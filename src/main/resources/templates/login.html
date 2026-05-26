@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - 못난이 작물 판매</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f0e8;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 320px;
+        }
+        h2 {
+            text-align: center;
+            color: #5a8a3c;
+            margin-bottom: 24px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5a8a3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #4a7a2c;
+        }
+        .error {
+            color: red;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h2>🥕 못난이 작물 판매</h2>
+    <form th:action="@{/login}" method="post">
+        <input type="text" name="username" placeholder="아이디" required />
+        <input type="password" name="password" placeholder="비밀번호" required />
+        <p class="error" th:if="${error}" th:text="${error}"></p>
+        <button type="submit">로그인</button>
+    </form>
+</div>
+</body>
+</html>
