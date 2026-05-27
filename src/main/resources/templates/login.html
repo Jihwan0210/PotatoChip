@@ -1,67 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>로그인 - 못난이 작물 판매</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f5f0e8;
-        }
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            width: 320px;
-        }
-        h2 {
-            text-align: center;
-            color: #5a8a3c;
-            margin-bottom: 24px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #5a8a3c;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #4a7a2c;
-        }
-        .error {
-            color: red;
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-    </style>
-</head>
+<head>...</head>
 <body>
-<div class="login-box">
-    <h2>🥕 못난이 작물 판매</h2>
-    <form th:action="@{/login}" method="post">
-        <input type="text" name="username" placeholder="아이디" required />
-        <input type="password" name="password" placeholder="비밀번호" required />
-        <p class="error" th:if="${error}" th:text="${error}"></p>
-        <button type="submit">로그인</button>
-    </form>
+<!-- 기존 프론트 코드 -->
+<!-- ════ LOGIN PAGE ════ -->
+<div class="page" id="page-login">
+    <div class="login-bg">
+        <div class="login-box">
+            <div style="font-family:Gaegu,cursive;font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:4px">못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물</div>
+            <div style="font-size:.76rem;color:var(--muted);text-align:center;margin-bottom:22px">폐기될 뻔한 농산물을 한 상으로 담다 🌿</div>
+            <div class="l-tabs">
+                <div class="l-tab on" id="tab-l" onclick="swTab('login')">로그인</div>
+                <div class="l-tab" id="tab-s" onclick="swTab('signup')">회원가입</div>
+            </div>
+            <div id="lf">
+                <div class="fg"><label>이메일</label><input type="email" id="le" placeholder="이메일을 입력해주세요"></div>
+                <div class="fg"><label>비밀번호</label><input type="password" id="lp" placeholder="비밀번호를 입력해주세요" onkeydown="if(event.key==='Enter')doLogin()"></div>
+                <div class="f-extra"><label class="f-rem"><input type="checkbox"> 로그인 상태 유지</label><span class="f-forgot">비밀번호 찾기</span></div>
+                <button class="btn-submit" onclick="doLogin()">로그인 →</button>
+                <div class="l-divider">또는</div>
+                <div class="soc-btns">
+                    <button class="soc-btn kakao" onclick="alert('카카오 로그인은 준비 중이에요!')">💬 카카오</button>
+                    <button class="soc-btn naver" onclick="alert('네이버 로그인은 준비 중이에요!')">N 네이버</button>
+                </div>
+                <p class="sw-txt">아직 계정이 없으신가요? <a onclick="swTab('signup')">회원가입</a></p>
+            </div>
+            <div id="sf" style="display:none">
+                <div class="name-row"><div class="fg"><label>이름</label><input type="text" placeholder="이름"></div><div class="fg"><label>역할</label><select><option>구매자</option><option>판매자(농가)</option></select></div></div>
+                <div class="fg"><label>이메일</label><input type="email" placeholder="이메일을 입력해주세요"></div>
+                <div class="fg"><label>비밀번호</label><input type="password" placeholder="8자 이상 입력해주세요"></div>
+                <div class="fg"><label>비밀번호 확인</label><input type="password" placeholder="비밀번호를 다시 입력해주세요"></div>
+                <div class="fg"><label>주소</label><input type="text" placeholder="배송받을 주소를 입력해주세요"></div>
+                <button class="btn-submit" onclick="doSignup()">가입하기 →</button>
+                <p class="sw-txt" style="margin-top:10px"><a onclick="swTab('login')">← 로그인으로 돌아가기</a></p>
+            </div>
+            <div class="success-view" id="sv">
+                <span class="success-ico">🎉</span>
+                <h3 style="font-family:Gaegu,cursive;font-size:1.3rem;color:var(--dark);margin-bottom:8px" id="sv-t">로그인 성공!</h3>
+                <p style="font-size:.82rem;color:var(--mid);line-height:1.7;margin-bottom:20px" id="sv-m">못난이 농작물에 오신 것을 환영해요! 🌿</p>
+                <button class="btn-submit" onclick="goPage('home')">메인으로 가기 →</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+
+<!-- 에러 메시지 표시 -->
+<div th:if="${error}" th:text="${error}" style="color:red"></div>
 </body>
 </html>
