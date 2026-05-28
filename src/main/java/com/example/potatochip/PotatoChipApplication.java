@@ -9,5 +9,4 @@ public class PotatoChipApplication {
     public static void main(String[] args) {
         SpringApplication.run(PotatoChipApplication.class, args);
     }
-
 }
