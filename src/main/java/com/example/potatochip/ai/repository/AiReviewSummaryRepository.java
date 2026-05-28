@@ -9,7 +9,10 @@ public interface AiReviewSummaryRepository extends JpaRepository<AiReviewSummary
 
     Optional<AiReviewSummary> findByProductIdAndIsActiveTrue(Long productId);
 
+    Optional<AiReviewSummary> findByProductId(Long productId);
+
     boolean existsByProductIdAndIsActiveTrue(Long productId);
+
 
     // TODO: Product Entity 연관관계 적용 후 메서드명 수정 여부 확인 필요
     //

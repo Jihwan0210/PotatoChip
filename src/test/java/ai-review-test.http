@@ -1,0 +1,7 @@
+POST http://localhost:8080/api/products/3/ai-review-summary
+Content-Type: application/json
+
+{
+  "summary": "DELETE 후 다시 POST로 새 내용처럼 저장한 AI 리뷰 총평입니다.",
+  "reviewCount": 20
+}

@@ -91,7 +91,6 @@ public class AiReviewSummary {
     public void updateSummary(String summary, Integer reviewCount) {
         this.summary = summary;
         this.reviewCount = reviewCount;
-        this.generatedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.isActive = true;
     }
