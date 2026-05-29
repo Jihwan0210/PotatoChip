@@ -1,5 +1,12 @@
 package com.example.potatochip.review.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class ReviewUpdateRequest {
 
     private Long userId;
@@ -7,27 +14,4 @@ public class ReviewUpdateRequest {
     private String content;
     private String imageUrl;
     private Boolean repurchaseIntent;
-
-    public ReviewUpdateRequest() {
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Integer getRating() {
-        return rating;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Boolean getRepurchaseIntent() {
-        return repurchaseIntent;
-    }
 }

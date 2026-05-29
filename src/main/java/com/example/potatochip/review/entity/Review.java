@@ -1,10 +1,17 @@
 package com.example.potatochip.review.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reviews")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Review {
 
     @Id
@@ -43,9 +50,7 @@ public class Review {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    protected Review() {
-    }
-
+    @Builder
     public Review(
             Long productId,
             Long userId,
@@ -67,56 +72,8 @@ public class Review {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Long getReviewId() {
-        return reviewId;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Long getOrderItemId() {
-        return orderItemId;
-    }
-
-    public Integer getRating() {
-        return rating;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public Boolean getRepurchaseIntent() {
-        return repurchaseIntent;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     public boolean isWrittenBy(Long userId) {
         return this.userId.equals(userId);
-    }
-
-    public boolean hasImage() {
-        return imageUrl != null && !imageUrl.isBlank();
     }
 
     public void updateReview(Integer rating, String content, String imageUrl, Boolean repurchaseIntent) {

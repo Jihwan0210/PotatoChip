@@ -8,18 +8,16 @@ import com.example.potatochip.review.entity.Review;
 import com.example.potatochip.review.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
-
-    public ReviewServiceImpl(ReviewRepository reviewRepository) {
-        this.reviewRepository = reviewRepository;
-    }
 
     @Override
     public List<ReviewResponse> getReviewsByProductId(Long productId) {
@@ -35,15 +33,15 @@ public class ReviewServiceImpl implements ReviewService {
         validateRating(request.getRating());
         validateContent(request.getContent());
 
-        Review review = new Review(
-                request.getProductId(),
-                request.getUserId(),
-                request.getOrderItemId(),
-                request.getRating(),
-                request.getContent(),
-                request.getImageUrl(),
-                request.getRepurchaseIntent()
-        );
+        Review review = Review.builder()
+                .productId(request.getProductId())
+                .userId(request.getUserId())
+                .orderItemId(request.getOrderItemId())
+                .rating(request.getRating())
+                .content(request.getContent())
+                .imageUrl(request.getImageUrl())
+                .repurchaseIntent(Boolean.TRUE.equals(request.getRepurchaseIntent()))
+                .build();
 
         Review savedReview = reviewRepository.save(review);
 
