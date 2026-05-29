@@ -4,18 +4,19 @@ import com.example.potatochip.ai.dto.AiReviewSummaryDTO;
 import com.example.potatochip.ai.dto.AiReviewSummarySaveRequest;
 import com.example.potatochip.ai.entity.AiReviewSummary;
 import com.example.potatochip.ai.repository.AiReviewSummaryRepository;
+import com.example.potatochip.product.entity.Product;
+import com.example.potatochip.product.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
 
     private final AiReviewSummaryRepository aiReviewSummaryRepository;
-
-    public AiReviewSummaryServiceImpl(AiReviewSummaryRepository aiReviewSummaryRepository) {
-        this.aiReviewSummaryRepository = aiReviewSummaryRepository;
-    }
+    private final ProductRepository productRepository;
 
     @Override
     public AiReviewSummaryDTO getAiReviewSummaryByProductId(Long productId) {
@@ -29,6 +30,8 @@ public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
     @Override
     @Transactional
     public AiReviewSummaryDTO saveOrUpdateAiReviewSummary(Long productId, AiReviewSummarySaveRequest request) {
+        Product product = findProduct(productId);
+
         AiReviewSummary aiReviewSummary = aiReviewSummaryRepository
                 .findByProductId(productId)
                 .map(existingSummary -> {
@@ -36,7 +39,7 @@ public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
                     return existingSummary;
                 })
                 .orElseGet(() -> new AiReviewSummary(
-                        productId,
+                        product,
                         request.getSummary(),
                         request.getReviewCount()
                 ));
@@ -64,6 +67,16 @@ public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
         AiReviewSummary aiReviewSummary = aiReviewSummaryRepository
                 .findByProductIdAndIsActiveTrue(productId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 AI 리뷰 총평이 없습니다."));
+
         aiReviewSummary.deactivate();
+    }
+
+    private Product findProduct(Long productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("상품 ID가 필요합니다.");
+        }
+
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다."));
     }
 }

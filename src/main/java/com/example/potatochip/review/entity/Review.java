@@ -1,5 +1,6 @@
 package com.example.potatochip.review.entity;
 
+import com.example.potatochip.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -19,8 +20,9 @@ public class Review {
     @Column(name = "review_id")
     private Long reviewId;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
@@ -52,7 +54,7 @@ public class Review {
 
     @Builder
     public Review(
-            Long productId,
+            Product product,
             Long userId,
             Long orderItemId,
             Integer rating,
@@ -60,7 +62,7 @@ public class Review {
             String imageUrl,
             Boolean repurchaseIntent
     ) {
-        this.productId = productId;
+        this.product = product;
         this.userId = userId;
         this.orderItemId = orderItemId;
         this.rating = rating;
@@ -70,6 +72,10 @@ public class Review {
         this.isActive = true;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public Long getProductId() {
+        return product.getId();
     }
 
     public boolean isWrittenBy(Long userId) {
