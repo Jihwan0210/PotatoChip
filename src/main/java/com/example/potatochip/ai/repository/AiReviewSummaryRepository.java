@@ -2,25 +2,33 @@ package com.example.potatochip.ai.repository;
 
 import com.example.potatochip.ai.entity.AiReviewSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
 public interface AiReviewSummaryRepository extends JpaRepository<AiReviewSummary, Long> {
 
-    Optional<AiReviewSummary> findByProductIdAndIsActiveTrue(Long productId);
+    @Query("""
+            select a
+            from AiReviewSummary a
+            where a.product.id = :productId
+              and a.isActive = true
+            """)
+    Optional<AiReviewSummary> findByProductIdAndIsActiveTrue(@Param("productId") Long productId);
 
-    Optional<AiReviewSummary> findByProductId(Long productId);
+    @Query("""
+            select a
+            from AiReviewSummary a
+            where a.product.id = :productId
+            """)
+    Optional<AiReviewSummary> findByProductId(@Param("productId") Long productId);
 
-    boolean existsByProductIdAndIsActiveTrue(Long productId);
-
-
-    // TODO: Product Entity 연관관계 적용 후 메서드명 수정 여부 확인 필요
-    //
-    // 현재:
-    // Optional<AiReviewSummary> findByProductIdAndIsActiveTrue(Long productId);
-    // boolean existsByProductIdAndIsActiveTrue(Long productId);
-    //
-    // 변경 가능:
-    // Optional<AiReviewSummary> findByProductAndIsActiveTrue(Product product);
-    // boolean existsByProductAndIsActiveTrue(Product product);
+    @Query("""
+            select count(a) > 0
+            from AiReviewSummary a
+            where a.product.id = :productId
+              and a.isActive = true
+            """)
+    boolean existsByProductIdAndIsActiveTrue(@Param("productId") Long productId);
 }

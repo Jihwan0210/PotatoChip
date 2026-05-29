@@ -1,5 +1,8 @@
 package com.example.potatochip.review.service;
 
+import com.example.potatochip.ai.service.AiReviewSummaryAutoService;
+import com.example.potatochip.product.entity.Product;
+import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.review.dto.ReviewCreateRequest;
 import com.example.potatochip.review.dto.ReviewResponse;
 import com.example.potatochip.review.dto.ReviewStatsResponse;
@@ -7,17 +10,21 @@ import com.example.potatochip.review.dto.ReviewUpdateRequest;
 import com.example.potatochip.review.entity.Review;
 import com.example.potatochip.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ProductRepository productRepository;
+    private final AiReviewSummaryAutoService aiReviewSummaryAutoService;
 
     @Override
     public List<ReviewResponse> getReviewsByProductId(Long productId) {
@@ -33,8 +40,10 @@ public class ReviewServiceImpl implements ReviewService {
         validateRating(request.getRating());
         validateContent(request.getContent());
 
+        Product product = findProduct(request.getProductId());
+
         Review review = Review.builder()
-                .productId(request.getProductId())
+                .product(product)
                 .userId(request.getUserId())
                 .orderItemId(request.getOrderItemId())
                 .rating(request.getRating())
@@ -44,6 +53,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .build();
 
         Review savedReview = reviewRepository.save(review);
+
+        refreshAiSummarySafely(savedReview.getProductId());
 
         return ReviewResponse.fromEntity(savedReview);
     }
@@ -68,6 +79,8 @@ public class ReviewServiceImpl implements ReviewService {
                 Boolean.TRUE.equals(request.getRepurchaseIntent())
         );
 
+        refreshAiSummarySafely(review.getProductId());
+
         return ReviewResponse.fromEntity(review);
     }
 
@@ -81,7 +94,11 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IllegalArgumentException("본인이 작성한 리뷰만 삭제할 수 있습니다.");
         }
 
+        Long productId = review.getProductId();
+
         review.deactivate();
+
+        refreshAiSummarySafely(productId);
     }
 
     @Override
@@ -101,6 +118,23 @@ public class ReviewServiceImpl implements ReviewService {
                 repurchaseRate,
                 photoReviewCount
         );
+    }
+
+    private Product findProduct(Long productId) {
+        if (productId == null) {
+            throw new IllegalArgumentException("상품 ID가 필요합니다.");
+        }
+
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다."));
+    }
+
+    private void refreshAiSummarySafely(Long productId) {
+        try {
+            aiReviewSummaryAutoService.refreshAiReviewSummary(productId);
+        } catch (RuntimeException e) {
+            log.warn("AI 리뷰 총평 자동 갱신 실패. productId={}", productId, e);
+        }
     }
 
     private void validateRating(Integer rating) {

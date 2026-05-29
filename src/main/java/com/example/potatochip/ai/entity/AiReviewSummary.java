@@ -1,10 +1,17 @@
 package com.example.potatochip.ai.entity;
 
+import com.example.potatochip.product.entity.Product;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ai_review_summaries")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AiReviewSummary {
 
     @Id
@@ -12,18 +19,9 @@ public class AiReviewSummary {
     @Column(name = "ai_review_summary_id")
     private Long aiReviewSummaryId;
 
-    // TODO: Product Entity가 main 브랜치에 병합되면
-    //  Long productId 대신 Product 연관관계로 변경 필요
-    //
-    //  변경 예정:
-    //  @OneToOne(fetch = FetchType.LAZY)
-    //  @JoinColumn(name = "product_id", nullable = false, unique = true)
-    //  private Product product;
-    //
-    //  추가 예정 import:
-    //  import com.example.potatochip.product.entity.Product;
-    @Column(name = "product_id", nullable = false, unique = true)
-    private Long productId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false, unique = true)
+    private Product product;
 
     @Lob
     @Column(name = "summary", nullable = false, columnDefinition = "TEXT")
@@ -41,18 +39,8 @@ public class AiReviewSummary {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    protected AiReviewSummary() {
-    }
-
-    // TODO: Product Entity 연동 후 생성자 파라미터 변경 필요
-    //
-    //  현재:
-    //  AiReviewSummary(Long productId, String summary, Integer reviewCount)
-    //
-    //  변경 예정:
-    //  AiReviewSummary(Product product, String summary, Integer reviewCount)
-    public AiReviewSummary(Long productId, String summary, Integer reviewCount) {
-        this.productId = productId;
+    public AiReviewSummary(Product product, String summary, Integer reviewCount) {
+        this.product = product;
         this.summary = summary;
         this.reviewCount = reviewCount;
         this.isActive = true;
@@ -60,32 +48,8 @@ public class AiReviewSummary {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Long getAiReviewSummaryId() {
-        return aiReviewSummaryId;
-    }
-
     public Long getProductId() {
-        return productId;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public Integer getReviewCount() {
-        return reviewCount;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public LocalDateTime getGeneratedAt() {
-        return generatedAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return product.getId();
     }
 
     public void updateSummary(String summary, Integer reviewCount) {

@@ -10,18 +10,38 @@ import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    List<Review> findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(Long productId);
+    @Query("""
+            select r
+            from Review r
+            where r.product.id = :productId
+              and r.isActive = true
+            order by r.createdAt desc
+            """)
+    List<Review> findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("productId") Long productId);
 
     Optional<Review> findByReviewIdAndIsActiveTrue(Long reviewId);
-
-    Long countByProductIdAndIsActiveTrue(Long productId);
-
-    Long countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(Long productId);
 
     @Query("""
             select count(r)
             from Review r
-            where r.productId = :productId
+            where r.product.id = :productId
+              and r.isActive = true
+            """)
+    Long countByProductIdAndIsActiveTrue(@Param("productId") Long productId);
+
+    @Query("""
+            select count(r)
+            from Review r
+            where r.product.id = :productId
+              and r.isActive = true
+              and r.repurchaseIntent = true
+            """)
+    Long countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(@Param("productId") Long productId);
+
+    @Query("""
+            select count(r)
+            from Review r
+            where r.product.id = :productId
               and r.isActive = true
               and r.imageUrl is not null
               and trim(r.imageUrl) <> ''
@@ -31,12 +51,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("""
             select avg(r.rating)
             from Review r
-            where r.productId = :productId
+            where r.product.id = :productId
               and r.isActive = true
             """)
     Double findAverageRatingByProductId(@Param("productId") Long productId);
-
-    // TODO: User Entity, Product Entity, OrderItem Entity가 main 브랜치에 병합되면
-    //  Long productId, Long userId, Long orderItemId 기준 조회를
-    //  연관관계 기반 조회로 변경할지 확인 필요
 }

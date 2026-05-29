@@ -63,3 +63,5 @@ Content-Type: application/json
 
 ### AI 리뷰 총평 조회
 GET http://localhost:8080/api/products/3/ai-review-summary
+
+
