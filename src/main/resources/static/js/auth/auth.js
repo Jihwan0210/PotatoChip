@@ -10,14 +10,33 @@ function swTab(t) {
 }
 
 function doLogin() {
-    var e = document.getElementById('le').value;
-    var p = document.getElementById('lp').value;
-    if (!e || !p) { showToast('이메일과 비밀번호를 입력해주세요!'); return; }
-    document.getElementById('lf').style.display = 'none';
-    document.getElementById('sv').style.display = 'block';
-    setTimeout(function () { goPage('mypage'); }, 1800);
-    var btn = document.querySelector('.btn-nav');
-    if (btn) { btn.textContent = '마이페이지'; btn.setAttribute('onclick', "goPage('mypage')"); }
+    const email = document.getElementById('le').value;
+    const password = document.getElementById('lp').value;
+
+    if (!email || !password) {
+        showToast('이메일과 비밀번호를 입력해주세요!');
+        return;
+    }
+
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+        .then(res => res.json())
+        .then(result => {
+            if (result.token) {
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('email', result.email);
+                localStorage.setItem('role', result.role);
+                document.getElementById('lf').style.display = 'none';
+                document.getElementById('sv').style.display = 'block';
+                setTimeout(function () { location.href = '/'; }, 1800);
+            } else {
+                showToast(result.error);
+            }
+        })
+        .catch(err => showToast('오류가 발생했습니다.'));
 }
 
 function doSignup() {
@@ -27,7 +46,9 @@ function doSignup() {
         email: document.querySelector('#sf input[name="email"]').value,
         password: document.querySelector('#sf input[name="password"]').value,
         passwordConfirm: document.querySelector('#sf input[name="passwordConfirm"]').value,
-        address: document.querySelector('#sf input[name="address"]').value
+        phone: document.querySelector('#sf input[name="phone"]').value,
+        address: document.querySelector('#sf input[name="address"]').value,
+        nickname: document.querySelector('#sf input[name="nickname"]').value
     };
 
     fetch('/signup', {
