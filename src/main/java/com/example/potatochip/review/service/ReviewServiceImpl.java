@@ -6,9 +6,9 @@ import com.example.potatochip.review.dto.ReviewStatsResponse;
 import com.example.potatochip.review.dto.ReviewUpdateRequest;
 import com.example.potatochip.review.entity.Review;
 import com.example.potatochip.review.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .orderItemId(request.getOrderItemId())
                 .rating(request.getRating())
                 .content(request.getContent())
-                .imageUrl(request.getImageUrl())
+                .imageUrl(normalizeImageUrl(request.getImageUrl()))
                 .repurchaseIntent(Boolean.TRUE.equals(request.getRepurchaseIntent()))
                 .build();
 
@@ -64,8 +64,8 @@ public class ReviewServiceImpl implements ReviewService {
         review.updateReview(
                 request.getRating(),
                 request.getContent(),
-                request.getImageUrl(),
-                request.getRepurchaseIntent()
+                normalizeImageUrl(request.getImageUrl()),
+                Boolean.TRUE.equals(request.getRepurchaseIntent())
         );
 
         return ReviewResponse.fromEntity(review);
@@ -88,7 +88,7 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewStatsResponse getReviewStatsByProductId(Long productId) {
         Long totalReviewCount = reviewRepository.countByProductIdAndIsActiveTrue(productId);
         Long repurchaseCount = reviewRepository.countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(productId);
-        Long photoReviewCount = reviewRepository.countByProductIdAndIsActiveTrueAndImageUrlIsNotNull(productId);
+        Long photoReviewCount = reviewRepository.countPhotoReviewsByProductId(productId);
         Double averageRating = reviewRepository.findAverageRatingByProductId(productId);
 
         double safeAverageRating = averageRating == null ? 0.0 : roundToOneDecimal(averageRating);
@@ -117,5 +117,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     private double roundToOneDecimal(Double value) {
         return Math.round(value * 10.0) / 10.0;
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        return imageUrl.trim();
     }
 }
