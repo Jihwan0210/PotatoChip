@@ -34,7 +34,9 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
-    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'
 }
 
 dependencyManagement {
