@@ -1,18 +1,17 @@
 package com.example.potatochip.review.controller;
 
 import com.example.potatochip.review.dto.ReviewCreateRequest;
+import com.example.potatochip.review.dto.ReviewHelpfulResponse;
 import com.example.potatochip.review.dto.ReviewResponse;
 import com.example.potatochip.review.dto.ReviewStatsResponse;
 import com.example.potatochip.review.dto.ReviewUpdateRequest;
 import com.example.potatochip.review.service.ReviewService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
-
-// TODO: 로그인 기능 연동 후 userId는 요청값이 아니라 인증 정보에서 가져오도록 수정 필요
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -23,9 +22,10 @@ public class ReviewController {
 
     @GetMapping
     public ResponseEntity<List<ReviewResponse>> getReviewsByProductId(
-            @RequestParam Long productId
+            @RequestParam Long productId,
+            @RequestParam(required = false) Long userId
     ) {
-        List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId);
+        List<ReviewResponse> reviews = reviewService.getReviewsByProductId(productId, userId);
         return ResponseEntity.ok(reviews);
     }
 
@@ -81,5 +81,20 @@ public class ReviewController {
     ) {
         ReviewStatsResponse reviewStats = reviewService.getReviewStatsByProductId(productId);
         return ResponseEntity.ok(reviewStats);
+    }
+
+    @PostMapping("/{reviewId}/helpful")
+    public ResponseEntity<?> addHelpful(
+            @PathVariable Long reviewId,
+            @RequestParam Long userId
+    ) {
+        try {
+            ReviewHelpfulResponse response = reviewService.addHelpful(reviewId, userId);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", e.getMessage())
+            );
+        }
     }
 }

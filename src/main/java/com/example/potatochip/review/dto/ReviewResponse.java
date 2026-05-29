@@ -20,8 +20,18 @@ public class ReviewResponse {
     private Boolean repurchaseIntent;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long helpfulCount;
+    private Boolean helpfulByCurrentUser;
 
     public static ReviewResponse fromEntity(Review review) {
+        return fromEntity(review, 0L, false);
+    }
+
+    public static ReviewResponse fromEntity(
+            Review review,
+            Long helpfulCount,
+            Boolean helpfulByCurrentUser
+    ) {
         return new ReviewResponse(
                 review.getReviewId(),
                 review.getProductId(),
@@ -32,7 +42,9 @@ public class ReviewResponse {
                 review.getImageUrl(),
                 review.getRepurchaseIntent(),
                 review.getCreatedAt(),
-                review.getUpdatedAt()
+                review.getUpdatedAt(),
+                helpfulCount,
+                helpfulByCurrentUser
         );
     }
 }
