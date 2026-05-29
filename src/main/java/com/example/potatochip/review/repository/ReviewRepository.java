@@ -18,9 +18,22 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Long countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(Long productId);
 
-    Long countByProductIdAndIsActiveTrueAndImageUrlIsNotNull(Long productId);
+    @Query("""
+            select count(r)
+            from Review r
+            where r.productId = :productId
+              and r.isActive = true
+              and r.imageUrl is not null
+              and trim(r.imageUrl) <> ''
+            """)
+    Long countPhotoReviewsByProductId(@Param("productId") Long productId);
 
-    @Query("select avg(r.rating) from Review r where r.productId = :productId and r.isActive = true")
+    @Query("""
+            select avg(r.rating)
+            from Review r
+            where r.productId = :productId
+              and r.isActive = true
+            """)
     Double findAverageRatingByProductId(@Param("productId") Long productId);
 
     // TODO: User Entity, Product Entity, OrderItem Entity가 main 브랜치에 병합되면
