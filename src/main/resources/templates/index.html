@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chat-history {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+            margin-left: 20%;
+        }
+
+        .ai-message {
+            background-color: #e9ecef;
+            color: #333;
+            margin-right: 20%;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #sendBtn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #clearBtn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <h1>Spring AI Chatbot</h1>
+
+    <div id="chatHistory" class="chat-history">
+        <div th:each="chat : ${chatHistory}"
+             th:class="${chat.sender == 'user'} ? 'message user-message' : 'message ai-message'">
+            <strong th:text="${chat.sender == 'user'} ? '사용자' : 'AI'">Sender</strong>:
+            <span th:text="${chat.message}">Message</span>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="messageInput" placeholder="메시지를 입력하세요..." />
+        <button id="sendBtn" onclick="sendMessage()">전송</button>
+        <button id="clearBtn" onclick="clearHistory()">대화내역 지우기</button>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        if (message === '') return;
+        // 입력 필드 비우기
+        input.value = '';
+        // 사용자 메시지 즉시 표시
+        addMessageToHistory('user', message);
+        // 버튼 비활성화
+        document.getElementById('sendBtn').disabled = true;
+        // 로딩 메시지 표시
+        addMessageToHistory('ai', '답변을 생성 중입니다...');
+        fetch('/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'message=' + encodeURIComponent(message)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // 로딩 메시지 제거
+            removeLastMessage();
+            // AI 응답 추가
+            addMessageToHistory('ai', data.response);
+            // 버튼 활성화
+            document.getElementById('sendBtn').disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            removeLastMessage();
+            addMessageToHistory('ai', '오류가 발생했습니다.');
+            document.getElementById('sendBtn').disabled = false;
+        });
+    }
+
+    function addMessageToHistory(sender, message) {
+        const chatHistory = document.getElementById('chatHistory');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = sender === 'user' ? 'message user-message' : 'message ai-message';
+        messageDiv.innerHTML = `<strong>${sender === 'user' ? '사용자' : 'AI'}</strong>: ${message}`;
+        chatHistory.appendChild(messageDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function removeLastMessage() {
+        const chatHistory = document.getElementById('chatHistory');
+        if (chatHistory.lastElementChild) {
+            chatHistory.removeChild(chatHistory.lastElementChild);
+        }
+    }
+
+    function clearHistory() {
+        fetch('/clear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'cleared') {
+                document.getElementById('chatHistory').innerHTML = '';
+            }
+        });
+    }
+
+    // 엔터 키로 메시지 전송
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>
