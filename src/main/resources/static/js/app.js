@@ -472,12 +472,34 @@ function doLogin(){
   var btn=document.querySelector('.btn-nav');
   if(btn){btn.textContent='마이페이지';btn.setAttribute('onclick',"goPage('mypage')");}
 }
-function doSignup(){
-  document.getElementById('sf').style.display='none';
-  document.getElementById('sv').style.display='block';
-  document.getElementById('sv-t').textContent='회원가입 완료!';
-  document.getElementById('sv-m').textContent='못난이 농작물 가족이 되신 걸 환영해요! 🌿';
-  setTimeout(function(){goPage('home');},2000);
+function doSignup() {
+  const data = {
+    name: document.querySelector('#sf input[name="name"]').value,
+    role: document.querySelector('#sf select[name="role"]').value,
+    email: document.querySelector('#sf input[name="email"]').value,
+    password: document.querySelector('#sf input[name="password"]').value,
+    passwordConfirm: document.querySelector('#sf input[name="passwordConfirm"]').value,
+    address: document.querySelector('#sf input[name="address"]').value
+  };
+
+  fetch('/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+      .then(res => res.json())
+      .then(result => {
+        if (result.message) {
+          document.getElementById('sf').style.display = 'none';
+          document.getElementById('sv').style.display = 'block';
+          document.getElementById('sv-t').textContent = '회원가입 완료!';
+          document.getElementById('sv-m').textContent = '못난이 농작물 가족이 되신 걸 환영해요! 🌿';
+          setTimeout(function() { goPage('home'); }, 2000);
+        } else {
+          alert(result.error);
+        }
+      })
+      .catch(err => alert('오류가 발생했습니다.'));
 }
 
 /* ══ MYPAGE TABS ══ */

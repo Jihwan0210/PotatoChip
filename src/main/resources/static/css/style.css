@@ -1,13 +1,3 @@
-
-/* ════════ 팔레트 ════════
-   메인:  연두  #7BBF45 / 연베이지 #F6F0E4
-   섹션별 포인트:
-     About    — 살구 핑크   #FFCBA4 / #FFF0E8
-     Services — 라벤더      #C8BAF0 / #F0EDFB
-     Products — 민트        #A8E4D8 / #E8FAF7
-     Mission  — 연두 진하게 #7BBF45 (다크 카드)
-     Footer   — 다크브라운  #3A2808 (푸터만)
-════════════════════════ */
 :root {
   --dark:   #3A2808;
 
