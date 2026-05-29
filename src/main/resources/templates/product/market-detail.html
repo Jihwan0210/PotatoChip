@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>못난이 농작물</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<nav id="nav">
+    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
+    </div>
+    <ul class="nav-links">
+        <li><a class="active" data-page="home" onclick="location.href='index.html'" style="cursor:pointer">홈</a></li>
+        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
+        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
+        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
+        <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
+        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
+    </ul>
+    <div class="nav-r">
+        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
+        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+        <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
+        <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
+        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
+    </div>
+</nav>
+
+<div class="page active" id="page-detail">
+    <!-- 뒤로가기 바 -->
+    <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:12px 5%;display:flex;align-items:center;gap:10px">
+        <span onclick="location.href='/market'" style="display:inline-flex;align-items:center;gap:5px;font-size:.8rem;color:var(--mid);cursor:pointer;padding:6px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit">← 마켓으로</span>
+        <span style="font-size:.74rem;color:var(--muted)">마켓 /
+            <span th:text="${product.category}">과일</span> /
+            <span th:text="${product.name}">홍옥 사과 3kg</span>
+        </span>
+        <button onclick="openReport()" style="margin-left:auto;background:#fff5ef;color:var(--amber);border:1.5px solid #f5c8a8;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">🚩 신고</button>
+    </div>
+
+    <div style="padding:28px 5%;display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1100px;margin:0 auto">
+        <!-- LEFT: 이미지 + 탭 -->
+        <div>
+            <!-- 상품 이미지 -->
+            <div style="background:linear-gradient(145deg,var(--gp),var(--gl));border-radius:18px;height:360px;display:flex;align-items:center;justify-content:center;font-size:8rem;line-height:1;margin-bottom:20px;position:relative;overflow:hidden">
+                <!-- 이미지가 있으면 img, 없으면 이모지 -->
+                <img th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
+                     th:src="${product.thumbnailUrl}"
+                     alt="상품 이미지"
+                     style="width:100%;height:100%;object-fit:cover;border-radius:18px;position:absolute;top:0;left:0"/>
+                <span th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}">🥬</span>
+
+                <!-- 찜하기 -->
+                <button id="detailWishBtn" onclick="toggleDetailWish(this)" style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.88);border:1.5px solid var(--sand);display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;transition:all .2s">🤍</button>
+            </div>
+
+            <!-- 탭: 상품정보 / 리뷰 / 픽업 -->
+            <div style="border-bottom:1.5px solid var(--sand);display:flex;gap:0;margin-bottom:22px">
+                <div id="dtab-info" onclick="switchDetailTab('info')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2.5px solid var(--dark)">상품 정보</div>
+                <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span style="color:var(--green);font-weight:600;margin-left:4px">312</span></div>
+                <div id="dtab-pickup" onclick="switchDetailTab('pickup')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">픽업 서비스</div>
+            </div>
+
+            <!-- 상품정보 탭 -->
+            <div id="detail-tab-info">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">원산지</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)" th:text="${product.origin}">충청북도 충주시</div>
+                    </div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">유통기한</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.expiryDate != null ? #temporals.format(product.expiryDate, 'yyyy년 M월 d일') : '-'}">2026년 5월 20일</div>
+                    </div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">재고</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.stockQuantity != null ? product.stockQuantity + '개' : '-'}">100개</div>
+                    </div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">픽업 가능 여부</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.isPickupAvailable ? '픽업 가능' : '픽업 불가'}">픽업 가능</div>
+                    </div>
+                </div>
+                <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-bottom:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:9px">📝 상품 설명</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.8" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">
+                        상품 설명이 없습니다.
+                    </div>
+                </div>
+                <div style="border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px">
+                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 판매자 정보</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.75"
+                         th:text="${product.origin}">
+                        원산지 정보
+                    </div>
+                </div>
+            </div>
+
+            <!-- 리뷰 탭 -->
+            <div id="detail-tab-review" style="display:none">
+                <!-- AI 총평 -->
+                <div style="background:linear-gradient(135deg,var(--gp),#f8fff2);border:1.5px solid var(--gl);border-radius:13px;padding:16px 18px;margin-bottom:18px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                        <div style="width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem">🤖</div>
+                        <div style="font-size:.82rem;font-weight:700;color:var(--green);font-family:Gaegu,cursive">AI 리뷰 총평</div>
+                        <div style="margin-left:auto;font-size:.68rem;color:var(--muted)">리뷰 312건 분석</div>
+                    </div>
+                    <div id="aiReviewSummary" style="font-size:.8rem;color:var(--mid);line-height:1.75">
+                        <button id="btnAiSummary" onclick="loadAiSummary()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.76rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px">✨ AI 총평 불러오기</button>
+                    </div>
+                </div>
+                <!-- 평점 요약 -->
+                <div style="display:flex;align-items:center;gap:22px;padding:16px 0;border-bottom:1px solid var(--sand);margin-bottom:16px">
+                    <div style="text-align:center">
+                        <div style="font-family:Gaegu,cursive;font-size:2.5rem;font-weight:700;color:var(--dark);line-height:1">4.9</div>
+                        <div style="color:var(--amber);font-size:.9rem;margin-top:3px">★★★★★</div>
+                        <div style="font-size:.7rem;color:var(--muted);margin-top:3px">312개 후기</div>
+                    </div>
+                    <div style="flex:1">
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">5★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:78%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">244</span></div>
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">4★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:14%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">44</span></div>
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">3★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:5%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">15</span></div>
+                        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:.72rem;color:var(--mid);width:22px">1★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:1%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">3</span></div>
+                    </div>
+                </div>
+                <!-- 개별 리뷰 -->
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="border:1.5px solid var(--sand);border-radius:12px;padding:15px 16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:.85rem">🍎</div><div><div style="font-size:.78rem;font-weight:500;color:var(--dark)">J***E</div><div style="font-size:.68rem;color:var(--muted)">2026.5.1</div></div></div>
+                            <div style="color:var(--amber);font-size:.8rem">★★★★★</div>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7;margin-bottom:5px">생김새는 못났지만 맛은 정말 최고예요. 1년째 이용 중인데 품질이 한 번도 실망시킨 적이 없어요!</div>
+                        <div style="font-size:.68rem;color:var(--green)">✓ 구매 인증</div>
+                    </div>
+                    <div style="border:1.5px solid var(--sand);border-radius:12px;padding:15px 16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:.85rem">🌿</div><div><div style="font-size:.78rem;font-weight:500;color:var(--dark)">현*연</div><div style="font-size:.68rem;color:var(--muted)">2026.4.24</div></div></div>
+                            <div style="color:var(--amber);font-size:.8rem">★★★★★</div>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7;margin-bottom:5px">배송도 빠르고 포장이 꼼꼼해서 하나도 안 상하고 도착했어요. 가격도 저렴한데 이 맛이면 완전 이득이죠.</div>
+                        <div style="font-size:.68rem;color:var(--green)">✓ 구매 인증</div>
+                    </div>
+                    <div style="border:1.5px solid var(--sand);border-radius:12px;padding:15px 16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#E8FAF7,var(--mint-lt,#A8E4D8));display:flex;align-items:center;justify-content:center;font-size:.85rem">🥬</div><div><div style="font-size:.78rem;font-weight:500;color:var(--dark)">고*연</div><div style="font-size:.68rem;color:var(--muted)">2026.4.19</div></div></div>
+                            <div style="color:var(--amber);font-size:.8rem">★★★★☆</div>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7;margin-bottom:5px">반신반의했는데 상태가 엄청 좋아요. 향도 살아있고 맛도 좋아서 재구매 확정입니다!</div>
+                        <div style="font-size:.68rem;color:var(--green)">✓ 구매 인증</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 픽업 탭 -->
+            <div id="detail-tab-pickup" style="display:none">
+                <div style="background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--green);margin-bottom:7px">📍 농장 직접 픽업 서비스</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.7">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📍 농장 위치</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.8">
+                        <strong th:text="${product.origin}">원산지</strong><br/>
+                        운영시간: 평일 09:00 ~ 17:00<br/>
+                        연락처: -
+                    </div>
+                </div>
+                <!-- 지도 영역 (placeholder) -->
+                <div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--sand);margin-bottom:14px">
+                    <div style="background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:6px">🗺️ 지도로 위치 확인</div>
+                    <div style="height:200px;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🗺️<span style="font-size:.8rem;color:var(--mid);margin-left:10px">지도 API 연동 예정</span></div>
+                </div>
+                <!-- 길찾기 버튼 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#FEE500;color:#3C1E1E;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 카카오맵</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#03C75A;color:#fff;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 네이버지도</div>
+                </div>
+                <!-- 픽업 예약 안내 -->
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📋 픽업 예약 방법</div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>상품 주문 시 배송 방법에서 '농장 직접 픽업'을 선택하세요.</div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>결제 완료 후 농장으로 방문 날짜·시간을 연락해주세요.</div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>예약한 날짜에 방문하셔서 상품을 직접 확인하고 수령하세요. 배송비 0원!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 관련 상품 추천 -->
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:18px;margin-top:22px">
+                <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:4px">🛍 관련 상품 추천</div>
+                <div style="font-size:.72rem;color:var(--muted);margin-bottom:13px">같이 구매하면 좋은 상품</div>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--sand);cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,#FEF2E8,#F5C4A0);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🥕</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">굴곡진 제주 당근 2kg</div><div style="font-size:.68rem;color:var(--muted)">제주 청정 당근 농장</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">5,900원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">11,800원</div></div>
+                    <button onclick="event.stopPropagation();addToCart()" style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:7px;padding:5px 9px;font-size:.68rem;cursor:pointer;font-family:inherit;flex-shrink:0">담기</button>
+                </div>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--sand);cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,var(--apricot-lt),var(--apricot));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🍅</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">완숙 토마토 1.5kg</div><div style="font-size:.68rem;color:var(--muted)">고창 햇살 농원</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">7,200원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">10,200원</div></div>
+                    <button onclick="event.stopPropagation();addToCart()" style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:7px;padding:5px 9px;font-size:.68rem;cursor:pointer;font-family:inherit;flex-shrink:0">담기</button>
+                </div>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🥔</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">황토 감자 5kg</div><div style="font-size:.68rem;color:var(--muted)">강원 해피팜</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">9,500원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">15,900원</div></div>
+                    <button onclick="event.stopPropagation();addToCart()" style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:7px;padding:5px 9px;font-size:.68rem;cursor:pointer;font-family:inherit;flex-shrink:0">담기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: 구매 패널 -->
+        <div style="position:sticky;top:80px;align-self:flex-start">
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:22px;margin-bottom:12px">
+                <div style="font-size:.72rem;color:var(--green);margin-bottom:4px;font-weight:500"
+                     th:text="${product.origin}">원산지</div>
+                <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:13px;line-height:1.4">
+                    <span th:text="${product.name}">상품명</span><br/>
+                    <span style="font-size:.8rem;font-weight:400;color:var(--muted)">(못난이)</span>
+                </div>
+
+                <!-- 가격 -->
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+                    <!-- 할인가 있을 때 -->
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
+                          th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'">12,900원</span>
+                    <!-- 할인가 없을 때 -->
+                    <span th:unless="${product.discountPrice != null}"
+                          style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
+                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">12,900원</span>
+
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-size:.82rem;color:var(--muted);text-decoration:line-through"
+                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">19,800원</span>
+
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-size:.82rem;font-weight:700;color:var(--amber)"
+                          th:text="'-' + ${#numbers.formatInteger((1 - product.discountPrice / product.price) * 100, 1, 'NONE')} + '%'">-35%</span>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px">
+                    <span style="color:var(--amber);font-size:.82rem">★★★★★</span>
+                    <span style="font-size:.74rem;color:var(--muted)">4.9 (후기 312)</span>
+                    <span style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px">이번주 1위 🏆</span>
+                </div>
+
+                <!-- 수량 선택 -->
+                <div style="border-top:1px solid var(--sand);padding-top:14px;margin-bottom:14px">
+                    <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">수량 선택</div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div style="display:inline-flex;align-items:center;border:1.5px solid var(--sand);border-radius:9px;overflow:hidden">
+                            <button onclick="changeDetailQty(-1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">−</button>
+                            <span id="detailQty" style="width:32px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;color:var(--dark);border-left:1px solid var(--sand);border-right:1px solid var(--sand)">1</span>
+                            <button onclick="changeDetailQty(1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">+</button>
+                        </div>
+                        <span style="font-size:.78rem;color:var(--mid)">×
+                            <span th:text="${product.discountPrice != null ? #numbers.formatInteger(product.discountPrice, 3, 'COMMA') + '원' : #numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">12,900원</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 배송 정보 -->
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)"><span style="color:var(--green)">🚚</span>익일 배송 (오후 2시 이전 주문 시 당일 출고)</div>
+                    <div th:if="${product.isPickupAvailable}"
+                         style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)">
+                        <span style="color:var(--green)">📍</span>농장 직접 픽업 가능
+                        <span onclick="switchDetailTab('pickup')" style="color:var(--green);cursor:pointer">(위치 보기)</span>
+                    </div>
+                </div>
+
+                <button th:data-id="${product.id}"
+                        onclick="addToCart()"
+                        style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">🛒 장바구니 담기</button>
+                <button onclick="location.href='/cart'"
+                        style="width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;margin-bottom:8px">바로 구매하기</button>
+
+                <!-- 찜하기 + 농부 문의 -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <button id="wishBtn2" onclick="toggleDetailWish2(this)" style="padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">🤍 찜하기</button>
+                    <button onclick="openFarmerChat()" style="padding:10px;border:1.5px solid var(--gl);border-radius:10px;background:var(--gp);font-size:.8rem;font-weight:500;color:var(--green);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px">💬 농부님 문의</button>
+                </div>
+            </div>
+
+            <!-- 주문 안내 -->
+            <div style="background:var(--beige2);border:1.5px solid var(--sand);border-radius:12px;padding:14px 16px;font-size:.74rem;color:var(--mid);line-height:1.85">
+                🛡️ 안전결제 · 구매확정 전 결제금 보호<br/>
+                ⏰ 오후 2시 이전 주문 시 당일 출고<br/>
+                🔄 수령 후 24시간 내 환불 신청 가능
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="ft-g" style="padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1)">
+            <div><div class="ft-logo">못난이 농작물</div><p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.</p></div>
+            <div class="ft-col"><h5>서비스</h5><a onclick="location.href='/market'">마켓</a><a onclick="goPage('board')">게시판</a><a onclick="location.href='/faq'">FAQ</a></div>
+            <div class="ft-col"><h5>고객 지원</h5><a>1:1 문의</a><a>배송 안내</a></div>
+            <div class="ft-col"><h5>판매자</h5><a>입점 신청</a><a>정산 안내</a></div>
+        </div>
+        <div class="ft-bot"><span>© 2026 못난이 농작물 · 포테토칩 팀</span></div>
+    </footer>
+</div>
+
+<footer>
+    <div class="ft-g">
+        <div>
+            <div class="ft-logo">못난이 농작물</div>
+            <p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.<br/>포테토칩 팀 · 유지환 · 김지혜 · 김민성 · 김주영 · 오지호</p>
+            <p style="margin-top:10px;font-size:.72rem">Spring Boot · MySQL · OpenAI · AWS · Kakao Map API</p>
+        </div>
+        <div class="ft-col">
+            <h5>서비스</h5>
+            <a onclick="location.href='/market'" style="cursor:pointer">마켓 이용</a><a onclick="goPage('board')" style="cursor:pointer">게시판</a><a onclick="location.href='/faq'" style="cursor:pointer">FAQ</a><a onclick="location.href='/review'" style="cursor:pointer">리뷰</a>
+        </div>
+        <div class="ft-col">
+            <h5>정보</h5>
+            <a href="#">우리의 미션</a><a href="#">판매자 신청</a><a href="#">픽업 장소</a><a href="#">공지사항</a>
+        </div>
+        <div class="ft-col">
+            <h5>고객 지원</h5>
+            <a href="#">AI 챗봇</a><a href="#">배송 조회</a><a href="#">환불·교환</a><a href="#">개인정보처리방침</a>
+        </div>
+    </div>
+    <div class="ft-bot">
+        <span>© 2025 못난이 농작물 · 포테토칩 팀</span>
+        <span>외형이 아닌 신선함으로 판단합니다 🌿</span>
+    </div>
+</footer>
+<script src="js/app.js"></script>
+</body>
+</html>
