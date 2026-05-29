@@ -190,7 +190,7 @@
   }
   function initReviewPage(){loadReviewStats(currentProductId);loadReviewList(currentProductId);loadAiReviewSummary(currentProductId)}
   async function loadReviewStats(productId){try{var response=await fetch('/api/reviews/stats?productId='+productId);var data=await response.json();document.getElementById('reviewTotalCount').textContent=formatCount(data.totalReviewCount);document.getElementById('reviewAverageRating').textContent=Number(data.averageRating||0).toFixed(1);document.getElementById('reviewRepurchaseRate').textContent=Number(data.repurchaseRate||0).toFixed(1)+'%';document.getElementById('reviewPhotoCount').textContent=formatCount(data.photoReviewCount)}catch(error){document.getElementById('reviewTotalCount').textContent='-';document.getElementById('reviewAverageRating').textContent='-';document.getElementById('reviewRepurchaseRate').textContent='-';document.getElementById('reviewPhotoCount').textContent='-'}}
-  async function loadReviewList(productId){var list=document.getElementById('reviewList');if(!list)return;list.innerHTML='<div class="review-empty">리뷰를 불러오는 중입니다.</div>';try{var response=await fetch('/api/reviews?productId='+productId);cachedReviews=await response.json();if(!Array.isArray(cachedReviews)) cachedReviews=[];renderReviewList()}catch(error){list.innerHTML='<div class="review-empty">리뷰 목록을 불러오지 못했습니다.</div>'}}
+  async function loadReviewList(productId){var list=document.getElementById('reviewList');if(!list)return;list.innerHTML='<div class="review-empty">리뷰를 불러오는 중입니다.</div>';try{var url = '/api/reviews?productId=' + productId;if (currentUserId) {url += '&userId=' + currentUserId;}var response = await fetch(url);cachedReviews=await response.json();if(!Array.isArray(cachedReviews)) cachedReviews=[];renderReviewList()}catch(error){list.innerHTML='<div class="review-empty">리뷰 목록을 불러오지 못했습니다.</div>'}}
   async function loadAiReviewSummary(productId){var text=document.getElementById('aiReviewSummaryText');var tags=document.getElementById('aiReviewSummaryTags');if(!text||!tags)return;text.textContent='AI 리뷰 총평을 불러오는 중입니다.';tags.innerHTML='<span class="ai-tag">AI 요약</span>';try{var response=await fetch('/api/products/'+productId+'/ai-review-summary');var data=await response.json();if(!response.ok){text.textContent=data.message||'아직 등록된 AI 리뷰 총평이 없습니다.';tags.innerHTML='<span class="ai-tag">총평 없음</span>';return}text.textContent=data.summary;tags.innerHTML='<span class="ai-tag">✅ 리뷰 '+data.reviewCount+'개 분석</span><span class="ai-tag">✅ AI 총평</span><span class="ai-tag">✅ 상품 ID '+data.productId+'</span>'}catch(error){text.textContent='AI 리뷰 총평 API에 연결할 수 없습니다.';tags.innerHTML='<span class="ai-tag">연결 실패</span>'}}
   function renderReviewList(){
     var list=document.getElementById('reviewList');
@@ -230,8 +230,8 @@
     list.innerHTML=reviews.map(function(review){
       var isMine=currentUserId!==null&&review.userId===currentUserId;
       var avatarClass=review.rating>=5?'ap':review.rating>=4?'gn':'mt';
-      var helpfulCount=getReviewHelpfulCount(review.reviewId);
-      var isHelpful=hasCurrentUserHelped(review.reviewId);
+      var helpfulCount = Number(review.helpfulCount || 0);
+      var isHelpful = Boolean(review.helpfulByCurrentUser);
 
       var imageHtml=review.imageUrl
         ? '<div style="margin-top:10px"><img src="'+escapeHtml(review.imageUrl)+'" alt="리뷰 이미지" style="max-width:180px;border-radius:10px;border:1px solid var(--beige)"></div>'
@@ -268,73 +268,44 @@
   function closeReviewForm(){document.getElementById('reviewFormModal').style.display='none'}
   async function submitReviewForm(){if(!currentUserId){showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');return}var reviewId=document.getElementById('reviewEditId').value;var rating=Number(document.getElementById('reviewRating').value);var content=document.getElementById('reviewContent').value.trim();var imageUrl=document.getElementById('reviewImageUrl').value.trim();var repurchaseIntent=document.getElementById('reviewRepurchaseIntent').checked;if(!content){showReviewToast('리뷰 내용을 입력해주세요.');return}var isEdit=reviewId!=='';var url=isEdit?'/api/reviews/'+reviewId:'/api/reviews';var method=isEdit?'PUT':'POST';var body=isEdit?{userId:currentUserId,rating:rating,content:content,imageUrl:imageUrl||null,repurchaseIntent:repurchaseIntent}:{productId:currentProductId,userId:currentUserId,orderItemId:null,rating:rating,content:content,imageUrl:imageUrl||null,repurchaseIntent:repurchaseIntent};try{var response=await fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var data=await response.json();if(!response.ok){showReviewToast(data.message||'리뷰 저장에 실패했습니다.');return}closeReviewForm();showReviewToast(isEdit?'리뷰가 수정되었습니다.':'리뷰가 등록되었습니다.');await loadReviewStats(currentProductId);await loadReviewList(currentProductId)}catch(error){showReviewToast('서버 연결에 실패했습니다.')}}
   async function deleteReview(reviewId){if(!currentUserId){showReviewToast('로그인 후 이용할 수 있어요.');return}if(!confirm('리뷰를 삭제할까요?'))return;try{var response=await fetch('/api/reviews/'+reviewId+'?userId='+currentUserId,{method:'DELETE'});var data=await response.json();if(!response.ok){showReviewToast(data.message||'리뷰 삭제에 실패했습니다.');return}showReviewToast('리뷰가 삭제되었습니다.');await loadReviewStats(currentProductId);await loadReviewList(currentProductId)}catch(error){showReviewToast('서버 연결에 실패했습니다.')}}
-  
-  function getHelpfulCountMap(){
-    return JSON.parse(localStorage.getItem('reviewHelpfulCounts')||'{}');
-  }
-
-  function saveHelpfulCountMap(map){
-    localStorage.setItem('reviewHelpfulCounts',JSON.stringify(map));
-  }
-
-  function getHelpfulUserMap(){
-    return JSON.parse(localStorage.getItem('reviewHelpfulUsers')||'{}');
-  }
-
-  function saveHelpfulUserMap(map){
-    localStorage.setItem('reviewHelpfulUsers',JSON.stringify(map));
-  }
-
-  function getReviewHelpfulCount(reviewId){
-    var countMap=getHelpfulCountMap();
-    return Number(countMap[reviewId]||0);
-  }
-
-  function hasCurrentUserHelped(reviewId){
-    if(!currentUserId)return false;
-
-    var userMap=getHelpfulUserMap();
-
-    if(!userMap[reviewId])return false;
-
-    return userMap[reviewId].includes(currentUserId);
-  }
-
-  function toggleReviewHelpful(reviewId){
-    if(!currentUserId){
+  async function toggleReviewHelpful(reviewId) {
+    if (!currentUserId) {
       showReviewToast('로그인 후 도움돼요를 누를 수 있어요.');
-      setTimeout(function(){location.href='/login'},900);
+      setTimeout(function () {
+        location.href = '/login';
+      }, 900);
       return;
     }
 
-    var userMap=getHelpfulUserMap();
-    var countMap=getHelpfulCountMap();
+    try {
+      var response = await fetch('/api/reviews/' + reviewId + '/helpful?userId=' + currentUserId, {
+        method: 'POST'
+      });
 
-    if(!userMap[reviewId]){
-      userMap[reviewId]=[];
+      var data = await response.json();
+
+      if (!response.ok) {
+        showReviewToast(data.message || '도움돼요 처리에 실패했습니다.');
+        return;
+      }
+
+      cachedReviews = cachedReviews.map(function (review) {
+        if (review.reviewId === reviewId) {
+          review.helpfulCount = data.helpfulCount;
+          review.helpfulByCurrentUser = data.helpfulByCurrentUser;
+        }
+
+        return review;
+      });
+
+      renderReviewList();
+      showReviewToast('도움돼요가 반영됐어요 🌿');
+    } catch (error) {
+      showReviewToast('서버 연결에 실패했습니다.');
     }
-
-    if(userMap[reviewId].includes(currentUserId)){
-      showReviewToast('이미 도움돼요를 누른 리뷰예요.');
-      return;
-    }
-
-    userMap[reviewId].push(currentUserId);
-    countMap[reviewId]=Number(countMap[reviewId]||0)+1;
-
-    saveHelpfulUserMap(userMap);
-    saveHelpfulCountMap(countMap);
-
-    var countElement=document.getElementById('helpfulCount-'+reviewId);
-    if(countElement){
-      countElement.textContent=countMap[reviewId];
-    }
-
-    renderReviewList();
-    showReviewToast('도움돼요가 반영됐어요 🌿');
   }
 
-function renderReviewStars(rating){var stars='';for(var i=1;i<=5;i++){stars+=i<=rating?'★':'☆'}return stars}
+  function renderReviewStars(rating){var stars='';for(var i=1;i<=5;i++){stars+=i<=rating?'★':'☆'}return stars}
   function getReviewEmoji(rating){if(rating>=5)return'😊';if(rating>=4)return'🌿';if(rating>=3)return'🙂';return'🥬'}
   function formatReviewDate(value){if(!value)return'-';return value.replace('T',' ').substring(0,10)}
   function formatCount(value){var number=Number(value||0);if(number>=1000)return number.toLocaleString()+'+';return String(number)}

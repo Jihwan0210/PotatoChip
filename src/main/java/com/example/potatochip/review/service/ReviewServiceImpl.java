@@ -4,10 +4,13 @@ import com.example.potatochip.ai.service.AiReviewSummaryAutoService;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.review.dto.ReviewCreateRequest;
+import com.example.potatochip.review.dto.ReviewHelpfulResponse;
 import com.example.potatochip.review.dto.ReviewResponse;
 import com.example.potatochip.review.dto.ReviewStatsResponse;
 import com.example.potatochip.review.dto.ReviewUpdateRequest;
 import com.example.potatochip.review.entity.Review;
+import com.example.potatochip.review.entity.ReviewHelpful;
+import com.example.potatochip.review.repository.ReviewHelpfulRepository;
 import com.example.potatochip.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +26,21 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final ReviewHelpfulRepository reviewHelpfulRepository;
     private final ProductRepository productRepository;
     private final AiReviewSummaryAutoService aiReviewSummaryAutoService;
 
     @Override
-    public List<ReviewResponse> getReviewsByProductId(Long productId) {
+    public List<ReviewResponse> getReviewsByProductId(Long productId, Long userId) {
         return reviewRepository.findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(productId)
                 .stream()
-                .map(ReviewResponse::fromEntity)
+                .map(review -> {
+                    Long helpfulCount = reviewHelpfulRepository.countByReviewId(review.getReviewId());
+                    Boolean helpfulByCurrentUser = userId != null &&
+                            reviewHelpfulRepository.existsByReviewIdAndUserId(review.getReviewId(), userId);
+
+                    return ReviewResponse.fromEntity(review, helpfulCount, helpfulByCurrentUser);
+                })
                 .toList();
     }
 
@@ -81,7 +91,13 @@ public class ReviewServiceImpl implements ReviewService {
 
         refreshAiSummarySafely(review.getProductId());
 
-        return ReviewResponse.fromEntity(review);
+        Long helpfulCount = reviewHelpfulRepository.countByReviewId(review.getReviewId());
+        Boolean helpfulByCurrentUser = reviewHelpfulRepository.existsByReviewIdAndUserId(
+                review.getReviewId(),
+                request.getUserId()
+        );
+
+        return ReviewResponse.fromEntity(review, helpfulCount, helpfulByCurrentUser);
     }
 
     @Override
@@ -120,6 +136,36 @@ public class ReviewServiceImpl implements ReviewService {
         );
     }
 
+    @Override
+    @Transactional
+    public ReviewHelpfulResponse addHelpful(Long reviewId, Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("로그인 후 도움돼요를 누를 수 있습니다.");
+        }
+
+        Review review = reviewRepository.findByReviewIdAndIsActiveTrue(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("도움돼요를 누를 리뷰가 없습니다."));
+
+        boolean helpfulByCurrentUser;
+
+        var existingHelpful = reviewHelpfulRepository.findByReviewIdAndUserId(reviewId, userId);
+
+        if (existingHelpful.isPresent()) {
+            reviewHelpfulRepository.delete(existingHelpful.get());
+            helpfulByCurrentUser = false;
+        } else {
+            reviewHelpfulRepository.save(new ReviewHelpful(review, userId));
+            helpfulByCurrentUser = true;
+        }
+
+        Long helpfulCount = reviewHelpfulRepository.countByReviewId(reviewId);
+
+        return new ReviewHelpfulResponse(
+                reviewId,
+                helpfulCount,
+                helpfulByCurrentUser
+        );
+    }
     private Product findProduct(Long productId) {
         if (productId == null) {
             throw new IllegalArgumentException("상품 ID가 필요합니다.");

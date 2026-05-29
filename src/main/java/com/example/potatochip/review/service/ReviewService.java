@@ -1,6 +1,7 @@
 package com.example.potatochip.review.service;
 
 import com.example.potatochip.review.dto.ReviewCreateRequest;
+import com.example.potatochip.review.dto.ReviewHelpfulResponse;
 import com.example.potatochip.review.dto.ReviewResponse;
 import com.example.potatochip.review.dto.ReviewStatsResponse;
 import com.example.potatochip.review.dto.ReviewUpdateRequest;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface ReviewService {
 
-    List<ReviewResponse> getReviewsByProductId(Long productId);
+    List<ReviewResponse> getReviewsByProductId(Long productId, Long userId);
 
     ReviewResponse createReview(ReviewCreateRequest request);
 
@@ -18,4 +19,6 @@ public interface ReviewService {
     void deleteReview(Long reviewId, Long userId);
 
     ReviewStatsResponse getReviewStatsByProductId(Long productId);
+
+    ReviewHelpfulResponse addHelpful(Long reviewId, Long userId);
 }
