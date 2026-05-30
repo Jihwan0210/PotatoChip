@@ -89,10 +89,11 @@
     <div class="review-toolbar">
       <div class="review-filter-group">
         <div class="mf on" onclick="setReviewFilter('all', this)">전체</div>
-        <div class="mf" onclick="setReviewFilter('high', this)">리뷰 높은순</div>
-        <div class="mf" onclick="setReviewFilter('low', this)">리뷰 낮은순</div>
+        <div class="mf" onclick="setReviewFilter('helpful', this)">추천순</div>
+        <div class="mf" onclick="setReviewFilter('high', this)">평점 높은순</div>
+        <div class="mf" onclick="setReviewFilter('low', this)">평점 낮은순</div>
         <div class="mf" onclick="setReviewFilter('recent', this)">최근 리뷰</div>
-        <div class="mf" onclick="setReviewFilter('photo', this)">📸 사진 리뷰</div>
+        <div class="mf" id="photoOnlyFilter" onclick="togglePhotoOnly(this)">📸 사진 리뷰</div>
       </div>
       <div class="review-product-box">
         <label for="reviewProductIdInput">상품 ID</label>
@@ -139,6 +140,7 @@
   var currentProductId = 3;
   var currentUserId = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
   var reviewFilter = 'all';
+  var onlyPhotoReview = false;
   var cachedReviews = [];
   document.addEventListener('DOMContentLoaded', function () {
     var params = new URLSearchParams(window.location.search);
@@ -172,6 +174,12 @@
 
     currentProductId = value;
     reviewFilter = 'all';
+    onlyPhotoReview = false;
+
+    var PhotoFilter = document.getElementById("photoOnlyFilter");
+    if (photoFilter) {
+      photoFilter.ClassList.remove('on');
+    }
 
     document.querySelectorAll('.review-filter-group .mf').forEach(function (item) {
       item.classList.remove('on');
@@ -195,30 +203,43 @@
   function renderReviewList(){
     var list=document.getElementById('reviewList');
     if(!list)return;
+    var reviews = cachedReviews.slice();
 
-    var reviews=cachedReviews.slice();
-
-    if(reviewFilter==='high'){
-      reviews.sort(function(a,b){
-        return Number(b.rating||0)-Number(a.rating||0);
+    if (onlyPhotoReview) {
+      reviews = reviews.filter(function (review) {
+        return review.imageUrl !== null &&
+                review.imageUrl !== undefined &&
+                String(review.imageUrl).trim() !== '';
       });
     }
 
-    if(reviewFilter==='low'){
-      reviews.sort(function(a,b){
-        return Number(a.rating||0)-Number(b.rating||0);
+    if (reviewFilter === 'helpful') {
+      reviews.sort(function (a, b) {
+        var helpfulDiff = Number(b.helpfulCount || 0) - Number(a.helpfulCount || 0);
+
+        if (helpfulDiff !== 0) {
+          return helpfulDiff;
+        }
+
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
     }
 
-    if(reviewFilter==='recent'){
-      reviews.sort(function(a,b){
-        return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+    if (reviewFilter === 'high') {
+      reviews.sort(function (a, b) {
+        return Number(b.rating || 0) - Number(a.rating || 0);
       });
     }
 
-    if(reviewFilter==='photo'){
-      reviews=reviews.filter(function(review){
-        return review.imageUrl!==null&&review.imageUrl!==undefined&&String(review.imageUrl).trim()!=='';
+    if (reviewFilter === 'low') {
+      reviews.sort(function (a, b) {
+        return Number(a.rating || 0) - Number(b.rating || 0);
+      });
+    }
+
+    if (reviewFilter === 'recent') {
+      reviews.sort(function (a, b) {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
     }
 
@@ -262,7 +283,8 @@
       +'</div>';
     }).join('');
   }
-  function setReviewFilter(filter,element){reviewFilter=filter;document.querySelectorAll('.review-filter-group .mf').forEach(function(item){item.classList.remove('on')});if(element)element.classList.add('on');renderReviewList()}
+  function setReviewFilter(filter, element) { reviewFilter = filter; document.querySelectorAll('.review-filter-group .mf').forEach(function (item) {if (item.id !== 'photoOnlyFilter') { item.classList.remove('on');} }); if (element) { element.classList.add('on'); } renderReviewList();}
+  function togglePhotoOnly(element) { onlyPhotoReview = !onlyPhotoReview; if (element){if(onlyPhotoReview) { element.classList.add('on');}else{element.classList.remove('on');}}renderReviewList();}
   function openReviewForm(){if(!currentUserId){showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');setTimeout(function(){location.href='/login'},900);return}document.getElementById('reviewFormTitle').textContent='리뷰 작성하기';document.getElementById('reviewEditId').value='';document.getElementById('reviewRating').value='5';document.getElementById('reviewContent').value='';document.getElementById('reviewImageUrl').value='';document.getElementById('reviewRepurchaseIntent').checked=true;document.getElementById('reviewFormModal').style.display='flex'}
   function openReviewEditForm(reviewId){var review=cachedReviews.find(function(item){return item.reviewId===reviewId});if(!review){showReviewToast('수정할 리뷰를 찾을 수 없어요.');return}if(review.userId!==currentUserId){showReviewToast('본인이 작성한 리뷰만 수정할 수 있어요.');return}document.getElementById('reviewFormTitle').textContent='리뷰 수정하기';document.getElementById('reviewEditId').value=review.reviewId;document.getElementById('reviewRating').value=review.rating;document.getElementById('reviewContent').value=review.content;document.getElementById('reviewImageUrl').value=review.imageUrl||'';document.getElementById('reviewRepurchaseIntent').checked=review.repurchaseIntent;document.getElementById('reviewFormModal').style.display='flex'}
   function closeReviewForm(){document.getElementById('reviewFormModal').style.display='none'}
