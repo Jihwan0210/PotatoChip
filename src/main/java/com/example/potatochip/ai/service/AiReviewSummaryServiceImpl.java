@@ -1,7 +1,6 @@
 package com.example.potatochip.ai.service;
 
 import com.example.potatochip.ai.dto.AiReviewSummaryDTO;
-import com.example.potatochip.ai.dto.AiReviewSummarySaveRequest;
 import com.example.potatochip.ai.entity.AiReviewSummary;
 import com.example.potatochip.ai.repository.AiReviewSummaryRepository;
 import com.example.potatochip.product.entity.Product;
@@ -29,19 +28,22 @@ public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
 
     @Override
     @Transactional
-    public AiReviewSummaryDTO saveOrUpdateAiReviewSummary(Long productId, AiReviewSummarySaveRequest request) {
+    public AiReviewSummaryDTO saveOrUpdateAiReviewSummary(Long productId, AiReviewSummaryDTO aiReviewSummaryDTO) {
         Product product = findProduct(productId);
 
         AiReviewSummary aiReviewSummary = aiReviewSummaryRepository
                 .findByProductId(productId)
                 .map(existingSummary -> {
-                    existingSummary.updateSummary(request.getSummary(), request.getReviewCount());
+                    existingSummary.updateSummary(
+                            aiReviewSummaryDTO.getSummary(),
+                            aiReviewSummaryDTO.getReviewCount()
+                    );
                     return existingSummary;
                 })
                 .orElseGet(() -> new AiReviewSummary(
                         product,
-                        request.getSummary(),
-                        request.getReviewCount()
+                        aiReviewSummaryDTO.getSummary(),
+                        aiReviewSummaryDTO.getReviewCount()
                 ));
 
         AiReviewSummary savedSummary = aiReviewSummaryRepository.save(aiReviewSummary);
@@ -51,12 +53,15 @@ public class AiReviewSummaryServiceImpl implements AiReviewSummaryService {
 
     @Override
     @Transactional
-    public AiReviewSummaryDTO updateAiReviewSummary(Long productId, AiReviewSummarySaveRequest request) {
+    public AiReviewSummaryDTO updateAiReviewSummary(Long productId, AiReviewSummaryDTO aiReviewSummaryDTO) {
         AiReviewSummary aiReviewSummary = aiReviewSummaryRepository
                 .findByProductIdAndIsActiveTrue(productId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 AI 리뷰 총평이 없습니다."));
 
-        aiReviewSummary.updateSummary(request.getSummary(), request.getReviewCount());
+        aiReviewSummary.updateSummary(
+                aiReviewSummaryDTO.getSummary(),
+                aiReviewSummaryDTO.getReviewCount()
+        );
 
         return AiReviewSummaryDTO.fromEntity(aiReviewSummary);
     }

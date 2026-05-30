@@ -1,13 +1,17 @@
 package com.example.potatochip.review.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
-public class ReviewHelpfulResponse {
+@NoArgsConstructor
+@ToString
+public class ReviewHelpfulDTO {
 
     private Long reviewId;
+
     private Long helpfulCount;
+
     private Boolean helpfulByCurrentUser;
 }
