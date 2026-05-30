@@ -1,14 +1,19 @@
 package com.example.potatochip.review.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
-public class ReviewStatsResponse {
+@NoArgsConstructor
+@ToString
+public class ReviewStatsDTO {
 
     private Long totalReviewCount;
+
     private Double averageRating;
+
     private Double repurchaseRate;
+
     private Long photoReviewCount;
 }

@@ -3,11 +3,9 @@ package com.example.potatochip.review.service;
 import com.example.potatochip.ai.service.AiReviewSummaryAutoService;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
-import com.example.potatochip.review.dto.ReviewCreateRequest;
-import com.example.potatochip.review.dto.ReviewHelpfulResponse;
-import com.example.potatochip.review.dto.ReviewResponse;
-import com.example.potatochip.review.dto.ReviewStatsResponse;
-import com.example.potatochip.review.dto.ReviewUpdateRequest;
+import com.example.potatochip.review.dto.ReviewDTO;
+import com.example.potatochip.review.dto.ReviewHelpfulDTO;
+import com.example.potatochip.review.dto.ReviewStatsDTO;
 import com.example.potatochip.review.entity.Review;
 import com.example.potatochip.review.entity.ReviewHelpful;
 import com.example.potatochip.review.repository.ReviewHelpfulRepository;
@@ -31,7 +29,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final AiReviewSummaryAutoService aiReviewSummaryAutoService;
 
     @Override
-    public List<ReviewResponse> getReviewsByProductId(Long productId, Long userId) {
+    public List<ReviewDTO> getReviewsByProductId(Long productId, Long userId) {
         return reviewRepository.findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(productId)
                 .stream()
                 .map(review -> {
@@ -39,54 +37,54 @@ public class ReviewServiceImpl implements ReviewService {
                     Boolean helpfulByCurrentUser = userId != null &&
                             reviewHelpfulRepository.existsByReviewIdAndUserId(review.getReviewId(), userId);
 
-                    return ReviewResponse.fromEntity(review, helpfulCount, helpfulByCurrentUser);
+                    return ReviewDTO.fromEntity(review, helpfulCount, helpfulByCurrentUser);
                 })
                 .toList();
     }
 
     @Override
     @Transactional
-    public ReviewResponse createReview(ReviewCreateRequest request) {
-        validateRating(request.getRating());
-        validateContent(request.getContent());
+    public ReviewDTO createReview(ReviewDTO reviewDTO) {
+        validateRating(reviewDTO.getRating());
+        validateContent(reviewDTO.getContent());
 
-        Product product = findProduct(request.getProductId());
+        Product product = findProduct(reviewDTO.getProductId());
 
         Review review = Review.builder()
                 .product(product)
-                .userId(request.getUserId())
-                .orderItemId(request.getOrderItemId())
-                .rating(request.getRating())
-                .content(request.getContent())
-                .imageUrl(normalizeImageUrl(request.getImageUrl()))
-                .repurchaseIntent(Boolean.TRUE.equals(request.getRepurchaseIntent()))
+                .userId(reviewDTO.getUserId())
+                .orderItemId(reviewDTO.getOrderItemId())
+                .rating(reviewDTO.getRating())
+                .content(reviewDTO.getContent())
+                .imageUrl(normalizeImageUrl(reviewDTO.getImageUrl()))
+                .repurchaseIntent(Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent()))
                 .build();
 
         Review savedReview = reviewRepository.save(review);
 
         refreshAiSummarySafely(savedReview.getProductId());
 
-        return ReviewResponse.fromEntity(savedReview);
+        return ReviewDTO.fromEntity(savedReview);
     }
 
     @Override
     @Transactional
-    public ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request) {
-        validateRating(request.getRating());
-        validateContent(request.getContent());
+    public ReviewDTO updateReview(Long reviewId, ReviewDTO reviewDTO) {
+        validateRating(reviewDTO.getRating());
+        validateContent(reviewDTO.getContent());
 
         Review review = reviewRepository.findByReviewIdAndIsActiveTrue(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 리뷰가 없습니다."));
 
-        if (!review.isWrittenBy(request.getUserId())) {
+        if (!review.isWrittenBy(reviewDTO.getUserId())) {
             throw new IllegalArgumentException("본인이 작성한 리뷰만 수정할 수 있습니다.");
         }
 
         review.updateReview(
-                request.getRating(),
-                request.getContent(),
-                normalizeImageUrl(request.getImageUrl()),
-                Boolean.TRUE.equals(request.getRepurchaseIntent())
+                reviewDTO.getRating(),
+                reviewDTO.getContent(),
+                normalizeImageUrl(reviewDTO.getImageUrl()),
+                Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent())
         );
 
         refreshAiSummarySafely(review.getProductId());
@@ -94,10 +92,10 @@ public class ReviewServiceImpl implements ReviewService {
         Long helpfulCount = reviewHelpfulRepository.countByReviewId(review.getReviewId());
         Boolean helpfulByCurrentUser = reviewHelpfulRepository.existsByReviewIdAndUserId(
                 review.getReviewId(),
-                request.getUserId()
+                reviewDTO.getUserId()
         );
 
-        return ReviewResponse.fromEntity(review, helpfulCount, helpfulByCurrentUser);
+        return ReviewDTO.fromEntity(review, helpfulCount, helpfulByCurrentUser);
     }
 
     @Override
@@ -118,7 +116,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public ReviewStatsResponse getReviewStatsByProductId(Long productId) {
+    public ReviewStatsDTO getReviewStatsByProductId(Long productId) {
         Long totalReviewCount = reviewRepository.countByProductIdAndIsActiveTrue(productId);
         Long repurchaseCount = reviewRepository.countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(productId);
         Long photoReviewCount = reviewRepository.countPhotoReviewsByProductId(productId);
@@ -128,7 +126,7 @@ public class ReviewServiceImpl implements ReviewService {
         double repurchaseRate = totalReviewCount == 0 ? 0.0 :
                 roundToOneDecimal((repurchaseCount * 100.0) / totalReviewCount);
 
-        return new ReviewStatsResponse(
+        return new ReviewStatsDTO(
                 totalReviewCount,
                 safeAverageRating,
                 repurchaseRate,
@@ -138,7 +136,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional
-    public ReviewHelpfulResponse addHelpful(Long reviewId, Long userId) {
+    public ReviewHelpfulDTO addHelpful(Long reviewId, Long userId) {
         if (userId == null) {
             throw new IllegalArgumentException("로그인 후 도움돼요를 누를 수 있습니다.");
         }
@@ -160,12 +158,13 @@ public class ReviewServiceImpl implements ReviewService {
 
         Long helpfulCount = reviewHelpfulRepository.countByReviewId(reviewId);
 
-        return new ReviewHelpfulResponse(
+        return new ReviewHelpfulDTO(
                 reviewId,
                 helpfulCount,
                 helpfulByCurrentUser
         );
     }
+
     private Product findProduct(Long productId) {
         if (productId == null) {
             throw new IllegalArgumentException("상품 ID가 필요합니다.");

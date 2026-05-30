@@ -1,24 +1,22 @@
 package com.example.potatochip.review.service;
 
-import com.example.potatochip.review.dto.ReviewCreateRequest;
-import com.example.potatochip.review.dto.ReviewHelpfulResponse;
-import com.example.potatochip.review.dto.ReviewResponse;
-import com.example.potatochip.review.dto.ReviewStatsResponse;
-import com.example.potatochip.review.dto.ReviewUpdateRequest;
+import com.example.potatochip.review.dto.ReviewDTO;
+import com.example.potatochip.review.dto.ReviewHelpfulDTO;
+import com.example.potatochip.review.dto.ReviewStatsDTO;
 
 import java.util.List;
 
 public interface ReviewService {
 
-    List<ReviewResponse> getReviewsByProductId(Long productId, Long userId);
+    List<ReviewDTO> getReviewsByProductId(Long productId, Long userId);
 
-    ReviewResponse createReview(ReviewCreateRequest request);
+    ReviewDTO createReview(ReviewDTO reviewDTO);
 
-    ReviewResponse updateReview(Long reviewId, ReviewUpdateRequest request);
+    ReviewDTO updateReview(Long reviewId, ReviewDTO reviewDTO);
 
     void deleteReview(Long reviewId, Long userId);
 
-    ReviewStatsResponse getReviewStatsByProductId(Long productId);
+    ReviewStatsDTO getReviewStatsByProductId(Long productId);
 
-    ReviewHelpfulResponse addHelpful(Long reviewId, Long userId);
+    ReviewHelpfulDTO addHelpful(Long reviewId, Long userId);
 }
