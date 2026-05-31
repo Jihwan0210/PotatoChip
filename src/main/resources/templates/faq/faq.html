@@ -21,8 +21,6 @@
     .faq-search-sub{font-size:.74rem;color:var(--muted);line-height:1.6;margin-top:3px;margin-bottom:13px}
     .faq-search-box{display:flex;align-items:center;gap:10px;background:var(--beige3);border:1.5px solid var(--beige);border-radius:14px;padding:12px 14px}
     .faq-search-box span{color:var(--muted);font-size:1rem}.faq-search-box input{flex:1;border:none;outline:none;background:transparent;color:var(--dark);font-size:.86rem;font-family:inherit;min-width:160px}.faq-search-box input::placeholder{color:var(--muted)}
-    .faq-top-tabs{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding:0 2px 14px;margin-bottom:14px;border-bottom:1.5px solid var(--beige)}.faq-top-tabs::-webkit-scrollbar{display:none}
-    .faq-top-tab{white-space:nowrap;padding:8px 2px 10px;font-size:.82rem;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:all .2s}.faq-top-tab:first-child{color:var(--dark);font-weight:500;border-bottom:2px solid var(--dark)}
     .faq-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}.faq-tag{padding:6px 14px;border-radius:100px;border:1.5px solid var(--beige);background:var(--white);color:var(--mid);font-size:.74rem;cursor:pointer;transition:all .2s;white-space:nowrap}.faq-tag.on{background:var(--green);color:#fff;border:1px solid var(--green);font-weight:700}
     .faq-list{display:flex;flex-direction:column;gap:10px}.faq-item{background:var(--white);border:1.5px solid var(--beige);border-radius:14px;overflow:hidden;box-shadow:0 6px 20px rgba(42,30,6,.04)}
     .faq-q{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;cursor:pointer}.faq-q-left{display:flex;align-items:flex-start;gap:11px}.faq-cat-badge{flex-shrink:0;font-size:.65rem;color:var(--green);background:var(--gp);border-radius:100px;padding:4px 9px;font-weight:700}.faq-question{color:var(--dark);font-size:.88rem;font-weight:700;line-height:1.6}.faq-q span{color:var(--muted);transition:transform .2s;flex-shrink:0}
@@ -46,6 +44,12 @@
     .chat-input-row input:focus{border-color:var(--green)}
     .chat-input-row button{border:none;background:var(--amber);color:#fff;border-radius:100px;padding:0 15px;font-family:'Gaegu',cursive;font-size:.9rem;font-weight:700;cursor:pointer}
     @media(max-width:520px){.chat-window{right:16px;bottom:92px;height:430px}}
+    .fab{position:fixed;right:28px;bottom:150px;z-index:700;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+    .fab-bubble{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;background:#fff;border:1.5px solid var(--beige);border-radius:16px 16px 4px 16px;padding:11px 15px;box-shadow:0 6px 24px rgba(42,30,6,.16);font-size:.78rem;font-weight:700;color:var(--dark);line-height:1.55;max-width:180px}
+    .fab-bubble small{display:block;font-size:.68rem;color:var(--light);font-weight:400;margin-top:2px}
+    .fab-btn{width:62px;height:62px}
+    .chat-window{right:28px;bottom:225px}
+    @media(max-width:520px){.fab{right:18px;bottom:120px}.chat-window{right:16px;bottom:190px}}
   </style>
 </head>
 <body>
@@ -92,15 +96,15 @@
   function renderFaqList(faqs){var list=document.getElementById('faqList');var empty=document.getElementById('faqEmpty');if(!list)return;if(!faqs.length){list.innerHTML='';if(empty)empty.style.display='block';return}if(empty)empty.style.display='none';list.innerHTML=faqs.map(function(faq){return '<div class="faq-item" data-cat="'+escapeFaqHtml(faq.category)+'"><div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-left"><div class="faq-cat-badge">'+getFaqCategoryName(faq.category)+'</div><div class="faq-question">'+escapeFaqHtml(faq.question)+'</div></div><span>⌄</span></div><div class="faq-a"><div class="faq-a-inner">'+escapeFaqHtml(faq.answer)+'</div></div></div>'}).join('')}
   function faqFilter(cat,element){currentFaqCategory=cat;var input=document.getElementById('faqSearchInput');if(input)input.value='';document.querySelectorAll('.faq-tag').forEach(function(tag){tag.classList.remove('on')});if(element)element.classList.add('on');loadFaqList()}
   function searchFaq(){clearTimeout(faqSearchTimer);faqSearchTimer=setTimeout(function(){currentFaqCategory='all';document.querySelectorAll('.faq-tag').forEach(function(tag){tag.classList.remove('on')});var first=document.querySelector('.faq-tag');if(first)first.classList.add('on');loadFaqList()},250)}
-  function getFaqCategoryName(category){var names={order:'주문·결제',delivery:'배송·픽업',refund:'교환·환불',quality:'상품 품질',ai:'AI 기능'};return names[category]||category||'기타'}
+  function getFaqCategoryName(category){var names={order:'주문·결제',delivery:'배송·픽업',refund:'교환·환불',quality:'상품 품질',ai:' AI 기능 '};return names[category]||category||'기타'}
   function escapeFaqHtml(value){if(value===null||value===undefined)return'';return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;")}
   function toggleChatbot(){var chatWindow=document.getElementById('chatWindow');if(!chatWindow)return;var isOpen=chatWindow.style.display==='flex';chatWindow.style.display=isOpen?'none':'flex';if(!isOpen){setTimeout(function(){var input=document.getElementById('chatInput');if(input)input.focus()},100)}}
   function closeChatbot(){var chatWindow=document.getElementById('chatWindow');if(chatWindow)chatWindow.style.display='none'}
   function handleChatEnter(event){if(event.key==='Enter')sendChatMessage()}
   function sendQuickQuestion(question){var input=document.getElementById('chatInput');if(input)input.value=question;sendChatMessage()}
-  function sendChatMessage(){var input=document.getElementById('chatInput');var body=document.getElementById('chatBody');if(!input||!body)return;var question=input.value.trim();if(!question)return;appendChatMessage('user',question);input.value='';setTimeout(function(){appendChatMessage('bot',getFaqBotAnswer(question))},350)}
+  async function sendChatMessage(){var input=document.getElementById('chatInput');var body=document.getElementById('chatBody');if(!input||!body)return;var question=input.value.trim();if(!question)return;appendChatMessage('user',question);input.value='';appendChatMessage('bot','답변을 찾는 중이에요...');try{var currentUserId=localStorage.getItem('currentUserId')?Number(localStorage.getItem('currentUserId')):null;var response=await fetch('/api/ai/chatbot/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:currentUserId,question:question})});var data=await response.json();removeLastBotLoadingMessage();if(!response.ok){appendChatMessage('bot',data.message||'답변을 불러오지 못했어요.');return}appendChatMessage('bot',data.answer||'답변을 찾지 못했어요.')}catch(error){removeLastBotLoadingMessage();appendChatMessage('bot','서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.')}}
+  function removeLastBotLoadingMessage(){var body=document.getElementById('chatBody');if(!body)return;var messages=body.querySelectorAll('.chat-msg.bot');if(!messages.length)return;var last=messages[messages.length-1];if(last&&last.textContent==='답변을 찾는 중이에요...'){last.remove()}}
   function appendChatMessage(type,message){var body=document.getElementById('chatBody');if(!body)return;var messageElement=document.createElement('div');messageElement.className='chat-msg '+type;messageElement.textContent=message;body.appendChild(messageElement);body.scrollTop=body.scrollHeight}
-  function getFaqBotAnswer(question){var text=question.toLowerCase();if(text.includes('배송')||text.includes('도착'))return'일반 배송은 보통 주문 확인 후 1~3일 정도 소요됩니다. 산지 출고 상황이나 날씨에 따라 일부 지연될 수 있어요.';if(text.includes('환불')||text.includes('교환')||text.includes('상했'))return'상품에 문제가 있다면 수령 직후 사진을 남기고 문의를 접수해주세요. 확인 후 교환 또는 환불 가능 여부를 안내해드려요.';if(text.includes('픽업'))return'픽업 가능 상품은 주문 시 픽업 장소와 시간을 확인할 수 있어요. 상품마다 픽업 가능 여부가 다를 수 있습니다.';if(text.includes('ai')||text.includes('총평')||text.includes('리뷰'))return'AI 리뷰 총평은 상품별 구매 리뷰를 바탕으로 공통 의견을 요약해 보여주는 기능입니다. 리뷰가 변경되면 총평도 다시 갱신될 수 있어요.';if(text.includes('품질')||text.includes('흠집')||text.includes('못난이'))return'못난이 농산물은 모양이나 흠집 때문에 일반 유통이 어려운 상품이지만, 식용에 문제가 없는 상품을 기준으로 제공합니다.';return'아직 정확한 답변을 찾지 못했어요. 배송, 환불, 픽업, 상품 품질, AI 리뷰 총평 중 하나로 다시 질문해보세요.'}
-</script>
+  </script>
 </body>
 </html>
