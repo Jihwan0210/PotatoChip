@@ -1,7 +1,9 @@
 package com.example.potatochip.ai.controller;
 
+import com.example.potatochip.ai.dto.ChatbotDTO;
 import com.example.potatochip.ai.dto.ChatbotFaqDTO;
 import com.example.potatochip.ai.service.ChatbotFaqService;
+import com.example.potatochip.ai.service.ChatbotLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import java.util.Map;
 public class ChatbotFaqController {
 
     private final ChatbotFaqService chatbotFaqService;
+    private final ChatbotLogService chatbotLogService;
 
     @GetMapping("/faq")
     public String faqPage() {
@@ -87,5 +90,27 @@ public class ChatbotFaqController {
                     Map.of("message", e.getMessage())
             );
         }
+    }
+
+   @PostMapping("/api/ai/chatbot/ask")
+    public ResponseEntity<?> ask(
+            @RequestBody ChatbotDTO chatbotDTO
+    ) {
+        try {
+            ChatbotDTO response = chatbotLogService.ask(chatbotDTO);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", e.getMessage())
+            );
+        }
+    }
+
+    @GetMapping("/api/ai/chatbot/logs")
+    public ResponseEntity<List<ChatbotDTO>> getChatbotLogs(
+            @RequestParam(required = false) Long userId
+    ) {
+        List<ChatbotDTO> logs = chatbotLogService.getChatbotLogs(userId);
+        return ResponseEntity.ok(logs);
     }
 }
