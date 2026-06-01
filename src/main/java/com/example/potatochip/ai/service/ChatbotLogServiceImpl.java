@@ -8,6 +8,7 @@ import com.example.potatochip.ai.repository.ChatbotLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ChatbotLogServiceImpl implements ChatbotLogService {
+
+    private static final int CURRENT_QUESTION_MATCH_SCORE = 5;
 
     private final ChatbotFaqRepository chatbotFaqRepository;
     private final ChatbotLogRepository chatbotLogRepository;
@@ -26,9 +29,12 @@ public class ChatbotLogServiceImpl implements ChatbotLogService {
         validateQuestion(chatbotDTO);
 
         String question = chatbotDTO.getQuestion().trim();
-        List<ChatbotFaq> faqs = chatbotFaqRepository.findByIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc();
 
-        ChatbotFaq matchedFaq = findBestMatchedFaq(question, faqs);
+        List<ChatbotFaq> faqs = chatbotFaqRepository.findByIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc();
+        List<ChatbotLog> recentLogs = findRecentLogs(chatbotDTO.getUserId());
+
+        ChatbotFaq matchedFaq = findBestMatchedFaq(question, recentLogs, faqs);
+
         String answer;
         String sourceType;
 
@@ -68,69 +74,192 @@ public class ChatbotLogServiceImpl implements ChatbotLogService {
                 .toList();
     }
 
-    private ChatbotFaq findBestMatchedFaq(String question, List<ChatbotFaq> faqs) {
+    private ChatbotFaq findBestMatchedFaq(String question, List<ChatbotLog> recentLogs, List<ChatbotFaq> faqs) {
+        FaqMatchResult currentMatch = findBestCurrentQuestionMatch(question, faqs);
+
+        if (currentMatch != null && currentMatch.score() >= CURRENT_QUESTION_MATCH_SCORE) {
+            return currentMatch.faq();
+        }
+
+        if (isFollowUpQuestion(question)) {
+            ChatbotFaq recentMatchedFaq = findRecentMatchedFaq(recentLogs);
+
+            if (recentMatchedFaq != null && Boolean.TRUE.equals(recentMatchedFaq.getIsActive())) {
+                return recentMatchedFaq;
+            }
+        }
+
+        if (currentMatch != null && currentMatch.score() > 0) {
+            return currentMatch.faq();
+        }
+
+        return null;
+    }
+
+    private FaqMatchResult findBestCurrentQuestionMatch(String question, List<ChatbotFaq> faqs) {
         String normalizedQuestion = normalize(question);
 
         return faqs.stream()
-                .map(faq -> new FaqMatchResult(faq, calculateScore(normalizedQuestion, faq)))
+                .map(faq -> new FaqMatchResult(faq, calculateCurrentQuestionScore(normalizedQuestion, faq)))
                 .filter(result -> result.score() > 0)
                 .max(Comparator.comparingInt(FaqMatchResult::score))
-                .map(FaqMatchResult::faq)
                 .orElse(null);
     }
 
-    private int calculateScore(String question, ChatbotFaq faq) {
+    private int calculateCurrentQuestionScore(String question, ChatbotFaq faq) {
         int score = 0;
 
+        String normalizedQuestion = normalize(question);
         String faqQuestion = normalize(faq.getQuestion());
         String faqAnswer = normalize(faq.getAnswer());
         String faqKeywords = normalize(faq.getKeywords());
+        String combinedFaqText = normalize(
+                faq.getQuestion() + " " +
+                        faq.getAnswer() + " " +
+                        faq.getKeywords() + " " +
+                        getCategoryKoreanName(faq.getCategory())
+        );
 
-        if (!faqQuestion.isBlank() && question.contains(faqQuestion)) {
-            score += 10;
+        score += calculateCategoryScore(normalizedQuestion, faq.getCategory());
+
+        if (!faqQuestion.isBlank() && normalizedQuestion.contains(faqQuestion)) {
+            score += 20;
         }
 
-        if (!faqQuestion.isBlank() && faqQuestion.contains(question)) {
-            score += 8;
+        if (!faqQuestion.isBlank() && faqQuestion.contains(normalizedQuestion)) {
+            score += 15;
         }
 
         if (!faqKeywords.isBlank()) {
-            String[] keywords = faqKeywords.split(",");
+            String[] keywords = faq.getKeywords().split(",");
 
             for (String keyword : keywords) {
                 String normalizedKeyword = normalize(keyword);
 
-                if (!normalizedKeyword.isBlank() && question.contains(normalizedKeyword)) {
-                    score += 5;
+                if (!normalizedKeyword.isBlank() && normalizedQuestion.contains(normalizedKeyword)) {
+                    score += 10;
                 }
             }
         }
 
-        if (!faqQuestion.isBlank()) {
-            String[] words = faqQuestion.split(" ");
+        List<String> questionTokens = extractQuestionTokens(question);
 
-            for (String word : words) {
-                String normalizedWord = normalize(word);
-
-                if (normalizedWord.length() >= 2 && question.contains(normalizedWord)) {
-                    score += 2;
-                }
+        for (String token : questionTokens) {
+            if (combinedFaqText.contains(token)) {
+                score += 4;
             }
-        }
 
-        if (!faqAnswer.isBlank()) {
-            String[] words = faqAnswer.split(" ");
+            if (faqQuestion.contains(token)) {
+                score += 3;
+            }
 
-            for (String word : words) {
-                String normalizedWord = normalize(word);
-
-                if (normalizedWord.length() >= 2 && question.contains(normalizedWord)) {
-                    score += 1;
-                }
+            if (faqAnswer.contains(token)) {
+                score += 1;
             }
         }
 
         return score;
+    }
+
+    private int calculateCategoryScore(String question, String category) {
+        if (category == null) {
+            return 0;
+        }
+
+        return switch (category) {
+            case "delivery" -> containsAny(question, "배송", "택배", "출고", "도착", "배달", "픽업", "수령", "며칠", "얼마나", "언제") ? 20 : 0;
+            case "refund" -> containsAny(question, "환불", "교환", "취소", "상했", "상함", "불량", "파손", "반품") ? 20 : 0;
+            case "quality" -> containsAny(question, "품질", "흠집", "신선", "상태", "못난이", "먹어도", "괜찮") ? 20 : 0;
+            case "ai" -> containsAny(question, "ai", "총평", "리뷰", "요약", "챗봇") ? 20 : 0;
+            case "order" -> containsAny(question, "주문", "결제", "결제수단", "가격", "구매") ? 20 : 0;
+            default -> 0;
+        };
+    }
+
+    private boolean containsAny(String text, String... keywords) {
+        if (text == null) {
+            return false;
+        }
+
+        for (String keyword : keywords) {
+            if (text.contains(normalize(keyword))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<String> extractQuestionTokens(String question) {
+        if (question == null || question.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(question.split("\\s+"))
+                .map(this::normalizeToken)
+                .filter(token -> token.length() >= 2)
+                .toList();
+    }
+
+    private String normalizeToken(String value) {
+        return normalize(value)
+                .replaceAll("(은|는|이|가|을|를|도|에|에서|으로|로|와|과|랑|하고)$", "");
+    }
+
+    private String getCategoryKoreanName(String category) {
+        if (category == null) {
+            return "";
+        }
+
+        return switch (category) {
+            case "order" -> "주문 결제";
+            case "delivery" -> "배송 픽업 택배 출고 도착 수령";
+            case "refund" -> "교환 환불 반품 취소";
+            case "quality" -> "상품 품질 신선도 흠집 못난이";
+            case "ai" -> "AI 리뷰 총평 요약 챗봇";
+            default -> category;
+        };
+    }
+
+    private ChatbotFaq findRecentMatchedFaq(List<ChatbotLog> recentLogs) {
+        if (recentLogs == null || recentLogs.isEmpty()) {
+            return null;
+        }
+
+        return recentLogs.stream()
+                .map(ChatbotLog::getMatchedFaq)
+                .filter(faq -> faq != null && Boolean.TRUE.equals(faq.getIsActive()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<ChatbotLog> findRecentLogs(Long userId) {
+        if (userId == null) {
+            return List.of();
+        }
+
+        return chatbotLogRepository.findTop5ByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    private boolean isFollowUpQuestion(String question) {
+        String normalizedQuestion = normalize(question);
+
+        return normalizedQuestion.startsWith("그럼")
+                || normalizedQuestion.startsWith("그러면")
+                || normalizedQuestion.startsWith("그건")
+                || normalizedQuestion.startsWith("그거")
+                || normalizedQuestion.startsWith("그럼요")
+                || normalizedQuestion.startsWith("그리고")
+                || normalizedQuestion.startsWith("또")
+                || normalizedQuestion.contains("토요일에도")
+                || normalizedQuestion.contains("주말에도")
+                || normalizedQuestion.contains("그때")
+                || normalizedQuestion.contains("이것도")
+                || normalizedQuestion.contains("그것도")
+                || normalizedQuestion.contains("가능해")
+                || normalizedQuestion.contains("가능한가")
+                || normalizedQuestion.contains("받을수")
+                || normalizedQuestion.contains("받을 수");
     }
 
     private String normalize(String value) {
@@ -143,6 +272,8 @@ public class ChatbotLogServiceImpl implements ChatbotLogService {
                 .replace("!", "")
                 .replace(".", "")
                 .replace(",", "")
+                .replace("~", "")
+                .replace(" ", "")
                 .trim();
     }
 
