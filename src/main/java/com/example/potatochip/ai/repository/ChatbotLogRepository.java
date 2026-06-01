@@ -10,4 +10,6 @@ public interface ChatbotLogRepository extends JpaRepository<ChatbotLog, Long> {
     List<ChatbotLog> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<ChatbotLog> findAllByOrderByCreatedAtDesc();
+
+    List<ChatbotLog> findTop5ByUserIdOrderByCreatedAtDesc(Long userId);
 }
