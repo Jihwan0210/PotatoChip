@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -175,11 +177,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private void refreshAiSummarySafely(Long productId) {
-        try {
-            aiReviewSummaryAutoService.refreshAiReviewSummary(productId);
-        } catch (RuntimeException e) {
-            log.warn("AI 리뷰 총평 자동 갱신 실패. productId={}", productId, e);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    aiReviewSummaryAutoService.refreshAiReviewSummary(productId);
+                }
+            });
+            return;
         }
+
+        aiReviewSummaryAutoService.refreshAiReviewSummary(productId);
     }
 
     private void validateRating(Integer rating) {

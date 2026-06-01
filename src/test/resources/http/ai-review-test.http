@@ -3,13 +3,7 @@ GET http://localhost:8080/api/products/3/ai-review-summary
 
 
 ### AI 리뷰 총평 저장
-POST http://localhost:8080/api/products/3/ai-review-summary
-Content-Type: application/json
-
-{
-  "summary": "POST 방식으로 저장한 AI 리뷰 총평 테스트입니다.",
-  "reviewCount": 8
-}
+POST http://localhost:8080/api/products/3/ai-review-summary/refresh
 
 
 ### AI 리뷰 총평 수정
