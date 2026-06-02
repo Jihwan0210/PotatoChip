@@ -1,34 +1,25 @@
-/* ══ MYPAGE.JS ══ */
 
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', function () {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
         location.href = '/login';
         return;
     }
 
-    // 로그아웃 버튼 전환 //고침
-    const btnNav = document.querySelector('.btn-nav'); //고침
-    if (btnNav) { //고침
-        btnNav.textContent = '로그아웃'; //고침
-        btnNav.setAttribute('onclick', 'doLogout()'); //고침
-    } //고침
+    // 로그아웃 버튼 전환
+    const btnNav = document.querySelector('.btn-nav');
+    if (btnNav) {
+        btnNav.textContent = '로그아웃';
+        btnNav.setAttribute('onclick', 'doLogout()');
+    }
 
     loadMyInfo();
 });
 
-// 로그아웃 //고침
-function doLogout() { //고침
-    localStorage.removeItem('token'); //고침
-    localStorage.removeItem('email'); //고침
-    localStorage.removeItem('role'); //고침
-    location.href = '/login'; //고침
-} //고침
-
 // 내 정보 조회
 function loadMyInfo() {
-    const token = localStorage.getItem('token');
+    const token = getToken();
 
     fetch('/mypage/info', {
         method: 'GET',
@@ -54,7 +45,7 @@ function loadMyInfo() {
 
 // 내 정보 수정
 function saveMyProfile() {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) { location.href = '/login'; return; }
 
     const body = {
