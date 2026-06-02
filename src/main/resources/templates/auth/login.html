@@ -11,12 +11,12 @@
 <body>
 
 <nav id="nav">
-    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+    <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
         <img src="/images/auth/farmer_logo.png" alt="로고" style="height:36px;width:auto;flex-shrink:0"/>
         못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
     </div>
     <ul class="nav-links">
-        <li><a class="active" data-page="home" onclick="location.href='index.html'" style="cursor:pointer">홈</a></li>
+        <li><a class="active" data-page="home" onclick="location.href='/'" style="cursor:pointer">홈</a></li>
         <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
         <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
         <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
@@ -32,9 +32,9 @@
             🛒
             <span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span>
         </span>
-        <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
+        <span class="n-ico" onclick="location.href='/mypage'" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
         <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
-        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
+        <button class="btn-nav" onclick="location.href='/login'">로그인</button>
     </div>
 </nav>
 
@@ -61,7 +61,7 @@
                 </div>
                 <div class="fg">
                     <label>비밀번호</label>
-                    <input id="lp" placeholder="비밀번호를 입력해주세요" type="password"/>
+                    <input id="lp" onkeydown="if(event.key==='Enter')doLogin()" placeholder="비밀번호를 입력해주세요" type="password"/>
                 </div>
                 <div class="f-extra">
                     <label class="f-rem"><input type="checkbox"/> 로그인 상태 유지</label>

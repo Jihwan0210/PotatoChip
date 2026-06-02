@@ -45,6 +45,8 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 
     runtimeOnly 'mysql:mysql-connector-java:8.0.33'
+
+    implementation 'org.modelmapper:modelmapper:3.2.0'
 }
 
 dependencyManagement {
