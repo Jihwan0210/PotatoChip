@@ -13,21 +13,16 @@ import java.time.LocalDateTime;
 public class ChatbotFaqDTO {
 
     private Long id;
-
     private String category;
-
     private String question;
-
     private String answer;
-
     private String keywords;
-
-    private Integer displayOrder;
-
     private Boolean isActive;
-
+    private Long createdBy;
+    private Long updatedBy;
+    private Long deletedBy;
+    private LocalDateTime deletedAt;
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     public static ChatbotFaqDTO fromEntity(ChatbotFaq chatbotFaq) {
@@ -37,8 +32,11 @@ public class ChatbotFaqDTO {
                 chatbotFaq.getQuestion(),
                 chatbotFaq.getAnswer(),
                 chatbotFaq.getKeywords(),
-                chatbotFaq.getDisplayOrder(),
                 chatbotFaq.getIsActive(),
+                chatbotFaq.getCreatedBy(),
+                chatbotFaq.getUpdatedBy(),
+                chatbotFaq.getDeletedBy(),
+                chatbotFaq.getDeletedAt(),
                 chatbotFaq.getCreatedAt(),
                 chatbotFaq.getUpdatedAt()
         );

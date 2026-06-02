@@ -20,7 +20,7 @@ public class ChatbotFaqServiceImpl implements ChatbotFaqService {
     public List<ChatbotFaqDTO> getFaqs(String category, String keyword) {
         if (keyword != null && !keyword.isBlank()) {
             return chatbotFaqRepository
-                    .findByQuestionContainingOrAnswerContainingOrKeywordsContainingOrderByDisplayOrderAscCreatedAtDesc(
+                    .findByQuestionContainingOrAnswerContainingOrKeywordsContainingOrderByCreatedAtDesc(
                             keyword,
                             keyword,
                             keyword
@@ -33,14 +33,14 @@ public class ChatbotFaqServiceImpl implements ChatbotFaqService {
 
         if (category != null && !category.isBlank() && !"all".equals(category)) {
             return chatbotFaqRepository
-                    .findByCategoryAndIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc(category)
+                    .findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(category)
                     .stream()
                     .map(ChatbotFaqDTO::fromEntity)
                     .toList();
         }
 
         return chatbotFaqRepository
-                .findByIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc()
+                .findByIsActiveTrueOrderByCreatedAtDesc()
                 .stream()
                 .map(ChatbotFaqDTO::fromEntity)
                 .toList();
@@ -65,7 +65,7 @@ public class ChatbotFaqServiceImpl implements ChatbotFaqService {
         chatbotFaq.setQuestion(chatbotFaqDTO.getQuestion());
         chatbotFaq.setAnswer(chatbotFaqDTO.getAnswer());
         chatbotFaq.setKeywords(chatbotFaqDTO.getKeywords());
-        chatbotFaq.setDisplayOrder(chatbotFaqDTO.getDisplayOrder());
+        chatbotFaq.setCreatedBy(chatbotFaqDTO.getCreatedBy() == null ? 1L : chatbotFaqDTO.getCreatedBy());
 
         ChatbotFaq savedFaq = chatbotFaqRepository.save(chatbotFaq);
 
@@ -81,6 +81,10 @@ public class ChatbotFaqServiceImpl implements ChatbotFaqService {
                 .filter(ChatbotFaq::getIsActive)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 FAQ를 찾을 수 없습니다."));
 
+        if (chatbotFaqDTO.getUpdatedBy() == null) {
+            chatbotFaqDTO.setUpdatedBy(1L);
+        }
+
         chatbotFaq.changeEntity(chatbotFaqDTO);
 
         return ChatbotFaqDTO.fromEntity(chatbotFaq);
@@ -93,7 +97,7 @@ public class ChatbotFaqServiceImpl implements ChatbotFaqService {
                 .filter(ChatbotFaq::getIsActive)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 FAQ를 찾을 수 없습니다."));
 
-        chatbotFaq.deactivate();
+        chatbotFaq.deactivate(1L);
     }
 
     private void validateFaq(ChatbotFaqDTO chatbotFaqDTO) {

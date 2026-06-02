@@ -11,46 +11,73 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "matchedFaq")
+@ToString
 public class ChatbotLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chatbot_log_id")
     private Long id;
 
     @Column(name = "user_id")
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matched_faq_id")
-    private ChatbotFaq matchedFaq;
+    @Column(name = "session_id", length = 100)
+    private String sessionId;
 
     @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String answer;
 
     @Column(name = "source_type", nullable = false, length = 30)
     private String sourceType;
 
-    @Column(nullable = false)
+    @Column(name = "source_id")
+    private Long sourceId;
+
+    @Column(name = "is_answered", nullable = false)
+    private Boolean isAnswered;
+
+    @Column(name = "error_message", length = 500)
+    private String errorMessage;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    public ChatbotLog(Long userId, ChatbotFaq matchedFaq, String question, String answer, String sourceType) {
+    public ChatbotLog(
+            Long userId,
+            String sessionId,
+            String question,
+            String answer,
+            String sourceType,
+            Long sourceId,
+            Boolean isAnswered,
+            String errorMessage
+    ) {
         this.userId = userId;
-        this.matchedFaq = matchedFaq;
+        this.sessionId = sessionId;
         this.question = question;
         this.answer = answer;
         this.sourceType = sourceType;
+        this.sourceId = sourceId;
+        this.isAnswered = isAnswered;
+        this.errorMessage = errorMessage;
         this.createdAt = LocalDateTime.now();
     }
 
     @PrePersist
     public void prePersist() {
+        if (this.sourceType == null) {
+            this.sourceType = "fallback";
+        }
+
+        if (this.isAnswered == null) {
+            this.isAnswered = true;
+        }
+
         this.createdAt = LocalDateTime.now();
     }
 }
