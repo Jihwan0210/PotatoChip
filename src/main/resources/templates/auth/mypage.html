@@ -10,6 +10,7 @@
     <link href="css/style.css" rel="stylesheet"/>
 </head>
 <body>
+
 <!-- NAV -->
 <nav id="nav">
     <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
@@ -1342,11 +1343,12 @@
                 <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:22px">프로필 설정 👤</div>
                 <div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:28px;max-width:500px">
                     <div style="display:flex;flex-direction:column;gap:14px">
-                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">이름</label><input style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="text" value="홍길동"/></div>
-                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">이메일</label><input style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="email" value="hong@example.com"/></div>
-                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">연락처</label><input style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="tel" value="010-1234-5678"/></div>
-                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">배송 주소</label><input style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="text" value="서울시 성동구 왕십리로 123"/></div>
-                        <button onclick="alert('저장되었어요! ✅')" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:4px">저장하기</button>
+                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">이름</label><input id="mp-name" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="text"/></div>
+                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">닉네임</label><input id="mp-nickname" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="text"/></div>
+                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">이메일</label><input id="mp-email" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none;background:var(--beige2)" type="email" readonly/></div>
+                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">전화번호</label><input id="mp-phone" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="tel" placeholder="010-0000-0000"/></div>
+                        <div><label style="font-size:.74rem;font-weight:600;color:var(--mid);display:block;margin-bottom:5px">배송 주소</label><input id="mp-address" style="width:100%;padding:10px 14px;border:1.5px solid var(--sand);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--dark);outline:none" type="text"/></div>
+                        <button onclick="saveMyProfile()" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:4px">저장하기</button>
                     </div>
                 </div>
             </div>
@@ -1568,5 +1570,22 @@
     </footer>
 </div><!-- /farmer -->
 <script src="js/app.js"></script>
+<script src="js/auth/mypage.js"></script>
+<script>
+    // 로그인 상태 버튼 전환
+    const token = localStorage.getItem('token');
+    const btnNav = document.querySelector('.btn-nav');
+    if (token && btnNav) {
+        btnNav.textContent = '로그아웃';
+        btnNav.setAttribute('onclick', 'doLogout()');
+    }
+
+    function doLogout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('email');
+        localStorage.removeItem('role');
+        location.href = '/login';
+    }
+</script>
 </body>
 </html>
