@@ -14,22 +14,26 @@ public class ChatbotDTO {
 
     private Long id;
     private Long userId;
-    private Long matchedFaqId;
+    private String sessionId;
     private String question;
     private String answer;
     private String sourceType;
+    private Long sourceId;
+    private Boolean isAnswered;
+    private String errorMessage;
     private LocalDateTime createdAt;
 
     public static ChatbotDTO fromEntity(ChatbotLog chatbotLog) {
-        Long matchedFaqId = chatbotLog.getMatchedFaq() == null ? null : chatbotLog.getMatchedFaq().getId();
-
         return new ChatbotDTO(
                 chatbotLog.getId(),
                 chatbotLog.getUserId(),
-                matchedFaqId,
+                chatbotLog.getSessionId(),
                 chatbotLog.getQuestion(),
                 chatbotLog.getAnswer(),
                 chatbotLog.getSourceType(),
+                chatbotLog.getSourceId(),
+                chatbotLog.getIsAnswered(),
+                chatbotLog.getErrorMessage(),
                 chatbotLog.getCreatedAt()
         );
     }

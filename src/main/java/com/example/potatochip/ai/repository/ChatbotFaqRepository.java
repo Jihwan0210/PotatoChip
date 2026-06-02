@@ -7,13 +7,15 @@ import java.util.List;
 
 public interface ChatbotFaqRepository extends JpaRepository<ChatbotFaq, Long> {
 
-    List<ChatbotFaq> findByIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc();
+    List<ChatbotFaq> findByIsActiveTrueOrderByCreatedAtDesc();
 
-    List<ChatbotFaq> findByCategoryAndIsActiveTrueOrderByDisplayOrderAscCreatedAtDesc(String category);
+    List<ChatbotFaq> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(String category);
 
-    List<ChatbotFaq> findByQuestionContainingOrAnswerContainingOrKeywordsContainingOrderByDisplayOrderAscCreatedAtDesc(
+    List<ChatbotFaq> findByQuestionContainingOrAnswerContainingOrKeywordsContainingOrderByCreatedAtDesc(
             String question,
             String answer,
             String keywords
     );
+
+    List<ChatbotFaq> findTop5ByIsActiveTrueOrderByCreatedAtDesc();
 }

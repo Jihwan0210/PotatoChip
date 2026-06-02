@@ -2,61 +2,78 @@ package com.example.potatochip.ai.entity;
 
 import com.example.potatochip.product.entity.Product;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ai_review_summaries")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "product")
 public class AiReviewSummary {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ai_review_summary_id")
-    private Long aiReviewSummaryId;
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false, unique = true)
     private Product product;
 
     @Lob
-    @Column(name = "summary", nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
     @Column(name = "review_count", nullable = false)
     private Integer reviewCount;
 
+    @Column(nullable = false, length = 30)
+    private String status;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @Column(name = "error_message", length = 500)
+    private String errorMessage;
 
     @Column(name = "generated_at", nullable = false)
     private LocalDateTime generatedAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     public AiReviewSummary(Product product, String summary, Integer reviewCount) {
         this.product = product;
         this.summary = summary;
         this.reviewCount = reviewCount;
+        this.status = "completed";
         this.isActive = true;
+        this.errorMessage = null;
         this.generatedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     public Long getProductId() {
-        return product.getId();
+        return product == null ? null : product.getId();
     }
 
     public void updateSummary(String summary, Integer reviewCount) {
         this.summary = summary;
         this.reviewCount = reviewCount;
-        this.updatedAt = LocalDateTime.now();
+        this.status = "completed";
         this.isActive = true;
+        this.errorMessage = null;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void fail(String errorMessage) {
+        this.status = "failed";
+        this.isActive = false;
+        this.errorMessage = errorMessage;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void deactivate() {
@@ -66,6 +83,25 @@ public class AiReviewSummary {
 
     public void activate() {
         this.isActive = true;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.status == null) {
+            this.status = "pending";
+        }
+
+        if (this.isActive == null) {
+            this.isActive = false;
+        }
+
+        this.generatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 }
