@@ -29,15 +29,30 @@ public class ProductDTO {
 
     private BigDecimal discountPrice;
 
-    private LocalDateTime discountStartAt;
+    private LocalDate discountStartAt; //할인 시작날짜
 
-    private LocalDateTime discountEndAt;
+    private LocalDate discountEndAt; //할인 종료날짜
 
     private String thumbnailUrl;
+
     private String origin;
+
     private LocalDate expiryDate;
+
     private Boolean isPickupAvailable;
+
     private Integer stockQuantity;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
+
+    private String address; // 주소
+
+    private BigDecimal latitude; // 위도 (카카오맵)
+
+    private BigDecimal longitude; // 경도 (카카오맵)
+
+    private String operatingHours; //운영 시간
+
 }
