@@ -1,21 +1,24 @@
 package com.example.potatochip.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Getter;
 
+@Getter
 @Entity
+@Table(name = "product")
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    private Long id;
 
-    private String productName;
-
+    private String name;
     private int price;
-
     private int stock;
+
+    public Long getId() {return id; }
+    public String getName() {return name; }
+    public int getPrice() {return price; }
+    public int getStock() {return stock; }
 
 }
