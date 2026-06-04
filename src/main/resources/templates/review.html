@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>리뷰 | 못난이 농작물</title>
+  <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link th:href="@{/css/style.css}" href="/css/style.css" rel="stylesheet"/>
+  <style>
+    .review-page{min-height:100vh;padding-top:64px;background:linear-gradient(160deg,var(--beige2) 0%,var(--beige3) 46%,var(--gp) 100%)}
+    .review-head{background:var(--white);border-bottom:1.5px solid var(--beige);padding:34px 6% 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .review-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
+    .review-head-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
+    .review-head-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:560px}
+    .review-write-btn{background:var(--green);color:#fff;border:none;border-radius:100px;padding:12px 24px;font-family:'Gaegu',cursive;font-size:1.12rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(123,191,69,.28);transition:all .2s}.review-write-btn:hover{background:#5E9E30;transform:translateY(-1px)}
+    .review-stats{background:var(--white);display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1.5px solid var(--beige)}
+    .review-stat{padding:18px 12px;text-align:center;border-right:1px solid var(--beige)}
+    .review-stat:last-child{border-right:none}
+    .review-stat-value{font-family:'Gaegu',cursive;font-size:1.45rem;font-weight:700;color:var(--amber)}
+    .review-stat-label{font-size:.68rem;color:var(--muted);margin-top:3px}
+    .review-layout{max-width:960px;margin:0 auto;padding:34px 6% 80px}
+    .review-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .review-filter-group{display:flex;gap:7px;flex-wrap:wrap}
+    .review-product-box{display:flex;align-items:center;gap:8px;background:var(--white);border:1.5px solid var(--beige);border-radius:100px;padding:6px 8px 6px 14px}
+    .review-product-box label{color:var(--light);font-size:.72rem;font-weight:700}
+    .review-product-box input{width:78px;border:none;outline:none;background:transparent;color:var(--dark);font-weight:700;font-family:inherit;font-size:.82rem}
+    .review-product-box button{border:none;background:var(--amber);color:#fff;border-radius:100px;padding:7px 12px;cursor:pointer;font-size:.72rem;font-weight:700;font-family:inherit}
+    .review-list{display:flex;flex-direction:column;gap:12px}
+    .review-empty{background:var(--white);border:1.5px solid var(--beige);border-radius:14px;padding:24px 22px;color:var(--muted);font-size:.84rem;line-height:1.8;text-align:center}
+    .review-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9999;align-items:center;justify-content:center;padding:20px}
+    .review-modal-card{background:var(--white);border-radius:20px;padding:26px;width:100%;max-width:480px;box-shadow:0 12px 44px rgba(0,0,0,.2)}
+    .review-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .review-modal-title{font-family:'Gaegu',cursive;font-size:1.45rem;font-weight:700;color:var(--dark)}
+    .review-close-btn{border:none;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--muted)}
+    .review-form-group{margin-bottom:13px}
+    .review-form-group label{display:block;font-size:.73rem;color:var(--mid);font-weight:700;margin-bottom:6px}
+    .review-form-group input,.review-form-group select,.review-form-group textarea{width:100%;padding:12px 13px;border:1.5px solid var(--beige);border-radius:12px;font-family:inherit;color:var(--dark);outline:none;background:var(--beige3)}
+    .review-form-group textarea{resize:none;min-height:120px}
+    .review-form-group input:focus,.review-form-group select:focus,.review-form-group textarea:focus{border-color:var(--green);background:#fff}
+    .review-check{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--mid);margin:14px 0 18px;cursor:pointer}
+    .review-check input{accent-color:var(--green)}
+    .review-submit-btn{width:100%;padding:13px;border:none;border-radius:13px;background:var(--green);color:#fff;font-family:'Gaegu',cursive;font-size:1rem;font-weight:700;cursor:pointer}
+
+    .rv2-prod{border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--gp);border-radius:7px;padding:3px 9px;font-size:.65rem;color:var(--green);font-weight:700;margin-bottom:9px;font-family:inherit}
+    .rv2-prod:hover{background:var(--green);color:#fff}
+    .helpful-active{background:var(--green)!important;color:#fff!important}
+    @media(max-width:720px){.review-stats{grid-template-columns:repeat(2,1fr)}.review-stat:nth-child(2){border-right:none}.review-stat:nth-child(1),.review-stat:nth-child(2){border-bottom:1px solid var(--beige)}.review-head{padding:28px 6% 22px}}
+  </style>
+</head>
+<body>
+<nav id="nav">
+  <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+    못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
+  </div>
+  <ul class="nav-links">
+    <li><a th:href="@{/}" href="/">홈</a></li>
+    <li><a th:href="@{/market}" href="/market">마켓</a></li>
+    <li><a th:href="@{/ranking}" href="/ranking">판매랭킹</a></li>
+    <li><a th:href="@{/review}" href="/review" style="color:var(--dark);font-weight:700">리뷰</a></li>
+    <li><a th:href="@{/board}" href="/board">게시판</a></li>
+    <li><a th:href="@{/faq}" href="/faq">FAQ</a></li>
+  </ul>
+  <div class="nav-r">
+    <span class="n-ico" id="bellIcon" onclick="toggleNotif && toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
+    <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+    <a th:href="@{/mypage}" href="/mypage" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</a>
+    <a th:href="@{/farmer}" href="/farmer" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
+    <button class="btn-nav" onclick="location.href='/login'">로그인</button>
+  </div>
+</nav>
+<main class="review-page">
+  <section class="review-head">
+    <div>
+      <div class="review-kicker">Reviews</div>
+      <h1 class="review-head-title">구매 리뷰 ⭐</h1>
+      <p class="review-head-desc">실제 구매자가 남긴 리뷰를 확인하고, AI가 요약한 상품별 리뷰 총평으로 신선도와 만족도를 빠르게 파악할 수 있어요.</p>
+    </div>
+    <button class="review-write-btn" type="button" onclick="openReviewForm()">리뷰 작성하기 →</button>
+  </section>
+  <section class="review-stats">
+    <div class="review-stat"><div id="reviewTotalCount" class="review-stat-value">0</div><div class="review-stat-label">누적 리뷰</div></div>
+    <div class="review-stat"><div id="reviewAverageRating" class="review-stat-value">0.0</div><div class="review-stat-label">평균 만족도</div></div>
+    <div class="review-stat"><div id="reviewRepurchaseRate" class="review-stat-value">0%</div><div class="review-stat-label">재구매 의향</div></div>
+    <div class="review-stat"><div id="reviewPhotoCount" class="review-stat-value">0</div><div class="review-stat-label">사진 리뷰</div></div>
+  </section>
+  <section class="review-layout">
+    <div class="review-toolbar">
+      <div class="review-filter-group">
+        <div class="mf on" onclick="setReviewFilter('all', this)">전체</div>
+        <div class="mf" onclick="setReviewFilter('helpful', this)">추천순</div>
+        <div class="mf" onclick="setReviewFilter('high', this)">평점 높은순</div>
+        <div class="mf" onclick="setReviewFilter('low', this)">평점 낮은순</div>
+        <div class="mf" onclick="setReviewFilter('recent', this)">최근 리뷰</div>
+        <div class="mf" id="photoOnlyFilter" onclick="togglePhotoOnly(this)">📸 사진 리뷰</div>
+      </div>
+      <div class="review-product-box">
+        <label for="reviewProductIdInput">상품 ID</label>
+        <input id="reviewProductIdInput" type="text" inputmode="numeric" value="3" placeholder="상품 ID"/>
+        <button type="button" onclick="changeReviewProduct()">조회</button>
+      </div>
+    </div>
+    <div class="ai-sum">
+      <div style="font-size:2rem;flex-shrink:0">🤖</div>
+      <div>
+        <div class="ai-lbl">AI 리뷰 총평</div>
+        <div class="ai-txt" id="aiReviewSummaryText">AI 리뷰 총평을 불러오는 중입니다.</div>
+        <div class="ai-tags" id="aiReviewSummaryTags"><span class="ai-tag">AI 요약</span></div>
+      </div>
+    </div>
+    <div id="reviewList" class="review-list"><div class="review-empty">리뷰를 불러오는 중입니다.</div></div>
+  </section>
+</main>
+<div id="reviewFormModal" class="review-modal">
+  <div class="review-modal-card">
+    <div class="review-modal-head">
+      <h2 id="reviewFormTitle" class="review-modal-title">리뷰 작성하기</h2>
+      <button class="review-close-btn" type="button" onclick="closeReviewForm()">✕</button>
+    </div>
+    <input type="hidden" id="reviewEditId"/>
+    <div class="review-form-group"><label for="reviewRating">별점</label><select id="reviewRating"><option value="5">5점</option><option value="4">4점</option><option value="3">3점</option><option value="2">2점</option><option value="1">1점</option></select></div>
+    <div class="review-form-group"><label for="reviewContent">리뷰 내용</label><textarea id="reviewContent" placeholder="상품에 대한 리뷰를 작성해주세요."></textarea></div>
+    <div class="review-form-group"><label for="reviewImageUrl">사진 URL</label><input id="reviewImageUrl" type="text" placeholder="선택 입력"/></div>
+    <label class="review-check"><input id="reviewRepurchaseIntent" type="checkbox" checked/>재구매 의향이 있어요</label>
+    <button class="review-submit-btn" type="button" onclick="submitReviewForm()">저장하기</button>
+  </div>
+</div>
+<footer>
+  <div class="ft-g">
+    <div><div class="ft-logo">못난이 농작물</div><p class="ft-desc">버려질 뻔한 농산물을 한 상으로 담다.<br/>신선한 못난이 농산물을 합리적인 가격으로 연결합니다.</p></div>
+    <div class="ft-col"><h5>서비스</h5><a th:href="@{/market}" href="/market">마켓</a><a th:href="@{/ranking}" href="/ranking">판매랭킹</a><a th:href="@{/review}" href="/review">리뷰</a></div>
+    <div class="ft-col"><h5>고객지원</h5><a th:href="@{/board}" href="/board">게시판</a><a th:href="@{/faq}" href="/faq">FAQ</a><a th:href="@{/mypage}" href="/mypage">마이페이지</a></div>
+    <div class="ft-col"><h5>농가</h5><a th:href="@{/farmer}" href="/farmer">농가 대시보드</a><a th:href="@{/market}" href="/market">상품 등록 안내</a></div>
+  </div>
+  <div class="ft-bot"><span>© PotatoChip. Ugly Farm Produce Market.</span><span>Review</span></div>
+</footer>
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script>
+  var currentProductId = 3;
+  var currentUserId = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
+  var reviewFilter = 'all';
+  var onlyPhotoReview = false;
+  var cachedReviews = [];
+  document.addEventListener('DOMContentLoaded', function () {
+    var params = new URLSearchParams(window.location.search);
+    var productId = Number(params.get('productId'));
+
+    if (productId && productId > 0) {
+      currentProductId = productId;
+    }
+
+    var input = document.getElementById('reviewProductIdInput');
+    if (input) {
+      input.value = currentProductId;
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          changeReviewProduct();
+        }
+      });
+    }
+
+    initReviewPage();
+  });
+
+  function changeReviewProduct() {
+    var input = document.getElementById('reviewProductIdInput');
+    var value = Number(input.value.trim());
+
+    if (!value || value < 1) {
+      showReviewToast('상품 ID를 숫자로 입력해주세요.');
+      return;
+    }
+
+    currentProductId = value;
+    reviewFilter = 'all';
+    onlyPhotoReview = false;
+
+    var PhotoFilter = document.getElementById("photoOnlyFilter");
+    if (photoFilter) {
+      photoFilter.ClassList.remove('on');
+    }
+
+    document.querySelectorAll('.review-filter-group .mf').forEach(function (item) {
+      item.classList.remove('on');
+    });
+
+    var firstFilter = document.querySelector('.review-filter-group .mf');
+    if (firstFilter) {
+      firstFilter.classList.add('on');
+    }
+
+    initReviewPage();
+  }
+
+  function goProductDetail(productId) {
+    location.href = '/products/' + productId;
+  }
+  function initReviewPage(){loadReviewStats(currentProductId);loadReviewList(currentProductId);loadAiReviewSummary(currentProductId)}
+  async function loadReviewStats(productId){try{var response=await fetch('/api/reviews/stats?productId='+productId);var data=await response.json();document.getElementById('reviewTotalCount').textContent=formatCount(data.totalReviewCount);document.getElementById('reviewAverageRating').textContent=Number(data.averageRating||0).toFixed(1);document.getElementById('reviewRepurchaseRate').textContent=Number(data.repurchaseRate||0).toFixed(1)+'%';document.getElementById('reviewPhotoCount').textContent=formatCount(data.photoReviewCount)}catch(error){document.getElementById('reviewTotalCount').textContent='-';document.getElementById('reviewAverageRating').textContent='-';document.getElementById('reviewRepurchaseRate').textContent='-';document.getElementById('reviewPhotoCount').textContent='-'}}
+  async function loadReviewList(productId){var list=document.getElementById('reviewList');if(!list)return;list.innerHTML='<div class="review-empty">리뷰를 불러오는 중입니다.</div>';try{var url = '/api/reviews?productId=' + productId;if (currentUserId) {url += '&userId=' + currentUserId;}var response = await fetch(url);cachedReviews=await response.json();if(!Array.isArray(cachedReviews)) cachedReviews=[];renderReviewList()}catch(error){list.innerHTML='<div class="review-empty">리뷰 목록을 불러오지 못했습니다.</div>'}}
+  async function loadAiReviewSummary(productId){var text=document.getElementById('aiReviewSummaryText');var tags=document.getElementById('aiReviewSummaryTags');if(!text||!tags)return;text.textContent='AI 리뷰 총평을 불러오는 중입니다.';tags.innerHTML='<span class="ai-tag">AI 요약</span>';try{var response=await fetch('/api/products/'+productId+'/ai-review-summary');var data=await response.json();if(!response.ok){text.textContent=data.message||'아직 등록된 AI 리뷰 총평이 없습니다.';tags.innerHTML='<span class="ai-tag">총평 없음</span>';return}text.textContent=data.summary;tags.innerHTML='<span class="ai-tag">✅ 리뷰 '+data.reviewCount+'개 분석</span><span class="ai-tag">✅ AI 총평</span><span class="ai-tag">✅ 상품 ID '+data.productId+'</span>'}catch(error){text.textContent='AI 리뷰 총평 API에 연결할 수 없습니다.';tags.innerHTML='<span class="ai-tag">연결 실패</span>'}}
+  function renderReviewList(){
+    var list=document.getElementById('reviewList');
+    if(!list)return;
+    var reviews = cachedReviews.slice();
+
+    if (onlyPhotoReview) {
+      reviews = reviews.filter(function (review) {
+        return review.imageUrl !== null &&
+                review.imageUrl !== undefined &&
+                String(review.imageUrl).trim() !== '';
+      });
+    }
+
+    if (reviewFilter === 'helpful') {
+      reviews.sort(function (a, b) {
+        var helpfulDiff = Number(b.helpfulCount || 0) - Number(a.helpfulCount || 0);
+
+        if (helpfulDiff !== 0) {
+          return helpfulDiff;
+        }
+
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+    }
+
+    if (reviewFilter === 'high') {
+      reviews.sort(function (a, b) {
+        return Number(b.rating || 0) - Number(a.rating || 0);
+      });
+    }
+
+    if (reviewFilter === 'low') {
+      reviews.sort(function (a, b) {
+        return Number(a.rating || 0) - Number(b.rating || 0);
+      });
+    }
+
+    if (reviewFilter === 'recent') {
+      reviews.sort(function (a, b) {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+    }
+
+    if(reviews.length===0){
+      list.innerHTML='<div class="review-empty">아직 등록된 리뷰가 없습니다.</div>';
+      return;
+    }
+
+    list.innerHTML=reviews.map(function(review){
+      var isMine=currentUserId!==null&&review.userId===currentUserId;
+      var avatarClass=review.rating>=5?'ap':review.rating>=4?'gn':'mt';
+      var helpfulCount = Number(review.helpfulCount || 0);
+      var isHelpful = Boolean(review.helpfulByCurrentUser);
+
+      var imageHtml=review.imageUrl
+        ? '<div style="margin-top:10px"><img src="'+escapeHtml(review.imageUrl)+'" alt="리뷰 이미지" style="max-width:180px;border-radius:10px;border:1px solid var(--beige)"></div>'
+        : '';
+
+      var editDeleteHtml=isMine
+        ? '<div style="display:flex;gap:6px"><button class="hlp-btn" onclick="openReviewEditForm('+review.reviewId+')">수정</button><button class="hlp-btn" onclick="deleteReview('+review.reviewId+')">삭제</button></div>'
+        : '';
+
+      return '<div class="rv2">'
+        +'<div class="rv2-top">'
+          +'<div class="rv2-auth">'
+            +'<div class="rv2-av '+avatarClass+'">'+getReviewEmoji(review.rating)+'</div>'
+            +'<div><div class="rv2-nm">사용자 '+review.userId+'</div><div class="rv2-dt">'+formatReviewDate(review.createdAt)+'</div></div>'
+          +'</div>'
+          +'<div class="rv2-stars">'+renderReviewStars(review.rating)+'</div>'
+        +'</div>'
+        +'<button type="button" class="rv2-prod" onclick="goProductDetail('+review.productId+')">🥬 상품 ID '+review.productId+'</button>'
+        +'<div class="rv2-txt">'+escapeHtml(review.content)+'</div>'
+        +imageHtml
+        +'<div class="rv2-foot">'
+          +'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+            +'<button class="hlp-btn '+(isHelpful?'helpful-active':'')+'" onclick="toggleReviewHelpful('+review.reviewId+')">👍 도움돼요 <span id="helpfulCount-'+review.reviewId+'">'+helpfulCount+'</span></button>'
+            +editDeleteHtml
+          +'</div>'
+          +'<span class="rv2-cert">'+(review.repurchaseIntent?'재구매 의향 있음':'재구매 의향 없음')+'</span>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+  }
+  function setReviewFilter(filter, element) { reviewFilter = filter; document.querySelectorAll('.review-filter-group .mf').forEach(function (item) {if (item.id !== 'photoOnlyFilter') { item.classList.remove('on');} }); if (element) { element.classList.add('on'); } renderReviewList();}
+  function togglePhotoOnly(element) { onlyPhotoReview = !onlyPhotoReview; if (element){if(onlyPhotoReview) { element.classList.add('on');}else{element.classList.remove('on');}}renderReviewList();}
+  function openReviewForm(){if(!currentUserId){showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');setTimeout(function(){location.href='/login'},900);return}document.getElementById('reviewFormTitle').textContent='리뷰 작성하기';document.getElementById('reviewEditId').value='';document.getElementById('reviewRating').value='5';document.getElementById('reviewContent').value='';document.getElementById('reviewImageUrl').value='';document.getElementById('reviewRepurchaseIntent').checked=true;document.getElementById('reviewFormModal').style.display='flex'}
+  function openReviewEditForm(reviewId){var review=cachedReviews.find(function(item){return item.reviewId===reviewId});if(!review){showReviewToast('수정할 리뷰를 찾을 수 없어요.');return}if(review.userId!==currentUserId){showReviewToast('본인이 작성한 리뷰만 수정할 수 있어요.');return}document.getElementById('reviewFormTitle').textContent='리뷰 수정하기';document.getElementById('reviewEditId').value=review.reviewId;document.getElementById('reviewRating').value=review.rating;document.getElementById('reviewContent').value=review.content;document.getElementById('reviewImageUrl').value=review.imageUrl||'';document.getElementById('reviewRepurchaseIntent').checked=review.repurchaseIntent;document.getElementById('reviewFormModal').style.display='flex'}
+  function closeReviewForm(){document.getElementById('reviewFormModal').style.display='none'}
+  async function submitReviewForm(){if(!currentUserId){showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');return}var reviewId=document.getElementById('reviewEditId').value;var rating=Number(document.getElementById('reviewRating').value);var content=document.getElementById('reviewContent').value.trim();var imageUrl=document.getElementById('reviewImageUrl').value.trim();var repurchaseIntent=document.getElementById('reviewRepurchaseIntent').checked;if(!content){showReviewToast('리뷰 내용을 입력해주세요.');return}var isEdit=reviewId!=='';var url=isEdit?'/api/reviews/'+reviewId:'/api/reviews';var method=isEdit?'PUT':'POST';var body=isEdit?{userId:currentUserId,rating:rating,content:content,imageUrl:imageUrl||null,repurchaseIntent:repurchaseIntent}:{productId:currentProductId,userId:currentUserId,orderItemId:null,rating:rating,content:content,imageUrl:imageUrl||null,repurchaseIntent:repurchaseIntent};try{var response=await fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var data=await response.json();if(!response.ok){showReviewToast(data.message||'리뷰 저장에 실패했습니다.');return}closeReviewForm();showReviewToast(isEdit?'리뷰가 수정되었습니다.':'리뷰가 등록되었습니다.');await loadReviewStats(currentProductId);await loadReviewList(currentProductId)}catch(error){showReviewToast('서버 연결에 실패했습니다.')}}
+  async function deleteReview(reviewId){if(!currentUserId){showReviewToast('로그인 후 이용할 수 있어요.');return}if(!confirm('리뷰를 삭제할까요?'))return;try{var response=await fetch('/api/reviews/'+reviewId+'?userId='+currentUserId,{method:'DELETE'});var data=await response.json();if(!response.ok){showReviewToast(data.message||'리뷰 삭제에 실패했습니다.');return}showReviewToast('리뷰가 삭제되었습니다.');await loadReviewStats(currentProductId);await loadReviewList(currentProductId)}catch(error){showReviewToast('서버 연결에 실패했습니다.')}}
+  async function toggleReviewHelpful(reviewId) {
+    if (!currentUserId) {
+      showReviewToast('로그인 후 도움돼요를 누를 수 있어요.');
+      setTimeout(function () {
+        location.href = '/login';
+      }, 900);
+      return;
+    }
+
+    try {
+      var response = await fetch('/api/reviews/' + reviewId + '/helpful?userId=' + currentUserId, {
+        method: 'POST'
+      });
+
+      var data = await response.json();
+
+      if (!response.ok) {
+        showReviewToast(data.message || '도움돼요 처리에 실패했습니다.');
+        return;
+      }
+
+      cachedReviews = cachedReviews.map(function (review) {
+        if (review.reviewId === reviewId) {
+          review.helpfulCount = data.helpfulCount;
+          review.helpfulByCurrentUser = data.helpfulByCurrentUser;
+        }
+
+        return review;
+      });
+
+      renderReviewList();
+      showReviewToast('도움돼요가 반영됐어요 🌿');
+    } catch (error) {
+      showReviewToast('서버 연결에 실패했습니다.');
+    }
+  }
+
+  function renderReviewStars(rating){var stars='';for(var i=1;i<=5;i++){stars+=i<=rating?'★':'☆'}return stars}
+  function getReviewEmoji(rating){if(rating>=5)return'😊';if(rating>=4)return'🌿';if(rating>=3)return'🙂';return'🥬'}
+  function formatReviewDate(value){if(!value)return'-';return value.replace('T',' ').substring(0,10)}
+  function formatCount(value){var number=Number(value||0);if(number>=1000)return number.toLocaleString()+'+';return String(number)}
+  function escapeHtml(value){if(value===null||value===undefined)return'';return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+  function showReviewToast(message){if(typeof showToast==='function'){showToast(message);return}alert(message)}
+</script>
+</body>
+</html>

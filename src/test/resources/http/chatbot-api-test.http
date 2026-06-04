@@ -1,0 +1,46 @@
+### 챗봇 질문 - 배송
+POST http://localhost:8080/api/ai/chatbot/ask
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "question": "배송은 얼마나 걸리나요?"
+}
+
+
+### 챗봇 질문 - 환불
+POST http://localhost:8080/api/ai/chatbot/ask
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "question": "상품이 상해서 왔는데 환불 가능한가요?"
+}
+
+
+### 챗봇 질문 - AI 리뷰 총평
+POST http://localhost:8080/api/ai/chatbot/ask
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "question": "AI 리뷰 총평은 어떻게 만들어져요?"
+}
+
+
+### 챗봇 질문 - 매칭 실패
+POST http://localhost:8080/api/ai/chatbot/ask
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "question": "감자 요리법 알려줘"
+}
+
+
+### 전체 문의 이력 조회
+GET http://localhost:8080/api/ai/chatbot/logs
+
+
+### 특정 사용자 문의 이력 조회
+GET http://localhost:8080/api/ai/chatbot/logs?userId=1
