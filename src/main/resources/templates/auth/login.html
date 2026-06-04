@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -10,33 +10,7 @@
 </head>
 <body>
 
-<nav id="nav">
-    <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        <img src="/images/auth/farmer_logo.png" alt="로고" style="height:36px;width:auto;flex-shrink:0"/>
-        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-    </div>
-    <ul class="nav-links">
-        <li><a class="active" data-page="home" onclick="location.href='/'" style="cursor:pointer">홈</a></li>
-        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
-        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
-        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
-        <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
-        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
-    </ul>
-    <div class="nav-r">
-        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">
-            🔔
-            <span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span>
-        </span>
-        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">
-            🛒
-            <span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span>
-        </span>
-        <span class="n-ico" onclick="location.href='/mypage'" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
-        <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
-        <button class="btn-nav" onclick="location.href='/login'">로그인</button>
-    </div>
-</nav>
+<div th:replace="nav :: nav"></div>
 
 <div class="page active" id="page-login">
     <div class="login-bg">
@@ -140,45 +114,6 @@
     </div>
 </div>
 
-<footer>
-    <div class="ft-g">
-        <div>
-            <div class="ft-logo">못난이 농작물</div>
-            <p class="ft-desc">
-                내려질 뻔한 농산물을 한 상으로 담다.<br/>
-                포테토칩 팀 · 유지환 · 김지혜 · 김민성 · 김주영 · 오지호
-            </p>
-            <p style="margin-top:10px;font-size:.72rem">Spring Boot · MySQL · OpenAI · AWS · Kakao Map API</p>
-        </div>
-        <div class="ft-col">
-            <h5>서비스</h5>
-            <a onclick="location.href='market.html'" style="cursor:pointer">마켓 이용</a>
-            <a onclick="goPage('board')" style="cursor:pointer">게시판</a>
-            <a onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a>
-            <a onclick="location.href='review.html'" style="cursor:pointer">리뷰</a>
-        </div>
-        <div class="ft-col">
-            <h5>정보</h5>
-            <a href="#">우리의 미션</a>
-            <a href="#">판매자 신청</a>
-            <a href="#">픽업 장소</a>
-            <a href="#">공지사항</a>
-        </div>
-        <div class="ft-col">
-            <h5>고객 지원</h5>
-            <a href="#">AI 챗봇</a>
-            <a href="#">배송 조회</a>
-            <a href="#">환불·교환</a>
-            <a href="#">개인정보처리방침</a>
-        </div>
-    </div>
-    <div class="ft-bot">
-        <span>© 2025 못난이 농작물 · 포테토칩 팀</span>
-        <span>외형이 아닌 신선함으로 판단합니다 🌿</span>
-    </div>
-</footer>
-
-<script src="/js/app.js"></script>
-<script src="/js/auth/auth.js"></script>
+<div th:replace="footer :: footer"></div>
 </body>
 </html>
