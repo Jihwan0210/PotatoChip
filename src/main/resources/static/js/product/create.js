@@ -54,6 +54,12 @@ document.querySelector('[name=thumbnailFile]').addEventListener('change', functi
         reader.readAsDataURL(file);
     }
 });
+
+// 설명
+document.querySelector('[name=description]').addEventListener('input', function() {
+    document.querySelector('.preview-desc').textContent = this.value || '설명란을 입력해주세요.';
+});
+
 // 픽업 가능 여부 토글
 const pickupSelect = document.getElementById('pickupSelect');
 const pickupDetail = document.getElementById('pickupDetail');
