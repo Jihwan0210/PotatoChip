@@ -14,4 +14,12 @@ public interface StatsRepository extends JpaRepository<Product, Long> {
 
 @Query(value = "SELECT COALESCE(SUM(quantity),0) FROM order_item",nativeQuery = true)
 Long totalSales();
+
+@Query(value = """
+SELECT COALESCE(SUM(p.price * oi.quantity), 0)
+FROM order_item oi
+JOIN product p
+ON oi.product_id = p.id
+""",nativeQuery = true)
+    Long totalRevenue();
 }

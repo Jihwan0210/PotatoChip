@@ -5,6 +5,15 @@ public class StatsResponseDTO {
     private Long totalProducts;
     private Long totalOrders;
     private Long totalSales;
+    private Long totalRevenue;
+
+    public Long getTotalRevenue(){
+        return totalRevenue;
+    }
+
+    public void setTotalRevenue(Long totalRevenue) {
+        this.totalRevenue = totalRevenue;
+    }
 
     public Long getTotalProducts() {
         return totalProducts;
