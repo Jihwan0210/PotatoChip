@@ -1,0 +1,24 @@
+### 구매이력 기반 추천 생성
+POST http://localhost:8080/api/ai/recommendations/generate
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+
+
+### 사용자 추천 조회
+GET http://localhost:8080/api/ai/recommendations?userId=1
+
+
+### 비로그인 세션 추천 생성
+POST http://localhost:8080/api/ai/recommendations/generate
+Content-Type: application/json
+
+{
+  "sessionId": "test-session-001"
+}
+
+
+### 비로그인 세션 추천 조회
+GET http://localhost:8080/api/ai/recommendations?sessionId=test-session-001

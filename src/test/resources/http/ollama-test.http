@@ -1,0 +1,6 @@
+POST http://localhost:8080/api/ollama/test
+Content-Type: application/json
+
+{
+  "prompt": "다음 리뷰들을 쇼핑몰 AI 리뷰 총평처럼 자연스러운 한국어 1문장으로 요약해줘. 리뷰: 감자는 모양이 고르지 않지만 맛이 좋았다. 가격이 저렴해서 만족했다. 배송도 빠르고 재구매 의향이 있다."
+}

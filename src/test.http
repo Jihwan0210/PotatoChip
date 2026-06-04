@@ -1,0 +1,6 @@
+POST http://localhost:8080/signup
+Content-Type: application/x-www-form-urlencoded
+
+email=test2@test.com&
+password=1234&
+name=감자2
