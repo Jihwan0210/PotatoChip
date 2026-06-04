@@ -1,5 +1,6 @@
 package com.example.potatochip.cart.entity;
 
+import com.example.potatochip.cartitem.entity.CartItem;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -16,13 +17,17 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column
     private Long buyerId;
-    @Column
     private LocalDateTime createdAt;
-    @Column
     private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CartItem> cartItems = new ArrayList<>();
 
+    public void addItem(CartItem item) {
+        this.cartItems.add(item);
+        item.setCart(this);
+    }
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -32,4 +37,5 @@ public class Cart {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
 }
