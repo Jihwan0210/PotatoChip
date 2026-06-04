@@ -20,6 +20,7 @@ public class StatsService {
         dto.setTotalProducts(statsRepository.countProducts());
         dto.setTotalOrders(statsRepository.countOrders());
         dto.setTotalSales(statsRepository.totalSales());
+        dto.setTotalRevenue(statsRepository.totalRevenue());
 
         return dto;
     }
