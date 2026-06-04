@@ -1,5 +1,8 @@
 package com.example.potatochip.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "총 매출액", example = "156000")
 public class StatsResponseDTO {
 
     private Long totalProducts;
@@ -38,4 +41,7 @@ public class StatsResponseDTO {
     public void setTotalSales(Long totalSales) {
         this.totalSales = totalSales;
     }
+
+
+
 }
