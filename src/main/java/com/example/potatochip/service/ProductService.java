@@ -40,5 +40,27 @@ public class ProductService {
 
         return ProductResponseDTO.from(savedProduct);
         }
+
+        public ProductResponseDTO updateProduct(Long id, ProductRequestDTO request) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다"));
+
+        product.setName(request.getName());
+        product.setPrice(request.getPrice());
+        product.setStock(request.getStock());
+
+        Product updatedProduct = productRepository.save(product);
+
+        return ProductResponseDTO.from(updatedProduct);
+        }
+
+        public void deleteProduct(Long id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("상품을 찾을 수 없습니다"));
+
+        productRepository.delete(product);
+        }
     }
 
