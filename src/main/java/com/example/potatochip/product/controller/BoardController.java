@@ -1,10 +1,7 @@
 package com.example.potatochip.product.controller;
 
-
 import com.example.potatochip.product.dto.request.BoardRequestDTO;
 import com.example.potatochip.product.dto.response.BoardResponseDTO;
-import com.example.potatochip.product.entity.Board;
-import com.example.potatochip.product.repository.BoardRepository;
 import com.example.potatochip.product.service.BoardService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,22 +16,27 @@ public class BoardController {
     public BoardController(BoardService boardService) {
         this.boardService = boardService;
     }
+
+    // 전체 게시글 조회
     @GetMapping
-    public List<BoardResponseDTO> getBoard() {
+    public List<BoardResponseDTO> getBoards() {
         return boardService.getBoards();
     }
 
+    // 게시글 상세 조회
     @GetMapping("/{id}")
     public BoardResponseDTO getBoard(@PathVariable Long id) {
         return boardService.getBoard(id);
     }
 
+    // 게시글 등록
     @PostMapping
-    public BoardResponseDTO createBoard(@RequestBody BoardRequestDTO request){
+    public BoardResponseDTO createBoard(@RequestBody BoardRequestDTO request) {
         return boardService.createBoard(request);
     }
 
-    @PostMapping("/{id}")
+    // 게시글 수정
+    @PutMapping("/{id}")
     public BoardResponseDTO updateBoard(
             @PathVariable Long id,
             @RequestBody BoardRequestDTO request) {
@@ -42,9 +44,9 @@ public class BoardController {
         return boardService.updateBoard(id, request);
     }
 
+    // 게시글 삭제
     @DeleteMapping("/{id}")
     public void deleteBoard(@PathVariable Long id) {
         boardService.deleteBoard(id);
     }
-
 }
