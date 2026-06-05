@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 등록</title>
+
+    <link rel="stylesheet" href="/css/product/create.css">
+
+
+</head>
+
+<body>
+
+<div class="create-wrap">
+
+    <div class="create-top">
+
+        <div class="create-badge">
+            🌾 판매자 전용
+        </div>
+
+        <div class="create-title">
+            못난이 농산물 상품 등록
+        </div>
+
+        <div class="create-sub">
+            신선한 농산물을 등록하고 소비자들에게 직접 판매해보세요.
+        </div>
+
+    </div>
+
+    <div class="create-grid">
+
+        <!-- 왼쪽 등록 폼 -->
+        <div class="create-card">
+
+            <form th:action="@{/market/create}"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label>상품명</label>
+
+                    <input type="text"
+                           name="name"
+                           class="form-input"
+                           placeholder="예: 못난이 감자 3kg"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>카테고리</label>
+
+                    <select name="category"
+                            class="form-select"
+                            required>
+
+                        <option value="">카테고리 선택</option>
+                        <option value="채소">채소</option>
+                        <option value="과일">과일</option>
+                        <option value="곡류">곡류</option>
+                        <option value="버섯">버섯</option>
+
+                    </select>
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label>판매 가격</label>
+
+                        <input type="number"
+                               name="price"
+                               class="form-input"
+                               placeholder="12000"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>할인 가격</label>
+
+                        <input type="number"
+                               name="discountPrice"
+                               class="form-input"
+                               placeholder="8900">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>할인 시작일</label>
+                            <input type="date"
+                                   name="discountStartAt"
+                                   class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>할인 종료일</label>
+                            <input type="date"
+                                   name="discountEndAt"
+                                   class="form-input">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label>원산지</label>
+
+                        <input type="text"
+                               name="origin"
+                               class="form-input"
+                               placeholder="예: 강원 홍천"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>재고 수량</label>
+
+                        <input type="number"
+                               name="stockQuantity"
+                               class="form-input"
+                               placeholder="100"
+                               required>
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label>유통기한</label>
+
+                        <input type="date"
+                               name="expiryDate"
+                               class="form-input"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>픽업 가능 여부</label>
+
+                        <select name="isPickupAvailable"
+                                class="form-select"
+                                id="pickupSelect">
+
+                            <option value="true">가능</option>
+                            <option value="false">불가능</option>
+
+                        </select>
+                    </div>
+
+
+
+                </div>
+
+                <div id="pickupDetail" style="display:none;">
+
+                    <div class="form-group">
+                        <label>픽업 주소</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text"
+                                   id="pickupAddressInput"
+                                   name="address"
+                                   class="form-input"
+                                   placeholder="주소 검색 버튼을 눌러주세요"
+                                   readonly>
+                            <button type="button"
+                                    class="btn-cancel"
+                                    onclick="searchAddress()">
+                                주소 검색
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="kakaoMap" style="width:100%; height:250px; border-radius:12px; margin-bottom:12px;"></div>
+
+                    <input type="hidden" id="latitudeInput" name="latitude">
+                    <input type="hidden" id="longitudeInput" name="longitude">
+
+                    <div class="form-group">
+                        <label>운영 시간</label>
+                        <input type="text"
+                               name="operatingHours"
+                               class="form-input"
+                               placeholder="예: 평일 09:00 ~ 18:00">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>상품 설명</label>
+
+                    <textarea name="description"
+                              class="form-textarea"
+                              placeholder="상품 특징, 배송 정보 등을 입력해주세요."></textarea>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>대표 이미지</label>
+
+                    <label class="thumb-upload">
+
+                        <div class="thumb-icon">
+                            📦
+                        </div>
+
+                        <div class="thumb-title">
+                            이미지 업로드
+                        </div>
+
+                        <div class="thumb-sub">
+                            JPG, PNG 파일 업로드 가능
+                        </div>
+
+                        <input type="file"
+                               name="thumbnailFile"
+                               accept="image/*"
+                               hidden>
+
+                    </label>
+
+                </div>
+
+                <div class="submit-row">
+
+                    <button type="button"
+                            class="btn-cancel"
+                            onclick="history.back()">
+
+                        취소
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn-submit2">
+
+                        상품 등록하기
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- 오른쪽 미리보기 -->
+        <div class="create-card preview-card">
+
+            <div class="preview-top">
+                <img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:0"/>
+                🥔
+
+                <div class="preview-badge">
+                    미리보기
+                </div>
+
+            </div>
+
+            <div class="preview-body">
+
+                <div class="preview-origin">
+                    강원 홍천 · 감자 농가
+                </div>
+
+                <div class="preview-name">
+                    못난이 감자 3kg
+                </div>
+
+                <div class="preview-price">
+
+                    <div class="preview-discount">
+                        -30%
+                    </div>
+
+                    <div class="preview-main">
+                        7,000원
+                    </div>
+
+                </div>
+
+                <div class="preview-desc">
+                    크기는 조금 달라도 맛과 신선함은 그대로인
+                    친환경 못난이 감자 상품입니다.
+                </div>
+
+                <div class="preview-meta">
+
+                    <div class="preview-chip">
+                        🥔 채소
+                    </div>
+
+                    <div class="preview-chip">
+                        📦 재고 100개
+                    </div>
+
+                    <div class="preview-chip">
+                        🚚 픽업 가능
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4&libraries=services"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script> <!--우편번호 스크립트-->
+<script src="/js/product/create.js"></script>
+</body>
+</html>
