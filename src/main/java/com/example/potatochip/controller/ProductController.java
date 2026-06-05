@@ -1,12 +1,9 @@
 package com.example.potatochip.controller;
 
-
 import com.example.potatochip.dto.request.ProductRequestDTO;
-import org.springframework.web.bind.annotation.RequestBody;
 import com.example.potatochip.dto.response.ProductResponseDTO;
 import com.example.potatochip.service.ProductService;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 
@@ -17,12 +14,11 @@ public class ProductController {
     private final ProductService productService;
 
     public ProductController(ProductService productService) {
-
         this.productService = productService;
     }
 
     @GetMapping
-    public List<ProductResponseDTO> getProducts(){
+    public List<ProductResponseDTO> getProducts() {
         return productService.getProducts();
     }
 
@@ -34,5 +30,18 @@ public class ProductController {
     @PostMapping
     public ProductResponseDTO createProduct(@RequestBody ProductRequestDTO request) {
         return productService.createProduct(request);
+    }
+
+    @PutMapping("/{id}")
+    public ProductResponseDTO updateProduct(
+            @PathVariable Long id,
+            @RequestBody ProductRequestDTO request) {
+
+        return productService.updateProduct(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
     }
 }
