@@ -1,6 +1,6 @@
 package com.example.potatochip.cart.service;
 
-import com.example.potatochip.cart.Repository.CartRepository;
+import com.example.potatochip.cart.repository.CartRepository;
 import com.example.potatochip.cart.dto.CartDTO;
 import com.example.potatochip.cart.entity.Cart;
 import com.example.potatochip.cartitem.dto.CartItemDTO;

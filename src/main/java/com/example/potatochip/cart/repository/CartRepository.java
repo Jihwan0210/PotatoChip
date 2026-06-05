@@ -1,4 +1,4 @@
-package com.example.potatochip.cart.Repository;
+package com.example.potatochip.cart.repository;
 
 import com.example.potatochip.cart.entity.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
