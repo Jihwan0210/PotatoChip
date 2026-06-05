@@ -7,6 +7,7 @@ import com.example.potatochip.cartitem.entity.CartItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
@@ -15,7 +16,7 @@ import jakarta.servlet.http.HttpSession;
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<CartDTO> getMyCart(HttpSession session){
         Long loggedInUserId = (Long) session.getAttribute("loginUserId");
         if (loggedInUserId == null) {
