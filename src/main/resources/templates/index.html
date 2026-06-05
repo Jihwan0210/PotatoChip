@@ -1,255 +1,153 @@
 <!DOCTYPE html>
-<html lang="ko"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>못난이 농작물</title>
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="css/style.css" rel="stylesheet"/>
-</head><body><nav id="nav">
-<div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-    <img src="/images/auth/farmer_logo.png" style="height:36px;width:auto;flex-shrink:0"/>
-    못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-  </div>
-<ul class="nav-links">
-    <li><a th:href="@{/}">홈</a></li>
-    <li><a th:href="@{/market}">마켓</a></li>
-    <li><a th:href="@{/ranking}">판매랭킹</a></li>
-    <li><a th:href="@{/review}">리뷰</a></li>
-    <li><a th:href="@{/board}">게시판</a></li>
-    <li><a th:href="@{/faq}">FAQ</a></li>
-</ul>
-<div class="nav-r">
-<span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-<span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
-    <a th:href="@{/mypage}" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</a>
-        <a th:href="@{/farmer}" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
-    <a th:href="@{/login}" class="btn-nav">로그인</a>
-</div>
-</nav><div id="page-home" style="padding-top:0">
-<!-- HERO: 좌-베이지 / 우-연두3분할 -->
-<section class="hero">
-<div class="hl">
-<span class="hl-dot d3"></span>
-<span class="hl-dot d4"></span>
-<div>
-<div class="h-badges">
-<span class="h-badge g">🌿 친환경 농산물</span>
-<span class="h-badge a">🚚 농가 직배송</span>
-</div>
-<h1 class="h-title">
-        못난이 농작물로<br/>
-<span class="g">더 건강하고</span><br/>
-<span class="a">더 알뜰하게</span>
-</h1>
-<p class="h-sub">외형이 다를 뿐, 맛과 영양은 똑같아요.<br/>폐기될 뻔한 신선 농산물을 평균 40% 저렴하게 전달합니다.</p>
-<button class="btn-hero" onclick="location.href='market.html'">지금 구경하기 <span class="ico">↗</span></button>
-</div>
-<div class="h-bot">
-<div class="hst">
-<span class="hst-n">5k+</span>
-<span class="hst-l">구매 후기</span>
-<div class="hst-av"><span>😊</span><span>🌿</span><span>😄</span><span>🥬</span></div>
-</div>
-<div class="hst" style="margin-left:22px;padding-left:22px;border-left:1px solid rgba(255,255,255,.11)">
-<span class="hst-l" style="margin-bottom:8px">상품 카테고리</span>
-<div class="h-cats">
-<div class="h-cat on">채소 🥦</div>
-<div class="h-cat">과일 🍎</div>
-<div class="h-cat">⏰ 기한임박</div>
-</div>
-</div>d
-</div>
-</div>
-<div class="hr" style="background:linear-gradient(155deg,#F6F0E4,#EDE4CC);display:flex;align-items:center;justify-content:center;gap:28px;padding:0 6%;position:relative;overflow:hidden">
-<div style="position:absolute;inset:0;background:linear-gradient(155deg,#7BBF45,#5A9A30);clip-path:polygon(50% 0%,100% 0%,100% 100%,50% 100%)"></div>
-<div style="position:relative;z-index:2;display:flex;align-items:center;gap:28px;width:100%">
-<div style="flex:1;display:flex;justify-content:flex-end">
-    <img src="/images/auth/farmer_logo.png" style="max-width:60%;height:auto;object-fit:contain;">
-</div>
-<div style="flex:1">
-<div style="color:#fff">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>못난이 농작물</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
 
-<div style="font-family:Gaegu,cursive;font-size:clamp(1.1rem,1.9vw,1.55rem);font-weight:700;line-height:1.4;margin-bottom:8px">못난이 꾸러미 친구<br/>만나보세요! 🌿</div>
+<div th:replace="nav :: nav"></div>
+
+<div id="page-home" style="padding-top:0">
+    <section class="hero">
+        <div class="hl">
+            <span class="hl-dot d3"></span>
+            <span class="hl-dot d4"></span>
+            <div>
+                <div class="h-badges">
+                    <span class="h-badge g">🌿 친환경 농산물</span>
+                    <span class="h-badge a">🚚 농가 직배송</span>
+                </div>
+                <h1 class="h-title">
+                    못난이 농작물로<br/>
+                    <span class="g">더 건강하고</span><br/>
+                    <span class="a">더 알뜰하게</span>
+                </h1>
+                <p class="h-sub">외형이 다를 뿐, 맛과 영양은 똑같아요.<br/>폐기될 뻔한 신선 농산물을 평균 40% 저렴하게 전달합니다.</p>
+                <button class="btn-hero" onclick="location.href='/market'">지금 구경하기 <span class="ico">↗</span></button>
+            </div>
+            <div class="h-bot">
+                <div class="hst">
+                    <span class="hst-n">5k+</span>
+                    <span class="hst-l">구매 후기</span>
+                    <div class="hst-av"><span>😊</span><span>🌿</span><span>😄</span><span>🥬</span></div>
+                </div>
+                <div class="hst" style="margin-left:22px;padding-left:22px;border-left:1px solid rgba(255,255,255,.11)">
+                    <span class="hst-l" style="margin-bottom:8px">상품 카테고리</span>
+                    <div class="h-cats">
+                        <div class="h-cat on">채소 🥦</div>
+                        <div class="h-cat">과일 🍎</div>
+                        <div class="h-cat">⏰ 기한임박</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hr" style="background:linear-gradient(155deg,#F6F0E4,#EDE4CC);display:flex;align-items:center;justify-content:center;gap:28px;padding:0 6%;position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background:linear-gradient(155deg,#7BBF45,#5A9A30);clip-path:polygon(50% 0%,100% 0%,100% 100%,50% 100%)"></div>
+            <div style="position:relative;z-index:2;display:flex;align-items:center;gap:28px;width:100%">
+                <div style="flex:1;display:flex;justify-content:flex-end">
+                    <img src="/images/auth/farmer_logo.png" style="max-width:60%;height:auto;object-fit:contain;">
+                </div>
+                <div style="flex:1">
+                    <div style="color:#fff">
+                        <div style="font-family:Gaegu,cursive;font-size:clamp(1.1rem,1.9vw,1.55rem);font-weight:700;line-height:1.4;margin-bottom:8px">못난이 꾸러미 친구<br/>만나보세요! 🌿</div>
+                    </div>
+                </div>
+                <div class="hp-fl f1"><span class="fn">40%</span>평균 할인율</div>
+                <div class="hp-fl f2"><span class="fn">⭐ 4.8</span>고객 만족도</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-sec rv">
+        <div class="about-grid">
+            <div class="al">
+                <div class="tag">About us ↓</div>
+                <span class="big-n" style="margin-top:14px">130+</span>
+                <span class="big-l">함께하는 농가</span>
+                <span class="big-n" style="margin-top:20px">20+</span>
+                <span class="big-l">픽업 거점 지역</span>
+            </div>
+            <div class="ar">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
+                    <h2>못난이도 맛있다,<br/><u>함께 구출해요</u></h2>
+                    <span style="color:var(--muted);cursor:pointer;font-size:1rem">↙</span>
+                </div>
+                <div class="ar-desc">
+                    <p>외형·규격 문제로 폐기되는 못난이 농산물을 랜덤박스·밀키트·제철 꾸러미로 재구성합니다.</p>
+                    <p>농가 재고를 효율적으로 관리하고, 소비자에게 저렴하게 제공하는 농산물 유통 서비스입니다.</p>
+                </div>
+                <div class="acards">
+                    <div class="ac ac1">🌾<div class="ac-lbl">농가와 직거래</div></div>
+                    <div class="ac ac2">
+                        <div style="font-size:4.5rem;position:relative;z-index:1">🥦</div>
+                        <div class="ac2-body"><div class="ac2-n">3k+</div><div class="ac2-l">등록 상품 수</div></div>
+                    </div>
+                    <div class="ac ac3">🤝<div class="ac-lbl">AI 추천 서비스</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="svc-sec rv">
+        <div class="sec-hdr">
+            <h2 class="sec-t">주요 기능 <span class="a">↗</span></h2>
+            <button class="btn-all">전체 보기 ↗</button>
+        </div>
+        <p style="color:var(--mid);font-size:.88rem;line-height:1.8;max-width:380px;margin-bottom:28px">
+            AI 리뷰 총평부터 챗봇 FAQ, 오프라인 픽업까지.<br/>못난이 농작물의 스마트한 서비스를 경험해보세요.
+        </p>
+        <div class="svc-grid">
+            <div class="svc-photo">🤖<div class="svc-pd">OpenAI 연동 AI 챗봇이 궁금한 점을 즉시 해결해드리고, 구매 이력 기반으로 나에게 딱 맞는 상품을 추천해드립니다.</div></div>
+            <div class="svc-list">
+                <div class="si"><div><div class="si-t">AI 리뷰 총평</div><div class="si-d">수백 개 후기를 AI가 분석해 한 줄로 요약해드려요</div></div><div class="si-btn">↗</div></div>
+                <div class="si on"><div><div class="si-t">AI 챗봇 FAQ</div><div class="si-d">24시간 자동 응답으로 배송·교환·상품 문의를 해결합니다. OpenAI GPT 연동으로 자연스러운 대화가 가능해요.</div></div><div class="si-btn">↗</div></div>
+                <div class="si"><div><div class="si-t">구매 이력 기반 추천</div><div class="si-d">내가 산 상품을 분석해 딱 맞는 농산물을 추천해드려요</div></div><div class="si-btn">↗</div></div>
+                <div class="si"><div><div class="si-t">오프라인 픽업 (지도 API)</div><div class="si-d">가까운 픽업 장소에서 배송비 없이 신선하게 받아가세요</div></div><div class="si-btn">↗</div></div>
+                <div class="si"><div><div class="si-t">기한임박 할인 알림</div><div class="si-d">유통기한 임박 상품을 추가 할인가로 만나볼 수 있어요</div></div><div class="si-btn">↗</div></div>
+                <div class="si"><div><div class="si-t">판매 랭킹 &amp; 커뮤니티</div><div class="si-d">인기 상품 랭킹과 구매자 커뮤니티로 정보를 공유해요</div></div><div class="si-btn">↗</div></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="prod-sec rv">
+        <div class="sec-hdr">
+            <h2 class="sec-t">이번 주 인기 상품 <span class="a">↗</span></h2>
+            <button class="btn-all">전체 보기 ↗</button>
+        </div>
+        <div class="prow">
+            <div class="pc"><div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div><div class="pi ap">🍅</div><div class="pb"><div class="pb-or">🌿 경남 함안 · 홍길동 농장</div><div class="pb-nm">흠집 완숙 토마토 2kg</div><div class="pb-pr"><span class="pb-og">18,000원</span><span class="pb-sl">11,700원</span><span class="pb-dc">-35%</span></div><div class="pb-st"><span class="s">★★★★★</span> 4.9 (128)</div><button class="pb-buy">🛒 담기</button></div></div>
+            <div class="pc"><div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div><div class="pi lv">🥦</div><div class="pb"><div class="pb-or">🌿 전남 나주 · 이순신 농장</div><div class="pb-nm">비균형 브로콜리 1.5kg</div><div class="pb-pr"><span class="pb-og">12,000원</span><span class="pb-sl">8,640원</span><span class="pb-dc">-28%</span></div><div class="pb-st"><span class="s">★★★★☆</span> 4.6 (87)</div><button class="pb-buy">🛒 담기</button></div></div>
+            <div class="pc"><div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div><div class="pi mt">🥕</div><div class="pb"><div class="pb-or">🌿 강원 홍천 · 김철수 농장</div><div class="pb-nm">못난이 당근 모음 3kg</div><div class="pb-pr"><span class="pb-og">15,000원</span><span class="pb-sl">9,750원</span><span class="pb-dc">-35%</span></div><div class="pb-st"><span class="s">★★★★★</span> 4.8 (214)</div><button class="pb-buy">🛒 담기</button></div></div>
+            <div class="pc"><div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div><div class="pi gn">🌽</div><div class="pb"><div class="pb-or">🌿 강원 횡성 · 옥수수 전문</div><div class="pb-nm">삐뚤한 옥수수 12개입</div><div class="pb-pr"><span class="pb-og">24,000원</span><span class="pb-sl">14,400원</span><span class="pb-dc">-40%</span></div><div class="pb-st"><span class="s">★★★★☆</span> 4.5 (63)</div><button class="pb-buy">🛒 담기</button></div></div>
+            <div class="pc"><div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div><div class="pi ap">🍊</div><div class="pb"><div class="pb-or">🌿 제주도 · 박진사 감귤농원</div><div class="pb-nm">비대칭 제주 감귤 3kg</div><div class="pb-pr"><span class="pb-og">22,000원</span><span class="pb-sl">12,760원</span><span class="pb-dc">-42%</span></div><div class="pb-st"><span class="s">★★★★★</span> 5.0 (203)</div><button class="pb-buy">🛒 담기</button></div></div>
+            <div class="pc"><div class="pc-badge">인기 🔥</div><div class="pc-wish">🤍</div><div class="pi lv">🎁</div><div class="pb"><div class="pb-or">🌿 못난이 농작물 큐레이션</div><div class="pb-nm">제철 랜덤박스 5kg</div><div class="pb-pr"><span class="pb-og">45,000원</span><span class="pb-sl">27,000원</span><span class="pb-dc">-40%</span></div><div class="pb-st"><span class="s">★★★★☆</span> 4.7 (341)</div><button class="pb-buy">🛒 담기</button></div></div>
+        </div>
+    </section>
+
+    <div class="miss-wrap rv">
+        <div class="miss-card">
+            <div class="ml">
+                <div class="ml-tag">🌍 우리의 미션</div>
+                <h2 class="ml-t">못난이 농작물이<br/><span class="g">지속 가능한 식탁</span>을<br/>만들어갑니다</h2>
+                <p class="ml-sub">외형이 아닌 신선함과 맛으로 판단하는 농산물 유통의 새로운 기준. 농가에는 정당한 수익을, 소비자에게는 40% 저렴한 신선 식품을.</p>
+                <button class="btn-hero" style="margin-top:22px;background:var(--green)">미션 알아보기 <span class="ico">↗</span></button>
+            </div>
+            <div class="mr">
+                <div class="ms"><div class="ms-ico">🌾</div><div class="ms-n">4,215t</div><div class="ms-l">구출한 못난이 농산물</div></div>
+                <div class="ms"><div class="ms-ico">💰</div><div class="ms-n">40%</div><div class="ms-l">평균 할인율</div></div>
+                <div class="ms"><div class="ms-ico">👨‍🌾</div><div class="ms-n">130+</div><div class="ms-l">함께하는 농가</div></div>
+                <div class="ms"><div class="ms-ico">🌍</div><div class="ms-n">2조원</div><div class="ms-l">연간 폐기 농산물 규모</div></div>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
-<div class="hp-fl f1"><span class="fn">40%</span>평균 할인율</div><div class="hp-fl f2"><span class="fn">⭐ 4.8</span>고객 만족도</div>
-</div></div></section>
-<!-- ABOUT: 살구 핑크 배경 -->
-<section class="about-sec rv">
-<div class="about-grid">
-<div class="al">
-<div class="tag">About us ↓</div>
-<span class="big-n" style="margin-top:14px">130+</span>
-<span class="big-l">함께하는 농가</span>
-<span class="big-n" style="margin-top:20px">20+</span>
-<span class="big-l">픽업 거점 지역</span>
-</div>
-<div class="ar">
-<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px">
-<h2>못난이도 맛있다,<br/><u>함께 구출해요</u></h2>
-<span style="color:var(--muted);cursor:pointer;font-size:1rem">↙</span>
-</div>
-<div class="ar-desc">
-<p>외형·규격 문제로 폐기되는 못난이 농산물을 랜덤박스·밀키트·제철 꾸러미로 재구성합니다.</p>
-<p>농가 재고를 효율적으로 관리하고, 소비자에게 저렴하게 제공하는 농산물 유통 서비스입니다.</p>
-</div>
-<div class="acards">
-<!-- 살구 -->
-<div class="ac ac1">🌾<div class="ac-lbl">농가와 직거래</div></div>
-<!-- 다크 tall -->
-<div class="ac ac2">
-<div style="font-size:4.5rem;position:relative;z-index:1">🥦</div>
-<div class="ac2-body"><div class="ac2-n">3k+</div><div class="ac2-l">등록 상품 수</div></div>
-</div>
-<!-- 연두 -->
-<div class="ac ac3">🤝<div class="ac-lbl">AI 추천 서비스</div></div>
-</div>
-</div>
-</div>
-</section>
-<!-- SERVICES: 라벤더 배경 -->
-<section class="svc-sec rv">
-<div class="sec-hdr">
-<h2 class="sec-t">주요 기능 <span class="a">↗</span></h2>
-<button class="btn-all">전체 보기 ↗</button>
-</div>
-<p style="color:var(--mid);font-size:.88rem;line-height:1.8;max-width:380px;margin-bottom:28px">
-    AI 리뷰 총평부터 챗봇 FAQ, 오프라인 픽업까지.<br/>못난이 농작물의 스마트한 서비스를 경험해보세요.
-  </p>
-<div class="svc-grid">
-<div class="svc-photo">🤖<div class="svc-pd">OpenAI 연동 AI 챗봇이 궁금한 점을 즉시 해결해드리고, 구매 이력 기반으로 나에게 딱 맞는 상품을 추천해드립니다.</div></div>
-<div class="svc-list">
-<div class="si"><div><div class="si-t">AI 리뷰 총평</div><div class="si-d">수백 개 후기를 AI가 분석해 한 줄로 요약해드려요</div></div><div class="si-btn">↗</div></div>
-<div class="si on"><div><div class="si-t">AI 챗봇 FAQ</div><div class="si-d">24시간 자동 응답으로 배송·교환·상품 문의를 해결합니다. OpenAI GPT 연동으로 자연스러운 대화가 가능해요.</div></div><div class="si-btn">↗</div></div>
-<div class="si"><div><div class="si-t">구매 이력 기반 추천</div><div class="si-d">내가 산 상품을 분석해 딱 맞는 농산물을 추천해드려요</div></div><div class="si-btn">↗</div></div>
-<div class="si"><div><div class="si-t">오프라인 픽업 (지도 API)</div><div class="si-d">가까운 픽업 장소에서 배송비 없이 신선하게 받아가세요</div></div><div class="si-btn">↗</div></div>
-<div class="si"><div><div class="si-t">기한임박 할인 알림</div><div class="si-d">유통기한 임박 상품을 추가 할인가로 만나볼 수 있어요</div></div><div class="si-btn">↗</div></div>
-<div class="si"><div><div class="si-t">판매 랭킹 &amp; 커뮤니티</div><div class="si-d">인기 상품 랭킹과 구매자 커뮤니티로 정보를 공유해요</div></div><div class="si-btn">↗</div></div>
-</div>
-</div>
-</section>
-<!-- PRODUCTS: 민트 배경 -->
-<section class="prod-sec rv">
-<div class="sec-hdr">
-<h2 class="sec-t">이번 주 인기 상품 <span class="a">↗</span></h2>
-<button class="btn-all">전체 보기 ↗</button>
-</div>
-<div class="prow">
-<div class="pc">
-<div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div>
-<div class="pi ap">🍅</div>
-<div class="pb">
-<div class="pb-or">🌿 경남 함안 · 홍길동 농장</div>
-<div class="pb-nm">흠집 완숙 토마토 2kg</div>
-<div class="pb-pr"><span class="pb-og">18,000원</span><span class="pb-sl">11,700원</span><span class="pb-dc">-35%</span></div>
-<div class="pb-st"><span class="s">★★★★★</span> 4.9 (128)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-<div class="pc">
-<div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div>
-<div class="pi lv">🥦</div>
-<div class="pb">
-<div class="pb-or">🌿 전남 나주 · 이순신 농장</div>
-<div class="pb-nm">비균형 브로콜리 1.5kg</div>
-<div class="pb-pr"><span class="pb-og">12,000원</span><span class="pb-sl">8,640원</span><span class="pb-dc">-28%</span></div>
-<div class="pb-st"><span class="s">★★★★☆</span> 4.6 (87)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-<div class="pc">
-<div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div>
-<div class="pi mt">🥕</div>
-<div class="pb">
-<div class="pb-or">🌿 강원 홍천 · 김철수 농장</div>
-<div class="pb-nm">못난이 당근 모음 3kg</div>
-<div class="pb-pr"><span class="pb-og">15,000원</span><span class="pb-sl">9,750원</span><span class="pb-dc">-35%</span></div>
-<div class="pb-st"><span class="s">★★★★★</span> 4.8 (214)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-<div class="pc">
-<div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div>
-<div class="pi gn">🌽</div>
-<div class="pb">
-<div class="pb-or">🌿 강원 횡성 · 옥수수 전문</div>
-<div class="pb-nm">삐뚤한 옥수수 12개입</div>
-<div class="pb-pr"><span class="pb-og">24,000원</span><span class="pb-sl">14,400원</span><span class="pb-dc">-40%</span></div>
-<div class="pb-st"><span class="s">★★★★☆</span> 4.5 (63)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-<div class="pc">
-<div class="pc-badge">New 👋</div><div class="pc-wish">🤍</div>
-<div class="pi ap">🍊</div>
-<div class="pb">
-<div class="pb-or">🌿 제주도 · 박진사 감귤농원</div>
-<div class="pb-nm">비대칭 제주 감귤 3kg</div>
-<div class="pb-pr"><span class="pb-og">22,000원</span><span class="pb-sl">12,760원</span><span class="pb-dc">-42%</span></div>
-<div class="pb-st"><span class="s">★★★★★</span> 5.0 (203)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-<div class="pc">
-<div class="pc-badge">인기 🔥</div><div class="pc-wish">🤍</div>
-<div class="pi lv">🎁</div>
-<div class="pb">
-<div class="pb-or">🌿 못난이 농작물 큐레이션</div>
-<div class="pb-nm">제철 랜덤박스 5kg</div>
-<div class="pb-pr"><span class="pb-og">45,000원</span><span class="pb-sl">27,000원</span><span class="pb-dc">-40%</span></div>
-<div class="pb-st"><span class="s">★★★★☆</span> 4.7 (341)</div>
-<button class="pb-buy">🛒 담기</button>
-</div>
-</div>
-</div>
-</section>
-<!-- MISSION: 연두 배경 + 다크 카드 -->
-<div class="miss-wrap rv">
-<div class="miss-card">
-<div class="ml">
-<div class="ml-tag">🌍 우리의 미션</div>
-<h2 class="ml-t">못난이 농작물이<br/><span class="g">지속 가능한 식탁</span>을<br/>만들어갑니다</h2>
-<p class="ml-sub">외형이 아닌 신선함과 맛으로 판단하는 농산물 유통의 새로운 기준. 농가에는 정당한 수익을, 소비자에게는 40% 저렴한 신선 식품을.</p>
-<button class="btn-hero" style="margin-top:22px;background:var(--green)">미션 알아보기 <span class="ico">↗</span></button>
-</div>
-<div class="mr">
-<div class="ms"><div class="ms-ico">🌾</div><div class="ms-n">4,215t</div><div class="ms-l">구출한 못난이 농산물</div></div>
-<div class="ms"><div class="ms-ico">💰</div><div class="ms-n">40%</div><div class="ms-l">평균 할인율</div></div>
-<div class="ms"><div class="ms-ico">👨‍🌾</div><div class="ms-n">130+</div><div class="ms-l">함께하는 농가</div></div>
-<div class="ms"><div class="ms-ico">🌍</div><div class="ms-n">2조원</div><div class="ms-l">연간 폐기 농산물 규모</div></div>
-</div>
-</div>
-</div>
-<!-- FOOTER: 다크브라운만 -->
-</div><footer>
-<div class="ft-g">
-<div>
-<div class="ft-logo">못난이 농작물</div>
-<p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.<br/>포테토칩 팀 · 유지환 · 김지혜 · 김민성 · 김주영 · 오지호</p>
-<p style="margin-top:10px;font-size:.72rem">Spring Boot · MySQL · OpenAI · AWS · Kakao Map API</p>
-</div>
-<div class="ft-col">
-<h5>서비스</h5>
-    <a th:href="@{/market}" style="cursor:pointer">마켓 이용</a>
-    <a th:href="@{/board}" style="cursor:pointer">게시판</a>
-    <a th:href="@{/faq}" style="cursor:pointer">FAQ</a>
-    <a th:href="@{/review}" style="cursor:pointer">리뷰</a>
-</div>
-<div class="ft-col">
-<h5>정보</h5>
-<a href="#">우리의 미션</a><a href="#">판매자 신청</a><a href="#">픽업 장소</a><a href="#">공지사항</a>
-</div>
-<div class="ft-col">
-<h5>고객 지원</h5>
-<a href="#">AI 챗봇</a><a href="#">배송 조회</a><a href="#">환불·교환</a><a href="#">개인정보처리방침</a>
-</div>
-</div>
-<div class="ft-bot">
-<span>© 2025 못난이 농작물 · 포테토칩 팀</span>
-<span>외형이 아닌 신선함으로 판단합니다 🌿</span>
-</div>
-</footer>
-<script src="js/app.js"></script>
-<script src="js/auth/auth.js"></script>
-</body></html>
+
+<div th:replace="footer :: footer"></div>
+
+</body>
+</html>

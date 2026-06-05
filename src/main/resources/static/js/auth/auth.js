@@ -104,16 +104,6 @@ function switchMyTab(name) {
     });
 }
 
-/* ══ 로그인 상태 버튼 전환 ══ */
-document.addEventListener('DOMContentLoaded', function () {
-    var token = getToken();
-    var btnNav = document.querySelector('.btn-nav');
-    if (token && btnNav) {
-        btnNav.textContent = '로그아웃';
-        btnNav.setAttribute('onclick', 'doLogout()');
-    }
-});
-
 /* ══ 로그아웃 ══ */
 function doLogout() {
     localStorage.removeItem('token');
