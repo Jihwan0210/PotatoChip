@@ -283,9 +283,10 @@
                 <button th:data-id="${product.id}"
                         onclick="addToCart()"
                         style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">🛒 장바구니 담기</button>
-                <button onclick="location.href='/cart'"
-                        style="width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;margin-bottom:8px">바로 구매하기</button>
-
+                <a th:href="@{/cart}"
+                   style="display:block;width:100%;background:var(--amber);color:#fff;text-decoration:none;text-align:center;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px">
+                    바로 구매하기
+                </a>
                 <!-- 찜하기 + 농부 문의 -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
                     <button id="wishBtn2" onclick="toggleDetailWish2(this)" style="padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">🤍 찜하기</button>
