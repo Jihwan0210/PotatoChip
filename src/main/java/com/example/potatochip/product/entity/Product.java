@@ -19,51 +19,64 @@ public class Product {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+        private Long id; //상품 ID
 
         @Column(name = "seller_id", nullable = false)
-        private Long sellerId;
+        private Long sellerId; //판매자 ID
 
         @Column(nullable = false, length = 100)
-        private String category;
+        private String category; //카테고리
 
         @Column(nullable = false, length = 200)
-        private String name;
+        private String name; //농작물 이름
 
-        private String description;
-
-        @Column(nullable = false)
-        private BigDecimal price;
-
-
-        private BigDecimal discountPrice;
-
-
-        private LocalDateTime discountStartAt;
-
-
-        private LocalDateTime discountEndAt;
-
-
-        private String thumbnailUrl;
+        private String description; //설명
 
         @Column(nullable = false)
-        private String origin;
+        private BigDecimal price; //가격
+
+
+        private BigDecimal discountPrice; //할인 가격
+
+
+        private LocalDate discountStartAt; //할인 시작 일시
+
+
+        private LocalDate discountEndAt; // 할인 종료 일시
+
+
+        private String thumbnailUrl; //대표 사진
 
         @Column(nullable = false)
-        private LocalDate expiryDate;
+        private String origin; // 원산지
 
         @Column(nullable = false)
-        private Boolean isPickupAvailable;
+        private LocalDate expiryDate; // 유통기한
 
         @Column(nullable = false)
-        private Integer stockQuantity;
+        private Boolean isPickupAvailable; //픽업 가능 여부
 
         @Column(nullable = false)
-        private LocalDateTime createdAt;
+        private Integer stockQuantity; // 재고 수량
 
         @Column(nullable = false)
-        private LocalDateTime updatedAt;
+        private LocalDateTime createdAt; //생성 일시
+
+        @Column(nullable = false)
+        private LocalDateTime updatedAt; //업데이트 일시
+
+        private String address; // 주소
+
+
+        private BigDecimal latitude; // 위도 (카카오맵)
+
+
+        private BigDecimal longitude; // 경도 (카카오맵)
+
+
+        private String operatingHours; //운영 시간
+
+
 
         public void changeEntity(ProductDTO productDTO) {
 
@@ -80,6 +93,10 @@ public class Product {
                 this.expiryDate = productDTO.getExpiryDate();
                 this.isPickupAvailable = productDTO.getIsPickupAvailable();
                 this.stockQuantity = productDTO.getStockQuantity();
+                this.address = productDTO.getAddress();
+                this.latitude = productDTO.getLatitude();
+                this.longitude = productDTO.getLongitude();
+                this.operatingHours = productDTO.getOperatingHours();
                 this.updatedAt = LocalDateTime.now();
         }
 
