@@ -1,4 +1,4 @@
-package com.example.potatochip.product.entity;
+package com.example.potatochip.board.entity;
 
 import jakarta.persistence.*;
 
