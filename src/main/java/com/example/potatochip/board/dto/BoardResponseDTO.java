@@ -1,6 +1,6 @@
-package com.example.potatochip.product.dto.response;
+package com.example.potatochip.board.dto;
 
-import com.example.potatochip.product.entity.Board;
+import com.example.potatochip.board.entity.Board;
 
 public class BoardResponseDTO {
 

@@ -1,10 +1,10 @@
-package com.example.potatochip.product.service;
+package com.example.potatochip.board.service;
 
 
 import com.example.potatochip.product.dto.request.BoardRequestDTO;
-import com.example.potatochip.product.dto.response.BoardResponseDTO;
-import com.example.potatochip.product.entity.Board;
-import com.example.potatochip.product.repository.BoardRepository;
+import com.example.potatochip.board.dto.BoardResponseDTO;
+import com.example.potatochip.board.entity.Board;
+import com.example.potatochip.board.repository.BoardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

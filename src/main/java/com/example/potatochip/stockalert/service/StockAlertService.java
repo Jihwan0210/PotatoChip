@@ -1,6 +1,6 @@
-package com.example.potatochip.product.service;
+package com.example.potatochip.stockalert.service;
 
-import com.example.potatochip.product.dto.response.StockAlertResponseDTO;
+import com.example.potatochip.stockalert.dto.StockAlertResponseDTO;
 import com.example.potatochip.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 

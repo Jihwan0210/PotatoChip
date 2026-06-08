@@ -1,7 +1,7 @@
-package com.example.potatochip.product.controller;
+package com.example.potatochip.stockalert.controller;
 
-import com.example.potatochip.product.dto.response.StockAlertResponseDTO;
-import com.example.potatochip.product.service.StockAlertService;
+import com.example.potatochip.stockalert.dto.StockAlertResponseDTO;
+import com.example.potatochip.stockalert.service.StockAlertService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +16,7 @@ public class StockAlertController {
         this.stockAlertService = stockAlertService;
 }
 
-@GetMapping("/stock - alert")
+@GetMapping("/stock-alert")
     public List<StockAlertResponseDTO> getAlerts() {
         return stockAlertService.getLowStockProducts();
 }

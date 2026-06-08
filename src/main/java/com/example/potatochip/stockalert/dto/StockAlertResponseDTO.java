@@ -1,4 +1,4 @@
-package com.example.potatochip.product.dto.response;
+package com.example.potatochip.stockalert.dto;
 
 
 import lombok.AllArgsConstructor;
