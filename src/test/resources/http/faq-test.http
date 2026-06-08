@@ -1,0 +1,125 @@
+### FAQ 등록 1 - 배송
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "delivery",
+  "question": "배송은 보통 얼마나 걸리나요?",
+  "answer": "일반 배송은 주문 확인 후 보통 1~3일 정도 소요됩니다. 산지 출고 상황이나 날씨에 따라 일부 지연될 수 있습니다.",
+  "keywords": "배송,도착,택배,출고,소요",
+  "displayOrder": 1
+}
+
+
+### FAQ 등록 2 - 픽업
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "delivery",
+  "question": "오프라인 픽업은 어떻게 이용하나요?",
+  "answer": "픽업 가능 상품은 주문 시 픽업 장소와 시간을 확인할 수 있습니다. 상품마다 픽업 가능 여부가 다를 수 있습니다.",
+  "keywords": "픽업,방문수령,오프라인,수령",
+  "displayOrder": 2
+}
+
+
+### FAQ 등록 3 - 환불
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "refund",
+  "question": "상품이 상해서 도착하면 어떻게 하나요?",
+  "answer": "수령 직후 상품 상태를 사진으로 남기고 문의를 접수해주세요. 확인 후 교환 또는 환불 가능 여부를 안내해드립니다.",
+  "keywords": "환불,교환,상함,파손,불량",
+  "displayOrder": 3
+}
+
+
+### FAQ 등록 4 - 상품 품질
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "quality",
+  "question": "흠집이 있는 상품도 먹어도 괜찮나요?",
+  "answer": "못난이 농산물은 모양이나 흠집 때문에 일반 유통이 어려운 상품이지만, 식용에 문제가 없는 상품을 기준으로 제공합니다.",
+  "keywords": "품질,흠집,못난이,신선도,식용",
+  "displayOrder": 4
+}
+
+
+### FAQ 등록 5 - AI 리뷰 총평
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "ai",
+  "question": "AI 리뷰 총평은 어떻게 만들어지나요?",
+  "answer": "AI 리뷰 총평은 상품별 구매 리뷰를 바탕으로 공통 의견을 요약해 보여주는 기능입니다. 리뷰 작성, 수정, 삭제가 발생하면 해당 상품의 AI 총평도 다시 갱신될 수 있습니다.",
+  "keywords": "AI,리뷰,총평,요약,올라마,Ollama",
+  "displayOrder": 5
+}
+
+
+### FAQ 등록 6 - 주문 결제
+POST http://localhost:8080/api/ai/chatbot/faqs
+Content-Type: application/json
+
+{
+  "category": "order",
+  "question": "주문 후 결제 수단을 변경할 수 있나요?",
+  "answer": "결제 완료 후에는 결제 수단 변경이 어렵습니다. 변경이 필요한 경우 기존 주문을 취소한 뒤 다시 주문해주세요.",
+  "keywords": "주문,결제,결제수단,취소,재주문",
+  "displayOrder": 6
+}
+
+
+### FAQ 전체 조회
+GET http://localhost:8080/api/ai/chatbot/faqs
+
+
+### FAQ 배송 카테고리 조회
+GET http://localhost:8080/api/ai/chatbot/faqs?category=delivery
+
+
+### FAQ 환불 카테고리 조회
+GET http://localhost:8080/api/ai/chatbot/faqs?category=refund
+
+
+### FAQ AI 카테고리 조회
+GET http://localhost:8080/api/ai/chatbot/faqs?category=ai
+
+
+### FAQ 검색 - 배송
+GET http://localhost:8080/api/ai/chatbot/faqs?keyword=배송
+
+
+### FAQ 검색 - 환불
+GET http://localhost:8080/api/ai/chatbot/faqs?keyword=환불
+
+
+### FAQ 검색 - 리뷰
+GET http://localhost:8080/api/ai/chatbot/faqs?keyword=리뷰
+
+
+### FAQ 단건 조회
+GET http://localhost:8080/api/ai/chatbot/faqs/1
+
+
+### FAQ 수정 테스트
+PUT http://localhost:8080/api/ai/chatbot/faqs/1
+Content-Type: application/json
+
+{
+  "category": "delivery",
+  "question": "배송은 며칠 정도 걸리나요?",
+  "answer": "일반 배송은 보통 주문 확인 후 1~3일 정도 소요되며, 산지 출고 상황이나 날씨에 따라 달라질 수 있습니다.",
+  "keywords": "배송,도착,택배,출고,소요,며칠",
+  "displayOrder": 1
+}
+
+
+### FAQ 삭제 테스트
+DELETE http://localhost:8080/api/ai/chatbot/faqs/6
