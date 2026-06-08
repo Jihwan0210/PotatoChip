@@ -8,23 +8,28 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
-@RestController
+@Controller
 @RequestMapping("/cart")
 @RequiredArgsConstructor
 public class CartController {
     private final CartService cartService;
-    @GetMapping("/")
-    public ResponseEntity<CartDTO> getMyCart(HttpSession session){
+    @GetMapping
+    public String getMyCart(HttpSession session, Model model) {
+        session.setAttribute("loginUserId", 1L);
         Long loggedInUserId = (Long) session.getAttribute("loginUserId");
         if (loggedInUserId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return "redirect:/login";
         }
         CartDTO cartDTO = cartService.getMyCart(loggedInUserId);
-        return ResponseEntity.ok(cartDTO);
+        model.addAttribute("cart", cartDTO);
+        return "cart/cart";  // 여기만 변경
     }
+
+
     @PostMapping("/items")
     public ResponseEntity<String> addItemToCart(
             @RequestBody CartItemDTO requestDTO,
