@@ -40,6 +40,8 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
 
     // -상품담당 - AWS S3 - 배포 시 주석 해제
     // implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
