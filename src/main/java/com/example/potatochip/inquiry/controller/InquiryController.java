@@ -16,12 +16,12 @@ public class InquiryController {
 
     private final InquiryService inquiryService;
 
-    @GetMapping("/inquiries/create")
+    @GetMapping("/create")
     public String createInquiryPage() {
         return "inquiry/create";
     }
 
-    @GetMapping("/inquiries/my")
+    @GetMapping("/my")
     public String myInquiriesPage() {
         return "inquiry/my";
     }
