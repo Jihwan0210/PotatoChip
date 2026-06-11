@@ -31,8 +31,9 @@ public class User {
 
     private String phone; // 연락처 (선택)
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role; // 역할 (BUYER / SELLER)
+    private Role role; // 역할 (BUYER / SELLER)
 
     @Column(nullable = false)
     private Boolean pushAgree; // 푸시 알림 수신 동의
