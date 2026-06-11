@@ -93,20 +93,20 @@ function renderCart(){
     d.id=id;
     var ogHtml=it.ogPrice?'<span class="ct-og">'+it.ogPrice.toLocaleString()+'원</span>':'';
     d.innerHTML='<div class="ct-thumb '+cl+'">'+it.emoji+'</div>'
-      +'<div style="flex:1">'
-      +'<div class="ct-from">'+it.farm+'</div>'
-      +'<div class="ct-nm">'+it.name+'</div>'
-      +'<div class="ct-exp">'+it.exp+'</div>'
-      +'<div class="qty-ctrl">'
-      +'<button class="qty-b" onclick="chgQ(\''+id+'\',-1)">−</button>'
-      +'<span class="qty-v" id="q-'+id+'">'+it.qty+'</span>'
-      +'<button class="qty-b" onclick="chgQ(\''+id+'\',1)">+</button>'
-      +'</div></div>'
-      +'<div class="ct-r">'
-      +'<span class="ct-del" onclick="rmItem(\''+id+'\')">✕</span>'
-      +ogHtml
-      +'<span class="ct-price" id="p-'+id+'">'+(it.up*it.qty).toLocaleString()+'원</span>'
-      +'</div>';
+        +'<div style="flex:1">'
+        +'<div class="ct-from">'+it.farm+'</div>'
+        +'<div class="ct-nm">'+it.name+'</div>'
+        +'<div class="ct-exp">'+it.exp+'</div>'
+        +'<div class="qty-ctrl">'
+        +'<button class="qty-b" onclick="chgQ(\''+id+'\',-1)">−</button>'
+        +'<span class="qty-v" id="q-'+id+'">'+it.qty+'</span>'
+        +'<button class="qty-b" onclick="chgQ(\''+id+'\',1)">+</button>'
+        +'</div></div>'
+        +'<div class="ct-r">'
+        +'<span class="ct-del" onclick="rmItem(\''+id+'\')">✕</span>'
+        +ogHtml
+        +'<span class="ct-price" id="p-'+id+'">'+(it.up*it.qty).toLocaleString()+'원</span>'
+        +'</div>';
     list.appendChild(d);
   });
   updSum();
@@ -214,11 +214,11 @@ function renderOrderHistory(){
   if(!container) return;
   if(!orderHistory.length){
     container.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)">'
-      +'<div style="font-size:2.5rem;margin-bottom:10px">📦</div>'
-      +'<div style="font-family:Gaegu,cursive;font-size:1rem;color:var(--mid)">아직 주문 내역이 없어요</div>'
-      +'<div style="font-size:.78rem;margin-top:6px;margin-bottom:16px">마켓에서 첫 주문을 해보세요!</div>'
-      +'<button onclick="goPage(\'market\')" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:.85rem;cursor:pointer">마켓 가기</button>'
-      +'</div>';
+        +'<div style="font-size:2.5rem;margin-bottom:10px">📦</div>'
+        +'<div style="font-family:Gaegu,cursive;font-size:1rem;color:var(--mid)">아직 주문 내역이 없어요</div>'
+        +'<div style="font-size:.78rem;margin-top:6px;margin-bottom:16px">마켓에서 첫 주문을 해보세요!</div>'
+        +'<button onclick="goPage(\'market\')" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:.85rem;cursor:pointer">마켓 가기</button>'
+        +'</div>';
     return;
   }
   var html='';
@@ -226,28 +226,28 @@ function renderOrderHistory(){
     var itemsHtml='';
     order.items.forEach(function(it){
       itemsHtml+='<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--sand)">'
-        +'<div style="width:46px;height:46px;border-radius:11px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">'+it.emoji+'</div>'
-        +'<div style="flex:1">'
-        +'<div style="font-size:.72rem;color:var(--green);font-weight:500;margin-bottom:1px">'+it.farm+'</div>'
-        +'<div style="font-size:.83rem;font-weight:700;color:var(--dark)">'+it.name+'</div>'
-        +'<div style="font-size:.78rem;font-weight:700;color:var(--amber)">'+it.up.toLocaleString()+'원 × '+it.qty+'</div>'
-        +'</div>'
-        +'</div>';
+          +'<div style="width:46px;height:46px;border-radius:11px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">'+it.emoji+'</div>'
+          +'<div style="flex:1">'
+          +'<div style="font-size:.72rem;color:var(--green);font-weight:500;margin-bottom:1px">'+it.farm+'</div>'
+          +'<div style="font-size:.83rem;font-weight:700;color:var(--dark)">'+it.name+'</div>'
+          +'<div style="font-size:.78rem;font-weight:700;color:var(--amber)">'+it.up.toLocaleString()+'원 × '+it.qty+'</div>'
+          +'</div>'
+          +'</div>';
     });
     html+='<div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:20px 22px;margin-bottom:14px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--sand)">'
-      +'<div>'
-      +'<div style="font-size:.8rem;font-weight:700;color:var(--dark)">주문번호 '+order.id+'</div>'
-      +'<div style="font-size:.7rem;color:var(--muted);margin-top:2px">'+order.date+' · '+order.items.length+'개 상품 · '+order.total.toLocaleString()+'원</div>'
-      +'</div>'
-      +'<div style="font-size:.76rem;font-weight:700;padding:4px 12px;border-radius:20px;background:#f0fff4;color:var(--green);border:1px solid var(--gl)">'+order.status+'</div>'
-      +'</div>'
-      +itemsHtml
-      +'<div style="display:flex;gap:8px;margin-top:14px">'
-      +'<button onclick="showToast(\'배송 조회 기능 준비 중이에요 🚚\')" style="flex:1;padding:9px;border:1.5px solid var(--sand);border-radius:9px;background:#fff;font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--mid)">배송 조회</button>'
-      +'<button onclick="goPage(\'review\')" style="flex:1;padding:9px;border:1.5px solid var(--gl);border-radius:9px;background:var(--gp);font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--green);font-weight:500">리뷰 작성</button>'
-      +'</div>'
-      +'</div>';
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--sand)">'
+        +'<div>'
+        +'<div style="font-size:.8rem;font-weight:700;color:var(--dark)">주문번호 '+order.id+'</div>'
+        +'<div style="font-size:.7rem;color:var(--muted);margin-top:2px">'+order.date+' · '+order.items.length+'개 상품 · '+order.total.toLocaleString()+'원</div>'
+        +'</div>'
+        +'<div style="font-size:.76rem;font-weight:700;padding:4px 12px;border-radius:20px;background:#f0fff4;color:var(--green);border:1px solid var(--gl)">'+order.status+'</div>'
+        +'</div>'
+        +itemsHtml
+        +'<div style="display:flex;gap:8px;margin-top:14px">'
+        +'<button onclick="showToast(\'배송 조회 기능 준비 중이에요 🚚\')" style="flex:1;padding:9px;border:1.5px solid var(--sand);border-radius:9px;background:#fff;font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--mid)">배송 조회</button>'
+        +'<button onclick="goPage(\'review\')" style="flex:1;padding:9px;border:1.5px solid var(--gl);border-radius:9px;background:var(--gp);font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--green);font-weight:500">리뷰 작성</button>'
+        +'</div>'
+        +'</div>';
   });
   container.innerHTML=html;
 }
@@ -284,14 +284,14 @@ function renderNotifPopup(){
   var html='';
   notifList.forEach(function(n){
     html+='<div onclick="readNotif(\''+n.id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--sand);cursor:pointer;background:'+(n.read?'#fff':'#f8fff4')+';transition:background .15s">'
-      +'<div style="width:7px;height:7px;border-radius:50%;background:'+(n.read?'transparent':'var(--green)')+';flex-shrink:0;margin-top:5px"></div>'
-      +'<div style="font-size:1.1rem;flex-shrink:0">'+n.icon+'</div>'
-      +'<div style="flex:1">'
-      +'<div style="font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:2px">'+n.title+'</div>'
-      +'<div style="font-size:.72rem;color:var(--mid);line-height:1.5;margin-bottom:3px">'+n.msg+'</div>'
-      +'<div style="font-size:.68rem;color:var(--muted)">'+n.time+'</div>'
-      +'</div>'
-      +'</div>';
+        +'<div style="width:7px;height:7px;border-radius:50%;background:'+(n.read?'transparent':'var(--green)')+';flex-shrink:0;margin-top:5px"></div>'
+        +'<div style="font-size:1.1rem;flex-shrink:0">'+n.icon+'</div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:2px">'+n.title+'</div>'
+        +'<div style="font-size:.72rem;color:var(--mid);line-height:1.5;margin-bottom:3px">'+n.msg+'</div>'
+        +'<div style="font-size:.68rem;color:var(--muted)">'+n.time+'</div>'
+        +'</div>'
+        +'</div>';
   });
   listEl.innerHTML=html;
 }
