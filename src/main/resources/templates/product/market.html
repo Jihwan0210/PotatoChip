@@ -4,9 +4,11 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>못난이 농작물</title>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="/css/style.css">
-</head><body><nav id="nav">
+</head><body>
+
+<nav id="nav">
     <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
         <img alt="" src="" style="height:36px;width:auto;flex-shrink:0"/>
         못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
@@ -25,11 +27,11 @@
         <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
         <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
         <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
-
     </div>
-
 </nav>
+
 <div class="page active" id="page-market">
+
     <!-- 알림 팝업 -->
     <div id="notifPopup" style="position:fixed;top:80px;right:20px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 8px 32px rgba(42,30,6,.14);z-index:999;overflow:hidden;display:none;animation:fadeDown .18s ease">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--sand)">
@@ -38,6 +40,7 @@
         </div>
         <div id="notifItemList"><!-- 동적 렌더링 --></div>
     </div>
+
     <!-- 마켓 헤더 -->
     <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 0">
         <div style="font-size:.65rem;color:var(--green);letter-spacing:1px;font-weight:500;margin-bottom:6px">Market</div>
@@ -59,7 +62,8 @@
             <div id="mkt-tab-3" onclick="openRecPopup()" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">✨ 맞춤추천</div>
         </div>
     </div>
-    <!-- 추천 팝업 (카테고리+구매이력 기반) -->
+
+    <!-- 맞춤추천 팝업 -->
     <div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:300px;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990;overflow:hidden">
         <div style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
             <div>
@@ -112,7 +116,7 @@
             <button onclick="location.href='market.html';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">전체 추천 상품 보기 →</button>
         </div>
     </div>
-    <!-- TOP 3 배너 -->
+
     <!-- 필터 -->
     <div class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
         <div class="mf on" onclick="mktF(this)">전체</div>
@@ -124,7 +128,8 @@
         <div class="mf" onclick="mktF(this)" style="background:#fff5ef;color:#D05018;border-color:#f5c8a8">⏰ 기한임박</div>
         <div style="width:1px;height:18px;background:var(--sand);flex-shrink:0;margin:0 2px"></div>
     </div>
-    <!-- 상품 그리드 -->
+
+    <!-- ======= 탭 0: 전체 상품 ======= -->
     <div id="mkt-content-0" style="padding:22px 5%">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
             <span class="pgrid-count" style="font-size:.76rem;color:var(--muted)">총 <strong style="color:var(--dark)">302</strong>개 상품</span>
@@ -135,169 +140,122 @@
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">최신순</div>
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">가까운순</div>
             </div>
-            <!-- th:if="${session.role == 'seller'}" -->
-
-            <button
-                    th:onclick="|location.href='@{/market/create}'|"
-                    style="font-size:.74rem;cursor:pointer;padding:5px 11px;
-        margin-left:8px;
-        border:1px solid var(--green);
-        background:var(--green);
-        color:#fff;
-        border-radius:6px;
-        font-weight:700">
+            <button th:onclick="|location.href='@{/market/create}'|"
+                    style="font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700">
                 + 상품등록
             </button>
         </div>
-    </div>
-    <div class="pgrid">
 
-        <div class="pc2"
-             th:each="product : ${products}"
-             th:onclick="|location.href='@{/market/detail(id=${product.id})}'|"
-             style="cursor:pointer">
-
-            <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
-                <div class="pbdg">
-                    <span class="pbdg-t pbdg-new">New</span>
+        <div class="pgrid">
+            <div class="pc2"
+                 th:each="product : ${products}"
+                 th:onclick="|location.href='@{/market/detail(id=${product.id})}'|"
+                 style="cursor:pointer">
+                <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
+                    <div class="pbdg"><span class="pbdg-t pbdg-new">New</span></div>
+                    <div class="plk" onclick="toggleW(this)">🤍</div>
+                    <img th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
+                         th:src="${product.thumbnailUrl}"
+                         alt="상품 이미지"
+                         style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit"/>
+                    <span th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}">🥔</span>
                 </div>
-                <div class="plk" onclick="toggleW(this)">🤍</div>
-
-                <!-- 이미지 있으면 img, 없으면 이모지 -->
-                <img th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
-                     th:src="${product.thumbnailUrl}"
-                     alt="상품 이미지"
-                     style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit"/>
-                <span th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}">🥔</span>
+                <div class="pc2-body">
+                    <div class="pc2-farm" th:text="${product.origin}"></div>
+                    <div class="pc2-nm" th:text="${product.name}"></div>
+                    <div class="pc2-pr">
+                        <span class="pc2-disc" th:if="${product.discountPrice != null}">할인</span>
+                        <span class="pc2-price"
+                              th:if="${product.discountPrice != null}"
+                              th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'"></span>
+                        <span class="pc2-price"
+                              th:unless="${product.discountPrice != null}"
+                              th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'"></span>
+                        <span class="pc2-og"
+                              th:if="${product.discountPrice != null}"
+                              th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'"></span>
+                    </div>
+                    <div class="pc2-meta">
+                        <span>📦 재고 <span th:text="${product.stockQuantity}"></span></span>
+                        <span th:if="${product.isPickupAvailable}">· 픽업 가능</span>
+                    </div>
+                    <button class="btn-add" onclick="addToCart()">🛒 담기</button>
+                </div>
             </div>
-
-            <div class="pc2-body">
-
-                <div class="pc2-farm"
-                     th:text="${product.origin}">
-                </div>
-
-                <div class="pc2-nm"
-                     th:text="${product.name}">
-                </div>
-
-                <div class="pc2-pr">
-
-                <span class="pc2-disc"
-                      th:if="${product.discountPrice != null}">
-                    할인
-                </span>
-
-                    <span class="pc2-price"
-                          th:if="${product.discountPrice != null}"
-                          th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'">
-                </span>
-
-                    <span class="pc2-price"
-                          th:unless="${product.discountPrice != null}"
-                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">
-                </span>
-
-                    <span class="pc2-og"
-                          th:if="${product.discountPrice != null}"
-                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">
-                </span>
-
-                </div>
-
-                <div class="pc2-meta">
-
-                <span>
-                    📦 재고
-                    <span th:text="${product.stockQuantity}">
-                    </span>
-                </span>
-
-                    <span th:if="${product.isPickupAvailable}">
-                    · 픽업 가능
-                </span>
-
-                </div>
-
-                <button class="btn-add"
-                        onclick="addToCart()">
-
-                    🛒 담기
-
-                </button>
-
-            </div>
-
         </div>
 
+        <div class="mpg" style="margin-top:32px">
+            <div class="mp-b">‹</div>
+            <div class="mp-b on">1</div>
+            <div class="mp-b" onclick="this.parentElement.querySelectorAll('.mp-b').forEach(x=>x.classList.remove('on'));this.classList.add('on')">2</div>
+            <div class="mp-b" onclick="this.parentElement.querySelectorAll('.mp-b').forEach(x=>x.classList.remove('on'));this.classList.add('on')">3</div>
+            <div class="mp-b">›</div>
+        </div>
     </div>
-</div>
-<div class="mpg" style="margin-top:32px">
-    <div class="mp-b">‹</div><div class="mp-b on">1</div>
-    <div class="mp-b" onclick="this.parentElement.querySelectorAll('.mp-b').forEach(x=&gt;x.classList.remove('on'));this.classList.add('on')">2</div>
-    <div class="mp-b" onclick="this.parentElement.querySelectorAll('.mp-b').forEach(x=&gt;x.classList.remove('on'));this.classList.add('on')">3</div>
-    <div class="mp-b">›</div>
-</div>
-</div>
-<!-- 이번주랭킹 탭 컨텐츠 -->
-<div id="mkt-content-1" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
+
+    <!-- 판매랭킹 -->
+    <div id="mkt-content-1" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
     <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:18px">🏆 이번 주 판매 랭킹 TOP 5</div>
     <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
         <div style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
             <div>순위</div><div>상품</div><div style="text-align:center">판매량</div><div style="text-align:right">가격</div><div style="text-align:center">담기</div>
         </div>
-        <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--amber);color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
-            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🍎</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">홍옥 사과 3kg</div><div style="font-size:.7rem;color:var(--muted)">충주 행복 사과 농원</div></div></div>
-            <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,342건</div>
-            <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">12,900원</div>
-            <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('홍옥 사과 3kg',12900)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
+    <div th:each="ranking, stat : ${weeklyRankings}"
+         onclick="goPage('detail')"
+         onmouseover="this.style.background='var(--beige2)'"
+         onmouseout="this.style.background=''"
+         style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
+
+        <div th:styleappend="${stat.index == 0} ? 'background:var(--amber)' : (${stat.index == 1} ? 'background:#B0B8C1' : (${stat.index == 2} ? 'background:#C89B6E' : 'background:none'))"
+             th:text="${stat.count}"
+             style="width:32px;height:32px;border-radius:50%;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">
         </div>
-        <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-            <div style="width:32px;height:32px;border-radius:50%;background:#B0B8C1;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
-            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥕</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">굴곡진 제주 당근 2kg</div><div style="font-size:.7rem;color:var(--muted)">제주 청정 당근 농장</div></div></div>
-            <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,180건</div>
-            <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">5,900원</div>
-            <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('제주 당근 2kg',5900)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+            <div>
+                <div th:text="${ranking.product.name}"
+                     style="font-size:.82rem;font-weight:600;color:var(--dark)"></div>
+                <div th:text="${ranking.product.address}"
+                     style="font-size:.7rem;color:var(--muted)"></div>
+            </div>
         </div>
-        <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-            <div style="width:32px;height:32px;border-radius:50%;background:#C89B6E;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
-            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🍊</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">비대칭 제주 감귤 3kg</div><div style="font-size:.7rem;color:var(--muted)">제주도 박진사 감귤농원</div></div></div>
-            <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,021건</div>
-            <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">12,760원</div>
-            <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('제주 감귤 3kg',12760)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-        </div>
-        <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-            <div style="text-align:center;font-size:.84rem;font-weight:700;color:var(--muted)">4</div>
-            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥦</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">비균형 브로콜리 1.5kg</div><div style="font-size:.7rem;color:var(--muted)">전남 나주 이순신 농장</div></div></div>
-            <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">894건</div>
-            <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">8,640원</div>
-            <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('브로콜리 1.5kg',8640)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-        </div>
-        <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;cursor:pointer">
-            <div style="text-align:center;font-size:.84rem;font-weight:700;color:var(--muted)">5</div>
-            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥔</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">황토 감자 5kg</div><div style="font-size:.7rem;color:var(--muted)">강원 해피팜</div></div></div>
-            <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">762건</div>
-            <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">9,500원</div>
-            <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('황토 감자 5kg',9500)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
+
+        <div th:text="${ranking.salesCount} + '건'"
+             style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)"></div>
+
+        <div th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"
+             style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"></div>
+
+        <div style="text-align:center">
+            <button th:data-name="${ranking.product.name}"
+                    th:data-price="${ranking.product.price}"
+                    onclick="event.stopPropagation();addToCart(this.dataset.name, this.dataset.price)"
+                    style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">
+                담기
+            </button>
         </div>
     </div>
-</div>
-<!-- AI추천 탭 컨텐츠 -->
-<div id="mkt-content-2" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
-    <div style="background:linear-gradient(135deg,var(--gp),#f0fce8);border:1.5px solid var(--gl);border-radius:16px;padding:20px 24px;margin-bottom:22px;display:flex;align-items:center;gap:16px">
-        <div style="width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🤖</div>
-        <div><div style="font-family:Gaegu,cursive;font-size:1rem;font-weight:700;color:var(--green);margin-bottom:3px">AI 맞춤 추천</div><div style="font-size:.78rem;color:var(--mid)">구매 패턴과 계절을 분석해 딱 맞는 상품을 추천해드려요</div></div>
+
+    <!-- ======= 탭 2: AI 추천 ======= -->
+    <div id="mkt-content-2" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
+        <div style="background:linear-gradient(135deg,var(--gp),#f0fce8);border:1.5px solid var(--gl);border-radius:16px;padding:20px 24px;margin-bottom:22px;display:flex;align-items:center;gap:16px">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🤖</div>
+            <div>
+                <div style="font-family:Gaegu,cursive;font-size:1rem;font-weight:700;color:var(--green);margin-bottom:3px">AI 맞춤 추천</div>
+                <div style="font-size:.78rem;color:var(--mid)">구매 패턴과 계절을 분석해 딱 맞는 상품을 추천해드려요</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
+            <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb gn"><div class="pbdg"><span class="pbdg-t pbdg-new">AI픽</span></div><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🍎</div><div class="pc2-body"><div class="pc2-farm">충주 행복 사과 농원</div><div class="pc2-nm">홍옥 사과 3kg</div><div class="pc2-pr"><span class="pc2-disc">-35%</span><span class="pc2-price">12,900원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('홍옥 사과',12900)">🛒 담기</button></div></div>
+            <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb ap"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥕</div><div class="pc2-body"><div class="pc2-farm">제주 청정 당근 농장</div><div class="pc2-nm">굴곡진 당근 2kg</div><div class="pc2-pr"><span class="pc2-disc">-50%</span><span class="pc2-price">5,900원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('굴곡진 당근',5900)">🛒 담기</button></div></div>
+            <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb mt"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥦</div><div class="pc2-body"><div class="pc2-farm">전남 나주 이순신 농장</div><div class="pc2-nm">비균형 브로콜리 1.5kg</div><div class="pc2-pr"><span class="pc2-disc">-28%</span><span class="pc2-price">8,640원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('브로콜리',8640)">🛒 담기</button></div></div>
+            <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb gn"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥔</div><div class="pc2-body"><div class="pc2-farm">강원 해피팜</div><div class="pc2-nm">황토 감자 5kg</div><div class="pc2-pr"><span class="pc2-disc">-40%</span><span class="pc2-price">9,500원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('황토 감자',9500)">🛒 담기</button></div></div>
+        </div>
     </div>
-    <div id="mkt-content-3" style="display:none"></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
-        <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb gn"><div class="pbdg"><span class="pbdg-t pbdg-new">AI픽</span></div><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🍎</div><div class="pc2-body"><div class="pc2-farm">충주 행복 사과 농원</div><div class="pc2-nm">홍옥 사과 3kg</div><div class="pc2-pr"><span class="pc2-disc">-35%</span><span class="pc2-price">12,900원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('홍옥 사과',12900)">🛒 담기</button></div></div>
-        <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb ap"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥕</div><div class="pc2-body"><div class="pc2-farm">제주 청정 당근 농장</div><div class="pc2-nm">굴곡진 당근 2kg</div><div class="pc2-pr"><span class="pc2-disc">-50%</span><span class="pc2-price">5,900원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('굴곡진 당근',5900)">🛒 담기</button></div></div>
-        <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb mt"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥦</div><div class="pc2-body"><div class="pc2-farm">전남 나주 이순신 농장</div><div class="pc2-nm">비균형 브로콜리 1.5kg</div><div class="pc2-pr"><span class="pc2-disc">-28%</span><span class="pc2-price">8,640원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('브로콜리',8640)">🛒 담기</button></div></div>
-        <div class="pc2" onclick="goPage('detail')"><div class="pc2-thumb gn"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥔</div><div class="pc2-body"><div class="pc2-farm">강원 해피팜</div><div class="pc2-nm">황토 감자 5kg</div><div class="pc2-pr"><span class="pc2-disc">-40%</span><span class="pc2-price">9,500원</span></div><button class="btn-add" onclick="event.stopPropagation();addToCart('황토 감자',9500)">🛒 담기</button></div></div>
-    </div>
-</div>
-</div><footer>
+
+</div><!-- /page-market -->
+
+<footer>
     <div class="ft-g">
         <div>
             <div class="ft-logo">못난이 농작물</div>
@@ -306,7 +264,10 @@
         </div>
         <div class="ft-col">
             <h5>서비스</h5>
-            <a onclick="location.href='market.html'" style="cursor:pointer">마켓 이용</a><a onclick="goPage('board')" style="cursor:pointer">게시판</a><a onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a><a onclick="location.href='review.html'" style="cursor:pointer">리뷰</a>
+            <a onclick="location.href='market.html'" style="cursor:pointer">마켓 이용</a>
+            <a onclick="goPage('board')" style="cursor:pointer">게시판</a>
+            <a onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a>
+            <a onclick="location.href='review.html'" style="cursor:pointer">리뷰</a>
         </div>
         <div class="ft-col">
             <h5>정보</h5>
@@ -321,6 +282,8 @@
         <span>© 2025 못난이 농작물 · 포테토칩 팀</span>
         <span>외형이 아닌 신선함으로 판단합니다 🌿</span>
     </div>
-</footer><script src="/js/app.js"></script>
+</footer>
+
 <script src="/js/product/product.js"></script>
+<script src="/js/app.js"></script>
 </body></html>
