@@ -1,4 +1,10 @@
 /* ══ LOGIN / SIGNUP ══ */
+
+// localStorage 또는 sessionStorage에서 토큰 읽기
+function getToken() {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
 function swTab(t) {
     document.getElementById('lf').style.display = t === 'login' ? 'block' : 'none';
     document.getElementById('sf').style.display = t === 'signup' ? 'block' : 'none';
@@ -10,14 +16,40 @@ function swTab(t) {
 }
 
 function doLogin() {
-    var e = document.getElementById('le').value;
-    var p = document.getElementById('lp').value;
-    if (!e || !p) { showToast('이메일과 비밀번호를 입력해주세요!'); return; }
-    document.getElementById('lf').style.display = 'none';
-    document.getElementById('sv').style.display = 'block';
-    setTimeout(function () { goPage('mypage'); }, 1800);
-    var btn = document.querySelector('.btn-nav');
-    if (btn) { btn.textContent = '마이페이지'; btn.setAttribute('onclick', "goPage('mypage')"); }
+    const email = document.getElementById('le').value;
+    const password = document.getElementById('lp').value;
+    const remember = document.querySelector('.f-rem input').checked;
+
+    if (!email || !password) {
+        showToast('이메일과 비밀번호를 입력해주세요!');
+        return;
+    }
+
+    fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+        .then(res => res.json())
+        .then(result => {
+            if (result.token) {
+                if (remember) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('email', result.email);
+                    localStorage.setItem('role', result.role);
+                } else {
+                    sessionStorage.setItem('token', result.token);
+                    sessionStorage.setItem('email', result.email);
+                    sessionStorage.setItem('role', result.role);
+                }
+                document.getElementById('lf').style.display = 'none';
+                document.getElementById('sv').style.display = 'block';
+                setTimeout(function () { location.href = '/'; }, 1800);
+            } else {
+                showToast(result.error);
+            }
+        })
+        .catch(err => showToast('오류가 발생했습니다.'));
 }
 
 function doSignup() {
@@ -27,7 +59,9 @@ function doSignup() {
         email: document.querySelector('#sf input[name="email"]').value,
         password: document.querySelector('#sf input[name="password"]').value,
         passwordConfirm: document.querySelector('#sf input[name="passwordConfirm"]').value,
-        address: document.querySelector('#sf input[name="address"]').value
+        phone: document.querySelector('#sf input[name="phone"]').value,
+        address: document.querySelector('#sf input[name="address"]').value,
+        nickname: document.querySelector('#sf input[name="nickname"]').value
     };
 
     fetch('/signup', {
@@ -42,7 +76,7 @@ function doSignup() {
                 document.getElementById('sv').style.display = 'block';
                 document.getElementById('sv-t').textContent = '회원가입 완료!';
                 document.getElementById('sv-m').textContent = '못난이 농작물 가족이 되신 걸 환영해요! 🌿';
-                setTimeout(function () { goPage('home'); }, 2000);
+                setTimeout(function () { location.href = '/'; }, 2000);
             } else {
                 alert(result.error);
             }
@@ -68,4 +102,15 @@ function switchMyTab(name) {
             }
         }
     });
+}
+
+/* ══ 로그아웃 ══ */
+function doLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('email');
+    localStorage.removeItem('role');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('email');
+    sessionStorage.removeItem('role');
+    location.href = '/login';
 }
