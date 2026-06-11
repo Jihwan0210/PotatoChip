@@ -5,19 +5,19 @@ import lombok.Setter;
 
 @Getter @Setter
 public class UserDTO {
-    /** 사용자 이름 (실명) */
+    /** 사용자 이름  */
     private String name;
 
     /** 사용자 역할 (BUYER: 구매자, SELLER: 판매자) */
     private String role;
 
-    /** 로그인에 사용되는 이메일 (고유값) */
+    /** 로그인에 사용되는 이메일  */
     private String email;
 
     /** 비밀번호 (암호화 전 원문, 서비스 레이어에서 BCrypt 인코딩) */
     private String password;
 
-    /** 비밀번호 확인 (회원가입 시 password와 일치 여부 검증용) */
+    /** 비밀번호 확인  */
     private String passwordConfirm;
 
     /** 연락처 (선택 입력) */
