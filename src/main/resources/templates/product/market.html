@@ -109,16 +109,24 @@
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">최신순</div>
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">가까운순</div>
             </div>
-            <button th:onclick="|location.href='@{/market/create}'|"
-                    style="font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700">
+            <button id="registerBtn"
+                    style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
+                    th:onclick="|location.href='@{/market/create}'|">
                 + 상품등록
             </button>
+
+            <script>
+                const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+                if (role === 'SELLER') {
+                    document.getElementById('registerBtn').style.display = 'inline-block';
+                }
+            </script>
         </div>
 
         <div class="pgrid">
             <div class="pc2"
                  th:each="product : ${products}"
-                 th:onclick="|location.href='@{/mark    et/detail(id=${product.id})}'|"
+                 th:onclick="|location.href='@{/market/detail(id=${product.id})}'|"
                  style="cursor:pointer">
                 <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
                     <div class="pbdg"><span class="pbdg-t pbdg-new">New</span></div>
