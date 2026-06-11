@@ -20,7 +20,7 @@ public class ProductImageServiceImpl implements ProductImageService{
     private final ProductImageRepository productImageRepository;
 
     // 이미지 저장 경로
-    private final String uploadDir = "uploads/products/";
+    private final String uploadDir = System.getProperty("user.dir") + "/uploads/products/";
 
     @Override
     @Transactional
@@ -32,7 +32,8 @@ public class ProductImageServiceImpl implements ProductImageService{
             String uuid = UUID.randomUUID().toString();
             String originalName = file.getOriginalFilename();
             String ext = originalName.substring(originalName.lastIndexOf("."));
-            String savedName = uuid + "_" + originalName.replaceAll("[^a-zA-Z0-9.]", "") + ext;
+            String baseName = originalName.substring(0, originalName.lastIndexOf("."));
+            String savedName = uuid + "_" + baseName.replaceAll("[^a-zA-Z0-9]", "") + ext;
 
             // 파일 저장
             File dest = new File(uploadDir + savedName);
