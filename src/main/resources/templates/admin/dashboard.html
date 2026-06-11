@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>관리자 대시보드</title>
+</head>
+<body>
+
+<h1>관리자 대시보드</h1>
+
+<p>총 상품 수 : <span th:text="${dashboard.totalProduct}"></span> </p>
+
+
+<p>총 게시글 수 : <span th:text="${dashboard.totalBoards}"></span> </p>
+
+<p>재고 부족 상품 수  : <span th:text="${dashboard.lowStockProducts}"></span></p>
+
+<p>픽업 가능 상품 수 : <span th:text="${dashboard.pickupProducts}"></span></p>
+
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.example.potatochip.board.controller;
 
-import com.example.potatochip.product.dto.request.BoardRequestDTO;
+import com.example.potatochip.board.dto.BoardRequestDTO;
+import com.example.potatochip.board.dto.BoardRequestDTO;
 import com.example.potatochip.board.dto.BoardResponseDTO;
 import com.example.potatochip.board.service.BoardService;
 import org.springframework.web.bind.annotation.*;
