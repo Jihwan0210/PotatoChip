@@ -29,6 +29,7 @@ public class ProductServiceImpl implements ProductService{
         Optional<Product> result = productRepository.findById(id);
         Product product = result.orElseThrow();
         ProductDTO productDTO = modelMapper.map(product , ProductDTO.class);
+        productDTO.setImages(product.getImages());
         return productDTO;
     }
 
@@ -46,7 +47,7 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
-    public Long createProduct(ProductDTO productDTO , MultipartFile file) {
+    public Product createProduct(ProductDTO productDTO , MultipartFile file) {
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements ProductService{
         Product product = modelMapper.map(productDTO , Product.class);
         product.setSellerId(1L);
         productRepository.save(product);
-        return product.getId();
+        return product;
     }
 
 

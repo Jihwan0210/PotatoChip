@@ -12,7 +12,7 @@ public interface ProductService {
 
     ProductDTO getProductById(Long id);
 
-    Long createProduct(ProductDTO productDTO , MultipartFile file);
+    Product createProduct(ProductDTO productDTO , MultipartFile file);
 
     void deleteProduct(Long id);
 
