@@ -13,38 +13,24 @@ import java.time.LocalDateTime;
 public class ReviewDTO {
 
     private Long reviewId;
-
     private Long productId;
-
     private Long userId;
-
     private Long orderItemId;
-
     private Integer rating;
-
     private String content;
-
     private String imageUrl;
-
     private Boolean repurchaseIntent;
-
+    private Boolean isAnonymous;
+    private String displayName;
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
-
     private Long helpfulCount;
-
     private Boolean helpfulByCurrentUser;
 
-    public static ReviewDTO fromEntity(Review review) {
-        return fromEntity(review, 0L, false);
-    }
+    public static ReviewDTO fromEntity(Review review, Long helpfulCount, Boolean helpfulByCurrentUser) {
+        Boolean isAnonymous = Boolean.TRUE.equals(review.getIsAnonymous());
+        String displayName = isAnonymous ? "익명 구매자" : "구매자 " + review.getUserId();
 
-    public static ReviewDTO fromEntity(
-            Review review,
-            Long helpfulCount,
-            Boolean helpfulByCurrentUser
-    ) {
         return new ReviewDTO(
                 review.getReviewId(),
                 review.getProductId(),
@@ -54,6 +40,8 @@ public class ReviewDTO {
                 review.getContent(),
                 review.getImageUrl(),
                 review.getRepurchaseIntent(),
+                review.getIsAnonymous(),
+                displayName,
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
                 helpfulCount,

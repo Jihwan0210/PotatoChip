@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>문의하기 | 못난이 농작물</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" href="/css/style.css" rel="stylesheet"/>
+    <style>
+        .inquiry-page{min-height:100vh;padding-top:64px;background:linear-gradient(160deg,var(--beige2) 0%,var(--beige3) 46%,var(--gp) 100%)}
+        .inquiry-head{background:var(--white);border-bottom:1.5px solid var(--beige);padding:34px 6% 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+        .inquiry-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
+        .inquiry-head-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
+        .inquiry-head-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:620px}
+        .inquiry-head-btn{background:var(--amber);color:#fff;border:none;border-radius:100px;padding:12px 24px;font-family:'Gaegu',cursive;font-size:1.08rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(240,168,62,.25);transition:all .2s}
+        .inquiry-head-btn:hover{transform:translateY(-1px)}
+        .inquiry-layout{max-width:760px;margin:0 auto;padding:34px 6% 80px}
+        .inquiry-card{background:var(--white);border:1.5px solid var(--beige);border-radius:20px;padding:26px;box-shadow:0 8px 28px rgba(90,74,58,.08)}
+        .inquiry-form-group{margin-bottom:15px}
+        .inquiry-form-group label{display:block;font-size:.73rem;color:var(--mid);font-weight:700;margin-bottom:7px}
+        .inquiry-form-group input,.inquiry-form-group select,.inquiry-form-group textarea{width:100%;padding:12px 13px;border:1.5px solid var(--beige);border-radius:12px;font-family:inherit;color:var(--dark);outline:none;background:var(--beige3)}
+        .inquiry-form-group textarea{resize:none;min-height:190px}
+        .inquiry-form-group input:focus,.inquiry-form-group select:focus,.inquiry-form-group textarea:focus{border-color:var(--green);background:#fff}
+        .inquiry-guide{background:var(--gp);border:1.5px solid rgba(123,191,69,.18);border-radius:16px;padding:15px 16px;color:var(--mid);font-size:.8rem;line-height:1.7;margin-bottom:18px}
+        .inquiry-guide strong{color:var(--green)}
+        .inquiry-actions{display:flex;gap:10px;margin-top:20px}
+        .inquiry-btn{border:none;border-radius:13px;padding:13px 18px;font-family:'Gaegu',cursive;font-size:1.05rem;font-weight:700;cursor:pointer}
+        .inquiry-btn.primary{background:var(--green);color:#fff;flex:1;box-shadow:0 6px 18px rgba(123,191,69,.22)}
+        .inquiry-btn.secondary{background:var(--beige);color:var(--mid)}
+        @media(max-width:720px){.inquiry-actions{flex-direction:column}.inquiry-head{padding:28px 6% 22px}}
+    </style>
+</head>
+<body>
+<nav id="nav">
+    <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
+    </div>
+    <ul class="nav-links">
+        <li><a th:href="@{/}" href="/">홈</a></li>
+        <li><a th:href="@{/market}" href="/market">마켓</a></li>
+        <li><a th:href="@{/ranking}" href="/ranking">판매랭킹</a></li>
+        <li><a th:href="@{/review}" href="/review">리뷰</a></li>
+        <li><a th:href="@{/board}" href="/board">게시판</a></li>
+        <li><a th:href="@{/faq}" href="/faq" style="color:var(--dark);font-weight:700">FAQ</a></li>
+    </ul>
+    <div class="nav-r">
+        <span class="n-ico" id="bellIcon" onclick="toggleNotif && toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
+        <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+        <a th:href="@{/mypage}" href="/mypage" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</a>
+        <a th:href="@{/farmer}" href="/farmer" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
+        <button class="btn-nav" onclick="location.href='/login'">로그인</button>
+    </div>
+</nav>
+
+<main class="inquiry-page">
+    <section class="inquiry-head">
+        <div>
+            <div class="inquiry-kicker">Customer Inquiry</div>
+            <h1 class="inquiry-head-title">문의하기 💬</h1>
+            <p class="inquiry-head-desc">FAQ와 챗봇으로 해결되지 않은 내용을 남겨주세요. 관리자가 확인 후 답변을 등록하면 내 문의보기에서 확인할 수 있어요.</p>
+        </div>
+        <button class="inquiry-head-btn" type="button" onclick="location.href='/my'">내 문의보기 →</button>
+    </section>
+
+    <section class="inquiry-layout">
+        <div class="inquiry-card">
+            <div class="inquiry-guide">
+                <strong>문의 전 확인해주세요.</strong><br/>
+                배송, 환불, 상품 품질, 주문·결제 관련 문의를 남길 수 있습니다.<br/>답변이 등록되면 내 문의보기에서 확인할 수 있습니다.
+            </div>
+
+            <div class="inquiry-form-group">
+                <label for="inquiryCategory">문의 유형</label>
+                <select id="inquiryCategory">
+                    <option value="delivery">배송 문의</option>
+                    <option value="refund">환불/교환 문의</option>
+                    <option value="product">상품 문의</option>
+                    <option value="order">주문/결제 문의</option>
+                    <option value="etc">기타 문의</option>
+                </select>
+            </div>
+
+            <div class="inquiry-form-group">
+                <label for="inquiryTitle">제목</label>
+                <input id="inquiryTitle" type="text" placeholder="문의 제목을 입력해주세요."/>
+            </div>
+
+            <div class="inquiry-form-group">
+                <label for="inquiryContent">문의 내용</label>
+                <textarea id="inquiryContent" placeholder="문의 내용을 자세히 입력해주세요."></textarea>
+            </div>
+
+            <div class="inquiry-actions">
+                <button type="button" class="inquiry-btn secondary" onclick="location.href='/faq'">FAQ로 돌아가기</button>
+                <button type="button" class="inquiry-btn primary" onclick="submitInquiry()">문의 등록하기</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="ft-g">
+        <div><div class="ft-logo">못난이 농작물</div><p class="ft-desc">버려질 뻔한 농산물을 한 상으로 담다.<br/>신선한 못난이 농산물을 합리적인 가격으로 연결합니다.</p></div>
+        <div class="ft-col"><h5>서비스</h5><a th:href="@{/market}" href="/market">마켓</a><a th:href="@{/ranking}" href="/ranking">판매랭킹</a><a th:href="@{/review}" href="/review">리뷰</a></div>
+        <div class="ft-col"><h5>고객지원</h5><a th:href="@{/board}" href="/board">게시판</a><a th:href="@{/faq}" href="/faq">FAQ</a><a th:href="@{/mypage}" href="/mypage">마이페이지</a></div>
+        <div class="ft-col"><h5>농가</h5><a th:href="@{/farmer}" href="/farmer">농가 대시보드</a><a th:href="@{/market}" href="/market">상품 등록 안내</a></div>
+    </div>
+    <div class="ft-bot"><span>© PotatoChip. Ugly Farm Produce Market.</span><span>Inquiry</span></div>
+</footer>
+
+<script th:src="@{/js/app.js}" src="/js/app.js"></script>
+<script>
+    var currentUserId=localStorage.getItem('currentUserId')?Number(localStorage.getItem('currentUserId')):null;
+
+    async function submitInquiry(){
+        if(!currentUserId){
+            showInquiryToast('로그인 후 문의를 작성할 수 있어요.');
+            setTimeout(function(){location.href='/login'},900);
+            return;
+        }
+
+        var category=document.getElementById('inquiryCategory').value;
+        var title=document.getElementById('inquiryTitle').value.trim();
+        var content=document.getElementById('inquiryContent').value.trim();
+
+        if(!title){
+            showInquiryToast('문의 제목을 입력해주세요.');
+            return;
+        }
+
+        if(!content){
+            showInquiryToast('문의 내용을 입력해주세요.');
+            return;
+        }
+
+        var body={
+            userId:currentUserId,
+            productId:null,
+            orderId:null,
+            category:category,
+            title:title,
+            content:content
+        };
+
+        try{
+            var response=await fetch('/api/inquiries',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify(body)
+            });
+
+            var data=await response.json();
+
+            if(!response.ok){
+                showInquiryToast(data.message||'문의 등록에 실패했습니다.');
+                return;
+            }
+
+            showInquiryToast('문의가 등록되었습니다.');
+            setTimeout(function(){location.href='/inquiries/my'},700);
+        }catch(error){
+            showInquiryToast('서버 연결에 실패했습니다.');
+        }
+    }
+
+    function showInquiryToast(message){
+        if(typeof showToast==='function'){showToast(message);return}
+        alert(message);
+    }
+</script>
+</body>
+</html>
