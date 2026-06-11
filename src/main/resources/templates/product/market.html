@@ -10,16 +10,16 @@
 
 <nav id="nav">
     <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        <img alt="" src="" style="height:36px;width:auto;flex-shrink:0"/>
+        <img src="/images/auth/farmer_logo.png" style="height:36px;width:auto;flex-shrink:0"/>
         못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
     </div>
     <ul class="nav-links">
         <li><a th:href="@{/}">홈</a></li>
-        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
-        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
-        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
-        <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
-        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
+        <li><a th:href="@{/market}">마켓</a></li>
+        <li><a th:href="@{/ranking}">판매랭킹</a></li>
+        <li><a th:href="@{/review}">리뷰</a></li>
+        <li><a th:href="@{/board}">게시판</a></li>
+        <li><a th:href="@{/faq}">FAQ</a></li>
     </ul>
     <div class="nav-r">
         <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
