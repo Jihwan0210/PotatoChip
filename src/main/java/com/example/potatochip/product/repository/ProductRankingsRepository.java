@@ -1,6 +1,6 @@
 package com.example.potatochip.product.repository;
 
-import com.example.potatochip.product.entity.PeriodType;
+import com.example.potatochip.product.entity.ranking.PeriodType;
 import com.example.potatochip.product.entity.ranking.ProductRankings;
 import org.springframework.data.jpa.repository.JpaRepository;
 

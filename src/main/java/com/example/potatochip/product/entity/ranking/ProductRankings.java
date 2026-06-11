@@ -1,7 +1,6 @@
 package com.example.potatochip.product.entity.ranking;
 
 import com.example.potatochip.auth.entity.User;
-import com.example.potatochip.product.entity.PeriodType;
 import com.example.potatochip.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;

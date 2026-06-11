@@ -1,7 +1,7 @@
-package com.example.potatochip.product.service;
+package com.example.potatochip.product.service.ranking;
 
 
-import com.example.potatochip.product.entity.PeriodType;
+import com.example.potatochip.product.entity.ranking.PeriodType;
 import com.example.potatochip.product.entity.ranking.ProductRankings;
 import com.example.potatochip.product.repository.ProductRankingsRepository;
 import lombok.RequiredArgsConstructor;
