@@ -8,38 +8,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head><body>
 
-<nav id="nav">
-    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        <img src="/images/auth/farmer_logo.png" style="height:36px;width:auto;flex-shrink:0"/>
-        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-    </div>
-    <ul class="nav-links">
-        <li><a th:href="@{/}">홈</a></li>
-        <li><a th:href="@{/market}">마켓</a></li>
-        <li><a th:href="@{/ranking}">판매랭킹</a></li>
-        <li><a th:href="@{/review}">리뷰</a></li>
-        <li><a th:href="@{/board}">게시판</a></li>
-        <li><a th:href="@{/faq}">FAQ</a></li>
-    </ul>
-    <div class="nav-r">
-        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
-        <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
-        <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
-        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
-    </div>
-</nav>
-
-<div class="page active" id="page-market">
-
-    <!-- 알림 팝업 -->
-    <div id="notifPopup" style="position:fixed;top:80px;right:20px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 8px 32px rgba(42,30,6,.14);z-index:999;overflow:hidden;display:none;animation:fadeDown .18s ease">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--sand)">
-            <span style="font-size:.85rem;font-weight:600;color:var(--dark)">알림</span>
-            <span onclick="markAllRead()" style="font-size:.72rem;color:var(--green);cursor:pointer">모두 읽음</span>
-        </div>
-        <div id="notifItemList"><!-- 동적 렌더링 --></div>
-    </div>
+<div th:replace="nav :: nav"></div>
 
     <!-- 마켓 헤더 -->
     <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 0">
@@ -140,10 +109,18 @@
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">최신순</div>
                 <div onclick="setSort(this)" style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">가까운순</div>
             </div>
-            <button th:onclick="|location.href='@{/market/create}'|"
-                    style="font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700">
+            <button id="registerBtn"
+                    style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
+                    th:onclick="|location.href='@{/market/create}'|">
                 + 상품등록
             </button>
+
+            <script>
+                const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+                if (role === 'SELLER') {
+                    document.getElementById('registerBtn').style.display = 'inline-block';
+                }
+            </script>
         </div>
 
         <div class="pgrid">
