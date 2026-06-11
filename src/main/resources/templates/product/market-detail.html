@@ -9,8 +9,26 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-
-<div th:replace="nav :: nav"></div>
+<nav id="nav">
+    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
+    </div>
+    <ul class="nav-links">
+        <li><a class="active" data-page="home" onclick="location.href='index.html'" style="cursor:pointer">홈</a></li>
+        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
+        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
+        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
+        <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
+        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
+    </ul>
+    <div class="nav-r">
+        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
+        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+        <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
+        <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
+        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
+    </div>
+</nav>
 
 <div class="page active" id="page-detail">
     <!-- 뒤로가기 바 -->
@@ -76,10 +94,25 @@
                     </div>
                 </div>
                 <div style="border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px">
-                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 판매자 정보</div>
+                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 원산지 정보</div>
                     <div style="font-size:.8rem;color:var(--mid);line-height:1.75"
                          th:text="${product.origin}">
                         원산지 정보
+                    </div>
+                </div>
+                <!-- 상세 이미지 표시하기 -->
+                <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-top:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:12px">🖼️ 상세 이미지</div>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                        <th:block th:each="image : ${product.images}">
+                            <img th:src="${image.uuid}"
+                                 alt="상세 이미지"
+                                 style="width:100%;border-radius:10px;object-fit:cover"/>
+                        </th:block>
+                        <div th:if="${product.images == null or product.images.isEmpty()}"
+                             style="font-size:.8rem;color:var(--muted);text-align:center;padding:20px 0">
+                            등록된 상세 이미지가 없습니다.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -157,7 +190,8 @@
                 <!-- 지도 영역 (placeholder) -->
                 <div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--sand);margin-bottom:14px">
                     <div style="background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:6px">🗺️ 지도로 위치 확인</div>
-                    <div style="height:200px;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:2.5rem">🗺️<span style="font-size:.8rem;color:var(--mid);margin-left:10px">지도 API 연동 예정</span></div>
+                    <div id="map" style="width:100%;height:300px;"></div>
+
                 </div>
                 <!-- 길찾기 버튼 -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
@@ -264,9 +298,10 @@
                 <button th:data-id="${product.id}"
                         onclick="addToCart()"
                         style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">🛒 장바구니 담기</button>
-                <button onclick="location.href='/cart'"
-                        style="width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;margin-bottom:8px">바로 구매하기</button>
-
+                <a th:href="@{/cart}"
+                   style="display:block;width:100%;background:var(--amber);color:#fff;text-decoration:none;text-align:center;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px">
+                    바로 구매하기
+                </a>
                 <!-- 찜하기 + 농부 문의 -->
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
                     <button id="wishBtn2" onclick="toggleDetailWish2(this)" style="padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">🤍 찜하기</button>
@@ -282,9 +317,68 @@
             </div>
         </div>
     </div>
+
+    <footer>
+        <div class="ft-g" style="padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1)">
+            <div><div class="ft-logo">못난이 농작물</div><p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.</p></div>
+            <div class="ft-col"><h5>서비스</h5><a onclick="location.href='/market'">마켓</a><a onclick="goPage('board')">게시판</a><a onclick="location.href='/faq'">FAQ</a></div>
+            <div class="ft-col"><h5>고객 지원</h5><a>1:1 문의</a><a>배송 안내</a></div>
+            <div class="ft-col"><h5>판매자</h5><a>입점 신청</a><a>정산 안내</a></div>
+        </div>
+        <div class="ft-bot"><span>© 2026 못난이 농작물 · 포테토칩 팀</span></div>
+    </footer>
 </div>
 
-<div th:replace="footer :: footer"></div>
+<footer>
+    <div class="ft-g">
+        <div>
+            <div class="ft-logo">못난이 농작물</div>
+            <p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.<br/>포테토칩 팀 · 유지환 · 김지혜 · 김민성 · 김주영 · 오지호</p>
+            <p style="margin-top:10px;font-size:.72rem">Spring Boot · MySQL · OpenAI · AWS · Kakao Map API</p>
+        </div>
+        <div class="ft-col">
+            <h5>서비스</h5>
+            <a onclick="location.href='/market'" style="cursor:pointer">마켓 이용</a><a onclick="goPage('board')" style="cursor:pointer">게시판</a><a onclick="location.href='/faq'" style="cursor:pointer">FAQ</a><a onclick="location.href='/review'" style="cursor:pointer">리뷰</a>
+        </div>
+        <div class="ft-col">
+            <h5>정보</h5>
+            <a href="#">우리의 미션</a><a href="#">판매자 신청</a><a href="#">픽업 장소</a><a href="#">공지사항</a>
+        </div>
+        <div class="ft-col">
+            <h5>고객 지원</h5>
+            <a href="#">AI 챗봇</a><a href="#">배송 조회</a><a href="#">환불·교환</a><a href="#">개인정보처리방침</a>
+        </div>
+    </div>
+    <div class="ft-bot">
+        <span>© 2025 못난이 농작물 · 포테토칩 팀</span>
+        <span>외형이 아닌 신선함으로 판단합니다 🌿</span>
+    </div>
+</footer>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4"></script> <!-- 카카오맵 API-->
+<script src="/js/app.js"></script>
+<script src="/js/product/product.js"></script>
+<script>
+    const productId = [[${product.id}]];
 
+    fetch(`/api/products/${productId}`)
+        .then(res => res.json())
+        .then(data => {
+            const lat = data.latitude;
+            const lng = data.longitude;
+
+            kakao.maps.load(function() {
+                var mapContainer = document.getElementById('map');
+                var mapOption = {
+                    center: new kakao.maps.LatLng(lat, lng), //고침
+                    level: 3
+                };
+                var map = new kakao.maps.Map(mapContainer, mapOption);
+                var marker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(lat, lng) //고침
+                });
+                marker.setMap(map);
+            });
+        });
+</script>
 </body>
 </html>
