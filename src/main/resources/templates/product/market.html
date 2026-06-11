@@ -193,48 +193,46 @@
         </div>
     </div>
 
-    <!-- ======= 탭 1: 이번 주 랭킹 ======= -->
+    <!-- 판매랭킹 -->
     <div id="mkt-content-1" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
-        <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:18px">🏆 이번 주 판매 랭킹 TOP 5</div>
-        <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
-            <div style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
-                <div>순위</div><div>상품</div><div style="text-align:center">판매량</div><div style="text-align:right">가격</div><div style="text-align:center">담기</div>
+    <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:18px">🏆 이번 주 판매 랭킹 TOP 5</div>
+    <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+            <div>순위</div><div>상품</div><div style="text-align:center">판매량</div><div style="text-align:right">가격</div><div style="text-align:center">담기</div>
+        </div>
+    <div th:each="ranking, stat : ${weeklyRankings}"
+         onclick="goPage('detail')"
+         onmouseover="this.style.background='var(--beige2)'"
+         onmouseout="this.style.background=''"
+         style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
+
+        <div th:styleappend="${stat.index == 0} ? 'background:var(--amber)' : (${stat.index == 1} ? 'background:#B0B8C1' : (${stat.index == 2} ? 'background:#C89B6E' : 'background:none'))"
+             th:text="${stat.count}"
+             style="width:32px;height:32px;border-radius:50%;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+            <div>
+                <div th:text="${ranking.product.name}"
+                     style="font-size:.82rem;font-weight:600;color:var(--dark)"></div>
+                <div th:text="${ranking.product.address}"
+                     style="font-size:.7rem;color:var(--muted)"></div>
             </div>
-            <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-                <div style="width:32px;height:32px;border-radius:50%;background:var(--amber);color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
-                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🍎</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">홍옥 사과 3kg</div><div style="font-size:.7rem;color:var(--muted)">충주 행복 사과 농원</div></div></div>
-                <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,342건</div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">12,900원</div>
-                <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('홍옥 사과 3kg',12900)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-            </div>
-            <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-                <div style="width:32px;height:32px;border-radius:50%;background:#B0B8C1;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
-                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥕</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">굴곡진 제주 당근 2kg</div><div style="font-size:.7rem;color:var(--muted)">제주 청정 당근 농장</div></div></div>
-                <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,180건</div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">5,900원</div>
-                <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('제주 당근 2kg',5900)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-            </div>
-            <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-                <div style="width:32px;height:32px;border-radius:50%;background:#C89B6E;color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
-                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🍊</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">비대칭 제주 감귤 3kg</div><div style="font-size:.7rem;color:var(--muted)">제주도 박진사 감귤농원</div></div></div>
-                <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">1,021건</div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">12,760원</div>
-                <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('제주 감귤 3kg',12760)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-            </div>
-            <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);cursor:pointer">
-                <div style="text-align:center;font-size:.84rem;font-weight:700;color:var(--muted)">4</div>
-                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥦</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">비균형 브로콜리 1.5kg</div><div style="font-size:.7rem;color:var(--muted)">전남 나주 이순신 농장</div></div></div>
-                <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">894건</div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">8,640원</div>
-                <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('브로콜리 1.5kg',8640)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-            </div>
-            <div onclick="goPage('detail')" onmouseout="this.style.background=''" onmouseover="this.style.background='var(--beige2)'" style="display:grid;grid-template-columns:52px 1fr 100px 100px 90px;align-items:center;padding:13px 18px;cursor:pointer">
-                <div style="text-align:center;font-size:.84rem;font-weight:700;color:var(--muted)">5</div>
-                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.5rem">🥔</span><div><div style="font-size:.82rem;font-weight:600;color:var(--dark)">황토 감자 5kg</div><div style="font-size:.7rem;color:var(--muted)">강원 해피팜</div></div></div>
-                <div style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">762건</div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)">9,500원</div>
-                <div style="text-align:center"><button onclick="event.stopPropagation();addToCart('황토 감자 5kg',9500)" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">담기</button></div>
-            </div>
+        </div>
+
+        <div th:text="${ranking.salesCount} + '건'"
+             style="text-align:center;font-size:.8rem;font-weight:700;color:var(--green)"></div>
+
+        <div th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"
+             style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"></div>
+
+        <div style="text-align:center">
+            <button th:data-name="${ranking.product.name}"
+                    th:data-price="${ranking.product.price}"
+                    onclick="event.stopPropagation();addToCart(this.dataset.name, this.dataset.price)"
+                    style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;">
+                담기
+            </button>
         </div>
     </div>
 
@@ -286,6 +284,6 @@
     </div>
 </footer>
 
-<script src="/js/app.js"></script>
 <script src="/js/product/product.js"></script>
+<script src="/js/app.js"></script>
 </body></html>

@@ -1,4 +1,4 @@
-package com.example.potatochip.product.service;
+package com.example.potatochip.product.service.ranking;
 
 
 import com.example.potatochip.product.entity.ranking.ProductRankings;

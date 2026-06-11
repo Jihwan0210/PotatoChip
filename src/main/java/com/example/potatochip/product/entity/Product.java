@@ -7,6 +7,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "images")
 public class Product {
 
         @Id
@@ -46,6 +48,9 @@ public class Product {
 
 
         private String thumbnailUrl; //대표 사진
+
+        @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<ProductImage> images = new ArrayList<>(); //상품 이미지 테이블과 연관관계 Casecade로 함께 삭제
 
         @Column(nullable = false)
         private String origin; // 원산지
