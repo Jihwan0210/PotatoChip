@@ -1,3 +1,13 @@
+
+/* ════════ 팔레트 ════════
+   메인:  연두  #7BBF45 / 연베이지 #F6F0E4
+   섹션별 포인트:
+     About    — 살구 핑크   #FFCBA4 / #FFF0E8
+     Services — 라벤더      #C8BAF0 / #F0EDFB
+     Products — 민트        #A8E4D8 / #E8FAF7
+     Mission  — 연두 진하게 #7BBF45 (다크 카드)
+     Footer   — 다크브라운  #3A2808 (푸터만)
+════════════════════════ */
 :root {
   --dark:   #3A2808;
 
@@ -396,7 +406,7 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 
 /* ── REVIEW ── */
 .ai-sum{background:linear-gradient(135deg,var(--brown,#3A2808),#5C4010);border-radius:14px;padding:22px 24px;margin-bottom:24px;display:flex;gap:14px}
-.ai-lbl{font-size:.64rem;font-weight:500;color:var(--gl,#C8E8A0);letter-spacing:1px;margin-bottom:6px}
+.ai-lbl{font-size:.90rem;font-weight:500;color:var(--gl,#C8E8A0);letter-spacing:1px;margin-bottom:6px}
 .ai-txt{font-size:.82rem;color:rgba(255,255,255,.85);line-height:1.7}
 .ai-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .ai-tag{background:rgba(192,224,144,.18);border:1px solid rgba(192,224,144,.28);color:var(--gl,#C8E8A0);border-radius:100px;padding:3px 9px;font-size:.64rem;font-weight:500}
@@ -416,3 +426,5 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 .rv2-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--sand)}
 .hlp-btn{padding:3px 9px;border:1px solid var(--sand);border-radius:6px;background:#fff;font-size:.67rem;color:var(--mid);cursor:pointer;font-family:inherit}
 .rv2-cert{font-size:.65rem;color:var(--green);font-weight:500}
+.rv2-prod {  border: none;  cursor: pointer;  display: inline-flex;  align-items: center;  gap: 5px;  background: var(--gp);  border-radius: 7px;  padding: 3px 9px;  font-size: .65rem;  color: var(--green);font-weight: 700;margin-bottom: 9px;font-family: inherit;}
+.rv2-prod:hover {background: var(--green);color: #fff;}
