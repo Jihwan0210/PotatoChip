@@ -9,26 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<nav id="nav">
-    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-    </div>
-    <ul class="nav-links">
-        <li><a class="active" data-page="home" onclick="location.href='index.html'" style="cursor:pointer">홈</a></li>
-        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
-        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
-        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
-        <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
-        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
-    </ul>
-    <div class="nav-r">
-        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
-        <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
-        <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
-        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
-    </div>
-</nav>
+<div th:replace="nav :: nav"></div>
 
 <div class="page active" id="page-detail">
     <!-- 뒤로가기 바 -->
@@ -182,9 +163,9 @@
                 <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px">
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📍 농장 위치</div>
                     <div style="font-size:.8rem;color:var(--mid);line-height:1.8">
-                        <strong th:text="${product.origin}">원산지</strong><br/>
-                        운영시간: 평일 09:00 ~ 17:00<br/>
-                        연락처: -
+                        <strong th:text="${product.address}">농장위치</strong><br/>
+                        <strong th:text="${product.operatingHours}">운영시간</strong><br/>
+                        <strong th:text="${product.sellerPhone}">폰번호</strong><br/>
                     </div>
                 </div>
                 <!-- 지도 영역 (placeholder) -->
@@ -285,6 +266,18 @@
                     </div>
                 </div>
 
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--sand)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:.82rem;color:var(--mid)">총 상품 금액</span>
+                        <strong id="detailTotalPrice"
+                                th:data-unit="${product.discountPrice != null ? product.discountPrice : product.price}"
+                                th:text="${#numbers.formatInteger(product.discountPrice != null ? product.discountPrice : product.price, 3, 'COMMA')} + '원'"
+                                style="font-size:1.1rem;color:var(--dark)">
+                            12,900원
+                        </strong>
+                    </div>
+                </div>
+
                 <!-- 배송 정보 -->
                 <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
                     <div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)"><span style="color:var(--green)">🚚</span>익일 배송 (오후 2시 이전 주문 시 당일 출고)</div>
@@ -298,7 +291,8 @@
                 <button th:data-id="${product.id}"
                         onclick="addToCart()"
                         style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">🛒 장바구니 담기</button>
-                <a th:href="@{/cart}"
+                <a th:href="@{/cart/items/buy-now(productId=${product.id}, quantity=1)}"
+                   id="buyNowBtn"
                    style="display:block;width:100%;background:var(--amber);color:#fff;text-decoration:none;text-align:center;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px">
                     바로 구매하기
                 </a>
@@ -311,49 +305,16 @@
 
             <!-- 주문 안내 -->
             <div style="background:var(--beige2);border:1.5px solid var(--sand);border-radius:12px;padding:14px 16px;font-size:.74rem;color:var(--mid);line-height:1.85">
-                🛡️ 안전결제 · 구매확정 전 결제금 보호<br/>
+                🛡️ 안전결제 · 구매확정 전 <결제></결제>금 보호<br/>
                 ⏰ 오후 2시 이전 주문 시 당일 출고<br/>
                 🔄 수령 후 24시간 내 환불 신청 가능
             </div>
         </div>
     </div>
-
-    <footer>
-        <div class="ft-g" style="padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.1)">
-            <div><div class="ft-logo">못난이 농작물</div><p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.</p></div>
-            <div class="ft-col"><h5>서비스</h5><a onclick="location.href='/market'">마켓</a><a onclick="goPage('board')">게시판</a><a onclick="location.href='/faq'">FAQ</a></div>
-            <div class="ft-col"><h5>고객 지원</h5><a>1:1 문의</a><a>배송 안내</a></div>
-            <div class="ft-col"><h5>판매자</h5><a>입점 신청</a><a>정산 안내</a></div>
-        </div>
-        <div class="ft-bot"><span>© 2026 못난이 농작물 · 포테토칩 팀</span></div>
-    </footer>
+    <div th:replace="footer :: footer"></div>
 </div>
 
-<footer>
-    <div class="ft-g">
-        <div>
-            <div class="ft-logo">못난이 농작물</div>
-            <p class="ft-desc">내려질 뻔한 농산물을 한 상으로 담다.<br/>포테토칩 팀 · 유지환 · 김지혜 · 김민성 · 김주영 · 오지호</p>
-            <p style="margin-top:10px;font-size:.72rem">Spring Boot · MySQL · OpenAI · AWS · Kakao Map API</p>
-        </div>
-        <div class="ft-col">
-            <h5>서비스</h5>
-            <a onclick="location.href='/market'" style="cursor:pointer">마켓 이용</a><a onclick="goPage('board')" style="cursor:pointer">게시판</a><a onclick="location.href='/faq'" style="cursor:pointer">FAQ</a><a onclick="location.href='/review'" style="cursor:pointer">리뷰</a>
-        </div>
-        <div class="ft-col">
-            <h5>정보</h5>
-            <a href="#">우리의 미션</a><a href="#">판매자 신청</a><a href="#">픽업 장소</a><a href="#">공지사항</a>
-        </div>
-        <div class="ft-col">
-            <h5>고객 지원</h5>
-            <a href="#">AI 챗봇</a><a href="#">배송 조회</a><a href="#">환불·교환</a><a href="#">개인정보처리방침</a>
-        </div>
-    </div>
-    <div class="ft-bot">
-        <span>© 2025 못난이 농작물 · 포테토칩 팀</span>
-        <span>외형이 아닌 신선함으로 판단합니다 🌿</span>
-    </div>
-</footer>
+
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4"></script> <!-- 카카오맵 API-->
 <script src="/js/app.js"></script>
 <script src="/js/product/product.js"></script>

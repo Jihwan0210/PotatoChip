@@ -19,7 +19,7 @@ public class ProductDTO {
 
     private Long id; //상품 ID
 
-    private Long sellerId; //판매자 ID
+    private String sellerPhone;
 
     private String category; // 카테고리
 
