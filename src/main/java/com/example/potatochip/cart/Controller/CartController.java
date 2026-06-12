@@ -12,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
+import java.math.BigDecimal;
+
 @Controller
 @RequestMapping("/cart")
 @RequiredArgsConstructor
@@ -25,8 +27,14 @@ public class CartController {
             return "redirect:/login";
         }
         CartDTO cartDTO = cartService.getMyCart(loggedInUserId);
+
+        BigDecimal totalPrice = cartDTO.getItems().stream()
+                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         model.addAttribute("cart", cartDTO);
-        return "cart/cart";  // 여기만 변경
+        model.addAttribute("totalPrice", totalPrice);  // 추가
+        return "cart/cart";
     }
 
 
@@ -67,4 +75,22 @@ public class CartController {
         cartService.removeCartItem(loggedInUserId, productId);
         return ResponseEntity.ok("상품이 장바구니에서 삭제되었습니다.");
     }
+
+    @GetMapping("/items/buy-now")
+    public String buyNow(@RequestParam Long productId,
+                         @RequestParam int quantity,
+                         HttpSession session) {
+        Long loggedInUserId = (Long) session.getAttribute("loginUserId");
+        if (loggedInUserId == null) return "redirect:/login";
+
+        CartItemDTO dto = CartItemDTO.builder()
+                .buyerId(loggedInUserId)
+                .productId(productId)
+                .quantity(quantity)
+                .build();
+        cartService.addCartItem(dto);
+
+        return "redirect:/cart";
+    }
+
 }

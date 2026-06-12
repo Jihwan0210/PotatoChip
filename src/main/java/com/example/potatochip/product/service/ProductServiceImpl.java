@@ -1,5 +1,7 @@
 package com.example.potatochip.product.service;
 
+import com.example.potatochip.auth.entity.User;
+import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.product.dto.ProductDTO;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.file.FileService;
@@ -21,6 +23,7 @@ public class ProductServiceImpl implements ProductService{
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final FileService fileService;
+    private final UserRepository userRepository;
 
 
 
@@ -30,9 +33,9 @@ public class ProductServiceImpl implements ProductService{
         Product product = result.orElseThrow();
         ProductDTO productDTO = modelMapper.map(product , ProductDTO.class);
         productDTO.setImages(product.getImages());
+        productDTO.setSellerPhone(product.getSeller().getPhone()); //고침
         return productDTO;
     }
-
 
 
     @Override
@@ -54,16 +57,19 @@ public class ProductServiceImpl implements ProductService{
                 String url = fileService.upload(file);
                 productDTO.setThumbnailUrl(url);
             } catch (IOException e) {
-                throw new RuntimeException("저장 실패" , e);
+                throw new RuntimeException("저장 실패", e);
             }
         }
 
-        Product product = modelMapper.map(productDTO , Product.class);
-        product.setSellerId(1L);
-        productRepository.save(product);
-        return product;
-    }
+        Product product = modelMapper.map(productDTO, Product.class);
 
+        User seller = userRepository.findById(1L)
+                .orElseThrow();
+
+        product.setSeller(seller);
+
+        return productRepository.save(product);
+    }
 
     @Override
     public void modify(ProductDTO productDTO) {

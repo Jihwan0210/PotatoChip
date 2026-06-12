@@ -12,12 +12,14 @@ function switchDetailTab(name){
     });
 }
 
-/* ══ CART PAGE QUANTITY ══ */
-var detailQtyVal=1;
-function changeDetailQty(d){
-    detailQtyVal=Math.max(1,detailQtyVal+d);
-    var el=document.getElementById('detailQty');
-    if(el) el.textContent=detailQtyVal;
+var detailQtyVal = 1;
+function changeDetailQty(d) {
+    detailQtyVal = Math.max(1, detailQtyVal + d);
+    document.getElementById('detailQty').textContent = detailQtyVal;
+
+    // 수량 href 업데이트
+    const btn = document.getElementById('buyNowBtn');
+    btn.href = `/cart/items/buy-now?productId=${productId}&quantity=${detailQtyVal}`;
 }
 
 /* ══ WISH ══ */
@@ -100,16 +102,43 @@ function catClick(el){
     },100);
 }
 
-function mktF(el){
-    el.parentElement.querySelectorAll('.mf').forEach(function(x){x.classList.remove('on');});
+function mktF(el) {
+    el.parentElement.querySelectorAll('.mf').forEach(function(x) {
+        x.classList.remove('on');
+    });
     el.classList.add('on');
-    var cats={'채소':89,'과일':74,'곡류':43,'버섯':28,'뿌리채소':36,'기한임박':32};
-    var txt=el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g,'').trim();
-    var cnt=cats[txt]||302;
-    var cntEl=document.querySelector('.pgrid-count');
-    if(cntEl) cntEl.innerHTML='총 <strong style="color:var(--dark)">'+cnt+'</strong>개 상품';
-}
 
+    var txt = el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g, '').trim();
+    var categoryMap = {
+        '전체': null,
+        '채소': '채소',
+        '과일': '과일',
+        '곡류': '곡류',
+        '버섯': '버섯',
+        '뿌리채소': '뿌리채소',
+        '기한임박': '기한임박'
+    };
+    var selectedCat = categoryMap[txt];
+
+    // 탭 0으로 강제 전환 추가
+    switchMktTab(0);
+
+    document.querySelectorAll('.pgrid .pc2').forEach(function(card) {
+        if (!selectedCat || card.dataset.category === selectedCat) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    var visible = document.querySelectorAll('.pgrid .pc2:not([style*="display: none"])').length;
+    var cntEl = document.querySelector('.pgrid-count');
+    if (cntEl) cntEl.innerHTML = '총 <strong style="color:var(--dark)">' + visible + '</strong>개 상품';
+
+    // 상품 목록으로 스크롤
+    var pgrid = document.querySelector('.pgrid');
+    if (pgrid) pgrid.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
 function switchMktTab(i){
     for(var j=0;j<4;j++){
         var t=document.getElementById('mkt-tab-'+j);

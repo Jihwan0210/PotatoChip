@@ -2,12 +2,7 @@
    못난이 농작물 — 메인 스크립트
    ═══════════════════════════════════════════ */
 
-/* ── 전역 상태 ── */
-var cItems = {
-  ci1:{up:11700,qty:1,name:'흠집 완숙 토마토 2kg',emoji:'🍅',farm:'경남 함안 · 홍길동 농장',exp:'유통기한 D-3',ogPrice:18000},
-  ci2:{up:8640,qty:2,name:'비균형 브로콜리 1.5kg',emoji:'🥦',farm:'전남 나주 · 이순신 농장',exp:'유통기한 D-5',ogPrice:12000},
-  ci3:{up:27000,qty:1,name:'황토 감자 5kg',emoji:'🥔',farm:'강원 해피팜',exp:'유통기한 D-7',ogPrice:36000}
-};
+
 var sf=0, pd=0;
 var orderHistory=[];
 var notifList=[
@@ -339,15 +334,6 @@ function catClick(el){
   },100);
 }
 
-function mktF(el){
-  el.parentElement.querySelectorAll('.mf').forEach(function(x){x.classList.remove('on');});
-  el.classList.add('on');
-  var cats={'채소':89,'과일':74,'곡류':43,'버섯':28,'뿌리채소':36,'기한임박':32};
-  var txt=el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g,'').trim();
-  var cnt=cats[txt]||302;
-  var cntEl=document.querySelector('.pgrid-count');
-  if(cntEl) cntEl.innerHTML='총 <strong style="color:var(--dark)">'+cnt+'</strong>개 상품';
-}
 
 function switchMktTab(i){
   for(var j=0;j<4;j++){
