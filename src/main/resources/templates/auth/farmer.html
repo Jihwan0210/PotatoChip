@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>못난이 농작물 - 농가 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div th:replace="nav :: nav"></div>
+
+<div class="page active" id="page-farmer">
+    <!-- 헤더 -->
+    <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:20px 5%">
+        <div style="font-size:.65rem;color:var(--green);letter-spacing:1px;font-weight:500;margin-bottom:3px">🌾 농가 관리</div>
+        <div style="font-family:Gaegu,cursive;font-size:1.5rem;font-weight:700;color:var(--dark)">충주 행복 사과 농원 대시보드</div>
+        <!-- 탭 -->
+        <div style="display:flex;gap:0;border-top:1px solid var(--sand);margin-top:14px">
+            <div id="ftab-0" onclick="switchFarmerTab(0)" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.8rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2px solid var(--dark)">주문 현황</div>
+            <div id="ftab-1" onclick="switchFarmerTab(1)" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent">재고 관리</div>
+            <div id="ftab-2" onclick="switchFarmerTab(2)" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent">판매 분석</div>
+            <div id="ftab-3" onclick="switchFarmerTab(3)" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.8rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent">정산 내역</div>
+        </div>
+    </div>
+
+    <div style="padding:28px 5%">
+        <!-- 주문 현황 탭 -->
+        <div id="fcontent-0">
+            <!-- KPI 카드 4개 -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:1rem;margin-bottom:6px">🛒</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);line-height:1">28</div>
+                    <div style="font-size:.72rem;color:var(--muted);margin-top:3px">오늘 신규 주문</div>
+                    <div style="font-size:.68rem;color:var(--green);font-weight:500;margin-top:4px">↑ 어제 대비 +12%</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:1rem;margin-bottom:6px">🏆</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);line-height:1">2,340건</div>
+                    <div style="font-size:.72rem;color:var(--muted);margin-top:3px">누적 판매 건수</div>
+                    <div style="font-size:.68rem;color:var(--green);font-weight:500;margin-top:4px">이번 달 +184건</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:1rem;margin-bottom:6px">💰</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);line-height:1">1,842만</div>
+                    <div style="font-size:.72rem;color:var(--muted);margin-top:3px">이번 달 매출</div>
+                    <div style="font-size:.68rem;color:var(--green);font-weight:500;margin-top:4px">↑ 전월 대비 +8%</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:1rem;margin-bottom:6px">⭐</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);line-height:1">4.9★</div>
+                    <div style="font-size:.72rem;color:var(--muted);margin-top:3px">평균 평점</div>
+                    <div style="font-size:.68rem;color:var(--muted);margin-top:4px">리뷰 312건</div>
+                </div>
+            </div>
+
+            <!-- 최근 주문 목록 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div style="font-size:.88rem;font-weight:600;color:var(--dark)">최근 주문 목록</div>
+                <div style="display:flex;gap:8px">
+                    <button style="background:var(--beige2);color:var(--mid);border:1.5px solid var(--sand);border-radius:8px;padding:7px 14px;font-size:.76rem;font-weight:500;cursor:pointer;font-family:inherit">엑셀 다운로드</button>
+                    <button onclick="alert('출고 처리 완료! 🚚')" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.76rem;font-weight:600;cursor:pointer;">출고 처리</button>
+                </div>
+            </div>
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+                    <div>주문번호</div><div>상품명</div><div style="text-align:center">수량</div><div style="text-align:right">결제액</div><div style="text-align:center">상태</div><div style="text-align:center">주문일</div>
+                </div>
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--muted);font-size:.7rem">#20260522-001</div>
+                    <div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div>
+                    <div style="text-align:center;color:var(--mid)">2</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">25,800원</div>
+                    <div style="text-align:center"><span style="background:#fff5ef;color:var(--amber);border:1px solid #f5d89c;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">입금 확인</span></div>
+                    <div style="text-align:center;color:var(--muted);font-size:.7rem">05.22</div>
+                </div>
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--muted);font-size:.7rem">#20260521-012</div>
+                    <div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div>
+                    <div style="text-align:center;color:var(--mid)">1</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">12,900원</div>
+                    <div style="text-align:center"><span style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">배송 중</span></div>
+                    <div style="text-align:center;color:var(--muted);font-size:.7rem">05.21</div>
+                </div>
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--muted);font-size:.7rem">#20260520-008</div>
+                    <div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div>
+                    <div style="text-align:center;color:var(--mid)">3</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">38,700원</div>
+                    <div style="text-align:center"><span style="background:var(--beige2);color:var(--muted);border:1px solid var(--sand);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">배송 완료</span></div>
+                    <div style="text-align:center;color:var(--muted);font-size:.7rem">05.20</div>
+                </div>
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--muted);font-size:.7rem">#20260519-024</div>
+                    <div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div>
+                    <div style="text-align:center;color:var(--mid)">1</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">12,900원</div>
+                    <div style="text-align:center"><span style="background:var(--beige2);color:var(--muted);border:1px solid var(--sand);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">배송 완료</span></div>
+                    <div style="text-align:center;color:var(--muted);font-size:.7rem">05.19</div>
+                </div>
+                <div style="display:grid;grid-template-columns:140px 1fr 60px 90px 80px 80px;align-items:center;padding:13px 18px;font-size:.78rem">
+                    <div style="color:var(--muted);font-size:.7rem">#20260518-007</div>
+                    <div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div>
+                    <div style="text-align:center;color:var(--mid)">2</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">25,800원</div>
+                    <div style="text-align:center"><span style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">배송 중</span></div>
+                    <div style="text-align:center;color:var(--muted);font-size:.7rem">05.18</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 재고 관리 탭 -->
+        <div id="fcontent-1" style="display:none">
+            <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark);margin-bottom:18px">재고 관리 📦</div>
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:1fr 100px 100px 120px 100px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+                    <div>상품명</div><div style="text-align:center">현재 재고</div><div style="text-align:center">총 재고</div><div style="text-align:center">상태</div><div style="text-align:center">관리</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 100px 100px 120px 100px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.1rem">🍎</div><div style="font-weight:500;color:var(--dark)">홍옥 사과 3kg</div></div>
+                    <div style="text-align:center;font-weight:700;color:var(--dark)">42박스</div>
+                    <div style="text-align:center;color:var(--muted)">100박스</div>
+                    <div style="text-align:center"><span style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">판매 중</span></div>
+                    <div style="text-align:center"><button onclick="alert('재고 수정 기능 준비 중')" style="background:var(--beige2);color:var(--mid);border:1.5px solid var(--sand);border-radius:7px;padding:4px 10px;font-size:.7rem;cursor:pointer;font-family:inherit">수정</button></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 100px 100px 120px 100px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.1rem">🍏</div><div style="font-weight:500;color:var(--dark)">아오리 사과 2kg</div></div>
+                    <div style="text-align:center;font-weight:700;color:var(--amber)">8박스</div>
+                    <div style="text-align:center;color:var(--muted)">60박스</div>
+                    <div style="text-align:center"><span style="background:#fff5ef;color:var(--amber);border:1px solid #f5d89c;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">재고 부족</span></div>
+                    <div style="text-align:center"><button onclick="alert('재고 수정 기능 준비 중')" style="background:var(--beige2);color:var(--mid);border:1.5px solid var(--sand);border-radius:7px;padding:4px 10px;font-size:.7rem;cursor:pointer;font-family:inherit">수정</button></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 100px 100px 120px 100px;align-items:center;padding:14px 18px;font-size:.78rem">
+                    <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(145deg,#FEF2E8,#F5C4A0);display:flex;align-items:center;justify-content:center;font-size:1.1rem">🍎</div><div style="font-weight:500;color:var(--dark)">홍로 사과 3kg</div></div>
+                    <div style="text-align:center;font-weight:700;color:#E84040">0박스</div>
+                    <div style="text-align:center;color:var(--muted)">80박스</div>
+                    <div style="text-align:center"><span style="background:#fff0f0;color:#E84040;border:1px solid #f5c0c0;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">품절</span></div>
+                    <div style="text-align:center"><button onclick="alert('재고 수정 기능 준비 중')" style="background:var(--beige2);color:var(--mid);border:1.5px solid var(--sand);border-radius:7px;padding:4px 10px;font-size:.7rem;cursor:pointer;font-family:inherit">수정</button></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 판매 분석 탭 -->
+        <div id="fcontent-2" style="display:none">
+            <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark);margin-bottom:18px">판매 분석 📊</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:.82rem;font-weight:500;color:var(--dark);margin-bottom:14px">월별 매출 추이</div>
+                    <div style="display:flex;align-items:flex-end;gap:8px;height:120px;margin-bottom:8px">
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--gl);border-radius:4px 4px 0 0;height:55%"></div><div style="font-size:.62rem;color:var(--muted)">2월</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--gl);border-radius:4px 4px 0 0;height:68%"></div><div style="font-size:.62rem;color:var(--muted)">3월</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--gl);border-radius:4px 4px 0 0;height:72%"></div><div style="font-size:.62rem;color:var(--muted)">4월</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--green);border-radius:4px 4px 0 0;height:100%"></div><div style="font-size:.62rem;color:var(--dark);font-weight:700">5월</div></div>
+                    </div>
+                    <div style="font-size:.72rem;color:var(--muted)">최고 매출 · 이번 달</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:20px 22px">
+                    <div style="font-size:.82rem;font-weight:500;color:var(--dark);margin-bottom:14px">요일별 주문 패턴</div>
+                    <div style="display:flex;align-items:flex-end;gap:6px;height:100px;margin-bottom:8px">
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:60%"></div><div style="font-size:.58rem;color:var(--muted)">월</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:75%"></div><div style="font-size:.58rem;color:var(--muted)">화</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:55%"></div><div style="font-size:.58rem;color:var(--muted)">수</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:65%"></div><div style="font-size:.58rem;color:var(--muted)">목</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--amber);border-radius:3px 3px 0 0;height:100%"></div><div style="font-size:.58rem;color:var(--dark);font-weight:700">금</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:90%"></div><div style="font-size:.58rem;color:var(--muted)">토</div></div>
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:var(--apricot);border-radius:3px 3px 0 0;height:82%"></div><div style="font-size:.58rem;color:var(--muted)">일</div></div>
+                    </div>
+                    <div style="font-size:.72rem;color:var(--muted)">금요일에 주문이 가장 많아요</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 정산 내역 탭 -->
+        <div id="fcontent-3" style="display:none">
+            <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark);margin-bottom:18px">정산 내역 💳</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+                <div style="background:linear-gradient(135deg,var(--green),#5A9A30);border-radius:14px;padding:18px 20px;color:#fff">
+                    <div style="font-size:.72rem;color:rgba(255,255,255,.7);margin-bottom:4px">이번 달 정산 예정</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.5rem;font-weight:700">1,642만원</div>
+                    <div style="font-size:.68rem;color:rgba(255,255,255,.6);margin-top:2px">05.31 지급 예정</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:18px 20px">
+                    <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">지난 달 정산 완료</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.5rem;font-weight:700;color:var(--dark)">1,521만원</div>
+                    <div style="font-size:.68rem;color:var(--green);font-weight:500;margin-top:2px">04.30 지급 완료 ✓</div>
+                </div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:18px 20px">
+                    <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px">누적 정산 총액</div>
+                    <div style="font-family:Gaegu,cursive;font-size:1.5rem;font-weight:700;color:var(--dark)">8,940만원</div>
+                    <div style="font-size:.68rem;color:var(--muted);margin-top:2px">가입일부터 현재까지</div>
+                </div>
+            </div>
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:80px 1fr 120px 100px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+                    <div>정산 월</div><div>정산 항목</div><div style="text-align:right">금액</div><div style="text-align:center">상태</div>
+                </div>
+                <div style="display:grid;grid-template-columns:80px 1fr 120px 100px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--mid);font-weight:500">2026.05</div>
+                    <div style="color:var(--dark)">홍옥 사과 3kg 판매대금 (184건)</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">1,642만원</div>
+                    <div style="text-align:center"><span style="background:#fff5ef;color:var(--amber);border:1px solid #f5d89c;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">예정</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:80px 1fr 120px 100px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sand);font-size:.78rem">
+                    <div style="color:var(--mid);font-weight:500">2026.04</div>
+                    <div style="color:var(--dark)">홍옥 사과 3kg 판매대금 (170건)</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">1,521만원</div>
+                    <div style="text-align:center"><span style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">완료</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:80px 1fr 120px 100px;align-items:center;padding:13px 18px;font-size:.78rem">
+                    <div style="color:var(--mid);font-weight:500">2026.03</div>
+                    <div style="color:var(--dark)">홍옥 사과 3kg 판매대금 (158건)</div>
+                    <div style="text-align:right;font-weight:700;color:var(--dark)">1,410만원</div>
+                    <div style="text-align:center"><span style="background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:700">완료</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="footer :: footer"></div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/auth/auth.js}"></script>
+
+</body>
+</html>
