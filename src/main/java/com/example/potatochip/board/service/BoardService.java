@@ -1,67 +1,36 @@
 package com.example.potatochip.board.service;
 
-
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardResponseDTO;
 import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.repository.BoardRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    public BoardService(BoardRepository boardRepository) {
-        this.boardRepository = boardRepository;
+    // 전체 조회
+    public List<Board> findAll() {
+        return boardRepository.findAll();
     }
 
-    public List<BoardResponseDTO> getBoards() {
-        return boardRepository.findAll()
-                .stream()
-                .map(BoardResponseDTO::from)
-                .toList();
-    }
-
-    public BoardResponseDTO getBoard(Long id) {
+    // 단건 조회
+    public Board findById(Long id) {
         return boardRepository.findById(id)
-                .map(BoardResponseDTO::from)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
 
-    public BoardResponseDTO createBoard(BoardRequestDTO request) {
-
-        Board board = new Board();
-
-        board.setTitle(request.getTitle());
-        board.setContent(request.getContent());
-
-        Board saveBoard = boardRepository.save(board);
-
-        return BoardResponseDTO.from(saveBoard);
+    // 저장
+    public Board save(Board board) {
+        return boardRepository.save(board);
     }
 
-    public BoardResponseDTO updateBoard(Long id,BoardRequestDTO request) {
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다"));
-
-        board.setTitle(request.getTitle());
-        board.setContent(request.getContent());
-
-        Board updateBoard = boardRepository.save(board);
-
-        return BoardResponseDTO.from(updateBoard);
-    }
-
-    public void deleteBoard(Long id) {
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다"));
-
-        boardRepository.delete(board);
+    // 삭제
+    public void delete(Long id) {
+        boardRepository.deleteById(id);
     }
 }
