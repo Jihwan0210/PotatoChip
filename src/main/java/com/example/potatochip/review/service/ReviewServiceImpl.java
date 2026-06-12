@@ -60,13 +60,14 @@ public class ReviewServiceImpl implements ReviewService {
                 .content(reviewDTO.getContent())
                 .imageUrl(normalizeImageUrl(reviewDTO.getImageUrl()))
                 .repurchaseIntent(Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent()))
+                .isAnonymous(Boolean.TRUE.equals(reviewDTO.getIsAnonymous()))
                 .build();
 
         Review savedReview = reviewRepository.save(review);
 
         refreshAiSummarySafely(savedReview.getProductId());
 
-        return ReviewDTO.fromEntity(savedReview);
+        return ReviewDTO.fromEntity(savedReview, 0L, false);
     }
 
     @Override
@@ -86,7 +87,8 @@ public class ReviewServiceImpl implements ReviewService {
                 reviewDTO.getRating(),
                 reviewDTO.getContent(),
                 normalizeImageUrl(reviewDTO.getImageUrl()),
-                Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent())
+                Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent()),
+                Boolean.TRUE.equals(reviewDTO.getIsAnonymous())
         );
 
         refreshAiSummarySafely(review.getProductId());
