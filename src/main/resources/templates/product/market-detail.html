@@ -10,23 +10,23 @@
 </head>
 <body>
 <nav id="nav">
-    <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
+    <div class="logo" onclick="location.href='index'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
         못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
     </div>
     <ul class="nav-links">
-        <li><a class="active" data-page="home" onclick="location.href='index.html'" style="cursor:pointer">홈</a></li>
-        <li><a data-page="market" onclick="location.href='market.html'" style="cursor:pointer">마켓</a></li>
-        <li><a data-page="ranking" onclick="location.href='ranking.html'" style="cursor:pointer">판매랭킹</a></li>
-        <li><a data-page="review" onclick="location.href='review.html'" style="cursor:pointer">리뷰</a></li>
+        <li><a class="active" data-page="home" onclick="location.href='index'" style="cursor:pointer">홈</a></li>
+        <li><a data-page="market" onclick="location.href='market'" style="cursor:pointer">마켓</a></li>
+        <li><a data-page="ranking" onclick="location.href='ranking'" style="cursor:pointer">판매랭킹</a></li>
+        <li><a data-page="review" onclick="location.href='review'" style="cursor:pointer">리뷰</a></li>
         <li><a data-page="board" onclick="goPage('board')" style="cursor:pointer">게시판</a></li>
-        <li><a data-page="faq" onclick="location.href='faq.html'" style="cursor:pointer">FAQ</a></li>
+        <li><a data-page="faq" onclick="location.href='faq'" style="cursor:pointer">FAQ</a></li>
     </ul>
     <div class="nav-r">
         <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-        <span class="n-ico" onclick="location.href='cart.html'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+        <span class="n-ico" onclick="location.href='cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
         <span class="n-ico" onclick="goPage('mypage')" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</span>
         <span class="n-ico" onclick="goPage('farmer')" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</span>
-        <button class="btn-nav" onclick="location.href='login.html'">로그인</button>
+        <button class="btn-nav" onclick="location.href='login'">로그인</button>
     </div>
 </nav>
 
