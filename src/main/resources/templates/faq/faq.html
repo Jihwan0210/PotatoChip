@@ -108,8 +108,8 @@
         <div class="faq-help-desc">1:1 문의를 남기거나, 이미 남긴 문의의 답변 상태를 확인할 수 있어요.</div>
       </div>
       <div class="faq-inquiry-actions">
-        <button type="button" class="faq-inquiry-btn primary" onclick="location.href='/create'">문의하기</button>
-        <button type="button" class="faq-inquiry-btn secondary" onclick="location.href='/my'">내 문의보기</button>
+        <button type="button" class="faq-inquiry-btn primary"  onclick="goInquiryCreate()">문의하기</button>
+        <button type="button" class="faq-inquiry-btn secondary"  onclick="goMyInquiry()">내 문의보기</button>
       </div>
     </div>
   </section>
@@ -443,6 +443,33 @@
     messageElement.textContent=message;
     body.appendChild(messageElement);
     body.scrollTop=body.scrollHeight;
+  }
+  function isLoggedIn() {
+    const token =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token');
+
+    return !!token;
+  }
+
+  function goInquiryCreate() {
+    if (!isLoggedIn()) {
+      alert('로그인 후 문의를 작성할 수 있습니다.');
+      location.href = '/login';
+      return;
+    }
+
+    location.href = '/create';
+  }
+
+  function goMyInquiry() {
+    if (!isLoggedIn()) {
+      alert('로그인 후 문의 내역을 확인할 수 있습니다.');
+      location.href = '/login';
+      return;
+    }
+
+    location.href = '/my';
   }
 </script>
 </body>

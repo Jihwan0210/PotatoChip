@@ -33,6 +33,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/signup", "/login", "/css/**", "/js/**", "/images/**").permitAll() // 인증 없이 허용
+                        .requestMatchers("/api/inquires/**").authenticated() // 로그인시 문의 허용
+                        .requestMatchers("/api/admin/inquires/**").authenticated() //관리자 로그인시 문의 답변 허용
                         .anyRequest().permitAll() // 나머지도 허용 (추후 인증 필요 시 authenticated()로 변경)
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록

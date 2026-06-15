@@ -41,7 +41,7 @@
             <h1 class="inquiry-head-title">문의하기 💬</h1>
             <p class="inquiry-head-desc">FAQ와 챗봇으로 해결되지 않은 내용을 남겨주세요. 관리자가 확인 후 답변을 등록하면 내 문의보기에서 확인할 수 있어요.</p>
         </div>
-        <button class="inquiry-head-btn" type="button" onclick="location.href='/my'">내 문의보기 →</button>
+        <button class="inquiry-head-btn" type="button" onclick="goMyInquiry()">내 문의보기 →</button>
     </section>
 
     <section class="inquiry-layout">
@@ -83,12 +83,46 @@
 <div th:replace="~{footer :: footer}"></div>
 
 <script>
-    var currentUserId=localStorage.getItem('currentUserId')?Number(localStorage.getItem('currentUserId')):null;
-
-    async function submitInquiry(){
-        if(!currentUserId){
+    document.addEventListener('DOMContentLoaded',function(){
+        if(!isInquiryLoggedIn()){
             showInquiryToast('로그인 후 문의를 작성할 수 있어요.');
             setTimeout(function(){location.href='/login'},900);
+            return;
+        }
+    });
+
+    function getInquiryAuthToken(){
+        return localStorage.getItem('token')||sessionStorage.getItem('token');
+    }
+
+    function isInquiryLoggedIn(){
+        return !!getInquiryAuthToken();
+    }
+
+    function getInquiryAuthJsonHeaders(){
+        return {
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+getInquiryAuthToken()
+        };
+    }
+
+    function handleInquiryUnauthorized(){
+        showInquiryToast('로그인이 필요합니다. 다시 로그인해주세요.');
+        setTimeout(function(){location.href='/login'},900);
+    }
+
+    function goMyInquiry(){
+        if(!isInquiryLoggedIn()){
+            handleInquiryUnauthorized();
+            return;
+        }
+
+        location.href='/my';
+    }
+
+    async function submitInquiry(){
+        if(!isInquiryLoggedIn()){
+            handleInquiryUnauthorized();
             return;
         }
 
@@ -107,7 +141,6 @@
         }
 
         var body={
-            userId:currentUserId,
             productId:null,
             orderId:null,
             category:category,
@@ -118,9 +151,14 @@
         try{
             var response=await fetch('/api/inquiries',{
                 method:'POST',
-                headers:{'Content-Type':'application/json'},
+                headers:getInquiryAuthJsonHeaders(),
                 body:JSON.stringify(body)
             });
+
+            if(response.status===401||response.status===403){
+                handleInquiryUnauthorized();
+                return;
+            }
 
             var data=await response.json();
 
