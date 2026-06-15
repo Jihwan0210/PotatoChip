@@ -169,11 +169,20 @@
             return;
         }
 
+        cart.items.forEach(item => {
+            cItems[item.productId] = {
+                up: Number(item.price),
+                qty: item.quantity,
+                ogPrice: Number(item.price)
+            };
+        });
+
+
         document.getElementById('itemCount').textContent = cart.items.length + '개 상품';
         document.getElementById('cartTotal').value = cart.items.length;
 
-        const pickupItems = cart.items.filter(i => i.pickupAvailable);
-        const deliveryItems = cart.items.filter(i => !i.pickupAvailable);
+        const pickupItems = cart.items.filter(i => i.isPickupAvailable);
+        const deliveryItems = cart.items.filter(i => !i.isPickupAvailable);
 
         if (pickupItems.length > 0) {
             document.getElementById('pickupSection').style.display = 'block';
@@ -193,39 +202,51 @@
     function createItemRow(item, isPickup) {
         const div = document.createElement('div');
         div.setAttribute('data-product-id', item.productId);
-        div.setAttribute('data-unit-price', item.price);
+        div.setAttribute('data-unit-price', Number(item.price));
         div.setAttribute('data-pickup', isPickup);
         div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px';
 
         div.innerHTML = `
-            <input type="checkbox" checked id="check-${item.productId}" onchange="onCheckChange()"
-                   style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0"/>
-            <div style="width:60px;height:60px;border-radius:10px;background:var(--beige2);overflow:hidden;flex-shrink:0">
-                ${item.thumbnailUrl
-            ? `<img src="${item.thumbnailUrl}" style="width:100%;height:100%;object-fit:cover"/>`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🥬</div>`}
-            </div>
-            <div style="flex:1;min-width:0">
-                <div style="font-size:.82rem;color:var(--green);margin-bottom:2px">${item.origin ?? ''}</div>
-                <a href="/market/detail?id=${item.productId}"
-                   style="font-size:.88rem;font-weight:600;color:var(--dark);text-decoration:none">${item.productName}</a>
-                <div style="font-size:.78rem;color:var(--muted)">${Number(item.price).toLocaleString()}원</div>
-            </div>
-            <div style="display:flex;align-items:center;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
-                <button onclick="decreaseQty(${item.productId})"
-                        style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">−</button>
-                <span id="qty-${item.productId}"
-                      style="width:32px;text-align:center;font-size:.84rem;font-weight:700">${item.quantity}</span>
-                <button onclick="increaseQty(${item.productId})"
-                        style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">+</button>
-            </div>
-            <div id="subtotal-${item.productId}"
-                 style="font-size:.88rem;font-weight:700;color:var(--dark);min-width:70px;text-align:right">
-                ${(item.price * item.quantity).toLocaleString()}원
-            </div>
-            <button onclick="removeItem(${item.productId})"
-                    style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;flex-shrink:0">✕</button>
-        `;
+  <input type="checkbox" id="check-${item.productId}" checked onchange="onCheckChange()"
+    style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+
+  <img src="${item.thumbnailUrl || 'https://placehold.co/64x64?text=🥔'}" alt=""
+    style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0">
+
+  <div style="flex:1;min-width:0">
+    <div style="font-size:.85rem;font-weight:700;color:var(--dark);margin-bottom:2px;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      ${item.productName}
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">
+      ${Number(item.price).toLocaleString()}원 / 개
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="decreaseQty(${item.productId})"
+        style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;
+               background:#fff;cursor:pointer;font-size:.9rem;line-height:1">−</button>
+      <span id="qty-${item.productId}"
+        style="min-width:20px;text-align:center;font-size:.85rem;font-weight:700">
+        ${item.quantity}
+      </span>
+      <button onclick="increaseQty(${item.productId})"
+        style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;
+               background:#fff;cursor:pointer;font-size:.9rem;line-height:1">+</button>
+    </div>
+  </div>
+
+  <div style="text-align:right;flex-shrink:0">
+    <div id="subtotal-${item.productId}"
+      style="font-size:.9rem;font-weight:700;color:var(--dark);margin-bottom:8px">
+      ${(Number(item.price) * item.quantity).toLocaleString()}원
+    </div>
+    <button onclick="removeItem(${item.productId})"
+      style="font-size:.72rem;color:var(--muted);background:none;border:none;
+             cursor:pointer;text-decoration:underline">
+      삭제
+    </button>
+  </div>
+`;
         return div;
     }
 
