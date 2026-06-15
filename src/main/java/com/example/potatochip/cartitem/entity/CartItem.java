@@ -18,8 +18,6 @@ public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // 🌟 1. CartItem은 자기가 어느 Cart에 속해있는지 알아야 합니다.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
@@ -41,7 +39,7 @@ public class CartItem {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
-
+    private BigDecimal price;
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
