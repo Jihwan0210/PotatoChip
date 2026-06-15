@@ -557,10 +557,15 @@ function submitPost() {
     if (!title)   { showToast('제목을 입력해주세요.');  return; }
     if (!content) { showToast('내용을 입력해주세요.');  return; }
 
+const token =
+    localStorage.getItem('token')||
+    sessionStorage.getItem('token');
+
     fetch('/api/board', {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ category: category, title: title, content: content, authorId: currentUserId })
+        headers: { 'Content-Type': 'application/json','Authorization':'Bearer' + token
+        },
+        body:    JSON.stringify({ category: category, title: title, content: content})
     })
     .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
     .then(function (newPost) {
