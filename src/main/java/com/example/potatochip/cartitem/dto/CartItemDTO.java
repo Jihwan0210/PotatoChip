@@ -17,4 +17,5 @@ public class CartItemDTO {
     private String productName;
     private String thumbnailUrl;
     private String origin;
+    private Boolean isPickupAvailable;
 }

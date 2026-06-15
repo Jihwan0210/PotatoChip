@@ -1,25 +1,28 @@
 <!DOCTYPE html>
-<html lang="ko"><head>
+<html lang="ko">
+<head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>못난이 농작물</title>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link href="css/style.css" rel="stylesheet"/>
-</head><body>
+</head>
+<body>
 <div th:replace="nav :: nav"></div>
-<div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 20px;display:flex;align-items:center;justify-content:space-between">
+
+<div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 20px;display:flex;align-items:center;justify-content:space-between;margin-top:60px">
     <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)">장바구니 🛒</div>
-    <span style="font-size:.8rem;color:var(--muted)"
-          th:text="${cart.items != null ? cart.items.size() : 0} + '개 상품'"></span>
+    <span style="font-size:.8rem;color:var(--muted)" id="itemCount">0개 상품</span>
 </div>
-<div style="padding:28px 5%">
+
+<div style="padding:28px 5%" id="cartData">
     <div class="cart-layout">
 
-        <!-- ▼ 좌측: 상품 목록 영역 -->
+        <!-- 좌측: 상품 목록 -->
         <div id="cartList">
 
-            <!-- 비로그인 안내 (기본 노출, 로그인 시 JS로 숨김) -->
+            <!-- 비로그인 안내 -->
             <div id="loginGuide" style="text-align:center;padding:60px 20px;color:var(--muted)">
                 <div style="font-size:3rem;margin-bottom:12px">🔒</div>
                 <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">로그인이 필요한 서비스예요</div>
@@ -30,12 +33,11 @@
                 </button>
             </div>
 
-            <!-- 로그인 시 노출 (JS로 display:block) -->
+            <!-- 로그인 시 노출 -->
             <div id="cartItems" style="display:none">
 
-                <!-- 비어있을 때 -->
-                <div th:if="${cart.items == null or cart.items.isEmpty()}"
-                     style="text-align:center;padding:60px 20px;color:var(--muted)">
+                <!-- 장바구니 비었을 때 -->
+                <div id="emptyCart" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
                     <div style="font-size:3rem;margin-bottom:12px">🛒</div>
                     <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">장바구니가 비어있어요</div>
                     <div style="font-size:.8rem;margin-bottom:20px">마켓에서 마음에 드는 상품을 담아보세요!</div>
@@ -45,60 +47,35 @@
                     </button>
                 </div>
 
-                <!-- 아이템 목록 -->
-                <div th:each="item : ${cart.items}"
-                     style="display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px">
-                    <!-- 썸네일 -->
-                    <div style="width:60px;height:60px;border-radius:10px;background:var(--beige2);overflow:hidden;flex-shrink:0">
-                        <img th:if="${item.thumbnailUrl != null and !item.thumbnailUrl.isEmpty()}"
-                             th:src="${item.thumbnailUrl}"
-                             style="width:100%;height:100%;object-fit:cover"/>
-                        <div th:unless="${item.thumbnailUrl != null and !item.thumbnailUrl.isEmpty()}"
-                             style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🥬</div>
+                <!-- 픽업 가능 섹션 -->
+                <div id="pickupSection" style="display:none;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                        <span style="font-size:.78rem;font-weight:700;color:var(--green)">📍 픽업 가능 상품</span>
+                        <div style="flex:1;height:1px;background:var(--gl)"></div>
                     </div>
-
-                    <!-- 상품 정보 -->
-                    <div style="flex:1;min-width:0">
-                        <div style="font-size:.82rem;color:var(--green);margin-bottom:2px" th:text="${item.origin}"></div>
-                        <div style="font-size:.88rem;font-weight:600;color:var(--dark)" th:text="${item.productName}"></div>
-                        <div style="font-size:.78rem;color:var(--muted)"
-                             th:text="${#numbers.formatInteger(item.price, 3, 'COMMA')} + '원'"></div>
-                    </div>
-
-                    <!-- 수량 조절 -->
-                    <div style="display:flex;align-items:center;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
-                        <button th:onclick="|updateQty(${item.productId}, ${item.quantity} - 1)|"
-                                style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">−</button>
-                        <span th:text="${item.quantity}"
-                              style="width:32px;text-align:center;font-size:.84rem;font-weight:700"></span>
-                        <button th:onclick="|updateQty(${item.productId}, ${item.quantity} + 1)|"
-                                style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">+</button>
-                    </div>
-
-                    <!-- 소계 -->
-                    <div style="font-size:.88rem;font-weight:700;color:var(--dark);min-width:70px;text-align:right"
-                         th:text="${#numbers.formatInteger(item.price * item.quantity, 3, 'COMMA')} + '원'"></div>
-
-                    <!-- 삭제 -->
-                    <button th:onclick="|removeItem(${item.productId})|"
-                            style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;flex-shrink:0">✕</button>
+                    <div id="pickupList"></div>
                 </div>
 
-                <!-- 총액 스크립트용 hidden -->
-                <input type="hidden" id="cartTotal"
-                       th:value="${cart.items != null ? cart.items.size() : 0}"/>
+                <!-- 배송 전용 섹션 -->
+                <div id="deliverySection" style="display:none;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:16px">
+                        <span style="font-size:.78rem;font-weight:700;color:var(--muted)">🚚 배송 전용 상품 (픽업 불가)</span>
+                        <div style="flex:1;height:1px;background:var(--sand)"></div>
+                    </div>
+                    <div id="deliveryList"></div>
+                </div>
 
-            </div> <!-- /#cartItems -->
-        </div> <!-- /#cartList -->
+                <input type="hidden" id="cartTotal" value="0"/>
+            </div>
+        </div>
 
-        <!-- ▼ 우측: 주문 요약 (항상 노출) -->
+        <!-- 우측: 주문 요약 -->
         <div class="cart-sum" id="cartSummary">
             <div class="cs-title">💰 주문 요약</div>
 
             <div class="cs-row">
                 <span>상품 금액</span>
-                <span class="v" id="cs-tot"
-                      th:text="${#numbers.formatDecimal(totalPrice, 3, 'COMMA', 0, 'POINT')} + '원'"></span>
+                <span class="v" id="cs-tot">0원</span>
             </div>
 
             <div class="cs-row">
@@ -108,9 +85,21 @@
 
             <div style="font-size:.72rem;font-weight:500;color:var(--mid);margin:10px 0 6px">배송 방법</div>
             <div class="del-opts">
-                <div class="del-opt on" onclick="selD(this,0)"><input checked="" name="del" type="radio"/><div style="flex:1"><div class="del-ti">🚚 일반 배송</div><div class="del-su">2~3일</div></div><div class="del-pr">무료</div></div>
-                <div class="del-opt" onclick="selD(this,3000)"><input name="del" type="radio"/><div style="flex:1"><div class="del-ti">⚡ 당일 배송</div><div class="del-su">오전 11시 전</div></div><div class="del-pr">3,000원</div></div>
-                <div class="del-opt" onclick="selD(this,0)"><input name="del" type="radio"/><div style="flex:1"><div class="del-ti">📍 농장 픽업</div><div class="del-su">무료</div></div><div class="del-pr" style="color:var(--green)">무료</div></div>
+                <div class="del-opt on" onclick="selD(this,0)">
+                    <input checked="" name="del" type="radio"/>
+                    <div style="flex:1"><div class="del-ti">🚚 일반 배송</div><div class="del-su">2~3일</div></div>
+                    <div class="del-pr">무료</div>
+                </div>
+                <div class="del-opt" onclick="selD(this,3000)">
+                    <input name="del" type="radio"/>
+                    <div style="flex:1"><div class="del-ti">⚡ 당일 배송</div><div class="del-su">오전 11시 전</div></div>
+                    <div class="del-pr">3,000원</div>
+                </div>
+                <div class="del-opt" id="pickupOpt" onclick="selPickup(this)">
+                    <input name="del" type="radio"/>
+                    <div style="flex:1"><div class="del-ti">📍 농장 픽업</div><div class="del-su">무료</div></div>
+                    <div class="del-pr" style="color:var(--green)">무료</div>
+                </div>
             </div>
 
             <div class="cs-row">
@@ -119,7 +108,8 @@
             </div>
 
             <div class="pt-row">
-                <input class="pt-in" id="ptIn" max="2000" min="0" placeholder="포인트 사용 (보유: 2,000P)" type="number"/>
+                <input class="pt-in" id="ptIn" max="2000" min="0"
+                       placeholder="포인트 사용 (보유: 2,000P)" type="number"/>
                 <button class="btn-pt" onclick="applyPt()">사용</button>
             </div>
 
@@ -130,52 +120,216 @@
 
             <div class="cs-row total">
                 <span>최종 금액</span>
-                <span class="v" id="cs-fin"
-                      th:text="${#numbers.formatDecimal(totalPrice, 3, 'COMMA', 0, 'POINT')} + '원'"></span>
+                <span class="v" id="cs-fin">0원</span>
             </div>
 
             <div class="ben-badge" id="cartPoints">🌿 이번 구매로 0P 적립 예정!</div>
             <button class="btn-order" id="btnOrder" onclick="doOrder()">결제하기 →</button>
-        </div> <!-- /#cartSummary -->
+        </div>
 
-    </div> <!-- /.cart-layout -->
+    </div>
 </div>
+
 <div th:replace="footer :: footer"></div>
+<script src="js/app.js"></script>
 <script>
-    // 로그인 여부 확인 (마켓 페이지와 동일한 패턴)
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
     const role = localStorage.getItem('role') || sessionStorage.getItem('role');
-    if (role) {
+    var sf = 0, pd = 0;
+
+    if (!token || !role) {
+        document.getElementById('loginGuide').style.display = 'block';
+        document.getElementById('cartItems').style.display = 'none';
+    } else {
         document.getElementById('loginGuide').style.display = 'none';
         document.getElementById('cartItems').style.display = 'block';
+
+        fetch('/cart/data', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    document.getElementById('loginGuide').style.display = 'block';
+                    document.getElementById('cartItems').style.display = 'none';
+                    return null;
+                }
+                return res.json();
+            })
+            .then(cart => {
+                if (!cart) return;
+                renderCart(cart);
+                recalcTotal();
+            });
     }
 
-    // 수량 변경
-    async function updateQty(productId, newQty) {
-        if (newQty < 1) return;
-        try {
-            const res = await fetch(`/cart/items/${productId}?quantity=${newQty}`, { method: 'PATCH' });
-            if (res.ok) {
-                location.reload();
-            } else {
-                console.error('수량 변경 실패:', res.status);
-            }
-        } catch (e) {
-            console.error('요청 오류:', e);
+    function renderCart(cart) {
+        if (!cart.items || cart.items.length === 0) {
+            document.getElementById('emptyCart').style.display = 'block';
+            document.getElementById('itemCount').textContent = '0개 상품';
+            return;
+        }
+
+        document.getElementById('itemCount').textContent = cart.items.length + '개 상품';
+        document.getElementById('cartTotal').value = cart.items.length;
+
+        const pickupItems = cart.items.filter(i => i.pickupAvailable);
+        const deliveryItems = cart.items.filter(i => !i.pickupAvailable);
+
+        if (pickupItems.length > 0) {
+            document.getElementById('pickupSection').style.display = 'block';
+            pickupItems.forEach(item => {
+                document.getElementById('pickupList').appendChild(createItemRow(item, true));
+            });
+        }
+
+        if (deliveryItems.length > 0) {
+            document.getElementById('deliverySection').style.display = 'block';
+            deliveryItems.forEach(item => {
+                document.getElementById('deliveryList').appendChild(createItemRow(item, false));
+            });
         }
     }
 
-    // 삭제
+    function createItemRow(item, isPickup) {
+        const div = document.createElement('div');
+        div.setAttribute('data-product-id', item.productId);
+        div.setAttribute('data-unit-price', item.price);
+        div.setAttribute('data-pickup', isPickup);
+        div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px';
+
+        div.innerHTML = `
+            <input type="checkbox" checked id="check-${item.productId}" onchange="onCheckChange()"
+                   style="width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0"/>
+            <div style="width:60px;height:60px;border-radius:10px;background:var(--beige2);overflow:hidden;flex-shrink:0">
+                ${item.thumbnailUrl
+            ? `<img src="${item.thumbnailUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🥬</div>`}
+            </div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:.82rem;color:var(--green);margin-bottom:2px">${item.origin ?? ''}</div>
+                <a href="/market/detail?id=${item.productId}"
+                   style="font-size:.88rem;font-weight:600;color:var(--dark);text-decoration:none">${item.productName}</a>
+                <div style="font-size:.78rem;color:var(--muted)">${Number(item.price).toLocaleString()}원</div>
+            </div>
+            <div style="display:flex;align-items:center;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
+                <button onclick="decreaseQty(${item.productId})"
+                        style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">−</button>
+                <span id="qty-${item.productId}"
+                      style="width:32px;text-align:center;font-size:.84rem;font-weight:700">${item.quantity}</span>
+                <button onclick="increaseQty(${item.productId})"
+                        style="width:30px;height:30px;border:none;background:#fff;cursor:pointer;font-size:.9rem">+</button>
+            </div>
+            <div id="subtotal-${item.productId}"
+                 style="font-size:.88rem;font-weight:700;color:var(--dark);min-width:70px;text-align:right">
+                ${(item.price * item.quantity).toLocaleString()}원
+            </div>
+            <button onclick="removeItem(${item.productId})"
+                    style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;flex-shrink:0">✕</button>
+        `;
+        return div;
+    }
+
+    function recalcTotal() {
+        var tot = 0;
+        document.querySelectorAll('[data-product-id]').forEach(function(row) {
+            var productId = row.dataset.productId;
+            var chk = document.getElementById('check-' + productId);
+            if (!chk || !chk.checked) return;
+            var unitPrice = parseInt(row.dataset.unitPrice) || 0;
+            var qtyEl = document.getElementById('qty-' + productId);
+            var qty = parseInt(qtyEl ? qtyEl.textContent : 0) || 0;
+            tot += unitPrice * qty;
+        });
+        var fin = Math.max(0, tot + sf - pd);
+        var et = document.getElementById('cs-tot');
+        var ef = document.getElementById('cs-fin');
+        var pts = document.getElementById('cartPoints');
+        if (et) et.textContent = tot.toLocaleString() + '원';
+        if (ef) ef.textContent = fin.toLocaleString() + '원';
+        if (pts) pts.textContent = '🌿 이번 구매로 ' + Math.floor(fin / 100) + 'P 적립 예정!';
+    }
+
+    function onCheckChange() { recalcTotal(); }
+
+    function selPickup(el) {
+        var hasNonPickup = false;
+        document.querySelectorAll('[data-product-id]').forEach(function(row) {
+            var productId = row.dataset.productId;
+            var chk = document.getElementById('check-' + productId);
+            var isPickup = row.dataset.pickup === 'true';
+            if (chk && chk.checked && !isPickup) hasNonPickup = true;
+        });
+        if (hasNonPickup) {
+            alert('⚠️ 농장 픽업이 불가능한 상품이 포함되어 있어요!\n픽업 불가 상품의 체크를 해제하거나 배송 방법을 변경해주세요.');
+            return;
+        }
+        selD(el, 0);
+    }
+
+    function increaseQty(productId) {
+        var qtyEl = document.getElementById('qty-' + productId);
+        var current = parseInt(qtyEl ? qtyEl.textContent : 1) || 1;
+        updateQty(productId, current + 1);
+    }
+
+    function decreaseQty(productId) {
+        var qtyEl = document.getElementById('qty-' + productId);
+        var current = parseInt(qtyEl ? qtyEl.textContent : 1) || 1;
+        if (current <= 1) return;
+        updateQty(productId, current - 1);
+    }
+
+    var updateLock = false;
+    async function updateQty(productId, newQty) {
+        if (newQty < 1 || updateLock) return;
+        updateLock = true;
+        try {
+            const res = await fetch(`/cart/items/${productId}?quantity=${newQty}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                var qtyEl = document.getElementById('qty-' + productId);
+                if (qtyEl) qtyEl.textContent = newQty;
+                var row = document.querySelector('[data-product-id="' + productId + '"]');
+                var unitPrice = parseInt(row ? row.dataset.unitPrice : 0) || 0;
+                var subtotalEl = document.getElementById('subtotal-' + productId);
+                if (subtotalEl) subtotalEl.textContent = (unitPrice * newQty).toLocaleString() + '원';
+                recalcTotal();
+            }
+        } catch (e) {
+            console.error('요청 오류:', e);
+        } finally {
+            updateLock = false;
+        }
+    }
+
     async function removeItem(productId) {
         try {
-            const res = await fetch(`/cart/items/${productId}`, { method: 'DELETE' });
+            const res = await fetch(`/cart/items/${productId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
             if (res.ok) {
-                location.reload();
-            } else {
-                console.error('삭제 실패:', res.status);
+                var row = document.querySelector('[data-product-id="' + productId + '"]');
+                if (row) row.remove();
+
+                // 섹션 비었으면 숨기기
+                if (document.getElementById('pickupList').children.length === 0)
+                    document.getElementById('pickupSection').style.display = 'none';
+                if (document.getElementById('deliveryList').children.length === 0)
+                    document.getElementById('deliverySection').style.display = 'none';
+
+                // 둘 다 비었으면 빈 메시지
+                if (document.querySelectorAll('[data-product-id]').length === 0)
+                    document.getElementById('emptyCart').style.display = 'block';
+
+                recalcTotal();
             }
         } catch (e) {
             console.error('요청 오류:', e);
         }
     }
 </script>
-<script src="js/app.js"></script></body></html>
+</body>
+</html>

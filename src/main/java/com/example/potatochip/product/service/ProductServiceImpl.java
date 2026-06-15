@@ -8,10 +8,15 @@ import com.example.potatochip.product.file.FileService;
 import com.example.potatochip.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -82,6 +87,52 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ProductDTO> getProducts(String category, String keyword, String sort, Pageable pageable) {
+
+        LocalDate today = LocalDate.now();
+        LocalDate expireLimit = today.plusDays(4);
+
+        Page<Product> products;
+
+        if ("popular".equals(sort)) {
+            products = productRepository.searchProductsByPopular(
+                    category, keyword, today, expireLimit, pageable
+            );
+        } else if ("discount".equals(sort)) {
+            products = productRepository.searchProductsByDiscount(
+                    category, keyword, today, expireLimit, pageable
+            );
+        } else {
+            Sort sorting = switch (sort) {
+                case "price"  -> Sort.by("price").ascending();
+                case "newest" -> Sort.by("createdAt").descending();
+                default       -> Sort.by("id").descending();
+            };
+            Pageable sortedPageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    sorting
+            );
+            products = productRepository.searchProducts(
+                    category, keyword, today, expireLimit, sortedPageable
+            );
+        }
+
+        return products.map(product -> toDTO(product, today, expireLimit));
+    }
+
+    private ProductDTO toDTO(Product product, LocalDate today, LocalDate expireLimit) {
+        ProductDTO dto = modelMapper.map(product, ProductDTO.class);
+        if (product.getDiscountEndAt() != null) {
+            LocalDate endAt = product.getDiscountEndAt();
+            dto.setSoonExpired(!endAt.isBefore(today) && endAt.isBefore(expireLimit));
+        } else {
+            dto.setSoonExpired(false);
+        }
+        return dto;
     }
 }
 

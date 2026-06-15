@@ -11,15 +11,18 @@ function switchDetailTab(name){
         }
     });
 }
-
 var detailQtyVal = 1;
 function changeDetailQty(d) {
     detailQtyVal = Math.max(1, detailQtyVal + d);
     document.getElementById('detailQty').textContent = detailQtyVal;
 
-    // 수량 href 업데이트
-    const btn = document.getElementById('buyNowBtn');
-    btn.href = `/cart/items/buy-now?productId=${productId}&quantity=${detailQtyVal}`;
+    // 총 금액 업데이트
+    var priceEl = document.getElementById('detailTotalPrice');
+    if (priceEl) {
+        var unit = parseFloat(priceEl.getAttribute('data-unit'));
+        var total = unit * detailQtyVal;
+        priceEl.textContent = total.toLocaleString() + '원';
+    }
 }
 
 /* ══ WISH ══ */
@@ -109,35 +112,7 @@ function mktF(el) {
     el.classList.add('on');
 
     var txt = el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g, '').trim();
-    var categoryMap = {
-        '전체': null,
-        '채소': '채소',
-        '과일': '과일',
-        '곡류': '곡류',
-        '버섯': '버섯',
-        '뿌리채소': '뿌리채소',
-        '기한임박': '기한임박'
-    };
-    var selectedCat = categoryMap[txt];
-
-    // 탭 0으로 강제 전환 추가
-    switchMktTab(0);
-
-    document.querySelectorAll('.pgrid .pc2').forEach(function(card) {
-        if (!selectedCat || card.dataset.category === selectedCat) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-
-    var visible = document.querySelectorAll('.pgrid .pc2:not([style*="display: none"])').length;
-    var cntEl = document.querySelector('.pgrid-count');
-    if (cntEl) cntEl.innerHTML = '총 <strong style="color:var(--dark)">' + visible + '</strong>개 상품';
-
-    // 상품 목록으로 스크롤
-    var pgrid = document.querySelector('.pgrid');
-    if (pgrid) pgrid.scrollIntoView({behavior: 'smooth', block: 'start'});
+    location.href = '/market?category=' + encodeURIComponent(txt);
 }
 function switchMktTab(i){
     for(var j=0;j<4;j++){
@@ -152,32 +127,11 @@ function switchMktTab(i){
     if(ct) ct.style.display='block';
 }
 
-function doMktSearch(){
-    var q=document.getElementById('mktSearch');
-    var keyword=(q?q.value.trim():'').toLowerCase();
-    var c=document.getElementById('mktSearchClear');
-    if(c) c.style.display=keyword?'inline':'none';
-    if(!keyword) return;
-    switchMktTab(0);
-    var cards=document.querySelectorAll('#mkt-content-0 .pc2');
-    var shown=0;
-    cards.forEach(function(card){
-        var nm=card.textContent.toLowerCase();
-        var match=nm.indexOf(keyword)>=0;
-        card.style.display=match?'':'none';
-        if(match) shown++;
-    });
-    var cnt=document.querySelector('.pgrid-count');
-    if(cnt) cnt.innerHTML='검색 결과: <strong style="color:var(--dark)">'+shown+'</strong>개';
+function doMktSearch() {
+    var keyword = document.getElementById('mktSearch').value.trim();
+    location.href = '/market?keyword=' + encodeURIComponent(keyword);
 }
 
-function clearMktSearch(){
-    var q=document.getElementById('mktSearch');
-    var c=document.getElementById('mktSearchClear');
-    if(q) q.value='';
-    if(c) c.style.display='none';
-    document.querySelectorAll('#mkt-content-0 .pc2').forEach(function(card){card.style.display='';});
-    var cnt=document.querySelector('.pgrid-count');
-    if(cnt) cnt.innerHTML='총 <strong style="color:var(--dark)">302</strong>개 상품';
+function clearMktSearch() {
+    location.href = '/market';
 }
-

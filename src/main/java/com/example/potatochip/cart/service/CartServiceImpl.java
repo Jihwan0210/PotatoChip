@@ -41,10 +41,10 @@ public class CartServiceImpl implements CartService {
                             .productId(item.getProductId())
                             .quantity(item.getQuantity())
                             .price(item.getPriceSnapshot())
-                            // 추가된 필드
                             .productName(product != null ? product.getName() : "상품 없음")
                             .thumbnailUrl(product != null ? product.getThumbnailUrl() : "")
                             .origin(product != null ? product.getOrigin() : "")
+                            .isPickupAvailable(product != null ? product.getIsPickupAvailable() : false) // 추가
                             .build();
                 })
                 .collect(Collectors.toList());
