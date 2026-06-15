@@ -18,18 +18,21 @@ public class ProductRankingsServiceImpl implements ProductRankingsService {
 
     @Override
     public List<ProductRankings> getWeeklyRanking() {
-        return productRankingsRepository.findByPeriodTypeAndPeriodDateOrderByRankAsc (
-            PeriodType.WEEKLY, //기간 유형
-                LocalDate.now()  //조회 날짜
-        );
+        LocalDate latest = productRankingsRepository
+                .findTopByPeriodTypeOrderByPeriodDateDesc(PeriodType.WEEKLY)
+                .map(r -> r.getPeriodDate())
+                .orElse(LocalDate.now());
+        return productRankingsRepository
+                .findByPeriodTypeAndPeriodDateOrderByRankAsc(PeriodType.WEEKLY, latest);
     }
-
 
     @Override
     public List<ProductRankings> getDailyRanking() {
-        return productRankingsRepository.findByPeriodTypeAndPeriodDateOrderByRankAsc (
-                PeriodType.DAILY, //기간 유형
-                LocalDate.now() //조회 날짜
-        );
+        LocalDate latest = productRankingsRepository
+                .findTopByPeriodTypeOrderByPeriodDateDesc(PeriodType.DAILY)
+                .map(r -> r.getPeriodDate())
+                .orElse(LocalDate.now());
+        return productRankingsRepository
+                .findByPeriodTypeAndPeriodDateOrderByRankAsc(PeriodType.DAILY, latest);
     }
 }

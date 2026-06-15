@@ -2,7 +2,7 @@
    못난이 농작물 — 메인 스크립트
    ═══════════════════════════════════════════ */
 
-
+var cItems = {};
 var sf=0, pd=0;
 var orderHistory=[];
 var notifList=[
@@ -35,8 +35,7 @@ function goPage(name){
     if(oc && oc.indexOf("'"+name+"'")>=0){a.style.color='var(--dark)';a.style.fontWeight='700';}
     else{a.style.color='';a.style.fontWeight='';}
   });
-  // 페이지별 렌더링 훅
-  if(name==='cart') renderCart();
+
   if(name==='mypage'){renderOrderHistory();renderNotifBadge();}
   if(name==='home'||name==='market') renderNotifBadge();
 }
@@ -61,10 +60,23 @@ function showToast(msg, duration){
 }
 
 /* ══ CART BADGE ══ */
-function updateCartBadge(){
-  var cnt=Object.keys(cItems).length;
-  var badge=document.getElementById('cartBadge');
-  if(badge){badge.textContent=cnt;badge.style.display=cnt?'flex':'none';}
+function updateCartBadge() {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+  if (!token) return;
+
+  fetch('/cart/data', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+      .then(res => res.ok ? res.json() : null)
+      .then(cart => {
+        var cnt = cart && cart.items ? cart.items.length : 0;
+        var badge = document.getElementById('cartBadge');
+        if (badge) {
+          badge.textContent = cnt;
+          badge.style.display = cnt ? 'flex' : 'none';
+        }
+      })
+      .catch(() => {});
 }
 
 /* ══ CART RENDER ══ */
@@ -107,19 +119,43 @@ function renderCart(){
   updSum();
 }
 
-/* ══ CART FUNCTIONS ══ */
-function addToCart(name,price,emoji,farm){
-  var nm=name||'상품';
-  var pr=price||9900;
-  var em=emoji||'🛒';
-  var fm=farm||'못난이 농작물';
-  var id='ci'+Date.now();
-  cItems[id]={up:pr,qty:1,name:nm,emoji:em,farm:fm,exp:'신선 배송',ogPrice:Math.round(pr*1.35)};
-  renderCart();
-  showToast('🛒 '+nm+' 장바구니에 담겼어요!');
-  updateCartBadge();
-}
+async function addToCart(productId, quantity) {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
+  if (!token) {
+    if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) {
+      location.href = '/login';
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch('/cart/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        productId: parseInt(productId),
+        quantity: quantity || 1
+      })
+    });
+
+    if (res.status === 401) {
+      if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) {
+        location.href = '/login';
+      }
+    } else if (res.ok) {
+      showToast('🛒 장바구니에 담겼어요!');
+      updateCartBadge();
+    } else {
+      showToast('담기 실패했어요 ㅠㅠ');
+    }
+  } catch (e) {
+    showToast('오류가 발생했어요 ㅠㅠ');
+  }
+}
 function chgQ(id,d){
   if(!cItems[id]) return;
   cItems[id].qty=Math.max(1,cItems[id].qty+d);
@@ -396,13 +432,7 @@ function toggleDetailWish2(btn){
   if(b1) b1.textContent=w?'🤍':'❤️';
 }
 
-/* ══ CART PAGE QUANTITY ══ */
-var detailQtyVal=1;
-function changeDetailQty(d){
-  detailQtyVal=Math.max(1,detailQtyVal+d);
-  var el=document.getElementById('detailQty');
-  if(el) el.textContent=detailQtyVal;
-}
+
 
 /* ══ DETAIL PAGE ══ */
 function switchDetailTab(name){
@@ -698,7 +728,6 @@ window.addEventListener('DOMContentLoaded',function(){
   },{threshold:.08});
   document.querySelectorAll('.rv').forEach(function(el){obs.observe(el);});
 
-  renderCart();
   renderNotifBadge();
   renderNotifPopup();
   renderOrderHistory();

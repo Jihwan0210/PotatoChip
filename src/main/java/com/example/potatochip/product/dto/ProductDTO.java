@@ -59,4 +59,6 @@ public class ProductDTO {
 
     private List<ProductImage> images;
 
+    private Boolean soonExpired; //할인마감 여부
+
 }
