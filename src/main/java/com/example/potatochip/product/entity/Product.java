@@ -1,5 +1,6 @@
 package com.example.potatochip.product.entity;
 
+import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.product.dto.ProductDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +8,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -14,15 +17,16 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "images")
 public class Product {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id; //상품 ID
 
-        @Column(name = "seller_id", nullable = false)
-        private Long sellerId; //판매자 ID
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "seller_id", nullable = false)
+        private User seller; //판매자 ID
 
         @Column(nullable = false, length = 100)
         private String category; //카테고리
@@ -46,6 +50,9 @@ public class Product {
 
 
         private String thumbnailUrl; //대표 사진
+
+        @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<ProductImage> images = new ArrayList<>(); //상품 이미지 테이블과 연관관계 Casecade로 함께 삭제
 
         @Column(nullable = false)
         private String origin; // 원산지
@@ -80,7 +87,6 @@ public class Product {
 
         public void changeEntity(ProductDTO productDTO) {
 
-                this.sellerId = productDTO.getSellerId();
                 this.category = productDTO.getCategory();
                 this.name = productDTO.getName();
                 this.description = productDTO.getDescription();

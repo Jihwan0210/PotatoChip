@@ -2,12 +2,7 @@
    못난이 농작물 — 메인 스크립트
    ═══════════════════════════════════════════ */
 
-/* ── 전역 상태 ── */
-var cItems = {
-  ci1:{up:11700,qty:1,name:'흠집 완숙 토마토 2kg',emoji:'🍅',farm:'경남 함안 · 홍길동 농장',exp:'유통기한 D-3',ogPrice:18000},
-  ci2:{up:8640,qty:2,name:'비균형 브로콜리 1.5kg',emoji:'🥦',farm:'전남 나주 · 이순신 농장',exp:'유통기한 D-5',ogPrice:12000},
-  ci3:{up:27000,qty:1,name:'황토 감자 5kg',emoji:'🥔',farm:'강원 해피팜',exp:'유통기한 D-7',ogPrice:36000}
-};
+var cItems = {};
 var sf=0, pd=0;
 var orderHistory=[];
 var notifList=[
@@ -40,8 +35,7 @@ function goPage(name){
     if(oc && oc.indexOf("'"+name+"'")>=0){a.style.color='var(--dark)';a.style.fontWeight='700';}
     else{a.style.color='';a.style.fontWeight='';}
   });
-  // 페이지별 렌더링 훅
-  if(name==='cart') renderCart();
+
   if(name==='mypage'){renderOrderHistory();renderNotifBadge();}
   if(name==='home'||name==='market') renderNotifBadge();
 }
@@ -66,10 +60,23 @@ function showToast(msg, duration){
 }
 
 /* ══ CART BADGE ══ */
-function updateCartBadge(){
-  var cnt=Object.keys(cItems).length;
-  var badge=document.getElementById('cartBadge');
-  if(badge){badge.textContent=cnt;badge.style.display=cnt?'flex':'none';}
+function updateCartBadge() {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+  if (!token) return;
+
+  fetch('/cart/data', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+      .then(res => res.ok ? res.json() : null)
+      .then(cart => {
+        var cnt = cart && cart.items ? cart.items.length : 0;
+        var badge = document.getElementById('cartBadge');
+        if (badge) {
+          badge.textContent = cnt;
+          badge.style.display = cnt ? 'flex' : 'none';
+        }
+      })
+      .catch(() => {});
 }
 
 /* ══ CART RENDER ══ */
@@ -93,38 +100,62 @@ function renderCart(){
     d.id=id;
     var ogHtml=it.ogPrice?'<span class="ct-og">'+it.ogPrice.toLocaleString()+'원</span>':'';
     d.innerHTML='<div class="ct-thumb '+cl+'">'+it.emoji+'</div>'
-      +'<div style="flex:1">'
-      +'<div class="ct-from">'+it.farm+'</div>'
-      +'<div class="ct-nm">'+it.name+'</div>'
-      +'<div class="ct-exp">'+it.exp+'</div>'
-      +'<div class="qty-ctrl">'
-      +'<button class="qty-b" onclick="chgQ(\''+id+'\',-1)">−</button>'
-      +'<span class="qty-v" id="q-'+id+'">'+it.qty+'</span>'
-      +'<button class="qty-b" onclick="chgQ(\''+id+'\',1)">+</button>'
-      +'</div></div>'
-      +'<div class="ct-r">'
-      +'<span class="ct-del" onclick="rmItem(\''+id+'\')">✕</span>'
-      +ogHtml
-      +'<span class="ct-price" id="p-'+id+'">'+(it.up*it.qty).toLocaleString()+'원</span>'
-      +'</div>';
+        +'<div style="flex:1">'
+        +'<div class="ct-from">'+it.farm+'</div>'
+        +'<div class="ct-nm">'+it.name+'</div>'
+        +'<div class="ct-exp">'+it.exp+'</div>'
+        +'<div class="qty-ctrl">'
+        +'<button class="qty-b" onclick="chgQ(\''+id+'\',-1)">−</button>'
+        +'<span class="qty-v" id="q-'+id+'">'+it.qty+'</span>'
+        +'<button class="qty-b" onclick="chgQ(\''+id+'\',1)">+</button>'
+        +'</div></div>'
+        +'<div class="ct-r">'
+        +'<span class="ct-del" onclick="rmItem(\''+id+'\')">✕</span>'
+        +ogHtml
+        +'<span class="ct-price" id="p-'+id+'">'+(it.up*it.qty).toLocaleString()+'원</span>'
+        +'</div>';
     list.appendChild(d);
   });
   updSum();
 }
 
-/* ══ CART FUNCTIONS ══ */
-function addToCart(name,price,emoji,farm){
-  var nm=name||'상품';
-  var pr=price||9900;
-  var em=emoji||'🛒';
-  var fm=farm||'못난이 농작물';
-  var id='ci'+Date.now();
-  cItems[id]={up:pr,qty:1,name:nm,emoji:em,farm:fm,exp:'신선 배송',ogPrice:Math.round(pr*1.35)};
-  renderCart();
-  showToast('🛒 '+nm+' 장바구니에 담겼어요!');
-  updateCartBadge();
-}
+async function addToCart(productId, quantity) {
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
+  if (!token) {
+    if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) {
+      location.href = '/login';
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch('/cart/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        productId: parseInt(productId),
+        quantity: quantity || 1
+      })
+    });
+
+    if (res.status === 401) {
+      if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) {
+        location.href = '/login';
+      }
+    } else if (res.ok) {
+      showToast('🛒 장바구니에 담겼어요!');
+      updateCartBadge();
+    } else {
+      showToast('담기 실패했어요 ㅠㅠ');
+    }
+  } catch (e) {
+    showToast('오류가 발생했어요 ㅠㅠ');
+  }
+}
 function chgQ(id,d){
   if(!cItems[id]) return;
   cItems[id].qty=Math.max(1,cItems[id].qty+d);
@@ -214,11 +245,11 @@ function renderOrderHistory(){
   if(!container) return;
   if(!orderHistory.length){
     container.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)">'
-      +'<div style="font-size:2.5rem;margin-bottom:10px">📦</div>'
-      +'<div style="font-family:Gaegu,cursive;font-size:1rem;color:var(--mid)">아직 주문 내역이 없어요</div>'
-      +'<div style="font-size:.78rem;margin-top:6px;margin-bottom:16px">마켓에서 첫 주문을 해보세요!</div>'
-      +'<button onclick="goPage(\'market\')" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:.85rem;cursor:pointer">마켓 가기</button>'
-      +'</div>';
+        +'<div style="font-size:2.5rem;margin-bottom:10px">📦</div>'
+        +'<div style="font-family:Gaegu,cursive;font-size:1rem;color:var(--mid)">아직 주문 내역이 없어요</div>'
+        +'<div style="font-size:.78rem;margin-top:6px;margin-bottom:16px">마켓에서 첫 주문을 해보세요!</div>'
+        +'<button onclick="goPage(\'market\')" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:.85rem;cursor:pointer">마켓 가기</button>'
+        +'</div>';
     return;
   }
   var html='';
@@ -226,28 +257,28 @@ function renderOrderHistory(){
     var itemsHtml='';
     order.items.forEach(function(it){
       itemsHtml+='<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--sand)">'
-        +'<div style="width:46px;height:46px;border-radius:11px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">'+it.emoji+'</div>'
-        +'<div style="flex:1">'
-        +'<div style="font-size:.72rem;color:var(--green);font-weight:500;margin-bottom:1px">'+it.farm+'</div>'
-        +'<div style="font-size:.83rem;font-weight:700;color:var(--dark)">'+it.name+'</div>'
-        +'<div style="font-size:.78rem;font-weight:700;color:var(--amber)">'+it.up.toLocaleString()+'원 × '+it.qty+'</div>'
-        +'</div>'
-        +'</div>';
+          +'<div style="width:46px;height:46px;border-radius:11px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">'+it.emoji+'</div>'
+          +'<div style="flex:1">'
+          +'<div style="font-size:.72rem;color:var(--green);font-weight:500;margin-bottom:1px">'+it.farm+'</div>'
+          +'<div style="font-size:.83rem;font-weight:700;color:var(--dark)">'+it.name+'</div>'
+          +'<div style="font-size:.78rem;font-weight:700;color:var(--amber)">'+it.up.toLocaleString()+'원 × '+it.qty+'</div>'
+          +'</div>'
+          +'</div>';
     });
     html+='<div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:20px 22px;margin-bottom:14px">'
-      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--sand)">'
-      +'<div>'
-      +'<div style="font-size:.8rem;font-weight:700;color:var(--dark)">주문번호 '+order.id+'</div>'
-      +'<div style="font-size:.7rem;color:var(--muted);margin-top:2px">'+order.date+' · '+order.items.length+'개 상품 · '+order.total.toLocaleString()+'원</div>'
-      +'</div>'
-      +'<div style="font-size:.76rem;font-weight:700;padding:4px 12px;border-radius:20px;background:#f0fff4;color:var(--green);border:1px solid var(--gl)">'+order.status+'</div>'
-      +'</div>'
-      +itemsHtml
-      +'<div style="display:flex;gap:8px;margin-top:14px">'
-      +'<button onclick="showToast(\'배송 조회 기능 준비 중이에요 🚚\')" style="flex:1;padding:9px;border:1.5px solid var(--sand);border-radius:9px;background:#fff;font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--mid)">배송 조회</button>'
-      +'<button onclick="goPage(\'review\')" style="flex:1;padding:9px;border:1.5px solid var(--gl);border-radius:9px;background:var(--gp);font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--green);font-weight:500">리뷰 작성</button>'
-      +'</div>'
-      +'</div>';
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--sand)">'
+        +'<div>'
+        +'<div style="font-size:.8rem;font-weight:700;color:var(--dark)">주문번호 '+order.id+'</div>'
+        +'<div style="font-size:.7rem;color:var(--muted);margin-top:2px">'+order.date+' · '+order.items.length+'개 상품 · '+order.total.toLocaleString()+'원</div>'
+        +'</div>'
+        +'<div style="font-size:.76rem;font-weight:700;padding:4px 12px;border-radius:20px;background:#f0fff4;color:var(--green);border:1px solid var(--gl)">'+order.status+'</div>'
+        +'</div>'
+        +itemsHtml
+        +'<div style="display:flex;gap:8px;margin-top:14px">'
+        +'<button onclick="showToast(\'배송 조회 기능 준비 중이에요 🚚\')" style="flex:1;padding:9px;border:1.5px solid var(--sand);border-radius:9px;background:#fff;font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--mid)">배송 조회</button>'
+        +'<button onclick="goPage(\'review\')" style="flex:1;padding:9px;border:1.5px solid var(--gl);border-radius:9px;background:var(--gp);font-size:.78rem;cursor:pointer;font-family:inherit;color:var(--green);font-weight:500">리뷰 작성</button>'
+        +'</div>'
+        +'</div>';
   });
   container.innerHTML=html;
 }
@@ -284,14 +315,14 @@ function renderNotifPopup(){
   var html='';
   notifList.forEach(function(n){
     html+='<div onclick="readNotif(\''+n.id+'\')" style="display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--sand);cursor:pointer;background:'+(n.read?'#fff':'#f8fff4')+';transition:background .15s">'
-      +'<div style="width:7px;height:7px;border-radius:50%;background:'+(n.read?'transparent':'var(--green)')+';flex-shrink:0;margin-top:5px"></div>'
-      +'<div style="font-size:1.1rem;flex-shrink:0">'+n.icon+'</div>'
-      +'<div style="flex:1">'
-      +'<div style="font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:2px">'+n.title+'</div>'
-      +'<div style="font-size:.72rem;color:var(--mid);line-height:1.5;margin-bottom:3px">'+n.msg+'</div>'
-      +'<div style="font-size:.68rem;color:var(--muted)">'+n.time+'</div>'
-      +'</div>'
-      +'</div>';
+        +'<div style="width:7px;height:7px;border-radius:50%;background:'+(n.read?'transparent':'var(--green)')+';flex-shrink:0;margin-top:5px"></div>'
+        +'<div style="font-size:1.1rem;flex-shrink:0">'+n.icon+'</div>'
+        +'<div style="flex:1">'
+        +'<div style="font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:2px">'+n.title+'</div>'
+        +'<div style="font-size:.72rem;color:var(--mid);line-height:1.5;margin-bottom:3px">'+n.msg+'</div>'
+        +'<div style="font-size:.68rem;color:var(--muted)">'+n.time+'</div>'
+        +'</div>'
+        +'</div>';
   });
   listEl.innerHTML=html;
 }
@@ -339,15 +370,6 @@ function catClick(el){
   },100);
 }
 
-function mktF(el){
-  el.parentElement.querySelectorAll('.mf').forEach(function(x){x.classList.remove('on');});
-  el.classList.add('on');
-  var cats={'채소':89,'과일':74,'곡류':43,'버섯':28,'뿌리채소':36,'기한임박':32};
-  var txt=el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g,'').trim();
-  var cnt=cats[txt]||302;
-  var cntEl=document.querySelector('.pgrid-count');
-  if(cntEl) cntEl.innerHTML='총 <strong style="color:var(--dark)">'+cnt+'</strong>개 상품';
-}
 
 function switchMktTab(i){
   for(var j=0;j<4;j++){
@@ -410,13 +432,7 @@ function toggleDetailWish2(btn){
   if(b1) b1.textContent=w?'🤍':'❤️';
 }
 
-/* ══ CART PAGE QUANTITY ══ */
-var detailQtyVal=1;
-function changeDetailQty(d){
-  detailQtyVal=Math.max(1,detailQtyVal+d);
-  var el=document.getElementById('detailQty');
-  if(el) el.textContent=detailQtyVal;
-}
+
 
 /* ══ DETAIL PAGE ══ */
 function switchDetailTab(name){
@@ -712,7 +728,6 @@ window.addEventListener('DOMContentLoaded',function(){
   },{threshold:.08});
   document.querySelectorAll('.rv').forEach(function(el){obs.observe(el);});
 
-  renderCart();
   renderNotifBadge();
   renderNotifPopup();
   renderOrderHistory();
