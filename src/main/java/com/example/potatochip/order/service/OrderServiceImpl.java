@@ -27,21 +27,21 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     public void OrderFromCart(Long buyerId, OrderRequestDTO requestDTO) {
 
-        // 1. 유저의 장바구니를 창고에서 꺼내옵니다.
+        // 1. 유저의 장바구니를 창고에서 가져온다
         Cart cart = cartRepository.findByBuyerId(buyerId)
                 .orElseThrow(() -> new IllegalArgumentException("장바구니가 존재하지 않습니다."));
 
-        // 2. 혹시 빈 장바구니인데 결제 버튼을 눌렀는지 검사합니다!
+        // 2. 혹시 빈 장바구니인데 결제 버튼을 눌렀는지 검사
         if (cart.getCartItems().isEmpty()) {
             throw new IllegalArgumentException("장바구니에 담긴 상품이 없습니다.");
         }
 
-        // 3. 총 결제 금액 계산! (모든 상품의 가격 * 수량을 더합니다)
+        // 3. 총 결제 금액 계산 (모든 상품의 가격 * 수량)
         BigDecimal totalAmount = cart.getCartItems().stream()
                 .map(item -> item.getPriceSnapshot().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 4. 새로운 영수증(Order 마스터) 껍데기를 예쁘게 만듭니다.
+        // 4. 새로운 영수증(Order 마스터) 껍데기를 만듭니다.
         Order newOrder = Order.builder()
                 .buyerId(buyerId)
                 // 주문번호는 "ORD-랜덤영어숫자" 형식으로 간지나게 생성!
