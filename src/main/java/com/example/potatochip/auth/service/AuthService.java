@@ -15,7 +15,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 로그인 (기존 유지)
+    // 로그인
     public boolean login(LoginRequestDTO dto) {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElse(null);
@@ -25,7 +25,7 @@ public class AuthService {
         return passwordEncoder.matches(dto.getPassword(), user.getPassword());
     }
 
-    // 회원가입 (UserDTO로 변경)
+    // 회원가입
     public void signup(UserDTO dto) {
         // 이메일 중복 체크
         if (userRepository.existsByEmail(dto.getEmail()))
@@ -38,11 +38,13 @@ public class AuthService {
         String role = "판매자(농가)".equals(dto.getRole()) ? "SELLER" : "BUYER";
 
         User user = new User();
+        user.setName(dto.getName());
+        user.setRole(role);
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setName(dto.getName());
+        user.setPhone(dto.getPhone());
         user.setAddress(dto.getAddress());
-        user.setRole(role);
+        user.setNickname(dto.getNickname());
         user.setPushAgree(false);
         user.setEmailAgree(false);
         user.setIsActive(true);
