@@ -5,6 +5,7 @@ import com.example.potatochip.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -35,9 +36,19 @@ public class BoardController {
     }
 
     // 생성
+
+
     @PostMapping("/api/board")
     @ResponseBody
-    public Board createBoard(@RequestBody Board board) {
+    public Board createBoard(
+            @RequestBody Board board,
+            Authentication authentication
+    ) {
+
+        String email = authentication.getName();
+
+        board.setAuthor(email);
+
         return boardService.save(board);
     }
 
