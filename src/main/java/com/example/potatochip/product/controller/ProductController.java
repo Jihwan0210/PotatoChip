@@ -6,6 +6,9 @@ import com.example.potatochip.product.service.ProductImageService;
 import com.example.potatochip.product.service.ranking.ProductRankingsService;
 import com.example.potatochip.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +30,28 @@ public class ProductController {
 
 
     @GetMapping("/market")
-    public String market(Model model) {
-        model.addAttribute("products" , productService.getAllProducts());
+    public String market(
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "popular") String sort,
+            Model model) {
+
+        if (page < 0) page = 0; // 추가
+
+        Pageable pageable = PageRequest.of(page, 12); // 한 페이지 12개
+        // ProductController
+        Page<ProductDTO> products = productService.getProducts(category, keyword, sort, pageable);
+
+        model.addAttribute("products", products.getContent()); // 이걸로 교체
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", products.getTotalPages());
+        model.addAttribute("category", category);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sort", sort);
         model.addAttribute("dailyRankings", productRankingsService.getDailyRanking());
         model.addAttribute("weeklyRankings", productRankingsService.getWeeklyRanking());
+        model.addAttribute("totalElements", products.getTotalElements());
         return "product/market";
     }
 

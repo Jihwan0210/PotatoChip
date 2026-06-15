@@ -19,7 +19,7 @@ public class ProductDTO {
 
     private Long id; //상품 ID
 
-    private Long sellerId; //판매자 ID
+    private String sellerPhone;
 
     private String category; // 카테고리
 
@@ -58,5 +58,7 @@ public class ProductDTO {
     private String operatingHours; //운영 시간
 
     private List<ProductImage> images;
+
+    private Boolean soonExpired; //할인마감 여부
 
 }
