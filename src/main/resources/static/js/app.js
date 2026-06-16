@@ -414,11 +414,6 @@ function clearMktSearch(){
 }
 
 /* ══ WISH / TOGGLE ══ */
-function toggleW(el){
-  var wished=el.textContent==='❤️';
-  el.textContent=wished?'🤍':'❤️';
-  showToast(wished?'찜 목록에서 제거됐어요':'❤️ 찜 목록에 추가됐어요!');
-}
 function toggleDetailWish(btn){
   var w=btn.textContent==='❤️';
   btn.textContent=w?'🤍':'❤️';

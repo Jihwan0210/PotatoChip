@@ -265,7 +265,11 @@
                         취소
 
                     </button>
-
+                    <input type="hidden" name="sellerEmail" id="sellerEmailInput"/>
+                    <script>
+                        document.getElementById('sellerEmailInput').value =
+                            sessionStorage.getItem('email') || localStorage.getItem('email');
+                    </script>
                     <button type="submit"
                             class="btn-submit2">
 

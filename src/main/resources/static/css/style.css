@@ -389,7 +389,7 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 .pbdg{position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:3px;z-index:2}
 .pbdg-t{font-size:.6rem;font-weight:500;padding:2px 6px;border-radius:4px;display:inline-block}
 .pbdg-new{background:var(--green);color:#fff}.pbdg-exp{background:#D05018;color:#fff}
-.plk{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;font-size:.78rem;cursor:pointer}
+.plk{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;font-size:.78rem;cursor:pointer;z-index: 2;}
 .pc2-body{padding:10px 11px 12px}
 .pc2-farm{font-size:.62rem;color:var(--muted);margin-bottom:2px}
 .pc2-nm{font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:5px;line-height:1.3}

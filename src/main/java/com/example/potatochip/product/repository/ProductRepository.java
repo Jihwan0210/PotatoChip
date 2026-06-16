@@ -64,4 +64,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                            @Param("today") LocalDate today,
                                            @Param("expireLimit") LocalDate expireLimit,
                                            Pageable pageable);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.seller.email = :sellerEmail " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
+            "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
+            "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
+            "AND (:keyword = '' OR p.name LIKE %:keyword% " +
+            "OR p.origin LIKE %:keyword% OR p.address LIKE %:keyword%)")
+    Page<Product> searchProductsBySellerEmail(@Param("sellerEmail") String sellerEmail,
+                                              @Param("category") String category,
+                                              @Param("keyword") String keyword,
+                                              @Param("today") LocalDate today,
+                                              @Param("expireLimit") LocalDate expireLimit,
+                                              Pageable pageable);
 }

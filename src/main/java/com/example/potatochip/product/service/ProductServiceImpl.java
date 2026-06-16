@@ -55,7 +55,7 @@ public class ProductServiceImpl implements ProductService{
 
 
     @Override
-    public Product createProduct(ProductDTO productDTO , MultipartFile file) {
+    public Product createProduct(ProductDTO productDTO, MultipartFile file, String sellerEmail) {
 
         if (file != null && !file.isEmpty()) {
             try {
@@ -68,11 +68,10 @@ public class ProductServiceImpl implements ProductService{
 
         Product product = modelMapper.map(productDTO, Product.class);
 
-        User seller = userRepository.findById(1L)
-                .orElseThrow();
+        User seller = userRepository.findByEmail(sellerEmail)
+                .orElseThrow(() -> new RuntimeException("유저 없음: " + sellerEmail));
 
         product.setSeller(seller);
-
         return productRepository.save(product);
     }
 
@@ -90,14 +89,28 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public Page<ProductDTO> getProducts(String category, String keyword, String sort, Pageable pageable) {
+    public Page<ProductDTO> getProducts(String category, String keyword, String sort, String sellerEmail, Pageable pageable) {
 
         LocalDate today = LocalDate.now();
         LocalDate expireLimit = today.plusDays(4);
 
         Page<Product> products;
 
-        if ("popular".equals(sort)) {
+        if (sellerEmail != null) {
+            Sort sorting = switch (sort) {
+                case "price"  -> Sort.by("price").ascending();
+                case "newest" -> Sort.by("createdAt").descending();
+                default       -> Sort.by("id").descending();
+            };
+            Pageable sortedPageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    sorting
+            );
+            products = productRepository.searchProductsBySellerEmail(
+                    sellerEmail, category, keyword, today, expireLimit, sortedPageable
+            );
+        } else if ("popular".equals(sort)) {
             products = productRepository.searchProductsByPopular(
                     category, keyword, today, expireLimit, pageable
             );

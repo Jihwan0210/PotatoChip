@@ -35,20 +35,21 @@ public class ProductController {
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "popular") String sort,
+            @RequestParam(required = false) String sellerEmail,  // Long sellerId → String sellerEmail
             Model model) {
 
-        if (page < 0) page = 0; // 추가
+        if (page < 0) page = 0;
 
-        Pageable pageable = PageRequest.of(page, 12); // 한 페이지 12개
-        // ProductController
-        Page<ProductDTO> products = productService.getProducts(category, keyword, sort, pageable);
+        Pageable pageable = PageRequest.of(page, 12);
+        Page<ProductDTO> products = productService.getProducts(category, keyword, sort, sellerEmail, pageable);
 
-        model.addAttribute("products", products.getContent()); // 이걸로 교체
+        model.addAttribute("products", products.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", products.getTotalPages());
         model.addAttribute("category", category);
         model.addAttribute("keyword", keyword);
         model.addAttribute("sort", sort);
+        model.addAttribute("sellerId", sellerEmail);  // 템플릿 페이지네이션 유지용 (키 이름 유지)
         model.addAttribute("dailyRankings", productRankingsService.getDailyRanking());
         model.addAttribute("weeklyRankings", productRankingsService.getWeeklyRanking());
         model.addAttribute("totalElements", products.getTotalElements());
@@ -71,9 +72,10 @@ public class ProductController {
     @PostMapping("/market/create")
     public String createProduct(ProductDTO productDTO,
                                 @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
-                                @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles) throws IOException {
+                                @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+                                @RequestParam("sellerEmail") String sellerEmail) throws IOException {
 
-        Product product = productService.createProduct(productDTO, thumbnailFile);
+        Product product = productService.createProduct(productDTO, thumbnailFile, sellerEmail);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
             productImageService.uploadImages(product, imageFiles);
