@@ -37,7 +37,7 @@ public class AdminUserDTO {
                 .nickname(user.getNickname())
                 .phone(user.getPhone())
                 .address(user.getAddress())
-                .role(user.getRole())
+                .role(user.getRole() == null ? null : user.getRole().name())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

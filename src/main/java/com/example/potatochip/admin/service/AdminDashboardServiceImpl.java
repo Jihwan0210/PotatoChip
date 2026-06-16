@@ -82,7 +82,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
                     long productCount = productRepository.findAll()
                             .stream()
-                            .filter(product -> Objects.equals(product.getSellerId(), user.getId()))
+                            .filter(product -> product.getSeller() != null)
+                            .filter(product -> Objects.equals(product.getSeller().getId(), user.getId()))
                             .count();
 
                     dto.setProductCount(productCount);
@@ -121,9 +122,10 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         if (hasRole(user, "SELLER")) {
             products = productRepository.findAll()
                     .stream()
-                    .filter(product -> Objects.equals(product.getSellerId(), userId))
+                    .filter(product -> product.getSeller() != null)
+                    .filter(product -> Objects.equals(product.getSeller().getId(), userId))
                     .sorted((a, b) -> dateOrMin(b.getCreatedAt()).compareTo(dateOrMin(a.getCreatedAt())))
-                    .map(product -> AdminProductDTO.fromEntity(product, getUserName(product.getSellerId())))
+                    .map(AdminProductDTO::fromEntity)
                     .toList();
 
             productReviews = reviewRepository.findBySellerIdAndIsActiveTrueOrderByCreatedAtDesc(userId)
@@ -147,7 +149,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return productRepository.findAll()
                 .stream()
                 .sorted((a, b) -> dateOrMin(b.getCreatedAt()).compareTo(dateOrMin(a.getCreatedAt())))
-                .map(product -> AdminProductDTO.fromEntity(product, getUserName(product.getSellerId())))
+                .map(AdminProductDTO::fromEntity)
                 .toList();
     }
 
@@ -230,8 +232,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private AdminReviewDTO toReviewDTO(Review review) {
         Long sellerId = null;
 
-        if (review.getProduct() != null) {
-            sellerId = review.getProduct().getSellerId();
+        if (review.getProduct() != null && review.getProduct().getSeller() != null) {
+            sellerId = review.getProduct().getSeller().getId();
         }
 
         return AdminReviewDTO.fromEntity(
@@ -271,7 +273,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private boolean hasRole(User user, String role) {
         return user != null
                 && user.getRole() != null
-                && user.getRole().equalsIgnoreCase(role);
+                && user.getRole().name().equalsIgnoreCase(role);
     }
 
     private LocalDateTime dateOrMin(LocalDateTime dateTime) {
