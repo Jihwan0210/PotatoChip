@@ -58,6 +58,12 @@ public class AdminDashboardController {
         return adminDashboardService.getReviews();
     }
 
+    @GetMapping("/api/admin/dashboard/inquiries")
+    @ResponseBody
+    public Object getInquiries() {
+        return adminDashboardService.getInquiries();
+    }
+
     @PatchMapping("/api/admin/dashboard/reviews/{reviewId}/hide")
     @ResponseBody
     public Object hideReview(@PathVariable Long reviewId) {
@@ -67,6 +73,6 @@ public class AdminDashboardController {
     @DeleteMapping("/api/admin/dashboard/reviews/{reviewId}")
     @ResponseBody
     public Object deleteReview(@PathVariable Long reviewId) {
-        return adminDashboardService.hideReview(reviewId);
+        return adminDashboardService.deleteReview(reviewId);
     }
 }

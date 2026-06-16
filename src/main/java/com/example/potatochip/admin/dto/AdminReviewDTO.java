@@ -24,6 +24,7 @@ public class AdminReviewDTO {
     private String content;
     private String imageUrl;
     private Boolean hasImage;
+    private Boolean hidden;
     private Boolean repurchaseIntent;
     private Boolean anonymous;
     private LocalDateTime createdAt;
@@ -44,6 +45,7 @@ public class AdminReviewDTO {
                 .content(review.getContent())
                 .imageUrl(review.getImageUrl())
                 .hasImage(review.getImageUrl() != null && !review.getImageUrl().isBlank())
+                .hidden(Boolean.TRUE.equals(review.getIsHidden()))
                 .repurchaseIntent(review.getRepurchaseIntent())
                 .anonymous(review.getIsAnonymous())
                 .createdAt(review.getCreatedAt())

@@ -37,9 +37,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     @Override
     public AdminSummaryDTO getSummary() {
         List<User> users = userRepository.findAll();
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-
         List<Review> reviews = reviewRepository.findByIsActiveTrueOrderByCreatedAtDesc();
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
         return AdminSummaryDTO.builder()
                 .totalUserCount(users.size())
@@ -50,7 +49,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .pendingInquiryCount(inquiryRepository.countByStatusAndIsActiveTrue("pending"))
                 .reviewCount(reviewRepository.countByIsActiveTrue())
                 .recentReviewCount(reviews.stream()
-                        .filter(review -> review.getCreatedAt() != null && review.getCreatedAt().isAfter(sevenDaysAgo))
+                        .filter(review -> review.getCreatedAt() != null)
+                        .filter(review -> review.getCreatedAt().isAfter(sevenDaysAgo))
                         .count())
                 .build();
     }
@@ -169,15 +169,37 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     }
 
     @Override
+    public List<AdminInquiryDTO> getInquiries() {
+        return inquiryRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toInquiryDTO)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public Map<String, Object> hideReview(Long reviewId) {
+        Review review = reviewRepository.findByReviewIdAndIsActiveTrue(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
+
+        review.hide();
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("message", "리뷰가 숨김 처리되었습니다.");
+        result.put("reviewId", reviewId);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> deleteReview(Long reviewId) {
         Review review = reviewRepository.findByReviewIdAndIsActiveTrue(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("리뷰를 찾을 수 없습니다."));
 
         review.deactivate();
 
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("message", "리뷰가 숨김 처리되었습니다.");
+        result.put("message", "리뷰가 삭제 처리되었습니다.");
         result.put("reviewId", reviewId);
         return result;
     }
