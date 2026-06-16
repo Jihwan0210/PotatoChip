@@ -28,11 +28,11 @@ public class AdminProductDTO {
     private LocalDateTime createdAt;
     private String statusText;
 
-    public static AdminProductDTO fromEntity(Product product, String sellerName) {
+    public static AdminProductDTO fromEntity(Product product) {
         return AdminProductDTO.builder()
                 .id(product.getId())
-                .sellerId(product.getSellerId())
-                .sellerName(sellerName)
+                .sellerId(product.getSeller() == null ? null : product.getSeller().getId())
+                .sellerName(product.getSeller() == null ? null : product.getSeller().getName())
                 .name(product.getName())
                 .category(product.getCategory())
                 .price(product.getPrice())
