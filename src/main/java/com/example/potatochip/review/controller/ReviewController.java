@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import com.example.potatochip.auth.entity.User;
+import com.example.potatochip.auth.repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +21,7 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final UserRepository userRepository;
 
     @GetMapping("/api/reviews")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProductId(
@@ -94,5 +99,39 @@ public class ReviewController {
                     Map.of("message", e.getMessage())
             );
         }
+    }
+
+    @GetMapping("/api/reviews/my")
+    public ResponseEntity<?> getMyReviews(Authentication authentication) {
+        try {
+            Long loginUserId = getLoginUserId(authentication);
+            List<ReviewDTO> reviews = reviewService.getMyReviews(loginUserId);
+            return ResponseEntity.ok(reviews);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of("message", e.getMessage())
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", e.getMessage())
+            );
+        }
+    }
+
+    private Long getLoginUserId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+
+        String email = String.valueOf(authentication.getPrincipal());
+
+        if (email == null || email.isBlank() || "anonymousUser".equals(email)) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new SecurityException("로그인 사용자를 찾을 수 없습니다."));
+
+        return user.getId();
     }
 }
