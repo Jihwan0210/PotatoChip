@@ -55,4 +55,20 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
               and r.isActive = true
             """)
     Double findAverageRatingByProductId(@Param("productId") Long productId);
-}
+
+    List<Review> findByIsActiveTrueOrderByCreatedAtDesc();
+
+    List<Review> findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(Long userId);
+
+    long countByIsActiveTrue();
+
+    @Query("""
+
+            select r
+        from Review r
+        where r.product.sellerId = :sellerId
+          and r.isActive = true
+        order by r.createdAt desc
+        """)
+    List<Review> findBySellerIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("sellerId") Long sellerId);
+    }
