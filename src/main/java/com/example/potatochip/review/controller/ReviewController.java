@@ -18,11 +18,6 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @GetMapping("/review")
-    public String reviewPage() {
-        return "review";
-    }
-
     @GetMapping("/api/reviews")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProductId(
             @RequestParam Long productId,
