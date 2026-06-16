@@ -39,11 +39,56 @@ function loadMyInfo() {
             document.getElementById('mp-email').value    = data.email    || '';
             document.getElementById('mp-phone').value    = data.phone    || '';
             document.getElementById('mp-address').value  = data.address  || '';
+
+            var nameEl = document.getElementById('mp-display-name');
+            if (nameEl) nameEl.textContent = (data.name || '') + '님';
+            var emailEl = document.getElementById('mp-display-email');
+            if (emailEl) emailEl.textContent = data.email || '';
         })
         .catch(err => console.error('내 정보 조회 실패:', err));
 }
 
-// 내 정보 수정
+var _savedValues = {};
+
+// 수정 모드 진입
+function enterEditMode() {
+    var editableIds = ['mp-name', 'mp-nickname', 'mp-phone', 'mp-address'];
+    editableIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        _savedValues[id] = el.value;
+        el.removeAttribute('readonly');
+        el.style.background = '#fff';
+        el.style.color = 'var(--text)';
+    });
+    document.getElementById('btn-edit').style.display = 'none';
+    document.getElementById('btn-save').style.display = 'flex';
+    document.getElementById('btn-cancel').style.display = 'flex';
+}
+
+// 수정 모드 종료 (읽기 전용으로 복귀)
+function exitEditMode() {
+    var editableIds = ['mp-name', 'mp-nickname', 'mp-phone', 'mp-address'];
+    editableIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        el.setAttribute('readonly', true);
+        el.style.background = 'var(--beige2)';
+        el.style.color = 'var(--muted)';
+    });
+    document.getElementById('btn-edit').style.display = 'flex';
+    document.getElementById('btn-save').style.display = 'none';
+    document.getElementById('btn-cancel').style.display = 'none';
+}
+
+// 취소 - 원래 값으로 되돌리고 읽기 전용 복귀
+function cancelEditMode() {
+    var editableIds = ['mp-name', 'mp-nickname', 'mp-phone', 'mp-address'];
+    editableIds.forEach(function(id) {
+        document.getElementById(id).value = _savedValues[id] || '';
+    });
+    exitEditMode();
+}
+
+// 내 정보 저장
 function saveMyProfile() {
     const token = getToken();
     if (!token) { location.href = '/login'; return; }
@@ -64,7 +109,12 @@ function saveMyProfile() {
         body: JSON.stringify(body)
     })
         .then(res => res.json())
-        .then(() => alert('저장되었어요! ✅'))
+        .then(data => {
+            exitEditMode();
+            var nameEl = document.getElementById('mp-display-name');
+            if (nameEl && body.name) nameEl.textContent = body.name + '님';
+            showToast('저장되었어요! ✅');
+        })
         .catch(err => console.error('저장 실패:', err));
 }
 
