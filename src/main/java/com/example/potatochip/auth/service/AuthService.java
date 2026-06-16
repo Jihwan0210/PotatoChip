@@ -2,6 +2,7 @@ package com.example.potatochip.auth.service;
 
 import com.example.potatochip.auth.dto.LoginRequestDTO;
 import com.example.potatochip.auth.dto.UserDTO;
+import com.example.potatochip.auth.entity.Role;
 import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class AuthService {
         if (!dto.getPassword().equals(dto.getPasswordConfirm()))
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 
-        String role = "판매자(농가)".equals(dto.getRole()) ? "SELLER" : "BUYER";
+        Role role = "판매자(농가)".equals(dto.getRole()) ? Role.SELLER : Role.BUYER;
 
         User user = new User();
         user.setName(dto.getName());
