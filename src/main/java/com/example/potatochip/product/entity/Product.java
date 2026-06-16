@@ -83,6 +83,9 @@ public class Product {
 
         private String operatingHours; //운영 시간
 
+        @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+        private List<Wishlist> wishlists = new ArrayList<>();
+
 
 
         public void changeEntity(ProductDTO productDTO) {
