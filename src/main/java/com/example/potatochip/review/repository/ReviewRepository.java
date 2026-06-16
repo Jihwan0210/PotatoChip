@@ -15,6 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             from Review r
             where r.product.id = :productId
               and r.isActive = true
+              and r.isHidden = false
             order by r.createdAt desc
             """)
     List<Review> findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("productId") Long productId);
@@ -26,6 +27,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             from Review r
             where r.product.id = :productId
               and r.isActive = true
+              and r.isHidden = false
             """)
     Long countByProductIdAndIsActiveTrue(@Param("productId") Long productId);
 
@@ -34,6 +36,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             from Review r
             where r.product.id = :productId
               and r.isActive = true
+              and r.isHidden = false
               and r.repurchaseIntent = true
             """)
     Long countByProductIdAndIsActiveTrueAndRepurchaseIntentTrue(@Param("productId") Long productId);
@@ -43,6 +46,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             from Review r
             where r.product.id = :productId
               and r.isActive = true
+              and r.isHidden = false
               and r.imageUrl is not null
               and trim(r.imageUrl) <> ''
             """)
@@ -53,6 +57,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             from Review r
             where r.product.id = :productId
               and r.isActive = true
+              and r.isHidden = false
             """)
     Double findAverageRatingByProductId(@Param("productId") Long productId);
 
@@ -63,12 +68,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     long countByIsActiveTrue();
 
     @Query("""
-
             select r
-        from Review r
-        where r.product.sellerId = :sellerId
-          and r.isActive = true
-        order by r.createdAt desc
-        """)
+            from Review r
+            where r.product.sellerId = :sellerId
+              and r.isActive = true
+            order by r.createdAt desc
+            """)
     List<Review> findBySellerIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("sellerId") Long sellerId);
-    }
+}

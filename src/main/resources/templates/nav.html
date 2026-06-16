@@ -22,7 +22,7 @@
                 class="n-ico"
                 id="nav-mypage"
                 onclick="goRolePage()"
-                style="cursor:pointer;font-size:.85rem;color:var(--mid);border:none;background:transparent"
+                style="display:none;cursor:pointer;font-size:.85rem;color:var(--mid);border:none;background:transparent"
                 title="마이페이지">👤</button>
 
         <!-- 판매자일 때만 보임 -->
@@ -35,34 +35,79 @@
     <script src="/js/app.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script>
-        // 로그인 상태에 따라 nav 아이콘 제어
+        // 로그인 상태에 따라 nav아이콘 제어
         (function() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
+            const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
+            const normalizedRole = role.toUpperCase();
 
-            if (role && role.toUpperCase() === 'SELLER') {
-                if (farmer) farmer.style.display = 'inline-flex';
-                if (mypage) mypage.style.display = 'none';
-            } else if (role && role.toUpperCase() === 'ADMIN') {
-                if (mypage) {
-                    mypage.style.display = 'inline-flex';
-                    mypage.title = '관리자 대시보드';
-                    mypage.textContent = '🛠️';
-                    mypage.style.color = 'var(--green)';
+            const loginButton = document.getElementById('btn-nav-login');
+            const mypageButton = document.getElementById('nav-mypage');
+            const farmerButton = document.getElementById('nav-farmer');
+
+            if (!token) {
+                if (mypageButton) {
+                    mypageButton.style.display = 'none';
                 }
 
-                if (farmer) farmer.style.display = 'none';
-            } else {
-                if (mypage) {
-                    mypage.style.display = 'inline-flex';
-                    mypage.title = '마이페이지';
-                    mypage.textContent = '👤';
-                    mypage.style.color = 'var(--mid)';
+                if (farmerButton) {
+                    farmerButton.style.display = 'none';
                 }
 
-                if (farmer) farmer.style.display = 'none';
+                if (loginButton) {
+                    loginButton.textContent = '로그인';
+                    loginButton.setAttribute('href', '/login');
+                    loginButton.removeAttribute('onclick');
+                }
+
+                return;
+            }
+
+            if (loginButton) {
+                loginButton.textContent = '로그아웃';
+                loginButton.removeAttribute('href');
+                loginButton.setAttribute('onclick', 'handleNavLogout()');
+            }
+
+            if (normalizedRole === 'SELLER') {
+                if (farmerButton) {
+                    farmerButton.style.display = 'inline-flex';
+                }
+
+                if (mypageButton) {
+                    mypageButton.style.display = 'none';
+                }
+
+                return;
+            }
+
+            if (normalizedRole === 'ADMIN') {
+                if (mypageButton) {
+                    mypageButton.style.display = 'inline-flex';
+                    mypageButton.title = '관리자 대시보드';
+                    mypageButton.textContent = '🛠️';
+                    mypageButton.style.color = 'var(--green)';
+                }
+
+                if (farmerButton) {
+                    farmerButton.style.display = 'none';
+                }
+
+                return;
+            }
+
+            if (mypageButton) {
+                mypageButton.style.display = 'inline-flex';
+                mypageButton.title = '마이페이지';
+                mypageButton.textContent = '👤';
+                mypageButton.style.color = 'var(--mid)';
+            }
+
+            if (farmerButton) {
+                farmerButton.style.display = 'none';
             }
         })();
+
         function goRolePage() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
@@ -78,6 +123,25 @@
             }
 
             location.href = '/mypage';
+        }
+
+        function handleNavLogout() {
+            if (typeof doLogout === 'function') {
+                doLogout();
+                return;
+            }
+
+            localStorage.removeItem('token');
+            localStorage.removeItem('email');
+            localStorage.removeItem('role');
+            localStorage.removeItem('currentUserId');
+
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('email');
+            sessionStorage.removeItem('role');
+            sessionStorage.removeItem('currentUserId');
+
+            location.href = '/login';
         }
     </script>
 </nav>

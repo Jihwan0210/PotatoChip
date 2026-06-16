@@ -21,5 +21,9 @@ public interface AdminDashboardService {
 
     List<AdminReviewDTO> getReviews();
 
+    List<AdminInquiryDTO> getInquiries();
+
     Map<String, Object> hideReview(Long reviewId);
+
+    Map<String, Object> deleteReview(Long reviewId);
 }
