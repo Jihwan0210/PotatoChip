@@ -17,9 +17,13 @@
         <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
         <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
 
-        <!-- 로그인 시에만 보임 -->
-        <a th:href="@{/mypage}" class="n-ico" id="nav-mypage"
-           style="display:none;cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</a>
+        <!-- 로그인 시에만 보임 / 관리자 로그인시 mypage가 아닌 admin/dashboard로 이동-->
+        <button type="button"
+                class="n-ico"
+                id="nav-mypage"
+                onclick="goRolePage()"
+                style="cursor:pointer;font-size:.85rem;color:var(--mid);border:none;background:transparent"
+                title="마이페이지">👤</button>
 
         <!-- 판매자일 때만 보임 -->
         <a th:href="@{/farmer}" class="n-ico" id="nav-farmer"
@@ -36,26 +40,45 @@
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const role  = localStorage.getItem('role')  || sessionStorage.getItem('role');
 
-            if (token) {
-                const btn = document.getElementById('btn-nav-login');
-                if (btn) {
-                    btn.textContent = '로그아웃';
-                    btn.setAttribute('onclick', 'doLogout()');
-                    btn.removeAttribute('href');
+            if (role && role.toUpperCase() === 'SELLER') {
+                if (farmer) farmer.style.display = 'inline-flex';
+                if (mypage) mypage.style.display = 'none';
+            } else if (role && role.toUpperCase() === 'ADMIN') {
+                if (mypage) {
+                    mypage.style.display = 'inline-flex';
+                    mypage.title = '관리자 대시보드';
+                    mypage.textContent = '🛠️';
+                    mypage.style.color = 'var(--green)';
                 }
 
-                const mypage = document.getElementById('nav-mypage');
-                const farmer = document.getElementById('nav-farmer');
-
-                if (role === 'SELLER') {
-                    // 판매자: 농가 대시보드만
-                    if (farmer) farmer.style.display = 'inline-flex';
-                } else {
-                    // 구매자: 마이페이지만
-                    if (mypage) mypage.style.display = 'inline-flex';
+                if (farmer) farmer.style.display = 'none';
+            } else {
+                if (mypage) {
+                    mypage.style.display = 'inline-flex';
+                    mypage.title = '마이페이지';
+                    mypage.textContent = '👤';
+                    mypage.style.color = 'var(--mid)';
                 }
+
+                if (farmer) farmer.style.display = 'none';
             }
         })();
+        function goRolePage() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
+
+            if (!token) {
+                location.href = '/login';
+                return;
+            }
+
+            if (role.toUpperCase() === 'ADMIN') {
+                location.href = '/admin/dashboard';
+                return;
+            }
+
+            location.href = '/mypage';
+        }
     </script>
 </nav>
 </body>
