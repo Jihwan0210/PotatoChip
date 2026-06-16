@@ -86,11 +86,11 @@
                     <div style="display:flex;flex-direction:column;gap:16px">
                         <div>
                             <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">이름</label>
-                            <input id="mp-name" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <input id="mp-name" type="text" style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none"/>
                         </div>
                         <div>
                             <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">닉네임</label>
-                            <input id="mp-nickname" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <input id="mp-nickname" type="text" style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none"/>
                         </div>
                         <div>
                             <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">이메일</label>
@@ -98,26 +98,16 @@
                         </div>
                         <div>
                             <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">전화번호</label>
-                            <input id="mp-phone" type="tel" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <input id="mp-phone" type="tel" style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none"/>
                         </div>
                         <div>
                             <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">주소</label>
-                            <input id="mp-address" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <input id="mp-address" type="text" style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none"/>
                         </div>
-                        <div style="display:flex;gap:10px">
-                            <button id="btn-edit" onclick="enterEditMode()"
-                                    style="flex:1;background:#fff;color:var(--green);border:1.5px solid var(--green);border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                ✏️ 수정
-                            </button>
-                            <button id="btn-save" onclick="saveMyProfile()"
-                                    style="display:none;flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                저장
-                            </button>
-                            <button id="btn-cancel" onclick="cancelEditMode()"
-                                    style="display:none;flex:1;background:#fff;color:var(--mid);border:1.5px solid var(--sand);border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                취소
-                            </button>
-                        </div>
+                        <button onclick="saveMyProfile()"
+                                style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
+                            저장하기
+                        </button>
                     </div>
                 </div>
             </div>
@@ -127,7 +117,6 @@
 </div>
 
 <div th:replace="footer :: footer"></div>
-<script th:src="@{/js/app.js}"></script>
 <script th:src="@{/js/auth/mypage.js}"></script>
 
 </body>

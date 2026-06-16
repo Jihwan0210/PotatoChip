@@ -12,10 +12,6 @@
         .fg.error input, .fg.error select { border-color: #e74c3c; }
         .fg-err { color: #e74c3c; font-size: .76rem; margin-top: 4px; display: none; }
         .fg.error .fg-err { display: block; }
-        .pw-wrap { position: relative; }
-        .pw-wrap input { width: 100%; padding-right: 38px !important; }
-        .pw-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 0; line-height: 1; }
-        .pw-eye:hover { color: var(--mid); }
     </style>
 </head>
 <body>
@@ -45,14 +41,11 @@
                 </div>
                 <div class="fg">
                     <label>비밀번호</label>
-                    <div class="pw-wrap">
-                        <input id="lp" onkeydown="if(event.key==='Enter')doLogin()" placeholder="비밀번호를 입력해주세요" type="password"/>
-                        <button type="button" class="pw-eye" onclick="togglePw(this)"><i class="ti ti-eye"></i></button>
-                    </div>
+                    <input id="lp" onkeydown="if(event.key==='Enter')doLogin()" placeholder="비밀번호를 입력해주세요" type="password"/>
                 </div>
                 <div class="f-extra">
                     <label class="f-rem"><input type="checkbox"/> 로그인 상태 유지</label>
-                    <span class="f-forgot" onclick="showForgotView()">비밀번호 찾기</span>
+                    <span class="f-forgot">비밀번호 찾기</span>
                 </div>
                 <button class="btn-submit" onclick="doLogin()">로그인 →</button>
 
@@ -89,18 +82,12 @@
                 </div>
                 <div class="fg">
                     <label>비밀번호</label>
-                    <div class="pw-wrap">
-                        <input name="password" placeholder="8자 이상 입력해주세요" type="password" oninput="filterPasswordChars(this)"/>
-                        <button type="button" class="pw-eye" onclick="togglePw(this)"><i class="ti ti-eye"></i></button>
-                    </div>
+                    <input name="password" placeholder="8자 이상 입력해주세요" type="password" oninput="filterPasswordChars(this)"/>
                     <div class="fg-err"></div>
                 </div>
                 <div class="fg">
                     <label>비밀번호 확인</label>
-                    <div class="pw-wrap">
-                        <input name="passwordConfirm" placeholder="비밀번호를 다시 입력해주세요" type="password"/>
-                        <button type="button" class="pw-eye" onclick="togglePw(this)"><i class="ti ti-eye"></i></button>
-                    </div>
+                    <input name="passwordConfirm" placeholder="비밀번호를 다시 입력해주세요" type="password"/>
                     <div class="fg-err"></div>
                 </div>
                 <div class="fg">
@@ -121,25 +108,6 @@
                 <button class="btn-submit" onclick="doSignup()">가입하기 →</button>
                 <p class="sw-txt" style="margin-top:10px">
                     <a onclick="swTab('login')">← 로그인으로 돌아가기</a>
-                </p>
-            </div>
-
-            <!-- 비밀번호 찾기 폼 -->
-            <div id="ff" style="display:none">
-                <div style="font-size:.82rem;color:var(--mid);margin-bottom:18px;line-height:1.6">
-                    가입 시 입력한 <strong>이메일</strong>과 <strong>이름</strong>을 입력해주세요.
-                </div>
-                <div class="fg">
-                    <label>이메일</label>
-                    <input id="fe" placeholder="이메일을 입력해주세요" type="email"/>
-                </div>
-                <div class="fg">
-                    <label>이름</label>
-                    <input id="fn" placeholder="이름을 입력해주세요" type="text"/>
-                </div>
-                <button class="btn-submit" onclick="doForgotPassword()">확인 →</button>
-                <p class="sw-txt" style="margin-top:10px">
-                    <a onclick="showLoginView()">← 로그인으로 돌아가기</a>
                 </p>
             </div>
 
