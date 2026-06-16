@@ -19,4 +19,6 @@ public interface ReviewService {
     ReviewStatsDTO getReviewStatsByProductId(Long productId);
 
     ReviewHelpfulDTO addHelpful(Long reviewId, Long userId);
+
+    List<ReviewDTO> getMyReviews(Long userId);
 }
