@@ -2,18 +2,12 @@ package com.example.potatochip.auth.service;
 
 import com.example.potatochip.auth.dto.LoginRequestDTO;
 import com.example.potatochip.auth.dto.UserDTO;
-import com.example.potatochip.auth.entity.ResetPw;
 import com.example.potatochip.auth.entity.Role;
 import com.example.potatochip.auth.entity.User;
-import com.example.potatochip.auth.repository.ResetPwRepository;
 import com.example.potatochip.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -21,7 +15,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ResetPwRepository resetPwRepository;
 
     // 로그인
     public boolean login(LoginRequestDTO dto) {
@@ -58,49 +51,5 @@ public class AuthService {
         user.setIsActive(true);
 
         userRepository.save(user);
-    }
-
-    // 이메일 + 이름으로 본인 확인 후 재설정 토큰 발급
-    @Transactional
-    public String verifyAndIssueToken(String email, String name) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("가입된 이메일이 없습니다."));
-
-        if (!user.getName().equals(name)) {
-            throw new IllegalArgumentException("이름이 일치하지 않습니다.");
-        }
-
-        // 기존 토큰 삭제 후 새로 발급
-        resetPwRepository.deleteByUser_Id(user.getId());
-
-        ResetPw resetPw = new ResetPw();
-        resetPw.setToken(UUID.randomUUID().toString());
-        resetPw.setUser(user);
-        resetPw.setExpiryDate(LocalDateTime.now().plusMinutes(30));
-        resetPwRepository.save(resetPw);
-
-        return resetPw.getToken();
-    }
-
-    // 토큰 검증 후 비밀번호 변경
-    @Transactional
-    public void resetPassword(String token, String newPassword, String passwordConfirm) {
-        if (!newPassword.equals(passwordConfirm)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        ResetPw resetPw = resetPwRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 링크입니다."));
-
-        if (resetPw.getExpiryDate().isBefore(LocalDateTime.now())) {
-            resetPwRepository.delete(resetPw);
-            throw new IllegalArgumentException("만료된 링크입니다. 다시 시도해주세요.");
-        }
-
-        User user = resetPw.getUser();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        resetPwRepository.delete(resetPw);
     }
 }
