@@ -52,10 +52,47 @@ public class BoardController {
         return boardService.save(board);
     }
 
+    //조회수 증가
+    @PostMapping("/api/board/{id}/view")
+    @ResponseBody
+    public void increasedView(@PathVariable Long id) {
+        boardService.increaseView(id);
+
+    }
+
     // 삭제
     @DeleteMapping("/api/board/{id}")
     @ResponseBody
-    public void deleteBoard(@PathVariable Long id) {
+    public void deleteBoard(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+
+        Board board = boardService.findById(id);
+        if (!board.getAuthor().equals(authentication.getName())) {
+            throw new RuntimeException("삭제 권한이 없습니다.");
+        }
+
         boardService.delete(id);
+    }
+
+    @PutMapping("/api/board/{id}")
+    @ResponseBody
+    public Board updateBoard(
+            @PathVariable Long id,
+            @RequestBody Board updatedBoard,
+            Authentication authentication
+    ) {
+
+        Board board = boardService.findById(id);
+
+        if (!board.getAuthor().equals(authentication.getName())) {
+            throw new RuntimeException("수정 권한이 없습니다.");
+        }
+
+        board.setTitle(updatedBoard.getTitle());
+        board.setContent(updatedBoard.getContent());
+        board.setCategory(updatedBoard.getCategory());
+        return boardService.save(board);
     }
 }

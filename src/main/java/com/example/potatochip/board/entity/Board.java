@@ -84,4 +84,20 @@ public class Board {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    @PrePersist
+    public void prePersist() {
+
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if(viewCount == null) {
+            viewCount = 0;
+        }
+
+        if(commentCount == null) {
+            commentCount = 0;
+        }
+    }
 }
