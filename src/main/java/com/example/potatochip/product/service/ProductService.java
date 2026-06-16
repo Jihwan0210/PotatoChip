@@ -2,6 +2,8 @@ package com.example.potatochip.product.service;
 
 import com.example.potatochip.product.dto.ProductDTO;
 import com.example.potatochip.product.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -17,4 +19,7 @@ public interface ProductService {
     void deleteProduct(Long id);
 
     void modify(ProductDTO productDTO);
+
+    Page<ProductDTO> getProducts(String category, String keyword, String sort, Pageable pageable);
+
 }

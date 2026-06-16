@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRankingsRepository extends JpaRepository<ProductRankings , Long> {
 
@@ -14,4 +15,6 @@ public interface ProductRankingsRepository extends JpaRepository<ProductRankings
             PeriodType periodType , // 기간 유형 (daily or weekly)
             LocalDate periodDate //조회 기간 날짜
     );
+
+    Optional<ProductRankings> findTopByPeriodTypeOrderByPeriodDateDesc(PeriodType periodType);
 }
