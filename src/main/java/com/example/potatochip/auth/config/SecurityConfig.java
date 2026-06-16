@@ -1,11 +1,11 @@
 package com.example.potatochip.auth.config;
 
-import org.springframework.http.HttpMethod; //게시글 생성 로그인 필요
 import com.example.potatochip.auth.filter.JwtFilter;
 import com.example.potatochip.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; //게시글 생성 및 삭제도 로그인 필요
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/board")
                         .authenticated()
                         // 인증 없이 허용 //->로그인 토큰이 있어야만 가능
+                        .requestMatchers(HttpMethod.DELETE,"/api/board/**")
+                        .authenticated() //삭제 API도 로그인 필수
+                        .requestMatchers(HttpMethod.PUT,"/api/board/**")
+                        .authenticated() //게시글 수정
+
                         .anyRequest().permitAll() // 나머지도 허용 (추후 인증 필요 시 authenticated()로 변경)
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록

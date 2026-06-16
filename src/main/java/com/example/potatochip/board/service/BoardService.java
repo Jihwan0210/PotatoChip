@@ -26,7 +26,33 @@ public class BoardService {
 
     // 저장
     public Board save(Board board) {
+
+        if (board.getViewCount() == null){
+            board.setViewCount(0);
+        }
+
+        if(board.getCommentCount() == null) {
+            board.setCommentCount(0);
+        }
+
+        if(board.getCreatedAt() == null) {
+            board.setCreatedAt(java.time.LocalDateTime.now());
+        }
         return boardRepository.save(board);
+    }
+
+    //조회수 증가
+    public void increaseView(Long id) {
+
+        Board board = findById(id);
+
+        if(board.getViewCount() == null) {
+            board.setViewCount(0);
+        }
+
+        board.setViewCount(board.getViewCount() +1);
+
+        boardRepository.save(board);
     }
 
     // 삭제
