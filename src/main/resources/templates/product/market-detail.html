@@ -268,6 +268,17 @@
                         style="width:100%;padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
                     🤍 찜하기
                 </button>
+                <button id="deleteProductBtn"
+                        th:data-seller-email="${product.sellerEmail}"
+                        th:data-product-id="${product.id}"
+                        style="display:none;width:100%;padding:10px;border:1.5px solid #f5c8a8;border-radius:10px;background:#fff5ef;font-size:.8rem;font-weight:500;color:#D05018;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:5px;margin-top:8px">
+                    🗑️ 상품 삭제
+                </button>
+                <button id="editProductBtn"
+                        style="display:none;width:100%;padding:10px;border:1.5px solid var(--green);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--green);cursor:pointer;font-family:inherit;display:none;align-items:center;justify-content:center;gap:5px;margin-top:8px"
+                        th:onclick="|location.href='@{/market/edit/{id}(id=${product.id})}'|">
+                    ✏️ 상품 수정
+                </button>
             </div>
 
             <!-- 주문 안내 -->
@@ -286,6 +297,40 @@
 <script src="/js/product/product.js"></script>
 <script>
     const productId = [[${product.id}]];
+    const sellerEmail = document.getElementById('deleteProductBtn').dataset.sellerEmail;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return;
+        const myEmail = JSON.parse(atob(token.split('.')[1])).sub;
+        if (myEmail === sellerEmail) {
+            const deleteBtn = document.getElementById('deleteProductBtn');
+            const editBtn = document.getElementById('editProductBtn');
+            if (deleteBtn) deleteBtn.style.display = 'flex';
+            if (editBtn) editBtn.style.display = 'flex';
+        }
+    });
+
+    document.getElementById('deleteProductBtn').addEventListener('click', function() {
+        const id = this.dataset.productId;
+        deleteProduct(id);
+    });
+
+    function deleteProduct(id) {
+        if (!confirm('정말 삭제하시겠어요?')) return;
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        fetch('/market/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(res => {
+            if (res.ok) {
+                showToast('상품이 삭제됐어요');
+                setTimeout(() => location.href = '/market', 1000);
+            } else {
+                showToast('삭제 실패했어요');
+            }
+        }).catch(() => showToast('오류가 발생했어요'));
+    }
 
     // 카카오맵
     fetch(`/api/products/${productId}`)
@@ -302,7 +347,6 @@
             });
         });
 
-    // 장바구니 담기
     function addToCartDetail(btn) {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         if (!token) {
@@ -331,7 +375,6 @@
             .catch(() => showToast('오류가 발생했어요 ㅠㅠ'));
     }
 
-    // 바로구매
     function buyNow(pid) {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         if (!token) {
@@ -352,10 +395,10 @@
                 } else if (res.ok) {
                     location.href = '/cart';
                 } else {
-                    showToast('오류가 발생했어요 ㅠㅠ');
+                    showToast('오류가 발생했어요');
                 }
             })
-            .catch(() => showToast('오류가 발생했어요 ㅠㅠ'));
+            .catch(() => showToast('오류가 발생했어요'));
     }
 </script>
 </body>

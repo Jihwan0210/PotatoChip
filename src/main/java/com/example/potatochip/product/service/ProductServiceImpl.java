@@ -38,7 +38,8 @@ public class ProductServiceImpl implements ProductService{
         Product product = result.orElseThrow();
         ProductDTO productDTO = modelMapper.map(product , ProductDTO.class);
         productDTO.setImages(product.getImages());
-        productDTO.setSellerPhone(product.getSeller().getPhone()); //고침
+        productDTO.setSellerPhone(product.getSeller().getPhone());
+        productDTO.setSellerEmail(product.getSeller().getEmail());
         return productDTO;
     }
 
@@ -147,6 +148,9 @@ public class ProductServiceImpl implements ProductService{
         }
         return dto;
     }
+
+
+
 }
 
 

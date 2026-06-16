@@ -291,14 +291,21 @@
     // 페이지 로드 시 현재 sort 파라미터로 버튼 활성화
     (function() {
         var url = new URL(window.location.href);
-        var sellerEmailParam = url.searchParams.get('sellerEmail');
-        var btn = document.getElementById('myProductsBtn');
-        if (sellerEmailParam && btn) {  // ← sellerIdParam → sellerEmailParam 으로 바꿔
-            btn.style.background = 'var(--green)';
-            btn.style.color = '#fff';
-            btn.textContent = '내 상품 ✓';
-        }
-        })();
+        var sort = url.searchParams.get('sort') || 'popular';
+        ['popular','discount','price','newest'].forEach(function(t) {
+            var b = document.getElementById('sort-btn-' + t);
+            if (!b) return;
+            if (t === sort) {
+                b.style.fontWeight = '700';
+                b.style.color = 'var(--green)';
+                b.style.background = 'var(--gp)';
+            } else {
+                b.style.fontWeight = '400';
+                b.style.color = 'var(--muted)';
+                b.style.background = '';
+            }
+        });
+    })();
 
     // ===== 맞춤추천 팝업 =====
     function openRecPopup() { document.getElementById('recPopup').style.display = 'block'; }
