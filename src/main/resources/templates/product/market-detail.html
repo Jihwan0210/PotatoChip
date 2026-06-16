@@ -256,18 +256,18 @@
                     🛒 장바구니 담기
                 </button>
 
-                <!-- 바로구매 - JS로 처리 -->
+                <!-- 바로구매 -->
                 <button th:data-id="${product.id}"
                         onclick="buyNow(this.dataset.id)"
                         style="display:block;width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px;cursor:pointer">
                     바로 구매하기
                 </button>
 
-                <!-- 찜하기 + 농부 문의 -->
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <button id="wishBtn2" onclick="toggleDetailWish2(this)" style="padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">🤍 찜하기</button>
-                    <button onclick="openFarmerChat()" style="padding:10px;border:1.5px solid var(--gl);border-radius:10px;background:var(--gp);font-size:.8rem;font-weight:500;color:var(--green);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px">💬 농부님 문의</button>
-                </div>
+                <!-- 찜하기 -->
+                <button id="wishBtn2" onclick="toggleDetailWish2(this)"
+                        style="width:100%;padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+                    🤍 찜하기
+                </button>
             </div>
 
             <!-- 주문 안내 -->
