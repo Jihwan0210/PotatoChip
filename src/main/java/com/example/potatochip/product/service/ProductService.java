@@ -14,12 +14,14 @@ public interface ProductService {
 
     ProductDTO getProductById(Long id);
 
-    Product createProduct(ProductDTO productDTO , MultipartFile file);
+    Product createProduct(ProductDTO productDTO, MultipartFile file, String sellerEmail);
 
     void deleteProduct(Long id);
 
     void modify(ProductDTO productDTO);
 
-    Page<ProductDTO> getProducts(String category, String keyword, String sort, Pageable pageable);
+    Page<ProductDTO> getProducts(String category, String keyword, String sort,  String sellerEmail, Pageable pageable);
+
+
 
 }
