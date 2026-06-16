@@ -103,21 +103,57 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
         <span class="pgrid-count" style="font-size:.76rem;color:var(--muted)">총 <strong style="color:var(--dark)" th:text="${totalElements}"></strong>개 상품</span>
         <!-- 정렬 버튼 -->
-        <div style="display:flex;gap:0;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
-            <div id="sort-btn-popular"   onclick="setSort('popular')"   style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);border-radius:6px 0 0 6px;font-weight:700;color:var(--green);background:var(--gp)">인기순</div>
-            <div id="sort-btn-discount"  onclick="setSort('discount')"  style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">할인율순</div>
-            <div id="sort-btn-price"     onclick="setSort('price')"     style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">가격순</div>
-            <div id="sort-btn-newest"    onclick="setSort('newest')"    style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">최신순</div>
+        <div style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;gap:0;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
+                <div id="sort-btn-popular"   onclick="setSort('popular')"   style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);border-radius:6px 0 0 6px;font-weight:700;color:var(--green);background:var(--gp)">인기순</div>
+                <div id="sort-btn-discount"  onclick="setSort('discount')"  style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">할인율순</div>
+                <div id="sort-btn-price"     onclick="setSort('price')"     style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">가격순</div>
+                <div id="sort-btn-newest"    onclick="setSort('newest')"    style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">최신순</div>
+            </div>
+            <button id="registerBtn"
+                    style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
+                    th:onclick="|location.href='@{/market/create}'|">
+                + 상품등록
+            </button>
+            <button id="myProductsBtn"
+                    style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;border:1px solid var(--green);background:#fff;color:var(--green);border-radius:6px;font-weight:700"
+                    onclick="toggleMyProducts()">
+                내 상품
+            </button>
         </div>
-        <button id="registerBtn"
-                style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;margin-left:8px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
-                th:onclick="|location.href='@{/market/create}'|">
-            + 상품등록
-        </button>
-        <script>
+        <script th:inline="javascript">
             const role = localStorage.getItem('role') || sessionStorage.getItem('role');
             if (role === 'SELLER') {
                 document.getElementById('registerBtn').style.display = 'inline-block';
+                document.getElementById('myProductsBtn').style.display = 'inline-block';
+            }
+
+            // 현재 sellerId 파라미터가 있으면 "내 상품" 버튼 활성화 표시
+            (function() {
+                var url = new URL(window.location.href);
+                var sellerEmailParam = url.searchParams.get('sellerEmail');
+                var btn = document.getElementById('myProductsBtn');
+                if (sellerEmailParam && btn) {
+                    btn.style.background = 'var(--green)';
+                    btn.style.color = '#fff';
+                    btn.textContent = '내 상품 ✓';
+                }
+            })();
+
+            function toggleMyProducts() {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const url = new URL(window.location.href);
+
+                if (url.searchParams.get('sellerEmail')) {
+                    url.searchParams.delete('sellerEmail');
+                } else {
+                    if (!token) { alert('로그인 후 이용해주세요'); return; }
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const myEmail = payload.sub; // JWT sub = "222" (email)
+                    url.searchParams.set('sellerEmail', myEmail);
+                }
+                url.searchParams.set('page', '0');
+                window.location.href = url.toString();
             }
         </script>
     </div>
@@ -178,19 +214,19 @@
     <!-- 페이지네이션 -->
     <div class="mpg" style="margin-top:32px">
         <th:block th:if="${currentPage > 0}">
-            <a th:href="@{/market(page=${currentPage - 1}, category=${category}, keyword=${keyword}, sort=${sort})}" class="mp-b">‹</a>
+            <a th:href="@{/market(page=${currentPage - 1}, category=${category}, keyword=${keyword}, sort=${sort}, sellerId=${sellerId})}" class="mp-b">‹</a>
         </th:block>
         <th:block th:unless="${currentPage > 0}">
             <span class="mp-b" style="color:var(--muted);pointer-events:none;cursor:default">‹</span>
         </th:block>
 
         <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:href="@{/market(page=${i}, category=${category}, keyword=${keyword}, sort=${sort})}"
+           th:href="@{/market(page=${i}, category=${category}, keyword=${keyword}, sort=${sort}, sellerId=${sellerId})}"
            th:text="${i + 1}"
            th:class="${i == currentPage} ? 'mp-b on' : 'mp-b'"></a>
 
         <th:block th:if="${currentPage + 1 < totalPages}">
-            <a th:href="@{/market(page=${currentPage + 1}, category=${category}, keyword=${keyword}, sort=${sort})}" class="mp-b">›</a>
+            <a th:href="@{/market(page=${currentPage + 1}, category=${category}, keyword=${keyword}, sort=${sort}, sellerId=${sellerId})}" class="mp-b">›</a>
         </th:block>
         <th:block th:unless="${currentPage + 1 < totalPages}">
             <span class="mp-b" style="color:var(--muted);pointer-events:none;cursor:default">›</span>
@@ -255,17 +291,14 @@
     // 페이지 로드 시 현재 sort 파라미터로 버튼 활성화
     (function() {
         var url = new URL(window.location.href);
-        var sort = url.searchParams.get('sort') || 'popular';
-        var btn = document.getElementById('sort-btn-' + sort);
-        if (btn) { btn.style.fontWeight = '700'; btn.style.color = 'var(--green)'; btn.style.background = 'var(--gp)'; }
-        // 나머지 초기화
-        ['popular','discount','price','newest'].forEach(function(t) {
-            if (t !== sort) {
-                var b = document.getElementById('sort-btn-' + t);
-                if (b) { b.style.fontWeight = '400'; b.style.color = 'var(--muted)'; b.style.background = ''; }
-            }
-        });
-    })();
+        var sellerEmailParam = url.searchParams.get('sellerEmail');
+        var btn = document.getElementById('myProductsBtn');
+        if (sellerEmailParam && btn) {  // ← sellerIdParam → sellerEmailParam 으로 바꿔
+            btn.style.background = 'var(--green)';
+            btn.style.color = '#fff';
+            btn.textContent = '내 상품 ✓';
+        }
+        })();
 
     // ===== 맞춤추천 팝업 =====
     function openRecPopup() { document.getElementById('recPopup').style.display = 'block'; }
