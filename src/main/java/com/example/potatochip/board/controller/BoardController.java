@@ -3,6 +3,7 @@ package com.example.potatochip.board.controller;
 import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
@@ -63,17 +64,32 @@ public class BoardController {
     // 삭제
     @DeleteMapping("/api/board/{id}")
     @ResponseBody
-    public void deleteBoard(
+    public ResponseEntity<?>deleteBoard(
             @PathVariable Long id,
             Authentication authentication
     ) {
 
+        System.out.println("=== 삭제 요청 진입! 게시글 ID: " + id);
+
+        if (authentication == null) {
+            System.out.println("❌ 인증 객체가 null입니다. 토큰이 안 넘어왔을 수 있습니다.");
+            return ResponseEntity.status(401).body(java.util.Map.of("error", "로그인이 필요합니다."));
+        }
+
         Board board = boardService.findById(id);
+
+        System.out.println("DB에 저장된 작성자: " + board.getAuthor());
+        System.out.println("현재 로그인한 유저: " + authentication.getName());
+
         if (!board.getAuthor().equals(authentication.getName())) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
+            System.out.println("❌ 작성자가 일치하지 않아 삭제가 거부되었습니다.");
+            return ResponseEntity.status(403).body(java.util.Map.of("error", "삭제 권한이 없습니다."));
         }
 
         boardService.delete(id);
+        System.out.println("✅ 삭제 성공!");
+
+        return ResponseEntity.ok().body(java.util.Map.of("message", "삭제 완료"));
     }
 
     @PutMapping("/api/board/{id}")

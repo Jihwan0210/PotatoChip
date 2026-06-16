@@ -129,7 +129,7 @@
 <body>
 
 <!-- ── NAV ── -->
-<div th:replace="~{fragments/nav :: nav}"></div>
+<div th:replace="~{nav :: nav}"></div>
 
 <!-- ── MAIN ── -->
 <main class="board-page">
@@ -205,7 +205,7 @@
 <div id="writeModal" class="board-modal">
     <div class="board-modal-card">
         <div class="board-modal-head">
-            <h2 class="board-modal-title">게시글 작성하기</h2>
+            <h2 id="modalTitle" class="board-modal-title">게시글 작성하기</h2>
             <button class="board-close-btn" type="button" onclick="closeWriteModal()"><i class="ti ti-x"></i></button>
         </div>
         <div class="board-form-group">
@@ -278,330 +278,417 @@
 
 <script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
-/* ════════════════════════════════════════
-   STATE
-════════════════════════════════════════ */
-var allPosts       = [];
-var currentCat     = 'all';
-var currentPage    = 1;
-var searchTimer    = null;
-var currentUserId  = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
-var POSTS_PER_PAGE = 10;
+    /* ════════════════════════════════════════
+       STATE
+    ════════════════════════════════════════ */
+    var allPosts       = [];
+    var currentCat     = 'all';
+    var currentPage    = 1;
+    var searchTimer    = null;
+    var POSTS_PER_PAGE = 10;
+    var isEditMode = false;
+    var editPostId = null;
 
-/* ════════════════════════════════════════
-   INIT
-════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', function () {
-    loadPosts();
-});
+    // 로그인한 유저의 정보 안전하게 로드
+    var currentUserId   = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
+    var currentUserEmail = localStorage.getItem('email') || sessionStorage.getItem('email');
 
-/* ════════════════════════════════════════
-   DATA
-════════════════════════════════════════ */
-async function loadPosts() {
-    try {
-        var res  = await fetch('/api/board');
-        allPosts = await res.json();
-        updateTabCounts();
-        renderPosts();
-        renderSidebar();
-    } catch (e) {
-        console.error('게시글 로딩 실패:', e);
-        document.getElementById('postList').innerHTML =
-            '<div class="post-empty">게시글을 불러오지 못했어요.<br/>잠시 후 다시 시도해주세요.</div>';
-    }
-}
-
-/* ════════════════════════════════════════
-   FILTER / SEARCH
-════════════════════════════════════════ */
-function getFilteredPosts() {
-    var keyword = document.getElementById('boardSearchInput').value.trim().toLowerCase();
-    return allPosts.filter(function (p) {
-        var catOk = currentCat === 'all' || p.category === currentCat;
-        var kwOk  = !keyword
-            || String(p.title  || '').toLowerCase().includes(keyword)
-            || String(p.content|| '').toLowerCase().includes(keyword)
-            || String(p.author || '').toLowerCase().includes(keyword);
-        return catOk && kwOk;
+    /* ════════════════════════════════════════
+       INIT
+    ════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', function () {
+        loadPosts();
     });
-}
 
-function setTab(el) {
-    document.querySelectorAll('.board-tab').forEach(function (t) { t.classList.remove('on'); });
-    el.classList.add('on');
-    currentCat  = el.dataset.cat;
-    currentPage = 1;
-    renderPosts();
-}
-
-function onSearch() {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(function () {
-        currentPage = 1;
-        renderPosts();
-    }, 200);
-}
-
-function updateTabCounts() {
-    var cats = ['all', 'notice', 'free', 'farmer', 'event'];
-    cats.forEach(function (cat) {
-        var el = document.getElementById('cnt-' + cat);
-        if (!el) return;
-        el.textContent = cat === 'all'
-            ? allPosts.length
-            : allPosts.filter(function (p) { return p.category === cat; }).length;
-    });
-}
-
-/* ════════════════════════════════════════
-   RENDER: POST LIST
-════════════════════════════════════════ */
-function renderPosts() {
-    var posts     = getFilteredPosts();
-    var total     = posts.length;
-    var totalPages= Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
-    if (currentPage > totalPages) currentPage = totalPages;
-
-    var start  = (currentPage - 1) * POSTS_PER_PAGE;
-    var paged  = posts.slice(start, start + POSTS_PER_PAGE);
-    var list   = document.getElementById('postList');
-    var now    = Date.now();
-
-    document.getElementById('boardCountNum').textContent = total.toLocaleString();
-
-    if (paged.length === 0) {
-        list.innerHTML = '<div class="post-empty">게시글이 없습니다.<br/>다른 카테고리나 검색어를 확인해보세요.</div>';
-        renderPagination(0, 1);
-        return;
-    }
-
-    list.innerHTML = paged.map(function (p) {
-        var isNew = p.createdAt && (now - new Date(p.createdAt).getTime()) < 1000 * 60 * 60 * 24;
-        return '<div class="post-item" onclick="openDetail(' + p.id + ')">'
-            + '<div class="post-top">'
-            + '<span class="post-category ' + getCatClass(p.category) + '">' + esc(getCatName(p.category)) + '</span>'
-            + '<span class="post-title">' + esc(p.title) + '</span>'
-            + (isNew ? '<span class="post-new"></span>' : '')
-            + '</div>'
-            + '<div class="post-bottom">'
-            + '<span class="post-author">' + esc(p.author) + '</span>'
-            + '<span class="post-dot"></span>'
-            + '<span>' + fmtDate(p.createdAt) + '</span>'
-            + '<span class="post-dot"></span>'
-            + '<span class="post-meta-item"><i class="ti ti-eye" style="font-size:11px"></i> ' + fmtNum(p.viewCount) + '</span>'
-            + (p.likeCount  != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-heart" style="font-size:11px"></i> ' + fmtNum(p.likeCount)    + '</span>' : '')
-            + (p.commentCount != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-message" style="font-size:11px"></i> ' + fmtNum(p.commentCount) + '</span>' : '')
-            + '</div>'
-            + '</div>';
-    }).join('');
-
-    renderPagination(total, totalPages);
-}
-
-/* ════════════════════════════════════════
-   RENDER: PAGINATION
-════════════════════════════════════════ */
-function renderPagination(total, totalPages) {
-    var el = document.getElementById('pagination');
-    if (totalPages <= 1) { el.innerHTML = ''; return; }
-
-    var html = '';
-    html += '<div class="pg-btn' + (currentPage === 1 ? ' disabled' : '') + '" onclick="goPage(' + (currentPage - 1) + ')"><i class="ti ti-chevron-left"></i></div>';
-
-    var start = Math.max(1, currentPage - 2);
-    var end   = Math.min(totalPages, start + 4);
-    if (end - start < 4) start = Math.max(1, end - 4);
-
-    for (var i = start; i <= end; i++) {
-        html += '<div class="pg-btn' + (i === currentPage ? ' on' : '') + '" onclick="goPage(' + i + ')">' + i + '</div>';
-    }
-    html += '<div class="pg-btn' + (currentPage === totalPages ? ' disabled' : '') + '" onclick="goPage(' + (currentPage + 1) + ')"><i class="ti ti-chevron-right"></i></div>';
-    el.innerHTML = html;
-}
-
-function goPage(page) {
-    currentPage = page;
-    renderPosts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ════════════════════════════════════════
-   RENDER: SIDEBAR
-════════════════════════════════════════ */
-function renderSidebar() {
-    // 인기 게시글 (viewCount 기준 Top 5)
-    var popular = allPosts.slice().sort(function (a, b) { return (b.viewCount || 0) - (a.viewCount || 0); }).slice(0, 5);
-    document.getElementById('popularList').innerHTML = popular.length
-        ? popular.map(function (p, i) {
-            return '<div class="popular-post" onclick="openDetail(' + p.id + ')">'
-                + '<span class="popular-num' + (i < 3 ? ' top3' : '') + '">' + String(i + 1).padStart(2, '0') + '</span>'
-                + '<span class="popular-title">' + esc(p.title) + '</span>'
-                + '<span class="popular-cnt">' + fmtNum(p.viewCount) + '</span>'
-                + '</div>';
-        }).join('')
-        : '<div style="font-size:.8rem;color:var(--muted)">게시글이 없습니다.</div>';
-
-    // 공지사항 최신 4개
-    var notices = allPosts.filter(function (p) { return p.category === 'notice'; })
-        .sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
-        .slice(0, 4);
-    document.getElementById('noticeList').innerHTML = notices.length
-        ? notices.map(function (p) {
-            return '<div class="notice-item" onclick="openDetail(' + p.id + ')">'
-                + '<span class="notice-title">' + esc(p.title) + '</span>'
-                + '<span class="notice-date">' + fmtDateShort(p.createdAt) + '</span>'
-                + '</div>';
-        }).join('')
-        : '<div style="font-size:.8rem;color:var(--muted)">공지사항이 없습니다.</div>';
-}
-
-/* ════════════════════════════════════════
-   DETAIL MODAL
-════════════════════════════════════════ */
-function openDetail(id) {
-    var post = allPosts.find(function (p) { return p.id === id; });
-    if (!post) return;
-
-    // 조회수 증가 (낙관적 업데이트)
-    post.viewCount = (post.viewCount || 0) + 1;
-    fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
-
-    document.getElementById('detailTitle').textContent   = post.title;
-    document.getElementById('detailBadges').innerHTML    =
-        '<span class="post-category ' + getCatClass(post.category) + '">' + esc(getCatName(post.category)) + '</span>';
-    document.getElementById('detailMeta').innerHTML      =
-        '<span>👤 ' + esc(post.author) + '</span>'
-        + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
-        + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
-        + (post.likeCount    != null ? '<span>❤️ ' + fmtNum(post.likeCount)    + '</span>' : '')
-        + (post.commentCount != null ? '<span>💬 ' + fmtNum(post.commentCount) + '</span>' : '');
-    document.getElementById('detailContent').textContent = post.content || '';
-
-    // 수정/삭제 버튼 (본인 글일 때만)
-    var actions = '';
-    if (currentUserId && post.authorId === currentUserId) {
-        actions = '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')">삭제</button>';
-    }
-    document.getElementById('detailActions').innerHTML = actions;
-
-    document.getElementById('detailModal').classList.add('open');
-}
-
-function closeDetailModal() {
-    document.getElementById('detailModal').classList.remove('open');
-}
-
-function deletePost(id) {
-    if (!confirm('게시글을 삭제할까요?')) return;
-    fetch('/api/board/' + id, { method: 'DELETE' })
-        .then(function (res) {
-            if (!res.ok) throw new Error();
-            allPosts = allPosts.filter(function (p) { return p.id !== id; });
+    /* ════════════════════════════════════════
+       DATA
+    ════════════════════════════════════════ */
+    async function loadPosts() {
+        try {
+            var res  = await fetch('/api/board');
+            allPosts = await res.json();
             updateTabCounts();
             renderPosts();
             renderSidebar();
-            closeDetailModal();
-            showToast('게시글이 삭제되었어요.');
-        })
-        .catch(function () { showToast('삭제에 실패했어요. 다시 시도해주세요.'); });
-}
-
-/* ════════════════════════════════════════
-   WRITE MODAL
-════════════════════════════════════════ */
-function openWriteModal() {
-    if (!currentUserId) {
-        showToast('로그인 후 게시글을 작성할 수 있어요.');
-        setTimeout(function () { location.href = '/login'; }, 900);
-        return;
+        } catch (e) {
+            console.error('게시글 로딩 실패:', e);
+            document.getElementById('postList').innerHTML =
+                '<div class="post-empty">게시글을 불러오지 못했어요.<br/>잠시 후 다시 시도해주세요.</div>';
+        }
     }
-    document.getElementById('boardCategory').value = 'free';
-    document.getElementById('boardTitle').value    = '';
-    document.getElementById('boardContent').value  = '';
-    document.getElementById('writeModal').classList.add('open');
-}
 
-function closeWriteModal() {
-    document.getElementById('writeModal').classList.remove('open');
-}
+    /* ════════════════════════════════════════
+       FILTER / SEARCH
+    ════════════════════════════════════════ */
+    function getFilteredPosts() {
+        var keyword = document.getElementById('boardSearchInput').value.trim().toLowerCase();
+        return allPosts.filter(function (p) {
+            var catOk = currentCat === 'all' || p.category === currentCat;
+            var kwOk  = !keyword
+                || String(p.title  || '').toLowerCase().includes(keyword)
+                || String(p.content|| '').toLowerCase().includes(keyword)
+                || String(p.author || '').toLowerCase().includes(keyword);
+            return catOk && kwOk;
+        });
+    }
 
-function submitPost() {
-    var category = document.getElementById('boardCategory').value;
-    var title    = document.getElementById('boardTitle').value.trim();
-    var content  = document.getElementById('boardContent').value.trim();
-
-    if (!title)   { showToast('제목을 입력해주세요.');  return; }
-    if (!content) { showToast('내용을 입력해주세요.');  return; }
-
-const token =
-    localStorage.getItem('token')||
-    sessionStorage.getItem('token');
-
-    fetch('/api/board', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json','Authorization':'Bearer' + token
-        },
-        body:    JSON.stringify({ category: category, title: title, content: content})
-    })
-    .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
-    .then(function (newPost) {
-        allPosts.unshift(newPost);
-        updateTabCounts();
-        currentCat  = 'all';
-        currentPage = 1;
+    function setTab(el) {
         document.querySelectorAll('.board-tab').forEach(function (t) { t.classList.remove('on'); });
-        document.querySelector('[data-cat="all"]').classList.add('on');
+        el.classList.add('on');
+        currentCat  = el.dataset.cat;
+        currentPage = 1;
         renderPosts();
-        renderSidebar();
-        closeWriteModal();
-        showToast('게시글이 등록되었어요! 🌱');
-    })
-    .catch(function () { showToast('등록에 실패했어요. 다시 시도해주세요.'); });
-}
+    }
 
-/* ════════════════════════════════════════
-   HELPERS
-════════════════════════════════════════ */
-function getCatClass(cat) {
-    return { notice: 'cat-notice', free: 'cat-free', farmer: 'cat-farmer', event: 'cat-event' }[cat] || 'cat-free';
-}
-function getCatName(cat) {
-    return { notice: '공지사항', free: '자유게시판', farmer: '농가 이야기', event: '이벤트' }[cat] || cat;
-}
-function esc(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function fmtDate(dt) {
-    if (!dt) return '';
-    var d = new Date(dt);
-    return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
-}
-function fmtDateShort(dt) {
-    if (!dt) return '';
-    var d = new Date(dt);
-    return String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
-}
-function fmtNum(n) {
-    return n != null ? Number(n).toLocaleString() : '0';
-}
+    function onSearch() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            currentPage = 1;
+            renderPosts();
+        }, 200);
+    }
 
-var _toastTimer = null;
-function showToast(msg) {
-    var el = document.getElementById('boardToast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2500);
-}
+    function updateTabCounts() {
+        var cats = ['all', 'notice', 'free', 'farmer', 'event'];
+        cats.forEach(function (cat) {
+            var el = document.getElementById('cnt-' + cat);
+            if (!el) return;
+            el.textContent = cat === 'all'
+                ? allPosts.length
+                : allPosts.filter(function (p) { return p.category === cat; }).length;
+        });
+    }
 
-// 모달 바깥 클릭 시 닫기
-document.addEventListener('click', function (e) {
-    ['writeModal','detailModal'].forEach(function (id) {
-        var modal = document.getElementById(id);
-        if (e.target === modal) modal.classList.remove('open');
+    /* ════════════════════════════════════════
+       RENDER: POST LIST
+    ════════════════════════════════════════ */
+    function renderPosts() {
+        var posts     = getFilteredPosts();
+        var total     = posts.length;
+        var totalPages= Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var start  = (currentPage - 1) * POSTS_PER_PAGE;
+        var paged  = posts.slice(start, start + POSTS_PER_PAGE);
+        var list   = document.getElementById('postList');
+        var now    = Date.now();
+
+        document.getElementById('boardCountNum').textContent = total.toLocaleString();
+
+        if (paged.length === 0) {
+            list.innerHTML = '<div class="post-empty">게시글이 없습니다.<br/>다른 카테고리나 검색어를 확인해보세요.</div>';
+            renderPagination(0, 1);
+            return;
+        }
+
+        list.innerHTML = paged.map(function (p) {
+            var isNew = p.createdAt && (now - new Date(p.createdAt).getTime()) < 1000 * 60 * 60 * 24;
+            return '<div class="post-item" onclick="openDetail(' + p.id + ')">'
+                + '<div class="post-top">'
+                + '<span class="post-category ' + getCatClass(p.category) + '">' + esc(getCatName(p.category)) + '</span>'
+                + '<span class="post-title">' + esc(p.title) + '</span>'
+                + (isNew ? '<span class="post-new"></span>' : '')
+                + '</div>'
+                + '<div class="post-bottom">'
+                + '<span class="post-author">' + esc(p.author) + '</span>'
+                + '<span class="post-dot"></span>'
+                + '<span>' + fmtDate(p.createdAt) + '</span>'
+                + '<span class="post-dot"></span>'
+                + '<span class="post-meta-item"><i class="ti ti-eye" style="font-size:11px"></i> ' + fmtNum(p.viewCount) + '</span>'
+                + (p.likeCount  != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-heart" style="font-size:11px"></i> ' + fmtNum(p.likeCount)    + '</span>' : '')
+                + (p.commentCount != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-message" style="font-size:11px"></i> ' + fmtNum(p.commentCount) + '</span>' : '')
+                + '</div>'
+                + '</div>';
+        }).join('');
+
+        renderPagination(total, totalPages);
+    }
+
+    /* ════════════════════════════════════════
+       RENDER: PAGINATION
+    ════════════════════════════════════════ */
+    function renderPagination(total, totalPages) {
+        var el = document.getElementById('pagination');
+        if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+        var html = '';
+        html += '<div class="pg-btn' + (currentPage === 1 ? ' disabled' : '') + '" onclick="goPage(' + (currentPage - 1) + ')"><i class="ti ti-chevron-left"></i></div>';
+
+        var start = Math.max(1, currentPage - 2);
+        var end   = Math.min(totalPages, start + 4);
+        if (end - start < 4) start = Math.max(1, end - 4);
+
+        for (var i = start; i <= end; i++) {
+            html += '<div class="pg-btn' + (i === currentPage ? ' on' : '') + '" onclick="goPage(' + i + ')">' + i + '</div>';
+        }
+        html += '<div class="pg-btn' + (currentPage === totalPages ? ' disabled' : '') + '" onclick="goPage(' + (currentPage + 1) + ')"><i class="ti ti-chevron-right"></i></div>';
+        el.innerHTML = html;
+    }
+
+    function goPage(page) {
+        currentPage = page;
+        renderPosts();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ════════════════════════════════════════
+       RENDER: SIDEBAR
+    ════════════════════════════════════════ */
+    function renderSidebar() {
+        var popular = allPosts.slice().sort(function (a, b) { return (b.viewCount || 0) - (a.viewCount || 0); }).slice(0, 5);
+        document.getElementById('popularList').innerHTML = popular.length
+            ? popular.map(function (p, i) {
+                return '<div class="popular-post" onclick="openDetail(' + p.id + ')">'
+                    + '<span class="popular-num' + (i < 3 ? ' top3' : '') + '">' + String(i + 1).padStart(2, '0') + '</span>'
+                    + '<span class="popular-title">' + esc(p.title) + '</span>'
+                    + '<span class="popular-cnt">' + fmtNum(p.viewCount) + '</span>'
+                    + '</div>';
+            }).join('')
+            : '<div style="font-size:.8rem;color:var(--muted)">게시글이 없습니다.</div>';
+
+        var notices = allPosts.filter(function (p) { return p.category === 'notice'; })
+            .sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); })
+            .slice(0, 4);
+        document.getElementById('noticeList').innerHTML = notices.length
+            ? notices.map(function (p) {
+                return '<div class="notice-item" onclick="openDetail(' + p.id + ')">'
+                    + '<span class="notice-title">' + esc(p.title) + '</span>'
+                    + '<span class="notice-date">' + fmtDateShort(p.createdAt) + '</span>'
+                    + '</div>';
+            }).join('')
+            : '<div style="font-size:.8rem;color:var(--muted)">공지사항이 없습니다.</div>';
+    }
+
+    /* ════════════════════════════════════════
+       DETAIL MODAL
+    ════════════════════════════════════════ */
+    function openDetail(id) {
+        var post = allPosts.find(function (p) { return p.id === id; });
+        if (!post) return;
+
+        post.viewCount = (post.viewCount || 0) + 1;
+        fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
+
+        document.getElementById('detailTitle').textContent   = post.title;
+        document.getElementById('detailBadges').innerHTML    =
+            '<span class="post-category ' + getCatClass(post.category) + '">' + esc(getCatName(post.category)) + '</span>';
+        document.getElementById('detailMeta').innerHTML      =
+            '<span>👤 ' + esc(post.author) + '</span>'
+            + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
+            + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
+            + (post.likeCount    != null ? '<span>❤️ ' + fmtNum(post.likeCount)    + '</span>' : '')
+            + (post.commentCount != null ? '<span>💬 ' + fmtNum(post.commentCount) + '</span>' : '');
+        document.getElementById('detailContent').textContent = post.content || '';
+
+        // 💡 [수정] 버튼 스타일을 확실하게 명시해서 빈칸으로 나오던 버그 수정!
+        var actions = '';
+        if (currentUserEmail && post.author === currentUserEmail) {
+            actions = '<button class="board-action-btn" onclick="openEditModal(' + post.id + ')" style="border:1px solid #ccc; background:#fff; color:#333; margin-right:8px; cursor:pointer;">수정</button>'
+                + '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')">삭제</button>';
+        }
+        document.getElementById('detailActions').innerHTML = actions;
+
+        document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.remove('open');
+    }
+
+    // 💡 [추가] 수정 버튼을 눌렀을 때 작동할 함수도 여기에 세트로 같이 넣어줘야 에러가 안 나!
+    function openEditModal(id) {
+        var post = allPosts.find(function (p) { return p.id === id; });
+        if (!post) return;
+
+        // 상세 모달 닫기
+        closeDetailModal();
+
+        // 수정 모드 상태 세팅
+        isEditMode = true;
+        editPostId = id;
+
+        // 기존 게시글 데이터 입력 폼에 싹 채워넣기
+        document.getElementById('boardCategory').value = post.category;
+        document.getElementById('boardTitle').value = post.title;
+        document.getElementById('boardContent').value = post.content;
+
+        // 글쓰기 모달창 제목을 '게시글 수정'으로 변경
+        var modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) {
+            modalTitle.textContent = '게시글 수정 🌿';
+        }
+
+        // 글쓰기 모달창 열기
+        document.getElementById('writeModal').classList.add('open');
+    }
+
+    function deletePost(id) {
+        if (!confirm('게시글을 삭제할까요?')) return;
+
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        fetch('/api/board/' + id, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+            .then(function (res) {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error('삭제 실패');
+                }
+            })
+            .then(function (data) {
+                allPosts = allPosts.filter(function (p) { return p.id !== id; });
+                updateTabCounts();
+                renderPosts();
+                renderSidebar();
+                closeDetailModal();
+                showToast('게시글이 삭제되었어요. 🌿');
+            })
+            .catch(function (err) {
+                console.error("삭제 실패:", err);
+                showToast('삭제에 실패했어요.');
+                closeDetailModal();
+            });
+    }
+
+    /* ════════════════════════════════════════
+       WRITE MODAL
+    ════════════════════════════════════════ */
+    function openWriteModal() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        if (!token) {
+            showToast('로그인 후 게시글을 작성할 수 있어요.');
+            setTimeout(function () {
+                location.href = '/login';
+            }, 900);
+            return;
+        }
+
+        document.getElementById('boardCategory').value = 'free';
+        document.getElementById('boardTitle').value = '';
+        document.getElementById('boardContent').value = '';
+
+        var modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.textContent = '게시글 수정 🌿';
+
+        document.getElementById('writeModal').classList.add('open');
+    }
+
+    function closeWriteModal() {
+        isEditMode = false;
+        editPostId = null;
+        var modalTitle = document.getElementById('modalTitle');
+        if (modalTitle) modalTitle.textContent = '새 게시글 작성 ✍️';
+        document.getElementById('writeModal').classList.remove('open');
+    }
+
+    function submitPost() {
+        var category = document.getElementById('boardCategory').value;
+        var title    = document.getElementById('boardTitle').value.trim();
+        var content  = document.getElementById('boardContent').value.trim();
+
+        if (!title)   { showToast('제목을 입력해주세요.');  return; }
+        if (!content) { showToast('내용을 입력해주세요.');  return; }
+
+        const boardData = {
+            category: category,
+            title: title,
+            content: content
+        };
+
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+
+        var url = isEditMode ? '/api/board/' + editPostId : '/api/board';
+        var method = isEditMode ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method:  method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body:    JSON.stringify(boardData)
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error();
+                return res.json();
+            })
+            .then(function (updatedPost) {
+                if (isEditMode) {
+
+                    var idx = allPosts.findIndex(function(p) { return p.id === editPostId; });
+                    if (idx !== -1) allPosts[idx] = updatedPost;
+                    showToast('게시글이 성공적으로 수정되었어요! 📝');
+                } else {
+
+                    allPosts.unshift(updatedPost);
+                    showToast('게시글이 등록되었어요! 🌱');
+                }
+
+
+                isEditMode = false;
+                editPostId = null;
+                var modalTitle = document.getElementById('modalTitle');
+                if (modalTitle) modalTitle.textContent = '새 게시글 작성 ✍️';
+
+                updateTabCounts();
+                renderPosts();
+                renderSidebar();
+                closeWriteModal();
+            })
+            .catch(function () {
+                showToast('처리에 실패했어요. 다시 시도해주세요.');
+            });
+    }
+
+    /* ════════════════════════════════════════
+       HELPERS
+    ════════════════════════════════════════ */
+    function getCatClass(cat) {
+        return { notice: 'cat-notice', free: 'cat-free', farmer: 'cat-farmer', event: 'cat-event' }[cat] || 'cat-free';
+    }
+    function getCatName(cat) {
+        return { notice: '공지사항', free: '자유게시판', farmer: '농가 이야기', event: '이벤트' }[cat] || cat;
+    }
+    function esc(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtDate(dt) {
+        if (!dt) return '';
+        var d = new Date(dt);
+        return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+    }
+    function fmtDateShort(dt) {
+        if (!dt) return '';
+        var d = new Date(dt);
+        return String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+    }
+    function fmtNum(n) {
+        return n != null ? Number(n).toLocaleString() : '0';
+    }
+
+    var _toastTimer = null;
+    function showToast(msg) {
+        var el = document.getElementById('boardToast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(_toastTimer);
+        _toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2500);
+    }
+
+    // 모달 바깥 클릭 시 닫기
+    document.addEventListener('click', function (e) {
+        ['writeModal','detailModal'].forEach(function (id) {
+            var modal = document.getElementById(id);
+            if (e.target === modal) modal.classList.remove('open');
+        });
     });
-});
 </script>
 </body>
 </html>
