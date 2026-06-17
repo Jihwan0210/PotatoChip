@@ -250,14 +250,16 @@
                 </div>
 
                 <!-- 장바구니 담기 -->
-                <button th:data-id="${product.id}"
+                <button id="addToCartBtn"
+                        th:data-id="${product.id}"
                         onclick="addToCartDetail(this)"
                         style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">
                     🛒 장바구니 담기
                 </button>
 
                 <!-- 바로구매 -->
-                <button th:data-id="${product.id}"
+                <button id="buyNowBtn"
+                        th:data-id="${product.id}"
                         onclick="buyNow(this.dataset.id)"
                         style="display:block;width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px;cursor:pointer">
                     바로 구매하기
@@ -302,12 +304,50 @@
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) return;
-        const myEmail = JSON.parse(atob(token.split('.')[1])).sub;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const myEmail = payload.sub;
+        const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+
+        // 내 상품이면 삭제/수정 버튼 표시
         if (myEmail === sellerEmail) {
             const deleteBtn = document.getElementById('deleteProductBtn');
             const editBtn = document.getElementById('editProductBtn');
             if (deleteBtn) deleteBtn.style.display = 'flex';
             if (editBtn) editBtn.style.display = 'flex';
+        }
+
+        // 판매자 계정이거나 내 상품이면 장바구니/바로구매 비활성화
+        if (role === 'SELLER') {
+            const cartBtn = document.getElementById('addToCartBtn');
+            const buyBtn = document.getElementById('buyNowBtn');
+            const wishBtn = document.getElementById('wishBtn2');
+            const wishImgBtn = document.getElementById('detailWishBtn');
+
+            if (cartBtn) {
+                cartBtn.disabled = true;
+                cartBtn.style.opacity = '0.4';
+                cartBtn.style.cursor = 'not-allowed';
+            }
+            if (buyBtn) {
+                buyBtn.disabled = true;
+                buyBtn.style.opacity = '0.4';
+                buyBtn.style.cursor = 'not-allowed';
+            }
+
+            // 내 상품이면 찜도 비활성화
+            if (myEmail === sellerEmail) {
+                if (wishBtn) {
+                    wishBtn.disabled = true;
+                    wishBtn.style.opacity = '0.4';
+                    wishBtn.style.cursor = 'not-allowed';
+                }
+                if (wishImgBtn) {
+                    wishImgBtn.disabled = true;
+                    wishImgBtn.style.opacity = '0.4';
+                    wishImgBtn.style.cursor = 'not-allowed';
+                }
+            }
         }
     });
 
