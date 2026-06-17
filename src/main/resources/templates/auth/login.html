@@ -7,6 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        .fg input, .fg select { border: 1.5px solid var(--sand); border-radius: 8px; }
+        .fg.error input, .fg.error select { border-color: #e74c3c; }
+        .fg-err { color: #e74c3c; font-size: .76rem; margin-top: 4px; display: none; }
+        .fg.error .fg-err { display: block; }
+    </style>
 </head>
 <body>
 
@@ -58,11 +64,12 @@
                 <div class="name-row">
                     <div class="fg">
                         <label>이름</label>
-                        <input name="name" placeholder="이름" type="text"/>
+                        <input name="name" placeholder="이름" type="text" onblur="filterKorean(this)"/>
+                        <div class="fg-err"></div>
                     </div>
                     <div class="fg">
                         <label>역할</label>
-                        <select name="role">
+                        <select name="role" onchange="toggleRoleFields(this)">
                             <option>구매자</option>
                             <option>판매자(농가)</option>
                         </select>
@@ -70,27 +77,33 @@
                 </div>
                 <div class="fg">
                     <label>이메일</label>
-                    <input name="email" placeholder="이메일을 입력해주세요" type="email"/>
+                    <input name="email" placeholder="이메일을 입력해주세요" type="text" oninput="filterEmailChars(this)"/>
+                    <div class="fg-err"></div>
                 </div>
                 <div class="fg">
                     <label>비밀번호</label>
-                    <input name="password" placeholder="8자 이상 입력해주세요" type="password"/>
+                    <input name="password" placeholder="8자 이상 입력해주세요" type="password" oninput="filterPasswordChars(this)"/>
+                    <div class="fg-err"></div>
                 </div>
                 <div class="fg">
                     <label>비밀번호 확인</label>
                     <input name="passwordConfirm" placeholder="비밀번호를 다시 입력해주세요" type="password"/>
+                    <div class="fg-err"></div>
                 </div>
                 <div class="fg">
                     <label>전화번호</label>
-                    <input name="phone" placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)" type="tel"/>
+                    <input name="phone" placeholder="숫자만 입력해주세요" type="tel" maxlength="11" oninput="filterDigits(this)"/>
+                    <div class="fg-err"></div>
                 </div>
-                <div class="fg">
+                <div class="fg" id="addressGroup">
                     <label>주소</label>
                     <input name="address" placeholder="배송받을 주소를 입력해주세요" type="text"/>
+                    <div class="fg-err"></div>
                 </div>
-                <div class="fg">
-                    <label>닉네임</label>
-                    <input name="nickname" placeholder="닉네임을 입력해주세요" type="text"/>
+                <div class="fg" id="nicknameGroup">
+                    <label>닉네임 <span style="color:var(--muted);font-size:.72rem">*선택</span></label>
+                    <input name="nickname" placeholder="닉네임을 입력해주세요" type="text" onblur="filterNicknameChars(this)"/>
+                    <div class="fg-err"></div>
                 </div>
                 <button class="btn-submit" onclick="doSignup()">가입하기 →</button>
                 <p class="sw-txt" style="margin-top:10px">
