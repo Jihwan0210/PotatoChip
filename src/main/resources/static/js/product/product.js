@@ -199,6 +199,10 @@ async function toggleW(btn) {
     if (!isLoggedIn()) {
         showToast('로그인 후 이용해주세요');
         return;
+    } const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+    if (role === 'SELLER') {
+        showToast('판매자 계정은 찜 기능을 이용할 수 없어요');
+        return;
     }
     const card = btn.closest('[data-id]') || btn.closest('.pc2');
     const id = card ? String(card.dataset.id || '') : '';
