@@ -5,6 +5,7 @@ import com.example.potatochip.auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +19,7 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
 
-    // 비밀번호 암호화 - BCrypt 방식
+    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,8 +33,20 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션 미사용 (JWT 기반)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/signup", "/login", "/forgot-password", "/resetpw", "/css/**", "/js/**", "/images/**").permitAll() // 인증 없이 허용
-                        .anyRequest().permitAll() // 나머지도 허용 (추후 인증 필요 시 authenticated()로 변경)
+                        // 1. 누구나 접근 가능한 정적 자원 및 인증 API (+ 업로드된 이미지 경로 추가)
+                        .requestMatchers("/signup", "/login", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+
+                        // 2. 문의사항(Inquiry) 관련 권한 인증 설정 (develop 변경사항 반영)
+                        .requestMatchers("/api/inquires/**").authenticated() // 로그인시 문의 허용
+                        .requestMatchers("/api/admin/inquires/**").authenticated() // 관리자 로그인시 문의 답변 허용
+
+                        // 3. 게시판(Board) 관련 권한 인증 설정 (feature/Operations 변경사항 반영)
+                        .requestMatchers(HttpMethod.POST, "/api/board").authenticated()     // 게시글 생성 시 로그인 필수
+                        .requestMatchers(HttpMethod.PUT, "/api/board/**").authenticated()    // 게시글 수정 시 로그인 필수
+                        .requestMatchers(HttpMethod.DELETE, "/api/board/**").authenticated() // 게시글 삭제 시 로그인 필수
+
+                        // 4. 그 외 나머지 요청은 우선 허용
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
 
