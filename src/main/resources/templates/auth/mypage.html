@@ -7,119 +7,151 @@
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/auth/mypage.css}"/>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 
 <div th:replace="nav :: nav"></div>
 
 <div class="page active" id="page-mypage">
-    <div style="display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--beige2)">
+    <div class="mp-layout">
 
-        <!-- 왼쪽 사이드바 -->
-        <div style="background:#fff;border-right:1.5px solid var(--sand);padding:32px 0">
-            <div style="padding:0 20px;margin-bottom:28px">
-                <div style="width:64px;height:64px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:10px">👤</div>
-                <div id="mp-display-name" style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark)">로딩 중...</div>
-                <div id="mp-display-email" style="font-size:.74rem;color:var(--muted);margin-top:2px"></div>
+        <!-- 사이드바 -->
+        <aside class="mp-sidebar">
+            <div class="mp-user-box">
+                <div class="mp-avatar">👤</div>
+                <div class="mp-sidebar-name" id="mp-display-name">로딩 중...</div>
+                <div class="mp-sidebar-email" id="mp-display-email"></div>
             </div>
-            <div id="my-tab-orders"  onclick="switchMyTab('orders')"
-                 style="padding:12px 20px;font-size:.82rem;color:var(--mid);cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px">
-                📦 주문 내역
+            <div class="mp-nav">
+                <div class="mp-tab on" id="my-tab-orders"  onclick="switchMyTab('orders')">📦 주문 내역</div>
+                <div class="mp-tab"    id="my-tab-wishlist" onclick="switchMyTab('wishlist')">🤍 찜 목록</div>
+                <div class="mp-tab"    id="my-tab-coupon"  onclick="switchMyTab('coupon')">🎟️ 쿠폰</div>
+                <div class="mp-tab"    id="my-tab-review"  onclick="switchMyTab('myreview')">✍️ 내 리뷰</div>
+                <div class="mp-tab"    id="my-tab-profile" onclick="switchMyTab('profile')">⚙️ 프로필 설정</div>
             </div>
-            <div id="my-tab-wishlist" onclick="switchMyTab('wishlist')"
-                 style="padding:12px 20px;font-size:.82rem;color:var(--mid);cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px">
-                🤍 찜 목록
-            </div>
-            <div id="my-tab-coupon"  onclick="switchMyTab('coupon')"
-                 style="padding:12px 20px;font-size:.82rem;color:var(--mid);cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px">
-                🎟️ 쿠폰
-            </div>
-            <div id="my-tab-review"  onclick="switchMyTab('myreview')"
-                 style="padding:12px 20px;font-size:.82rem;color:var(--mid);cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px">
-                ✍️ 내 리뷰
-            </div>
-            <div id="my-tab-profile" onclick="switchMyTab('profile')"
-                 style="padding:12px 20px;font-size:.82rem;color:var(--mid);cursor:pointer;border-left:3px solid transparent;display:flex;align-items:center;gap:8px;background:var(--gp);border-left:3px solid var(--green)">
-                ⚙️ 프로필 설정
-            </div>
-        </div>
+        </aside>
 
-        <!-- 오른쪽 컨텐츠 -->
-        <div style="padding:32px">
+        <!-- 콘텐츠 -->
+        <div>
 
             <!-- 주문 내역 -->
-            <div id="mycontent-orders" style="display:none">
-                <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:20px">📦 주문 내역</div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:.84rem">
-                    주문 내역이 없어요 🌿
+            <div id="mycontent-orders" style="display:block">
+                <div class="mp-card">
+                    <div class="mp-section-title">📦 주문 내역</div>
+                    <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">주문 내역이 없어요 🌿</div>
                 </div>
             </div>
 
             <!-- 찜 목록 -->
             <div id="mycontent-wishlist" style="display:none">
-                <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:20px">🤍 찜 목록</div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:.84rem">
-                    찜한 상품이 없어요 🌿
+                <div class="mp-card">
+                    <div class="mp-section-title">🤍 찜 목록</div>
+                    <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">찜한 상품이 없어요 🌿</div>
                 </div>
             </div>
 
             <!-- 쿠폰 -->
             <div id="mycontent-coupon" style="display:none">
-                <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:20px">🎟️ 쿠폰</div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:.84rem">
-                    보유한 쿠폰이 없어요 🌿
+                <div class="mp-card">
+                    <div class="mp-section-title">🎟️ 쿠폰</div>
+                    <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">보유한 쿠폰이 없어요 🌿</div>
                 </div>
             </div>
 
             <!-- 내 리뷰 -->
             <div id="mycontent-myreview" style="display:none">
-                <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:20px">✍️ 내 리뷰</div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:40px;text-align:center;color:var(--muted);font-size:.84rem">
-                    작성한 리뷰가 없어요 🌿
+                <div class="mp-card">
+                    <div class="mp-section-title">✍️ 내 리뷰</div>
+                    <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">작성한 리뷰가 없어요 🌿</div>
                 </div>
             </div>
 
             <!-- 프로필 설정 -->
-            <div id="mycontent-profile" style="display:block">
-                <div style="font-family:Gaegu,cursive;font-size:1.3rem;font-weight:700;color:var(--dark);margin-bottom:20px">⚙️ 프로필 설정</div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:28px;max-width:520px">
-                    <div style="display:flex;flex-direction:column;gap:16px">
+            <div id="mycontent-profile" style="display:none">
+
+                <!-- 기본 정보 -->
+                <div class="mp-card">
+                    <div class="mp-section-title">⚙️ 기본 정보</div>
+                    <div class="mp-field">
                         <div>
-                            <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">이름</label>
-                            <input id="mp-name" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <label>이름</label>
+                            <input id="mp-name" type="text" readonly/>
                         </div>
                         <div>
-                            <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">닉네임</label>
-                            <input id="mp-nickname" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <label>닉네임</label>
+                            <input id="mp-nickname" type="text" readonly/>
                         </div>
                         <div>
-                            <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">이메일</label>
-                            <input id="mp-email" type="email" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <label>이메일</label>
+                            <input id="mp-email" type="email" readonly/>
                         </div>
                         <div>
-                            <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">전화번호</label>
-                            <input id="mp-phone" type="tel" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <label>전화번호</label>
+                            <input id="mp-phone" type="tel" readonly/>
                         </div>
                         <div>
-                            <label style="font-size:.74rem;color:var(--muted);display:block;margin-bottom:5px">주소</label>
-                            <input id="mp-address" type="text" readonly style="width:100%;border:1.5px solid var(--sand);border-radius:9px;padding:10px 13px;font-size:.84rem;font-family:inherit;outline:none;background:var(--beige2);color:var(--muted)"/>
+                            <label>주소</label>
+                            <div id="mp-address-search-row" style="display:none;flex-wrap:nowrap;gap:6px;align-items:center;margin-bottom:6px">
+                                <input id="mp-postcode" type="text" readonly placeholder="우편번호" style="width:110px;flex-shrink:0;background:var(--beige2);color:var(--muted)"/>
+                                <button type="button" onclick="openMpAddressSearch()" style="flex-shrink:0;padding:0 14px;height:40px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">주소 검색</button>
+                            </div>
+                            <input id="mp-address" type="text" readonly placeholder="도로명 주소"/>
+                            <input id="mp-address-detail" type="text" readonly placeholder="상세주소 (동/호수 등)" style="margin-top:6px"/>
                         </div>
-                        <div style="display:flex;gap:10px">
-                            <button id="btn-edit" onclick="enterEditMode()"
-                                    style="flex:1;background:#fff;color:var(--green);border:1.5px solid var(--green);border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                ✏️ 수정
-                            </button>
-                            <button id="btn-save" onclick="saveMyProfile()"
-                                    style="display:none;flex:1;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                저장
-                            </button>
-                            <button id="btn-cancel" onclick="cancelEditMode()"
-                                    style="display:none;flex:1;background:#fff;color:var(--mid);border:1.5px solid var(--sand);border-radius:10px;padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit">
-                                취소
-                            </button>
+                        <div class="mp-btn-row">
+                            <button id="btn-edit"   class="mp-btn outline" onclick="enterEditMode()">✏️ 수정</button>
+                            <button id="btn-save"   class="mp-btn green"   onclick="saveMyProfile()"  style="display:none">저장</button>
+                            <button id="btn-cancel" class="mp-btn gray"    onclick="cancelEditMode()" style="display:none">취소</button>
                         </div>
                     </div>
                 </div>
+
+                <!-- 비밀번호 변경 -->
+                <div class="mp-card">
+                    <div class="mp-section-title">🔒 비밀번호 변경</div>
+                    <div class="mp-field">
+                        <div>
+                            <label>현재 비밀번호</label>
+                            <input id="cp-current" type="password" placeholder="현재 비밀번호 입력"/>
+                        </div>
+                        <div>
+                            <label>새 비밀번호</label>
+                            <input id="cp-new" type="password" placeholder="8자 이상, 영어+숫자+특수문자"/>
+                        </div>
+                        <div>
+                            <label>새 비밀번호 확인</label>
+                            <input id="cp-confirm" type="password" placeholder="새 비밀번호 다시 입력"/>
+                        </div>
+                        <div class="mp-btn-row">
+                            <button class="mp-btn green" onclick="changePassword()">변경하기</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 회원 탈퇴 -->
+                <div class="danger-card">
+                    <div class="mp-section-title" style="color:#e74c3c">🚪 회원 탈퇴</div>
+                    <p style="font-size:.82rem;color:var(--mid);line-height:1.75;margin-bottom:18px">
+                        탈퇴 시 계정 정보 및 모든 활동 내역이 비활성화됩니다.<br/>
+                        탈퇴 후에는 복구가 어려우니 신중하게 진행해주세요.
+                    </p>
+                    <div class="mp-field">
+                        <div>
+                            <label>비밀번호 확인</label>
+                            <input id="wd-pw" type="password" placeholder="현재 비밀번호를 입력해주세요"/>
+                        </div>
+                        <div>
+                            <label>탈퇴 사유 <span style="color:var(--muted);font-size:.7rem">*선택</span></label>
+                            <textarea id="wd-reason" rows="3" placeholder="탈퇴 사유를 입력해주세요 (선택)"></textarea>
+                        </div>
+                        <div class="mp-btn-row">
+                            <button class="mp-btn red" onclick="withdrawAccount()">탈퇴하기</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>

@@ -148,7 +148,7 @@ function doSignup() {
         password: document.querySelector('#sf input[name="password"]').value,
         passwordConfirm: document.querySelector('#sf input[name="passwordConfirm"]').value,
         phone: document.querySelector('#sf input[name="phone"]').value,
-        address: document.querySelector('#sf input[name="address"]').value,
+        address: (document.querySelector('#sf input[name="address"]').value + ' ' + document.querySelector('#sf input[name="addressDetail"]').value).trim(),
         nickname: document.querySelector('#sf input[name="nickname"]').value
     };
 
@@ -217,6 +217,18 @@ function switchMyTab(name) {
             }
         }
     });
+}
+
+/* ══ 주소 검색 ══ */
+function openAddressSearch() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            var addr = data.roadAddress || data.jibunAddress;
+            document.getElementById('sf-postcode').value = data.zonecode;
+            document.getElementById('sf-address').value = addr;
+            document.getElementById('sf-address-detail').focus();
+        }
+    }).open();
 }
 
 /* ══ 로그아웃 ══ */
