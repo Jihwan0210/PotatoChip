@@ -16,11 +16,18 @@
 <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 0;margin-top:64px">
     <div style="font-size:.65rem;color:var(--green);letter-spacing:1px;font-weight:500;margin-bottom:6px">Market</div>
     <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);margin-bottom:14px">못난이 마켓 🌿</div>
+
     <!-- 검색바 -->
     <div style="display:flex;align-items:center;gap:8px;max-width:600px;margin-bottom:14px">
+        <select id="mktSearchType" style="border:1.5px solid var(--sand);border-radius:8px;padding:9px 10px;font-size:.78rem;color:var(--mid);background:#fff;font-family:inherit;cursor:pointer;outline:none">
+            <option value="all"    th:selected="${searchType == 'all'}">전체</option>
+            <option value="name"   th:selected="${searchType == 'name'}">상품명</option>
+            <option value="farm"   th:selected="${searchType == 'farm'}">원산지</option>
+            <option value="region" th:selected="${searchType == 'region'}">농장 위치</option>
+        </select>
         <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--beige2);border:1.5px solid var(--sand);border-radius:10px;padding:9px 14px">
             <span style="font-size:.85rem;color:var(--muted)">🔍</span>
-            <input id="mktSearch" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..." style="flex:1;border:none;outline:none;font-size:.82rem;color:var(--dark);background:transparent;font-family:inherit"/>
+            <input id="mktSearch" th:value="${keyword}" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..." style="flex:1;border:none;outline:none;font-size:.82rem;color:var(--dark);background:transparent;font-family:inherit"/>
             <span id="mktSearchClear" onclick="clearMktSearch()" style="font-size:.85rem;color:var(--muted);cursor:pointer;display:none">×</span>
         </div>
         <button onclick="doMktSearch()" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">검색</button>
