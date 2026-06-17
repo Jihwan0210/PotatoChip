@@ -349,12 +349,6 @@ function markAllRead(){
 }
 
 /* ══ SORT ══ */
-function setSort(el){
-  el.parentElement.querySelectorAll('div').forEach(function(d){
-    d.style.color='var(--muted)';d.style.fontWeight='400';d.style.background='transparent';
-  });
-  el.style.color='var(--green)';el.style.fontWeight='700';el.style.background='var(--gp)';
-}
 
 /* ══ MARKET ══ */
 function catClick(el){

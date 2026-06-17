@@ -61,4 +61,6 @@ public class ProductDTO {
 
     private Boolean soonExpired; //할인마감 여부
 
+    private String sellerEmail;
+
 }

@@ -2,348 +2,227 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${product.name} + ' | 못난이 농작물'">상품 상세 | 못난이 농작물</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>못난이 농작물</title>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css"/>
-    <style>
-        .detail-page{padding-top:64px;background:var(--beige3);min-height:100vh}
-        .detail-back-bar{background:#fff;border-bottom:1.5px solid var(--sand,var(--beige));padding:12px 5%;display:flex;align-items:center;gap:10px}
-        .detail-back-btn{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;color:var(--mid);cursor:pointer;padding:6px 12px;border:1.5px solid var(--sand,var(--beige));border-radius:8px;font-family:inherit}
-        .detail-breadcrumb{font-size:.74rem;color:var(--muted)}
-        .detail-report-btn{margin-left:auto;background:#fff5ef;color:var(--amber);border:1.5px solid #f5c8a8;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px}
-        .detail-layout{padding:28px 5%;display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1100px;margin:0 auto}
-        .detail-image-box{background:linear-gradient(145deg,var(--gp),var(--gl));border-radius:18px;height:360px;display:flex;align-items:center;justify-content:center;font-size:8rem;line-height:1;margin-bottom:20px;position:relative;overflow:hidden}
-        .detail-image-box img{width:100%;height:100%;object-fit:cover;border-radius:18px;position:absolute;top:0;left:0}
-        .detail-wish-circle{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.88);border:1.5px solid var(--sand,var(--beige));display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;transition:all .2s}
-        .detail-tabs{border-bottom:1.5px solid var(--sand,var(--beige));display:flex;gap:0;margin-bottom:22px}
-        .detail-tab{padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent}
-        .detail-tab.on{color:var(--dark);font-weight:600;border-bottom-color:var(--dark)}
-        .detail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-        .detail-info-card{background:var(--beige2);border-radius:10px;padding:14px}
-        .detail-info-label{font-size:.7rem;color:var(--muted);margin-bottom:4px}
-        .detail-info-value{font-size:.84rem;font-weight:500;color:var(--dark)}
-        .detail-section-card{border:1.5px solid var(--sand,var(--beige));border-radius:12px;padding:18px;margin-bottom:16px}
-        .detail-section-title{font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:9px}
-        .detail-section-text{font-size:.8rem;color:var(--mid);line-height:1.8}
-        .detail-green-card{border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px}
-        .detail-green-title{font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px}
-        .detail-side{position:sticky;top:80px;align-self:flex-start}
-        .detail-buy-card{background:#fff;border:1.5px solid var(--sand,var(--beige));border-radius:16px;padding:22px;margin-bottom:12px}
-        .detail-origin{font-size:.72rem;color:var(--green);margin-bottom:4px;font-weight:500}
-        .detail-product-name{font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:13px;line-height:1.4}
-        .detail-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
-        .detail-price{font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)}
-        .detail-origin-price{font-size:.82rem;color:var(--muted);text-decoration:line-through}
-        .detail-discount{font-size:.82rem;font-weight:700;color:var(--amber)}
-        .detail-rating-row{display:flex;align-items:center;gap:6px;margin-bottom:18px}
-        .detail-stars{color:var(--amber);font-size:.82rem}
-        .detail-rating-text{font-size:.74rem;color:var(--muted)}
-        .detail-qty-area{border-top:1px solid var(--sand,var(--beige));padding-top:14px;margin-bottom:14px}
-        .detail-qty-label{font-size:.74rem;color:var(--muted);margin-bottom:8px}
-        .detail-qty-row{display:flex;align-items:center;gap:12px}
-        .detail-qty-box{display:inline-flex;align-items:center;border:1.5px solid var(--sand,var(--beige));border-radius:9px;overflow:hidden}
-        .detail-qty-box button{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit}
-        .detail-qty-box span{width:32px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;color:var(--dark);border-left:1px solid var(--sand,var(--beige));border-right:1px solid var(--sand,var(--beige))}
-        .detail-delivery-info{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
-        .detail-delivery-info div{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)}
-        .detail-cart-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s}
-        .detail-buy-btn{display:block;width:100%;background:var(--amber);color:#fff;text-decoration:none;text-align:center;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px}
-        .detail-side-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-        .detail-side-actions button{padding:10px;border-radius:10px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
-        .detail-wish-btn{border:1.5px solid var(--sand,var(--beige));background:#fff;color:var(--mid)}
-        .detail-farmer-btn{border:1.5px solid var(--gl);background:var(--gp);color:var(--green)}
-        .detail-guide-card{background:var(--beige2);border:1.5px solid var(--sand,var(--beige));border-radius:12px;padding:14px 16px;font-size:.74rem;color:var(--mid);line-height:1.85}
-        .detail-recommend-card{background:#fff;border:1.5px solid var(--sand,var(--beige));border-radius:14px;padding:18px;margin-top:22px}
-        .detail-recommend-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--sand,var(--beige));cursor:pointer}
-        .detail-recommend-item:last-child{border-bottom:none}
-        .detail-rec-thumb{width:48px;height:48px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
-        .detail-rec-info{flex:1;min-width:0}
-        .detail-rec-name{font-size:.76rem;font-weight:500;color:var(--dark)}
-        .detail-rec-farm{font-size:.68rem;color:var(--muted)}
-        .detail-rec-price{text-align:right;flex-shrink:0}
-        .detail-rec-price strong{display:block;font-size:.8rem;color:var(--amber)}
-        .detail-rec-price span{font-size:.68rem;color:var(--muted);text-decoration:line-through}
-        .detail-rec-btn{background:var(--gp);color:var(--green);border:1px solid var(--gl);border-radius:7px;padding:5px 9px;font-size:.68rem;cursor:pointer;font-family:inherit;flex-shrink:0}
-        .pickup-intro{background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px}
-        .pickup-card{background:#fff;border:1.5px solid var(--sand,var(--beige));border-radius:12px;padding:16px 18px;margin-bottom:14px}
-        .pickup-map-wrap{border-radius:12px;overflow:hidden;border:1.5px solid var(--sand,var(--beige));margin-bottom:14px}
-        .pickup-map-title{background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand,var(--beige));display:flex;align-items:center;gap:6px}
-        .pickup-map-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-        .pickup-map-btn{display:flex;align-items:center;justify-content:center;gap:7px;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer}
-        .pickup-step{display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)}
-        .pickup-step-num{width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-        .detail-review-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-        .review-write-btn{background:var(--green);color:#fff;border:none;border-radius:100px;padding:10px 20px;font-family:'Gaegu',cursive;font-size:1.05rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(123,191,69,.28);transition:all .2s}
-        .review-write-btn:hover{background:#5E9E30;transform:translateY(-1px)}
-        .review-stats{background:var(--white);display:grid;grid-template-columns:repeat(4,1fr);border:1.5px solid var(--beige);border-radius:14px;overflow:hidden;margin-bottom:16px}
-        .review-stat{padding:16px 10px;text-align:center;border-right:1px solid var(--beige)}
-        .review-stat:last-child{border-right:none}
-        .review-stat-value{font-family:'Gaegu',cursive;font-size:1.4rem;font-weight:700;color:var(--amber)}
-        .review-stat-label{font-size:.68rem;color:var(--muted);margin-top:3px}
-        .review-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-        .review-filter-group{display:flex;gap:7px;flex-wrap:wrap}
-        .review-list{display:flex;flex-direction:column;gap:12px}
-        .review-empty{background:var(--white);border:1.5px solid var(--beige);border-radius:14px;padding:24px 22px;color:var(--muted);font-size:.84rem;line-height:1.8;text-align:center}
-        .review-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9999;align-items:center;justify-content:center;padding:20px}
-        .review-modal-card{background:var(--white);border-radius:20px;padding:26px;width:100%;max-width:480px;box-shadow:0 12px 44px rgba(0,0,0,.2)}
-        .review-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-        .review-modal-title{font-family:'Gaegu',cursive;font-size:1.45rem;font-weight:700;color:var(--dark)}
-        .review-close-btn{border:none;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--muted)}
-        .review-form-group{margin-bottom:13px}
-        .review-form-group label{display:block;font-size:.73rem;color:var(--mid);font-weight:700;margin-bottom:6px}
-        .review-form-group input,.review-form-group select,.review-form-group textarea{width:100%;padding:12px 13px;border:1.5px solid var(--beige);border-radius:12px;font-family:inherit;color:var(--dark);outline:none;background:var(--beige3)}
-        .review-form-group textarea{resize:none;min-height:120px}
-        .review-form-group input:focus,.review-form-group select:focus,.review-form-group textarea:focus{border-color:var(--green);background:#fff}
-        .review-check,.anonymous-check{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--mid);cursor:pointer}
-        .review-check{margin:14px 0 18px}
-        .anonymous-check{margin:0 0 18px}
-        .review-check input,.anonymous-check input{accent-color:var(--green)}
-        .review-submit-btn{width:100%;padding:13px;border:none;border-radius:13px;background:var(--green);color:#fff;font-family:'Gaegu',cursive;font-size:1rem;font-weight:700;cursor:pointer}
-        .ai-sum{display:flex;gap:14px;background:linear-gradient(135deg,var(--gp),#f8fff2);border:1.5px solid var(--gl);border-radius:13px;padding:16px 18px;margin-bottom:16px}
-        .ai-lbl{font-size:.82rem;font-weight:700;color:var(--green);font-family:Gaegu,cursive;margin-bottom:5px}
-        .ai-txt{font-size:.8rem;color:var(--mid);line-height:1.75}
-        .ai-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
-        .ai-tag{font-size:.66rem;color:var(--green);background:#fff;border:1px solid var(--gl);border-radius:100px;padding:4px 8px}
-        .rv2-prod{border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--gp);border-radius:7px;padding:3px 9px;font-size:.65rem;color:var(--green);font-weight:700;margin-bottom:9px;font-family:inherit}
-        .rv2-prod:hover{background:var(--green);color:#fff}
-        .helpful-active{background:var(--green)!important;color:#fff!important}
-        @media(max-width:900px){.detail-layout{grid-template-columns:1fr}.detail-side{position:static}.detail-image-box{height:300px}}
-        @media(max-width:720px){.detail-info-grid{grid-template-columns:1fr}.review-stats{grid-template-columns:repeat(2,1fr)}.review-stat:nth-child(2){border-right:none}.review-stat:nth-child(1),.review-stat:nth-child(2){border-bottom:1px solid var(--beige)}.detail-tabs{overflow-x:auto}.detail-tab{white-space:nowrap;padding:0 14px}.pickup-map-btns{grid-template-columns:1fr}}
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div th:replace="~{nav :: nav}"></div>
+<div th:replace="nav :: nav"></div>
 
-<main class="detail-page">
-    <div class="detail-back-bar">
-        <span class="detail-back-btn" onclick="location.href='/market'">← 마켓으로</span>
-        <span class="detail-breadcrumb">
-            마켓 /
+<div class="page active" id="page-detail">
+    <!-- 뒤로가기 바 -->
+    <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:12px 5%;display:flex;align-items:center;gap:10px">
+        <span onclick="location.href='/market'" style="display:inline-flex;align-items:center;gap:5px;font-size:.8rem;color:var(--mid);cursor:pointer;padding:6px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit">← 마켓으로</span>
+        <span style="font-size:.74rem;color:var(--muted)">마켓 /
             <span th:text="${product.category}">과일</span> /
             <span th:text="${product.name}">홍옥 사과 3kg</span>
         </span>
-        <button type="button" class="detail-report-btn" onclick="if(typeof openReport==='function')openReport()">🚩 신고</button>
+        <button onclick="openReport()" style="margin-left:auto;background:#fff5ef;color:var(--amber);border:1.5px solid #f5c8a8;border-radius:8px;padding:6px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">🚩 신고</button>
     </div>
 
-    <div class="detail-layout">
+    <div style="padding:28px 5%;display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1100px;margin:0 auto">
+        <!-- LEFT: 이미지 + 탭 -->
         <div>
-            <div class="detail-image-box">
-                <img th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}" th:src="${product.thumbnailUrl}" alt="상품 이미지"/>
+            <!-- 상품 이미지 -->
+            <div style="background:linear-gradient(145deg,var(--gp),var(--gl));border-radius:18px;height:360px;display:flex;align-items:center;justify-content:center;font-size:8rem;line-height:1;margin-bottom:20px;position:relative;overflow:hidden">
+                <img th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
+                     th:src="${product.thumbnailUrl}"
+                     alt="상품 이미지"
+                     style="width:100%;height:100%;object-fit:cover;border-radius:18px;position:absolute;top:0;left:0"/>
                 <span th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}">🥬</span>
-                <button id="detailWishBtn" type="button" class="detail-wish-circle" onclick="if(typeof toggleDetailWish==='function')toggleDetailWish(this)">🤍</button>
+                <button id="detailWishBtn" onclick="toggleDetailWish(this)" style="position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.88);border:1.5px solid var(--sand);display:flex;align-items:center;justify-content:center;font-size:.95rem;cursor:pointer;transition:all .2s">🤍</button>
             </div>
 
-            <div class="detail-tabs">
-                <div id="dtab-info" class="detail-tab on" onclick="switchDetailTab('info')">상품 정보</div>
-                <div id="dtab-review" class="detail-tab" onclick="switchDetailTab('review')">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
-                <div id="dtab-pickup" class="detail-tab" onclick="switchDetailTab('pickup')">픽업 서비스</div>
+            <!-- 탭 -->
+            <div style="border-bottom:1.5px solid var(--sand);display:flex;gap:0;margin-bottom:22px">
+                <div id="dtab-info" onclick="switchDetailTab('info')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2.5px solid var(--dark)">상품 정보</div>
+                <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span style="color:var(--green);font-weight:600;margin-left:4px">312</span></div>
+                <div id="dtab-pickup" onclick="switchDetailTab('pickup')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">픽업 서비스</div>
             </div>
 
+            <!-- 상품정보 탭 -->
             <div id="detail-tab-info">
-                <div class="detail-info-grid">
-                    <div class="detail-info-card">
-                        <div class="detail-info-label">원산지</div>
-                        <div class="detail-info-value" th:text="${product.origin}">충청북도 충주시</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">원산지</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)" th:text="${product.origin}">충청북도 충주시</div>
                     </div>
-                    <div class="detail-info-card">
-                        <div class="detail-info-label">유통기한</div>
-                        <div class="detail-info-value" th:text="${product.expiryDate != null ? #temporals.format(product.expiryDate, 'yyyy년 M월 d일') : '-'}">2026년 5월 20일</div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">유통기한</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.expiryDate != null ? #temporals.format(product.expiryDate, 'yyyy년 M월 d일') : '-'}">2026년 5월 20일</div>
                     </div>
-                    <div class="detail-info-card">
-                        <div class="detail-info-label">재고</div>
-                        <div class="detail-info-value" th:text="${product.stockQuantity != null ? product.stockQuantity + '개' : '-'}">100개</div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">재고</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.stockQuantity != null ? product.stockQuantity + '개' : '-'}">100개</div>
                     </div>
-                    <div class="detail-info-card">
-                        <div class="detail-info-label">픽업 가능 여부</div>
-                        <div class="detail-info-value" th:text="${product.isPickupAvailable ? '픽업 가능' : '픽업 불가'}">픽업 가능</div>
+                    <div style="background:var(--beige2);border-radius:10px;padding:14px">
+                        <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px">픽업 가능 여부</div>
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark)"
+                             th:text="${product.isPickupAvailable ? '픽업 가능' : '픽업 불가'}">픽업 가능</div>
                     </div>
                 </div>
-
-                <div class="detail-section-card">
-                    <div class="detail-section-title">📝 상품 설명</div>
-                    <div class="detail-section-text" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 설명이 없습니다.</div>
+                <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-bottom:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:9px">📝 상품 설명</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.8" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 설명이 없습니다.</div>
                 </div>
-
-                <div class="detail-green-card">
-                    <div class="detail-green-title">✅ 원산지 정보</div>
-                    <div class="detail-section-text" th:text="${product.origin}">원산지 정보</div>
+                <div style="border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px">
+                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 원산지 정보</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.75" th:text="${product.origin}">원산지 정보</div>
                 </div>
-
-                <div class="detail-section-card" style="margin-top:16px">
-                    <div class="detail-section-title">🖼️ 상세 이미지</div>
+                <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-top:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:12px">🖼️ 상세 이미지</div>
                     <div style="display:flex;flex-direction:column;gap:12px">
                         <th:block th:each="image : ${product.images}">
                             <img th:src="${image.uuid}" alt="상세 이미지" style="width:100%;border-radius:10px;object-fit:cover"/>
                         </th:block>
-                        <div th:if="${product.images == null or product.images.isEmpty()}" style="font-size:.8rem;color:var(--muted);text-align:center;padding:20px 0">
-                            등록된 상세 이미지가 없습니다.
-                        </div>
+                        <div th:if="${product.images == null or product.images.isEmpty()}"
+                             style="font-size:.8rem;color:var(--muted);text-align:center;padding:20px 0">등록된 상세 이미지가 없습니다.</div>
                     </div>
                 </div>
             </div>
 
+            <!-- 리뷰 탭 -->
             <div id="detail-tab-review" style="display:none">
-                <div class="detail-review-top">
-                    <div>
-                        <div style="font-family:Gaegu,cursive;font-size:1.25rem;font-weight:700;color:var(--dark)">구매 리뷰 ⭐</div>
-                        <div style="font-size:.76rem;color:var(--muted);margin-top:3px">실제 구매자가 남긴 리뷰와 AI 리뷰 총평을 확인할 수 있어요.</div>
+                <div style="background:linear-gradient(135deg,var(--gp),#f8fff2);border:1.5px solid var(--gl);border-radius:13px;padding:16px 18px;margin-bottom:18px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                        <div style="width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem">🤖</div>
+                        <div style="font-size:.82rem;font-weight:700;color:var(--green);font-family:Gaegu,cursive">AI 리뷰 총평</div>
+                        <div style="margin-left:auto;font-size:.68rem;color:var(--muted)">리뷰 312건 분석</div>
                     </div>
-                    </div>
-
-                <section class="review-stats">
-                    <div class="review-stat">
-                        <div id="reviewTotalCount" class="review-stat-value">0</div>
-                        <div class="review-stat-label">누적 리뷰</div>
-                    </div>
-                    <div class="review-stat">
-                        <div id="reviewAverageRating" class="review-stat-value">0.0</div>
-                        <div class="review-stat-label">평균 만족도</div>
-                    </div>
-                    <div class="review-stat">
-                        <div id="reviewRepurchaseRate" class="review-stat-value">0%</div>
-                        <div class="review-stat-label">재구매 의향</div>
-                    </div>
-                    <div class="review-stat">
-                        <div id="reviewPhotoCount" class="review-stat-value">0</div>
-                        <div class="review-stat-label">사진 리뷰</div>
-                    </div>
-                </section>
-
-                <div class="ai-sum">
-                    <div style="font-size:2rem;flex-shrink:0">🤖</div>
-                    <div>
-                        <div class="ai-lbl">AI 리뷰 총평</div>
-                        <div class="ai-txt" id="aiReviewSummaryText">AI 리뷰 총평을 불러오는 중입니다.</div>
-                        <div class="ai-tags" id="aiReviewSummaryTags"><span class="ai-tag">AI 요약</span></div>
+                    <div id="aiReviewSummary" style="font-size:.8rem;color:var(--mid);line-height:1.75">
+                        <button id="btnAiSummary" onclick="loadAiSummary()" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.76rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px">✨ AI 총평 불러오기</button>
                     </div>
                 </div>
-
-                <div class="review-toolbar">
-                    <div class="review-filter-group">
-                        <div class="mf on" onclick="setReviewFilter('all', this)">전체</div>
-                        <div class="mf" onclick="setReviewFilter('helpful', this)">추천순</div>
-                        <div class="mf" onclick="setReviewFilter('high', this)">평점 높은순</div>
-                        <div class="mf" onclick="setReviewFilter('low', this)">평점 낮은순</div>
-                        <div class="mf" onclick="setReviewFilter('recent', this)">최근 리뷰</div>
-                        <div class="mf" id="photoOnlyFilter" onclick="togglePhotoOnly(this)">📸 사진 리뷰</div>
+                <div style="display:flex;align-items:center;gap:22px;padding:16px 0;border-bottom:1px solid var(--sand);margin-bottom:16px">
+                    <div style="text-align:center">
+                        <div style="font-family:Gaegu,cursive;font-size:2.5rem;font-weight:700;color:var(--dark);line-height:1">4.9</div>
+                        <div style="color:var(--amber);font-size:.9rem;margin-top:3px">★★★★★</div>
+                        <div style="font-size:.7rem;color:var(--muted);margin-top:3px">312개 후기</div>
+                    </div>
+                    <div style="flex:1">
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">5★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:78%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">244</span></div>
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">4★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:14%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">44</span></div>
+                        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:.72rem;color:var(--mid);width:22px">3★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:5%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">15</span></div>
+                        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:.72rem;color:var(--mid);width:22px">1★</span><div style="flex:1;height:7px;background:var(--sand);border-radius:4px;overflow:hidden"><div style="height:100%;width:1%;background:var(--amber);border-radius:4px"></div></div><span style="font-size:.68rem;color:var(--muted);width:26px;text-align:right">3</span></div>
                     </div>
                 </div>
-
-                <div id="reviewList" class="review-list">
-                    <div class="review-empty">리뷰를 불러오는 중입니다.</div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="border:1.5px solid var(--sand);border-radius:12px;padding:15px 16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:.85rem">🍎</div><div><div style="font-size:.78rem;font-weight:500;color:var(--dark)">J***E</div><div style="font-size:.68rem;color:var(--muted)">2026.5.1</div></div></div>
+                            <div style="color:var(--amber);font-size:.8rem">★★★★★</div>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7;margin-bottom:5px">생김새는 못났지만 맛은 정말 최고예요. 1년째 이용 중인데 품질이 한 번도 실망시킨 적이 없어요!</div>
+                        <div style="font-size:.68rem;color:var(--green)">✓ 구매 인증</div>
+                    </div>
+                    <div style="border:1.5px solid var(--sand);border-radius:12px;padding:15px 16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+                            <div style="display:flex;align-items:center;gap:8px"><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:.85rem">🌿</div><div><div style="font-size:.78rem;font-weight:500;color:var(--dark)">현*연</div><div style="font-size:.68rem;color:var(--muted)">2026.4.24</div></div></div>
+                            <div style="color:var(--amber);font-size:.8rem">★★★★★</div>
+                        </div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7;margin-bottom:5px">배송도 빠르고 포장이 꼼꼼해서 하나도 안 상하고 도착했어요.</div>
+                        <div style="font-size:.68rem;color:var(--green)">✓ 구매 인증</div>
+                    </div>
                 </div>
             </div>
 
+            <!-- 픽업 탭 -->
             <div id="detail-tab-pickup" style="display:none">
-                <div class="pickup-intro">
-                    <div class="detail-green-title">📍 농장 직접 픽업 서비스</div>
-                    <div class="detail-section-text">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
+                <div style="background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--green);margin-bottom:7px">📍 농장 직접 픽업 서비스</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.7">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
                 </div>
-
-                <div class="pickup-card">
-                    <div class="detail-section-title">📍 농장 위치</div>
-                    <div class="detail-section-text">
-                        <strong th:text="${product.origin}">원산지</strong><br/>
-                        운영시간: 평일 09:00 ~ 17:00<br/>
-                        연락처: -
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📍 농장 위치</div>
+                    <div style="font-size:.8rem;color:var(--mid);line-height:1.8">
+                        <strong th:text="${product.address}">농장위치</strong><br/>
+                        <strong th:text="${product.operatingHours}">운영시간</strong><br/>
+                        <strong th:text="${product.sellerPhone}">폰번호</strong><br/>
                     </div>
                 </div>
-
-                <div class="pickup-map-wrap">
-                    <div class="pickup-map-title">🗺️ 지도로 위치 확인</div>
-                    <div id="map" style="width:100%;height:300px"></div>
+                <div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--sand);margin-bottom:14px">
+                    <div style="background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:6px">🗺️ 지도로 위치 확인</div>
+                    <div id="map" style="width:100%;height:300px;"></div>
                 </div>
-
-                <div class="pickup-map-btns">
-                    <div class="pickup-map-btn" style="background:#FEE500;color:#3C1E1E">🗺️ 카카오맵</div>
-                    <div class="pickup-map-btn" style="background:#03C75A;color:#fff">🗺️ 네이버지도</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#FEE500;color:#3C1E1E;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 카카오맵</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#03C75A;color:#fff;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 네이버지도</div>
                 </div>
-
-                <div class="pickup-card">
-                    <div class="detail-section-title">📋 픽업 예약 방법</div>
+                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px">
+                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📋 픽업 예약 방법</div>
                     <div style="display:flex;flex-direction:column;gap:8px">
-                        <div class="pickup-step"><div class="pickup-step-num">1</div>상품 주문 시 배송 방법에서 농장 직접 픽업을 선택하세요.</div>
-                        <div class="pickup-step"><div class="pickup-step-num">2</div>결제 완료 후 농장으로 방문 날짜·시간을 연락해주세요.</div>
-                        <div class="pickup-step"><div class="pickup-step-num">3</div>예약한 날짜에 방문하셔서 상품을 직접 확인하고 수령하세요. 배송비 0원!</div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>상품 주문 시 배송 방법에서 '농장 직접 픽업'을 선택하세요.</div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>결제 완료 후 농장으로 방문 날짜·시간을 연락해주세요.</div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;font-size:.8rem;color:var(--mid)"><div style="width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;font-size:.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>예약한 날짜에 방문하셔서 상품을 직접 확인하고 수령하세요. 배송비 0원!</div>
                     </div>
                 </div>
             </div>
 
-            <div class="detail-recommend-card">
+            <!-- 관련 상품 추천 -->
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;padding:18px;margin-top:22px">
                 <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:4px">🛍 관련 상품 추천</div>
                 <div style="font-size:.72rem;color:var(--muted);margin-bottom:13px">같이 구매하면 좋은 상품</div>
-
-                <div class="detail-recommend-item" onclick="location.href='/market'">
-                    <div class="detail-rec-thumb" style="background:linear-gradient(145deg,#FEF2E8,#F5C4A0)">🥕</div>
-                    <div class="detail-rec-info">
-                        <div class="detail-rec-name">굴곡진 제주 당근 2kg</div>
-                        <div class="detail-rec-farm">제주 청정 당근 농장</div>
-                    </div>
-                    <div class="detail-rec-price">
-                        <strong>5,900원</strong>
-                        <span>11,800원</span>
-                    </div>
-                    <button type="button" class="detail-rec-btn" onclick="event.stopPropagation();if(typeof addToCart==='function')addToCart()">담기</button>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--sand);cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,#FEF2E8,#F5C4A0);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🥕</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">굴곡진 제주 당근 2kg</div><div style="font-size:.68rem;color:var(--muted)">제주 청정 당근 농장</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">5,900원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">11,800원</div></div>
                 </div>
-
-                <div class="detail-recommend-item" onclick="location.href='/market'">
-                    <div class="detail-rec-thumb" style="background:linear-gradient(145deg,var(--apricot-lt),var(--apricot))">🍅</div>
-                    <div class="detail-rec-info">
-                        <div class="detail-rec-name">완숙 토마토 1.5kg</div>
-                        <div class="detail-rec-farm">고창 햇살 농원</div>
-                    </div>
-                    <div class="detail-rec-price">
-                        <strong>7,200원</strong>
-                        <span>10,200원</span>
-                    </div>
-                    <button type="button" class="detail-rec-btn" onclick="event.stopPropagation();if(typeof addToCart==='function')addToCart()">담기</button>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--sand);cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,var(--apricot-lt),var(--apricot));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🍅</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">완숙 토마토 1.5kg</div><div style="font-size:.68rem;color:var(--muted)">고창 햇살 농원</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">7,200원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">10,200원</div></div>
                 </div>
-
-                <div class="detail-recommend-item" onclick="location.href='/market'">
-                    <div class="detail-rec-thumb" style="background:linear-gradient(145deg,var(--gp),var(--gl))">🥔</div>
-                    <div class="detail-rec-info">
-                        <div class="detail-rec-name">황토 감자 5kg</div>
-                        <div class="detail-rec-farm">강원 해피팜</div>
-                    </div>
-                    <div class="detail-rec-price">
-                        <strong>9,500원</strong>
-                        <span>15,900원</span>
-                    </div>
-                    <button type="button" class="detail-rec-btn" onclick="event.stopPropagation();if(typeof addToCart==='function')addToCart()">담기</button>
+                <div onclick="location.href='/market'" style="display:flex;align-items:center;gap:11px;padding:10px 0;cursor:pointer">
+                    <div style="width:48px;height:48px;border-radius:9px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">🥔</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:500;color:var(--dark)">황토 감자 5kg</div><div style="font-size:.68rem;color:var(--muted)">강원 해피팜</div></div>
+                    <div style="text-align:right;flex-shrink:0"><div style="font-size:.8rem;font-weight:700;color:var(--amber)">9,500원</div><div style="font-size:.68rem;color:var(--muted);text-decoration:line-through">15,900원</div></div>
                 </div>
             </div>
         </div>
 
-        <aside class="detail-side">
-            <div class="detail-buy-card">
-                <div class="detail-origin" th:text="${product.origin}">원산지</div>
-                <div class="detail-product-name">
+        <!-- RIGHT: 구매 패널 -->
+        <div style="position:sticky;top:80px;align-self:flex-start">
+            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:22px;margin-bottom:12px">
+                <div style="font-size:.72rem;color:var(--green);margin-bottom:4px;font-weight:500" th:text="${product.origin}">원산지</div>
+                <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:13px;line-height:1.4">
                     <span th:text="${product.name}">상품명</span><br/>
                     <span style="font-size:.8rem;font-weight:400;color:var(--muted)">(못난이)</span>
                 </div>
 
-                <div class="detail-price-row">
-                    <span th:if="${product.discountPrice != null}" class="detail-price" th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'">12,900원</span>
-                    <span th:unless="${product.discountPrice != null}" class="detail-price" th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">12,900원</span>
-                    <span th:if="${product.discountPrice != null}" class="detail-origin-price" th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">19,800원</span>
-                    <span th:if="${product.discountPrice != null}" class="detail-discount" th:text="'-' + ${#numbers.formatInteger((1 - product.discountPrice / product.price) * 100, 1, 'NONE')} + '%'">-35%</span>
+                <!-- 가격 -->
+                <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
+                          th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'">12,900원</span>
+                    <span th:unless="${product.discountPrice != null}"
+                          style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
+                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">12,900원</span>
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-size:.82rem;color:var(--muted);text-decoration:line-through"
+                          th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">19,800원</span>
+                    <span th:if="${product.discountPrice != null}"
+                          style="font-size:.82rem;font-weight:700;color:var(--amber)"
+                          th:text="'-' + ${#numbers.formatInteger((1 - product.discountPrice / product.price) * 100, 1, 'NONE')} + '%'">-35%</span>
                 </div>
 
-                <div class="detail-rating-row">
-                    <span id="detailRatingStars" class="detail-stars">★★★★★</span>
-                    <span id="detailReviewCountText" class="detail-rating-text">0.0 (후기 0)</span>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px">
+                    <span style="color:var(--amber);font-size:.82rem">★★★★★</span>
+                    <span style="font-size:.74rem;color:var(--muted)">4.9 (후기 312)</span>
                     <span style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px">이번주 1위 🏆</span>
                 </div>
 
-                <div class="detail-qty-area">
-                    <div class="detail-qty-label">수량 선택</div>
-                    <div class="detail-qty-row">
-                        <div class="detail-qty-box">
-                            <button type="button" onclick="if(typeof changeDetailQty==='function')changeDetailQty(-1)">−</button>
-                            <span id="detailQty">1</span>
-                            <button type="button" onclick="if(typeof changeDetailQty==='function')changeDetailQty(1)">+</button>
+                <!-- 수량 선택 -->
+                <div style="border-top:1px solid var(--sand);padding-top:14px;margin-bottom:14px">
+                    <div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">수량 선택</div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div style="display:inline-flex;align-items:center;border:1.5px solid var(--sand);border-radius:9px;overflow:hidden">
+                            <button onclick="changeDetailQty(-1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">−</button>
+                            <span id="detailQty" style="width:32px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;color:var(--dark);border-left:1px solid var(--sand);border-right:1px solid var(--sand)">1</span>
+                            <button onclick="changeDetailQty(1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">+</button>
                         </div>
                         <span style="font-size:.78rem;color:var(--mid)">×
                             <span th:text="${product.discountPrice != null ? #numbers.formatInteger(product.discountPrice, 3, 'COMMA') + '원' : #numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">12,900원</span>
@@ -351,639 +230,215 @@
                     </div>
                 </div>
 
-                <div class="detail-delivery-info">
-                    <div><span style="color:var(--green)">🚚</span>익일 배송 (오후 2시 이전 주문 시 당일 출고)</div>
-                    <div th:if="${product.isPickupAvailable}">
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--sand)">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:.82rem;color:var(--mid)">총 상품 금액</span>
+                        <strong id="detailTotalPrice"
+                                th:data-unit="${product.discountPrice != null ? product.discountPrice : product.price}"
+                                th:text="${#numbers.formatInteger(product.discountPrice != null ? product.discountPrice : product.price, 3, 'COMMA')} + '원'"
+                                style="font-size:1.1rem;color:var(--dark)">12,900원</strong>
+                    </div>
+                </div>
+
+                <!-- 배송 정보 -->
+                <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:16px">
+                    <div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)"><span style="color:var(--green)">🚚</span>익일 배송 (오후 2시 이전 주문 시 당일 출고)</div>
+                    <div th:if="${product.isPickupAvailable}" style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--mid)">
                         <span style="color:var(--green)">📍</span>농장 직접 픽업 가능
                         <span onclick="switchDetailTab('pickup')" style="color:var(--green);cursor:pointer">(위치 보기)</span>
                     </div>
                 </div>
 
-                <button th:data-id="${product.id}" type="button" class="detail-cart-btn" onclick="if(typeof addToCart==='function')addToCart()">🛒 장바구니 담기</button>
-                <a th:href="@{/cart}" href="/cart" class="detail-buy-btn">바로 구매하기</a>
+                <!-- 장바구니 담기 -->
+                <button id="addToCartBtn"
+                        th:data-id="${product.id}"
+                        onclick="addToCartDetail(this)"
+                        style="width:100%;background:var(--green);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s">
+                    🛒 장바구니 담기
+                </button>
 
-                <div class="detail-side-actions">
-                    <button id="wishBtn2" type="button" class="detail-wish-btn" onclick="if(typeof toggleDetailWish2==='function')toggleDetailWish2(this)">🤍 찜하기</button>
-                    <button type="button" class="detail-farmer-btn" onclick="if(typeof openFarmerChat==='function')openFarmerChat()">💬 농부님 문의</button>
-                </div>
+                <!-- 바로구매 -->
+                <button id="buyNowBtn"
+                        th:data-id="${product.id}"
+                        onclick="buyNow(this.dataset.id)"
+                        style="display:block;width:100%;background:var(--amber);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;margin-bottom:8px;cursor:pointer">
+                    바로 구매하기
+                </button>
+
+                <!-- 찜하기 -->
+                <button id="wishBtn2" onclick="toggleDetailWish2(this)"
+                        style="width:100%;padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
+                    🤍 찜하기
+                </button>
+                <button id="deleteProductBtn"
+                        th:data-seller-email="${product.sellerEmail}"
+                        th:data-product-id="${product.id}"
+                        style="display:none;width:100%;padding:10px;border:1.5px solid #f5c8a8;border-radius:10px;background:#fff5ef;font-size:.8rem;font-weight:500;color:#D05018;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:5px;margin-top:8px">
+                    🗑️ 상품 삭제
+                </button>
+                <button id="editProductBtn"
+                        style="display:none;width:100%;padding:10px;border:1.5px solid var(--green);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--green);cursor:pointer;font-family:inherit;display:none;align-items:center;justify-content:center;gap:5px;margin-top:8px"
+                        th:onclick="|location.href='@{/market/edit/{id}(id=${product.id})}'|">
+                    ✏️ 상품 수정
+                </button>
             </div>
 
-            <div class="detail-guide-card">
+            <!-- 주문 안내 -->
+            <div style="background:var(--beige2);border:1.5px solid var(--sand);border-radius:12px;padding:14px 16px;font-size:.74rem;color:var(--mid);line-height:1.85">
                 🛡️ 안전결제 · 구매확정 전 결제금 보호<br/>
                 ⏰ 오후 2시 이전 주문 시 당일 출고<br/>
                 🔄 수령 후 24시간 내 환불 신청 가능
             </div>
-        </aside>
+        </div>
     </div>
-</main>
-
-<div id="reviewFormModal" class="review-modal">
-    <div class="review-modal-card">
-        <div class="review-modal-head">
-            <h2 id="reviewFormTitle" class="review-modal-title">리뷰 작성하기</h2>
-            <button class="review-close-btn" type="button" onclick="closeReviewForm()">✕</button>
-        </div>
-        <input type="hidden" id="reviewEditId"/>
-        <div class="review-form-group">
-            <label for="reviewRating">별점</label>
-            <select id="reviewRating">
-                <option value="5">5점</option>
-                <option value="4">4점</option>
-                <option value="3">3점</option>
-                <option value="2">2점</option>
-                <option value="1">1점</option>
-            </select>
-        </div>
-        <div class="review-form-group">
-            <label for="reviewContent">리뷰 내용</label>
-            <textarea id="reviewContent" placeholder="상품에 대한 리뷰를 작성해주세요."></textarea>
-        </div>
-        <div class="review-form-group">
-            <label for="reviewImageUrl">사진 URL</label>
-            <input id="reviewImageUrl" type="text" placeholder="선택 입력"/>
-        </div>
-        <label class="review-check"><input id="reviewRepurchaseIntent" type="checkbox" checked/>재구매 의향이 있어요</label>
-        <label class="anonymous-check"><input id="reviewAnonymous" type="checkbox"/>익명으로 작성하기</label>
-        <button class="review-submit-btn" type="button" onclick="submitReviewForm()">저장하기</button>
-    </div>
+    <div th:replace="footer :: footer"></div>
 </div>
 
-<div th:replace="~{footer :: footer}"></div>
-
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4"></script>
+<script src="/js/app.js"></script>
 <script src="/js/product/product.js"></script>
-<script th:inline="javascript">
-    var currentProductId = [[${product.id}]];
-    var currentUserId = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
-    var reviewFilter = 'all';
-    var onlyPhotoReview = false;
-    var cachedReviews = [];
-    var reviewInitialized = false;
-    var mapInitialized = false;
+<script>
+    const productId = [[${product.id}]];
+    const sellerEmail = document.getElementById('deleteProductBtn').dataset.sellerEmail;
 
-    document.addEventListener('DOMContentLoaded', function () {
-        initReviewPage();
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const myEmail = payload.sub;
+        const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+
+        // 내 상품이면 삭제/수정 버튼 표시
+        if (myEmail === sellerEmail) {
+            const deleteBtn = document.getElementById('deleteProductBtn');
+            const editBtn = document.getElementById('editProductBtn');
+            if (deleteBtn) deleteBtn.style.display = 'flex';
+            if (editBtn) editBtn.style.display = 'flex';
+        }
+
+        // 판매자 계정이거나 내 상품이면 장바구니/바로구매 비활성화
+        if (role === 'SELLER') {
+            const cartBtn = document.getElementById('addToCartBtn');
+            const buyBtn = document.getElementById('buyNowBtn');
+            const wishBtn = document.getElementById('wishBtn2');
+            const wishImgBtn = document.getElementById('detailWishBtn');
+
+            if (cartBtn) {
+                cartBtn.disabled = true;
+                cartBtn.style.opacity = '0.4';
+                cartBtn.style.cursor = 'not-allowed';
+            }
+            if (buyBtn) {
+                buyBtn.disabled = true;
+                buyBtn.style.opacity = '0.4';
+                buyBtn.style.cursor = 'not-allowed';
+            }
+
+            // 내 상품이면 찜도 비활성화
+            if (myEmail === sellerEmail) {
+                if (wishBtn) {
+                    wishBtn.disabled = true;
+                    wishBtn.style.opacity = '0.4';
+                    wishBtn.style.cursor = 'not-allowed';
+                }
+                if (wishImgBtn) {
+                    wishImgBtn.disabled = true;
+                    wishImgBtn.style.opacity = '0.4';
+                    wishImgBtn.style.cursor = 'not-allowed';
+                }
+            }
+        }
     });
 
-    function switchDetailTab(tab) {
-        var tabs = ['info', 'review', 'pickup'];
+    document.getElementById('deleteProductBtn').addEventListener('click', function() {
+        const id = this.dataset.productId;
+        deleteProduct(id);
+    });
 
-        tabs.forEach(function (name) {
-            var tabButton = document.getElementById('dtab-' + name);
-            var tabContent = document.getElementById('detail-tab-' + name);
-
-            if (tabButton) {
-                tabButton.classList.remove('on');
-            }
-
-            if (tabContent) {
-                tabContent.style.display = 'none';
-            }
-        });
-
-        var activeButton = document.getElementById('dtab-' + tab);
-        var activeContent = document.getElementById('detail-tab-' + tab);
-
-        if (activeButton) {
-            activeButton.classList.add('on');
-        }
-
-        if (activeContent) {
-            activeContent.style.display = 'block';
-        }
-
-        if (tab === 'review') {
-            initReviewPage();
-        }
-
-        if (tab === 'pickup') {
-            initProductMap();
-        }
-    }
-
-    function initReviewPage() {
-        loadReviewStats(currentProductId);
-        loadReviewList(currentProductId);
-        loadAiReviewSummary(currentProductId);
-        reviewInitialized = true;
-    }
-
-    async function loadReviewStats(productId) {
-        try {
-            var response = await fetch('/api/reviews/stats?productId=' + productId);
-            var data = await response.json();
-
-            var totalReviewCount = Number(data.totalReviewCount || 0);
-            var averageRating = Number(data.averageRating || 0);
-            var repurchaseRate = Number(data.repurchaseRate || 0);
-            var photoReviewCount = Number(data.photoReviewCount || 0);
-
-            document.getElementById('reviewTotalCount').textContent = formatCount(totalReviewCount);
-            document.getElementById('reviewAverageRating').textContent = averageRating.toFixed(1);
-            document.getElementById('reviewRepurchaseRate').textContent = repurchaseRate.toFixed(1) + '%';
-            document.getElementById('reviewPhotoCount').textContent = formatCount(photoReviewCount);
-
-            var tabCount = document.getElementById('detailReviewTabCount');
-            if (tabCount) {
-                tabCount.textContent = totalReviewCount;
-            }
-
-            var ratingText = document.getElementById('detailReviewCountText');
-            if (ratingText) {
-                ratingText.textContent = averageRating.toFixed(1) + ' (후기 ' + totalReviewCount.toLocaleString() + ')';
-            }
-
-            var ratingStars = document.getElementById('detailRatingStars');
-            if (ratingStars) {
-                ratingStars.textContent = renderReviewStars(Math.round(averageRating));
-            }
-        } catch (error) {
-            document.getElementById('reviewTotalCount').textContent = '-';
-            document.getElementById('reviewAverageRating').textContent = '-';
-            document.getElementById('reviewRepurchaseRate').textContent = '-';
-            document.getElementById('reviewPhotoCount').textContent = '-';
-        }
-    }
-
-    async function loadReviewList(productId) {
-        var list = document.getElementById('reviewList');
-
-        if (!list) {
-            return;
-        }
-
-        list.innerHTML = '<div class="review-empty">리뷰를 불러오는 중입니다.</div>';
-
-        try {
-            var url = '/api/reviews?productId=' + productId;
-
-            if (currentUserId) {
-                url += '&userId=' + currentUserId;
-            }
-
-            var response = await fetch(url);
-            cachedReviews = await response.json();
-
-            if (!Array.isArray(cachedReviews)) {
-                cachedReviews = [];
-            }
-
-            renderReviewList();
-        } catch (error) {
-            list.innerHTML = '<div class="review-empty">리뷰 목록을 불러오지 못했습니다.</div>';
-        }
-    }
-
-    async function loadAiReviewSummary(productId) {
-        var text = document.getElementById('aiReviewSummaryText');
-        var tags = document.getElementById('aiReviewSummaryTags');
-
-        if (!text || !tags) {
-            return;
-        }
-
-        text.textContent = 'AI 리뷰 총평을 불러오는 중입니다.';
-        tags.innerHTML = '<span class="ai-tag">AI 요약</span>';
-
-        try {
-            var response = await fetch('/api/products/' + productId + '/ai-review-summary');
-            var data = await response.json();
-
-            if (!response.ok) {
-                text.textContent = data.message || '아직 등록된 AI 리뷰 총평이 없습니다.';
-                tags.innerHTML = '<span class="ai-tag">총평 없음</span>';
-                return;
-            }
-
-            text.textContent = data.summary;
-            tags.innerHTML = '<span class="ai-tag">✅ 리뷰 ' + data.reviewCount + '개 분석</span><span class="ai-tag">✅ AI 총평</span><span class="ai-tag">✅ 상품 ID ' + data.productId + '</span>';
-        } catch (error) {
-            text.textContent = 'AI 리뷰 총평 API에 연결할 수 없습니다.';
-            tags.innerHTML = '<span class="ai-tag">연결 실패</span>';
-        }
-    }
-
-    function renderReviewList() {
-        var list = document.getElementById('reviewList');
-
-        if (!list) {
-            return;
-        }
-
-        var reviews = cachedReviews.slice();
-
-        if (onlyPhotoReview) {
-            reviews = reviews.filter(function (review) {
-                var imageUrl = normalizeReviewImageUrl(review.imageUrl);
-                return imageUrl !== '';
-            });
-        }
-
-        if (reviewFilter === 'helpful') {
-            reviews.sort(function (a, b) {
-                var helpfulDiff = Number(b.helpfulCount || 0) - Number(a.helpfulCount || 0);
-
-                if (helpfulDiff !== 0) {
-                    return helpfulDiff;
-                }
-
-                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-            });
-        }
-
-        if (reviewFilter === 'high') {
-            reviews.sort(function (a, b) {
-                return Number(b.rating || 0) - Number(a.rating || 0);
-            });
-        }
-
-        if (reviewFilter === 'low') {
-            reviews.sort(function (a, b) {
-                return Number(a.rating || 0) - Number(b.rating || 0);
-            });
-        }
-
-        if (reviewFilter === 'recent') {
-            reviews.sort(function (a, b) {
-                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-            });
-        }
-
-        if (reviews.length === 0) {
-            list.innerHTML = '<div class="review-empty">아직 등록된 리뷰가 없습니다.</div>';
-            return;
-        }
-
-        list.innerHTML = reviews.map(function (review) {
-            var isMine = currentUserId !== null && review.userId === currentUserId;
-            var avatarClass = review.rating >= 5 ? 'ap' : review.rating >= 4 ? 'gn' : 'mt';
-            var helpfulCount = Number(review.helpfulCount || 0);
-            var isHelpful = Boolean(review.helpfulByCurrentUser);
-
-            var imageUrl = normalizeReviewImageUrl(review.imageUrl);
-
-            var imageHtml = imageUrl
-                ? '<div style="margin-top:10px"><img src="' + escapeHtml(imageUrl) + '" alt="리뷰 이미지" onerror="this.parentElement.style.display=\'none\'" style="max-width:180px;border-radius:10px;border:1px solid var(--beige)"></div>'
-                : '';
-
-            var editDeleteHtml = isMine
-                ? '<div style="display:flex;gap:6px"><button class="hlp-btn" onclick="openReviewEditForm(' + review.reviewId + ')">수정</button><button class="hlp-btn" onclick="deleteReview(' + review.reviewId + ')">삭제</button></div>'
-                : '';
-
-            return '<div class="rv2">'
-                + '<div class="rv2-top">'
-                + '<div class="rv2-auth">'
-                + '<div class="rv2-av ' + avatarClass + '">' + getReviewEmoji(review.rating) + '</div>'
-                + '<div><div class="rv2-nm">' + escapeHtml(review.displayName || '익명 구매자') + '</div><div class="rv2-dt">' + formatReviewDate(review.createdAt) + '</div></div>'
-                + '</div>'
-                + '<div class="rv2-stars">' + renderReviewStars(review.rating) + '</div>'
-                + '</div>'
-                + '<div class="rv2-txt">' + escapeHtml(review.content) + '</div>'
-                + imageHtml
-                + '<div class="rv2-foot">'
-                + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
-                + '<button class="hlp-btn ' + (isHelpful ? 'helpful-active' : '') + '" onclick="toggleReviewHelpful(' + review.reviewId + ')">👍 도움돼요 <span id="helpfulCount-' + review.reviewId + '">' + helpfulCount + '</span></button>'
-                + editDeleteHtml
-                + '</div>'
-                + '<span class="rv2-cert">' + (review.repurchaseIntent ? '재구매 의향 있음' : '재구매 의향 없음') + '</span>'
-                + '</div>'
-                + '</div>';
-        }).join('');
-    }
-
-    function setReviewFilter(filter, element) {
-        reviewFilter = filter;
-
-        document.querySelectorAll('.review-filter-group .mf').forEach(function (item) {
-            if (item.id !== 'photoOnlyFilter') {
-                item.classList.remove('on');
-            }
-        });
-
-        if (element) {
-            element.classList.add('on');
-        }
-
-        renderReviewList();
-    }
-
-    function togglePhotoOnly(element) {
-        onlyPhotoReview = !onlyPhotoReview;
-
-        if (element) {
-            if (onlyPhotoReview) {
-                element.classList.add('on');
+    function deleteProduct(id) {
+        if (!confirm('정말 삭제하시겠어요?')) return;
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        fetch('/market/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(res => {
+            if (res.ok) {
+                showToast('상품이 삭제됐어요');
+                setTimeout(() => location.href = '/market', 1000);
             } else {
-                element.classList.remove('on');
+                showToast('삭제 실패했어요');
             }
-        }
-
-        renderReviewList();
+        }).catch(() => showToast('오류가 발생했어요'));
     }
 
-    function openReviewForm() {
-        if (!currentUserId) {
-            showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');
-            setTimeout(function () {
-                location.href = '/login';
-            }, 900);
-            return;
-        }
-
-        document.getElementById('reviewFormTitle').textContent = '리뷰 작성하기';
-        document.getElementById('reviewEditId').value = '';
-        document.getElementById('reviewRating').value = '5';
-        document.getElementById('reviewContent').value = '';
-        document.getElementById('reviewImageUrl').value = '';
-        document.getElementById('reviewRepurchaseIntent').checked = true;
-        document.getElementById('reviewAnonymous').checked = false;
-        document.getElementById('reviewFormModal').style.display = 'flex';
-    }
-
-    function openReviewEditForm(reviewId) {
-        var review = cachedReviews.find(function (item) {
-            return item.reviewId === reviewId;
+    // 카카오맵
+    fetch(`/api/products/${productId}`)
+        .then(res => res.json())
+        .then(data => {
+            const lat = data.latitude;
+            const lng = data.longitude;
+            kakao.maps.load(function() {
+                var mapContainer = document.getElementById('map');
+                var mapOption = { center: new kakao.maps.LatLng(lat, lng), level: 3 };
+                var map = new kakao.maps.Map(mapContainer, mapOption);
+                var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) });
+                marker.setMap(map);
+            });
         });
 
-        if (!review) {
-            showReviewToast('수정할 리뷰를 찾을 수 없어요.');
+    function addToCartDetail(btn) {
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        if (!token) {
+            if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
             return;
         }
-
-        if (review.userId !== currentUserId) {
-            showReviewToast('본인이 작성한 리뷰만 수정할 수 있어요.');
-            return;
-        }
-
-        document.getElementById('reviewFormTitle').textContent = '리뷰 수정하기';
-        document.getElementById('reviewEditId').value = review.reviewId;
-        document.getElementById('reviewRating').value = review.rating;
-        document.getElementById('reviewContent').value = review.content;
-        document.getElementById('reviewImageUrl').value = review.imageUrl || '';
-        document.getElementById('reviewRepurchaseIntent').checked = review.repurchaseIntent;
-        document.getElementById('reviewAnonymous').checked = Boolean(review.isAnonymous);
-        document.getElementById('reviewFormModal').style.display = 'flex';
-    }
-
-    function closeReviewForm() {
-        document.getElementById('reviewFormModal').style.display = 'none';
-    }
-
-    async function submitReviewForm() {
-        if (!currentUserId) {
-            showReviewToast('로그인 후 리뷰를 작성할 수 있어요.');
-            return;
-        }
-
-        var reviewId = document.getElementById('reviewEditId').value;
-        var rating = Number(document.getElementById('reviewRating').value);
-        var content = document.getElementById('reviewContent').value.trim();
-        var imageUrl = document.getElementById('reviewImageUrl').value.trim();
-        var repurchaseIntent = document.getElementById('reviewRepurchaseIntent').checked;
-        var isAnonymous = document.getElementById('reviewAnonymous').checked;
-
-        if (!content) {
-            showReviewToast('리뷰 내용을 입력해주세요.');
-            return;
-        }
-
-        var isEdit = reviewId !== '';
-        var url = isEdit ? '/api/reviews/' + reviewId : '/api/reviews';
-        var method = isEdit ? 'PUT' : 'POST';
-        var body = isEdit
-            ? {
-                userId: currentUserId,
-                rating: rating,
-                content: content,
-                imageUrl: imageUrl || null,
-                repurchaseIntent: repurchaseIntent,
-                isAnonymous: isAnonymous
-            }
-            : {
-                productId: currentProductId,
-                userId: currentUserId,
-                orderItemId: null,
-                rating: rating,
-                content: content,
-                imageUrl: imageUrl || null,
-                repurchaseIntent: repurchaseIntent,
-                isAnonymous: isAnonymous
-            };
-
-        try {
-            var response = await fetch(url, {
-                method: method,
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(body)
-            });
-
-            var data = await response.json();
-
-            if (!response.ok) {
-                showReviewToast(data.message || '리뷰 저장에 실패했습니다.');
-                return;
-            }
-
-            closeReviewForm();
-            showReviewToast(isEdit ? '리뷰가 수정되었습니다.' : '리뷰가 등록되었습니다.');
-            await loadReviewStats(currentProductId);
-            await loadReviewList(currentProductId);
-            await loadAiReviewSummary(currentProductId);
-        } catch (error) {
-            showReviewToast('서버 연결에 실패했습니다.');
-        }
-    }
-
-    async function deleteReview(reviewId) {
-        if (!currentUserId) {
-            showReviewToast('로그인 후 이용할 수 있어요.');
-            return;
-        }
-
-        if (!confirm('리뷰를 삭제할까요?')) {
-            return;
-        }
-
-        try {
-            var response = await fetch('/api/reviews/' + reviewId + '?userId=' + currentUserId, {
-                method: 'DELETE'
-            });
-
-            var data = await response.json();
-
-            if (!response.ok) {
-                showReviewToast(data.message || '리뷰 삭제에 실패했습니다.');
-                return;
-            }
-
-            showReviewToast('리뷰가 삭제되었습니다.');
-            await loadReviewStats(currentProductId);
-            await loadReviewList(currentProductId);
-            await loadAiReviewSummary(currentProductId);
-        } catch (error) {
-            showReviewToast('서버 연결에 실패했습니다.');
-        }
-    }
-
-    async function toggleReviewHelpful(reviewId) {
-        if (!currentUserId) {
-            showReviewToast('로그인 후 도움돼요를 누를 수 있어요.');
-            setTimeout(function () {
-                location.href = '/login';
-            }, 900);
-            return;
-        }
-
-        try {
-            var response = await fetch('/api/reviews/' + reviewId + '/helpful?userId=' + currentUserId, {
-                method: 'POST'
-            });
-
-            var data = await response.json();
-
-            if (!response.ok) {
-                showReviewToast(data.message || '도움돼요 처리에 실패했습니다.');
-                return;
-            }
-
-            cachedReviews = cachedReviews.map(function (review) {
-                if (review.reviewId === reviewId) {
-                    review.helpfulCount = data.helpfulCount;
-                    review.helpfulByCurrentUser = data.helpfulByCurrentUser;
+        var pid = btn.getAttribute('data-id');
+        fetch('/cart/items', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ productId: parseInt(pid), quantity: detailQtyVal })
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
+                } else if (res.ok) {
+                    showToast('🛒 장바구니에 담겼어요!');
+                    updateCartBadge();
+                } else {
+                    showToast('담기 실패했어요 ㅠㅠ');
                 }
-
-                return review;
-            });
-
-            renderReviewList();
-            showReviewToast('도움돼요가 반영됐어요 🌿');
-        } catch (error) {
-            showReviewToast('서버 연결에 실패했습니다.');
-        }
+            })
+            .catch(() => showToast('오류가 발생했어요 ㅠㅠ'));
     }
 
-    function initProductMap() {
-        if (mapInitialized) {
+    function buyNow(pid) {
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        if (!token) {
+            if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
             return;
         }
-
-        var mapContainer = document.getElementById('map');
-
-        if (!mapContainer || typeof kakao === 'undefined' || !kakao.maps) {
-            return;
-        }
-
-        fetch('/api/products/' + currentProductId)
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (data) {
-                var lat = data.latitude;
-                var lng = data.longitude;
-
-                if (!lat || !lng) {
-                    mapContainer.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem">등록된 위치 정보가 없습니다.</div>';
-                    return;
+        fetch('/cart/items', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ productId: parseInt(pid), quantity: detailQtyVal })
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
+                } else if (res.ok) {
+                    location.href = '/cart';
+                } else {
+                    showToast('오류가 발생했어요');
                 }
-
-                kakao.maps.load(function () {
-                    var mapOption = {
-                        center: new kakao.maps.LatLng(lat, lng),
-                        level: 3
-                    };
-
-                    var map = new kakao.maps.Map(mapContainer, mapOption);
-
-                    var marker = new kakao.maps.Marker({
-                        position: new kakao.maps.LatLng(lat, lng)
-                    });
-
-                    marker.setMap(map);
-                    mapInitialized = true;
-                });
             })
-            .catch(function () {
-                mapContainer.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem">지도를 불러오지 못했습니다.</div>';
-            });
-    }
-
-    function renderReviewStars(rating) {
-        var safeRating = Number(rating || 0);
-        var stars = '';
-
-        for (var i = 1; i <= 5; i++) {
-            stars += i <= safeRating ? '★' : '☆';
-        }
-
-        return stars;
-    }
-
-    function getReviewEmoji(rating) {
-        if (rating >= 5) {
-            return '😊';
-        }
-
-        if (rating >= 4) {
-            return '🌿';
-        }
-
-        if (rating >= 3) {
-            return '🙂';
-        }
-
-        return '🥬';
-    }
-
-    function formatReviewDate(value) {
-        if (!value) {
-            return '-';
-        }
-
-        return String(value).replace('T', ' ').substring(0, 10);
-    }
-
-    function formatCount(value) {
-        var number = Number(value || 0);
-
-        if (number >= 1000) {
-            return number.toLocaleString() + '+';
-        }
-
-        return String(number);
-    }
-    function normalizeReviewImageUrl(value) {
-        if (value === null || value === undefined) {
-            return '';
-        }
-
-        var url = String(value).trim();
-
-        if (!url || url === 'null' || url === 'undefined') {
-            return '';
-        }
-
-        return url;
-    }
-    function escapeHtml(value) {
-        if (value === null || value === undefined) {
-            return '';
-        }
-
-        return String(value)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
-
-    function showReviewToast(message) {
-        if (typeof showToast === 'function') {
-            showToast(message);
-            return;
-        }
-
-        alert(message);
+            .catch(() => showToast('오류가 발생했어요'));
     }
 </script>
 </body>
