@@ -65,4 +65,34 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    // 비밀번호 찾기 - 이메일+이름 검증 후 토큰 발급
+    @PostMapping("/forgot-password")
+    @ResponseBody
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        try {
+            String token = authService.verifyAndIssueToken(body.get("email"), body.get("name"));
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // 비밀번호 재설정 페이지
+    @GetMapping("/resetpw")
+    public String resetPwPage() {
+        return "auth/resetpw";
+    }
+
+    // 비밀번호 재설정 처리
+    @PostMapping("/resetpw")
+    @ResponseBody
+    public ResponseEntity<?> resetPw(@RequestBody Map<String, String> body) {
+        try {
+            authService.resetPassword(body.get("token"), body.get("password"), body.get("passwordConfirm"));
+            return ResponseEntity.ok(Map.of("message", "비밀번호가 변경되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

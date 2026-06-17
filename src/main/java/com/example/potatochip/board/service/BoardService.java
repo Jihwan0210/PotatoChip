@@ -1,67 +1,99 @@
 package com.example.potatochip.board.service;
 
-
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardResponseDTO;
 import com.example.potatochip.board.entity.Board;
+import com.example.potatochip.board.entity.Comment;
 import com.example.potatochip.board.repository.BoardRepository;
+import com.example.potatochip.board.repository.CommentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    public BoardService(BoardRepository boardRepository) {
-        this.boardRepository = boardRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+
+    // 전체 조회
+    public List<Board> findAll() {
+        return boardRepository.findAll();
     }
 
-    public List<BoardResponseDTO> getBoards() {
-        return boardRepository.findAll()
-                .stream()
-                .map(BoardResponseDTO::from)
-                .toList();
-    }
-
-    public BoardResponseDTO getBoard(Long id) {
+    // 단건 조회
+    public Board findById(Long id) {
         return boardRepository.findById(id)
-                .map(BoardResponseDTO::from)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
 
-    public BoardResponseDTO createBoard(BoardRequestDTO request) {
-
-        Board board = new Board();
-
-        board.setTitle(request.getTitle());
-        board.setContent(request.getContent());
-
-        Board saveBoard = boardRepository.save(board);
-
-        return BoardResponseDTO.from(saveBoard);
+    // 저장
+    public Board save(Board board) {
+        if (board.getViewCount() == null) {
+            board.setViewCount(0);
+        }
+        if (board.getCommentCount() == null) {
+            board.setCommentCount(0);
+        }
+        if (board.getCreatedAt() == null) {
+            board.setCreatedAt(java.time.LocalDateTime.now());
+        }
+        return boardRepository.save(board);
     }
 
-    public BoardResponseDTO updateBoard(Long id,BoardRequestDTO request) {
-
-        Board board = boardRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다"));
-
-        board.setTitle(request.getTitle());
-        board.setContent(request.getContent());
-
-        Board updateBoard = boardRepository.save(board);
-
-        return BoardResponseDTO.from(updateBoard);
+    // 조회수 증가
+    public void increaseView(Long id) {
+        Board board = findById(id);
+        if (board.getViewCount() == null) {
+            board.setViewCount(0);
+        }
+        board.setViewCount(board.getViewCount() + 1);
+        boardRepository.save(board);
     }
 
-    public void deleteBoard(Long id) {
+    // 삭제
+    public void delete(Long id) {
+        boardRepository.deleteById(id);
+    }
 
-        Board board = boardRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("게시글을 찾을 수 없습니다"));
+    /**
+     * 1. 특정 게시글의 댓글 목록 조회
+     * 순환 참조(500 에러)를 차단하기 위해 CommentRepository에서 직접 깔끔하게 배열로 가져옵니다.
+     */
+    public List<Comment> findCommentsByBoardId(Long boardId) {
+        return commentRepository.findByBoardIdOrderByCreatedAtAsc(boardId);
+    }
 
-        boardRepository.delete(board);
+    /**
+     * 2. 댓글 저장
+     */
+    public Comment saveComment(Long boardId, String content, String email) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다. ID: " + boardId));
+
+        Comment comment = new Comment();
+        comment.setBoard(board);
+        comment.setContent(content);
+        comment.setAuthor(email);
+
+        return commentRepository.save(comment);
+    }
+
+    /**
+     * 3. 댓글 삭제
+     */
+    public void deleteComment(Long commentId, String email) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다. ID: " + commentId));
+
+        // 작성자 검증
+        if (!comment.getAuthor().equals(email)) {
+            throw new RuntimeException("댓글 삭제 권한이 없습니다.");
+        }
+
+        commentRepository.delete(comment);
     }
 }
