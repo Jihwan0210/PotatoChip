@@ -37,21 +37,49 @@ public class BoardController {
     }
 
     // 생성
-
-
-    @PostMapping("/api/board")
+    @PostMapping(value = "/api/board", consumes = {"multipart/form-data"})
     @ResponseBody
     public Board createBoard(
-            @RequestBody Board board,
+            @RequestPart("board") Board board,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
             Authentication authentication
     ) {
-
         String email = authentication.getName();
-
         board.setAuthor(email);
+
+        // 💡 [수정] 수신된 이미지 파일을 실제로 서버 하드디스크에 저장하는 로직 구현
+        if (image != null && !image.isEmpty()) {
+            try {
+                // 1. 파일을 보관할 실제 물리적인 폴더 경로 지정
+                String uploadDir = "C:/minsung/uploads/";
+                java.io.File folder = new java.io.File(uploadDir);
+                if (!folder.exists()) {
+                    folder.mkdirs(); // 폴더가 없다면 자동으로 생성해 줍니다.
+                }
+
+                // 2. 파일 이름 중복 방지를 위해 고유한 랜덤 ID(UUID)를 파일명 앞에 결합
+                String originalFileName = image.getOriginalFilename();
+                String savedFileName = java.util.UUID.randomUUID().toString() + "_" + originalFileName;
+
+                // 3. 해당 경로에 파일 물리적 저장(이동)
+                java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
+                image.transferTo(destinationFile);
+
+                // 4. 프론트엔드 브라우저가 접근할 수 있는 웹상의 가상 URL 주소를 Board 객체에 매핑
+                // (예: /uploads/랜덤ID_사진명.jpg)
+                board.setImageUrl("/uploads/" + savedFileName);
+                System.out.println("📷 이미지 업로드 및 엔티티 매핑 성공: /uploads/" + savedFileName);
+
+            } catch (java.io.IOException e) {
+                System.out.println("❌ 이미지 저장 중 에러 발생: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         return boardService.save(board);
     }
+
+
 
     //조회수 증가
     @PostMapping("/api/board/{id}/view")
