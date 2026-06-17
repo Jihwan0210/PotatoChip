@@ -14,4 +14,8 @@ public class CartItemDTO {
     private Long productId;
     private int quantity;
     private BigDecimal price;
+    private String productName;
+    private String thumbnailUrl;
+    private String origin;
+    private Boolean isPickupAvailable;
 }

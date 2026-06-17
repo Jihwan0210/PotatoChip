@@ -37,7 +37,7 @@ public class AdminReviewDTO {
                 .reviewId(review.getReviewId())
                 .productId(review.getProductId())
                 .productName(product == null ? null : product.getName())
-                .sellerId(product == null ? null : product.getSellerId())
+                .sellerId(product == null || product.getSeller() == null ? null : product.getSeller().getId())
                 .sellerName(sellerName)
                 .userId(review.getUserId())
                 .userName(userName)

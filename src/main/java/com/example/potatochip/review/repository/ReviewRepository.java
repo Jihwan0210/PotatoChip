@@ -70,7 +70,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("""
             select r
             from Review r
-            where r.product.sellerId = :sellerId
+            where r.product.seller.id = :sellerId
               and r.isActive = true
             order by r.createdAt desc
             """)
