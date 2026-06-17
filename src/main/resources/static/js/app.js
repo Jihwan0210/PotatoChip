@@ -505,11 +505,7 @@ function switchFarmerTab(n){
     var c=document.getElementById('fcontent-'+i);
     var t=document.getElementById('ftab-'+i);
     if(c) c.style.display=(i===n?'block':'none');
-    if(t){
-      t.style.borderBottom=(i===n?'2px solid var(--dark)':'2px solid transparent');
-      t.style.color=(i===n?'var(--dark)':'var(--muted)');
-      t.style.fontWeight=(i===n?'500':'400');
-    }
+    if(t) t.classList.toggle('on', i===n);
   }
 }
 
