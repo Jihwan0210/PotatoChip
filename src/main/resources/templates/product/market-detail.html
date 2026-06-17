@@ -335,19 +335,18 @@
                 buyBtn.style.cursor = 'not-allowed';
             }
 
-            // 내 상품이면 찜도 비활성화
-            if (myEmail === sellerEmail) {
                 if (wishBtn) {
                     wishBtn.disabled = true;
                     wishBtn.style.opacity = '0.4';
                     wishBtn.style.cursor = 'not-allowed';
+                    wishBtn.textContent = '판매자는 찜 할 수 없습니다';
                 }
                 if (wishImgBtn) {
                     wishImgBtn.disabled = true;
                     wishImgBtn.style.opacity = '0.4';
                     wishImgBtn.style.cursor = 'not-allowed';
+                    wishImgBtn.title = '판매자는 찜 할 수 없습니다';
                 }
-            }
         }
     });
 
