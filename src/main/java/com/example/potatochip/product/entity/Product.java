@@ -1,5 +1,6 @@
 package com.example.potatochip.product.entity;
 
+import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.product.dto.ProductDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +24,9 @@ public class Product {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id; //상품 ID
 
-        @Column(name = "seller_id", nullable = false)
-        private Long sellerId; //판매자 ID
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "seller_id", nullable = false)
+        private User seller; //판매자 ID
 
         @Column(nullable = false, length = 100)
         private String category; //카테고리
@@ -81,11 +83,13 @@ public class Product {
 
         private String operatingHours; //운영 시간
 
+        @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+        private List<Wishlist> wishlists = new ArrayList<>();
+
 
 
         public void changeEntity(ProductDTO productDTO) {
 
-                this.sellerId = productDTO.getSellerId();
                 this.category = productDTO.getCategory();
                 this.name = productDTO.getName();
                 this.description = productDTO.getDescription();

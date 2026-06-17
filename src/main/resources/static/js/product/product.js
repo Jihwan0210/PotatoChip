@@ -11,13 +11,18 @@ function switchDetailTab(name){
         }
     });
 }
+var detailQtyVal = 1;
+function changeDetailQty(d) {
+    detailQtyVal = Math.max(1, detailQtyVal + d);
+    document.getElementById('detailQty').textContent = detailQtyVal;
 
-/* ══ CART PAGE QUANTITY ══ */
-var detailQtyVal=1;
-function changeDetailQty(d){
-    detailQtyVal=Math.max(1,detailQtyVal+d);
-    var el=document.getElementById('detailQty');
-    if(el) el.textContent=detailQtyVal;
+    // 총 금액 업데이트
+    var priceEl = document.getElementById('detailTotalPrice');
+    if (priceEl) {
+        var unit = parseFloat(priceEl.getAttribute('data-unit'));
+        var total = unit * detailQtyVal;
+        priceEl.textContent = total.toLocaleString() + '원';
+    }
 }
 
 /* ══ WISH ══ */
@@ -100,16 +105,15 @@ function catClick(el){
     },100);
 }
 
-function mktF(el){
-    el.parentElement.querySelectorAll('.mf').forEach(function(x){x.classList.remove('on');});
+function mktF(el) {
+    el.parentElement.querySelectorAll('.mf').forEach(function(x) {
+        x.classList.remove('on');
+    });
     el.classList.add('on');
-    var cats={'채소':89,'과일':74,'곡류':43,'버섯':28,'뿌리채소':36,'기한임박':32};
-    var txt=el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g,'').trim();
-    var cnt=cats[txt]||302;
-    var cntEl=document.querySelector('.pgrid-count');
-    if(cntEl) cntEl.innerHTML='총 <strong style="color:var(--dark)">'+cnt+'</strong>개 상품';
-}
 
+    var txt = el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g, '').trim();
+    location.href = '/market?category=' + encodeURIComponent(txt);
+}
 function switchMktTab(i){
     for(var j=0;j<4;j++){
         var t=document.getElementById('mkt-tab-'+j);
@@ -123,32 +127,130 @@ function switchMktTab(i){
     if(ct) ct.style.display='block';
 }
 
-function doMktSearch(){
-    var q=document.getElementById('mktSearch');
-    var keyword=(q?q.value.trim():'').toLowerCase();
-    var c=document.getElementById('mktSearchClear');
-    if(c) c.style.display=keyword?'inline':'none';
-    if(!keyword) return;
-    switchMktTab(0);
-    var cards=document.querySelectorAll('#mkt-content-0 .pc2');
-    var shown=0;
-    cards.forEach(function(card){
-        var nm=card.textContent.toLowerCase();
-        var match=nm.indexOf(keyword)>=0;
-        card.style.display=match?'':'none';
-        if(match) shown++;
-    });
-    var cnt=document.querySelector('.pgrid-count');
-    if(cnt) cnt.innerHTML='검색 결과: <strong style="color:var(--dark)">'+shown+'</strong>개';
+function doMktSearch() {
+    var keyword = document.getElementById('mktSearch').value.trim();
+    location.href = '/market?keyword=' + encodeURIComponent(keyword);
 }
 
-function clearMktSearch(){
-    var q=document.getElementById('mktSearch');
-    var c=document.getElementById('mktSearchClear');
-    if(q) q.value='';
-    if(c) c.style.display='none';
-    document.querySelectorAll('#mkt-content-0 .pc2').forEach(function(card){card.style.display='';});
-    var cnt=document.querySelector('.pgrid-count');
-    if(cnt) cnt.innerHTML='총 <strong style="color:var(--dark)">302</strong>개 상품';
+function clearMktSearch() {
+    location.href = '/market';
+}
+/* ══ WISHLIST (localStorage) ══ */
+
+function getWishKey() {
+    const email = localStorage.getItem('email') || sessionStorage.getItem('email');
+    return email ? 'wishlist_' + email : 'wishlist_guest';
 }
 
+function isLoggedIn() {
+    return !!(localStorage.getItem('email') || sessionStorage.getItem('email'));
+}
+
+// 찜 목록 가져오기
+function getWishlist() {
+    return JSON.parse(localStorage.getItem(getWishKey()) || '[]');
+}
+
+// 찜 저장
+function saveWishlist(list) {
+    localStorage.setItem(getWishKey(), JSON.stringify(list));
+}
+
+// 찜 토글 (상세페이지 메인 이미지 버튼)
+function toggleDetailWish(btn) {
+    if (!isLoggedIn()) {
+        showToast('로그인 후 이용해주세요');
+        return;
+    }
+    const list = getWishlist();
+    const id = String(productId);
+    const idx = list.indexOf(id);
+    if (idx === -1) {
+        list.push(id);
+        btn.textContent = '❤️';
+        showToast('❤️ 찜 목록에 추가됐어요!');
+    } else {
+        list.splice(idx, 1);
+        btn.textContent = '🤍';
+        showToast('찜 목록에서 제거됐어요');
+    }
+    saveWishlist(list);
+    syncWishBtns();
+}
+
+// 찜 토글 (상세페이지 하단 찜하기 버튼)
+function toggleDetailWish2(btn) {
+    toggleDetailWish(document.getElementById('detailWishBtn'));
+}
+
+// 두 버튼 동기화
+function syncWishBtns() {
+    const list = getWishlist();
+    const id = String(productId);
+    const isWished = list.includes(id);
+    const btn1 = document.getElementById('detailWishBtn');
+    const btn2 = document.getElementById('wishBtn2');
+    if (btn1) btn1.textContent = isWished ? '❤️' : '🤍';
+    if (btn2) btn2.textContent = isWished ? '❤️ 찜됨' : '🤍 찜하기';
+}
+
+// 마켓 찜 토글 (API 기반)
+async function toggleW(btn) {
+    if (!isLoggedIn()) {
+        showToast('로그인 후 이용해주세요');
+        return;
+    } const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+    if (role === 'SELLER') {
+        showToast('판매자 계정은 찜 기능을 이용할 수 없어요');
+        return;
+    }
+    const card = btn.closest('[data-id]') || btn.closest('.pc2');
+    const id = card ? String(card.dataset.id || '') : '';
+    if (!id) return;
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    try {
+        const res = await fetch('/wishlist/' + id, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.added) {
+            btn.textContent = '❤️';
+            showToast('❤️ 찜 목록에 추가됐어요!');
+        } else {
+            btn.textContent = '🤍';
+            showToast('찜 목록에서 제거됐어요');
+        }
+    } catch (e) {
+        showToast('오류가 발생했어요');
+    }
+}
+
+// 페이지 로드 시 찜 상태 복원
+document.addEventListener('DOMContentLoaded', function() {
+    // 상세페이지면 버튼 동기화
+    if (typeof productId !== 'undefined') {
+        syncWishBtns();
+    }
+
+    // 마켓 카드 찜 버튼 상태 복원 (API 기반)
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+        fetch('/wishlist', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+            .then(res => res.json())
+            .then(list => {
+                const ids = list.map(p => String(p.id));
+                document.querySelectorAll('.plk').forEach(function(btn) {
+                    const card = btn.closest('[data-id]') || btn.closest('.pc2');
+                    if (card && ids.includes(String(card.dataset.id || ''))) {
+                        btn.textContent = '❤️';
+                    }
+                });
+            })
+            .catch(e => console.error('찜 목록 로드 실패', e));
+    }
+});
