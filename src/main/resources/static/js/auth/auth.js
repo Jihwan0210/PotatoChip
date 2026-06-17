@@ -5,6 +5,38 @@ function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
 }
 
+function filterKorean(el) { el.value = el.value.replace(/[^가-힣]/g, ''); }
+function filterEmailChars(el) { el.value = el.value.replace(/[^a-zA-Z0-9@._-]/g, ''); }
+function filterPasswordChars(el) { el.value = el.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/g, ''); }
+function filterDigits(el) { el.value = el.value.replace(/[^0-9]/g, '').slice(0, 11); }
+function filterNicknameChars(el) { el.value = el.value.replace(/[^가-힣a-zA-Z]/g, ''); }
+
+function toggleRoleFields(sel) {
+    var isFarmer = sel.value === '판매자(농가)';
+    var addrGroup = document.getElementById('addressGroup');
+    var nickGroup = document.getElementById('nicknameGroup');
+    if (addrGroup) addrGroup.style.display = isFarmer ? 'none' : '';
+    if (nickGroup) nickGroup.style.display = isFarmer ? 'none' : '';
+}
+
+function clearFieldErrors() {
+    document.querySelectorAll('#sf .fg').forEach(function (fg) {
+        fg.classList.remove('error');
+        var err = fg.querySelector('.fg-err');
+        if (err) err.textContent = '';
+    });
+}
+
+function showFieldError(name, msg) {
+    var input = document.querySelector('#sf [name="' + name + '"]');
+    if (!input) return;
+    var fg = input.closest('.fg');
+    if (!fg) return;
+    fg.classList.add('error');
+    var err = fg.querySelector('.fg-err');
+    if (err) err.textContent = msg;
+}
+
 function swTab(t) {
     document.getElementById('lf').style.display = t === 'login' ? 'block' : 'none';
     document.getElementById('sf').style.display = t === 'signup' ? 'block' : 'none';
@@ -63,6 +95,33 @@ function doSignup() {
         address: document.querySelector('#sf input[name="address"]').value,
         nickname: document.querySelector('#sf input[name="nickname"]').value
     };
+
+    clearFieldErrors();
+    let hasError = false;
+    const isFarmer = data.role === '판매자(농가)';
+
+    if (!data.name) { showFieldError('name', '이름은 필수 정보입니다.'); hasError = true; }
+    else if (!/^[가-힣]+$/.test(data.name)) { showFieldError('name', '이름은 한글만 입력 가능해요.'); hasError = true; }
+
+    if (!data.email) { showFieldError('email', '이메일은 필수 정보입니다.'); hasError = true; }
+    else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/.test(data.email)) { showFieldError('email', '이메일 형식을 확인해주세요.'); hasError = true; }
+
+    if (!data.password) { showFieldError('password', '비밀번호는 필수 정보입니다.'); hasError = true; }
+    else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]).{8,}$/.test(data.password)) { showFieldError('password', '영어, 숫자, 특수문자를 포함해 8자 이상 입력해주세요.'); hasError = true; }
+
+    if (!data.passwordConfirm) { showFieldError('passwordConfirm', '비밀번호 확인은 필수 정보입니다.'); hasError = true; }
+    else if (data.password !== data.passwordConfirm) { showFieldError('passwordConfirm', '비밀번호가 일치하지 않아요.'); hasError = true; }
+
+    if (!data.phone) { showFieldError('phone', '전화번호는 필수 정보입니다.'); hasError = true; }
+    else if (!/^[0-9]+$/.test(data.phone)) { showFieldError('phone', '전화번호는 숫자만 입력 가능해요.'); hasError = true; }
+
+    if (!isFarmer) {
+        if (!data.address) { showFieldError('address', '주소는 필수 정보입니다.'); hasError = true; }
+    }
+
+    if (!isFarmer && data.nickname && !/^[가-힣a-zA-Z]+$/.test(data.nickname)) { showFieldError('nickname', '닉네임은 한글/영어만 입력 가능해요.'); hasError = true; }
+
+    if (hasError) return;
 
     fetch('/signup', {
         method: 'POST',

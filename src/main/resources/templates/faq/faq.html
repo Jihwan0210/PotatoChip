@@ -66,26 +66,7 @@
   </style>
 </head>
 <body>
-<nav id="nav">
-  <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-    못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-  </div>
-  <ul class="nav-links">
-    <li><a th:href="@{/}" href="/">홈</a></li>
-    <li><a th:href="@{/market}" href="/market">마켓</a></li>
-    <li><a th:href="@{/ranking}" href="/ranking">판매랭킹</a></li>
-    <li><a th:href="@{/review}" href="/review">리뷰</a></li>
-    <li><a th:href="@{/board}" href="/board">게시판</a></li>
-    <li><a th:href="@{/faq}" href="/faq" style="color:var(--dark);font-weight:700">FAQ</a></li>
-  </ul>
-  <div class="nav-r">
-    <span class="n-ico" id="bellIcon" onclick="if(typeof toggleNotif==='function')toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-    <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
-    <a th:href="@{/mypage}" href="/mypage" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--mid)" title="마이페이지">👤</a>
-    <a th:href="@{/farmer}" href="/farmer" class="n-ico" style="cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
-    <button class="btn-nav" onclick="location.href='/login'">로그인</button>
-  </div>
-</nav>
+<div th:replace="~{nav :: nav}"></div>
 
 <main class="faq-page">
   <section class="faq-head">
@@ -127,8 +108,8 @@
         <div class="faq-help-desc">1:1 문의를 남기거나, 이미 남긴 문의의 답변 상태를 확인할 수 있어요.</div>
       </div>
       <div class="faq-inquiry-actions">
-        <button type="button" class="faq-inquiry-btn primary" onclick="location.href='/create'">문의하기</button>
-        <button type="button" class="faq-inquiry-btn secondary" onclick="location.href='/my'">내 문의보기</button>
+        <button type="button" class="faq-inquiry-btn primary"  onclick="goInquiryCreate()">문의하기</button>
+        <button type="button" class="faq-inquiry-btn secondary"  onclick="goMyInquiry()">내 문의보기</button>
       </div>
     </div>
   </section>
@@ -162,35 +143,8 @@
   <button class="fab-btn" type="button" onclick="toggleChatbot()">🤖<span class="fab-badge">AI</span></button>
 </div>
 
-<footer>
-  <div class="ft-g">
-    <div>
-      <div class="ft-logo">못난이 농작물</div>
-      <p class="ft-desc">버려질 뻔한 농산물을 한 상으로 담다.<br/>신선한 못난이 농산물을 합리적인 가격으로 연결합니다.</p>
-    </div>
-    <div class="ft-col">
-      <h5>서비스</h5>
-      <a th:href="@{/market}" href="/market">마켓</a>
-      <a th:href="@{/ranking}" href="/ranking">판매랭킹</a>
-      <a th:href="@{/review}" href="/review">리뷰</a>
-      <a th:href="@{/faq}" href="/faq">FAQ</a>
-    </div>
-    <div class="ft-col">
-      <h5>고객지원</h5>
-      <a th:href="@{/board}" href="/board">게시판</a>
-      <a th:href="@{/faq}" href="/faq">FAQ</a>
-      <a th:href="@{/mypage}" href="/mypage">마이페이지</a>
-    </div>
-    <div class="ft-col">
-      <h5>농가</h5>
-      <a th:href="@{/farmer}" href="/farmer">농가 대시보드</a>
-      <a th:href="@{/market}" href="/market">상품 등록 안내</a>
-    </div>
-  </div>
-  <div class="ft-bot"><span>© PotatoChip. Ugly Farm Produce Market.</span><span>FAQ</span></div>
-</footer>
+<div th:replace="~{footer :: footer}"></div>
 
-<script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
   var currentFaqCategory='all';
   var faqSearchTimer=null;
@@ -489,6 +443,33 @@
     messageElement.textContent=message;
     body.appendChild(messageElement);
     body.scrollTop=body.scrollHeight;
+  }
+  function isLoggedIn() {
+    const token =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token');
+
+    return !!token;
+  }
+
+  function goInquiryCreate() {
+    if (!isLoggedIn()) {
+      alert('로그인 후 문의를 작성할 수 있습니다.');
+      location.href = '/login';
+      return;
+    }
+
+    location.href = '/create';
+  }
+
+  function goMyInquiry() {
+    if (!isLoggedIn()) {
+      alert('로그인 후 문의 내역을 확인할 수 있습니다.');
+      location.href = '/login';
+      return;
+    }
+
+    location.href = '/my';
   }
 </script>
 </body>
