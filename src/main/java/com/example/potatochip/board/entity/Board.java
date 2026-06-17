@@ -2,6 +2,7 @@ package com.example.potatochip.board.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "board")
@@ -100,4 +101,17 @@ public class Board {
             commentCount = 0;
         }
     }
+    @OneToMany(mappedBy = "board" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Comment> comments = new java.util.ArrayList<>();
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
 }
