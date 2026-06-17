@@ -12,7 +12,7 @@
         .admin-inq-head{background:var(--white);border-bottom:1.5px solid var(--beige);padding:34px 6% 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
         .admin-inq-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
         .admin-inq-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
-        .admin-inq-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:620px}
+        .admin-inq-desc{color:var(--light);font-size:.84rem;line-height:QD1.7;margin-top:8px;max-width:620px}
         .admin-inq-wrap{max-width:1040px;margin:0 auto;padding:34px 6% 80px}
         .admin-inq-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
         .admin-inq-filter{display:flex;gap:7px;flex-wrap:wrap}
@@ -55,20 +55,7 @@
     </style>
 </head>
 <body>
-<nav id="nav">
-    <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-    </div>
-    <ul class="nav-links">
-        <li><a th:href="@{/}" href="/">홈</a></li>
-        <li><a th:href="@{/market}" href="/market">마켓</a></li>
-        <li><a th:href="@{/faq}" href="/faq">FAQ</a></li>
-        <li><a th:href="@{/admin/inquiries}" href="/admin/inquiries" style="color:var(--dark);font-weight:700">문의 관리</a></li>
-    </ul>
-    <div class="nav-r">
-        <button class="btn-nav" onclick="location.href='/login'">로그인</button>
-    </div>
-</nav>
+<div th:replace="~{nav :: nav}"></div>
 
 <main class="admin-inq-page">
     <section class="admin-inq-head">
@@ -95,6 +82,8 @@
     </section>
 </main>
 
+<div th:replace="~{footer :: footer}"></div>
+
 <div id="answerModal" class="admin-modal">
     <div class="admin-modal-card">
         <div class="admin-modal-head">
@@ -111,19 +100,55 @@
     </div>
 </div>
 
-<script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
     var adminId=1;
     var adminInquiryFilter='all';
     var cachedAdminInquiries=[];
 
     document.addEventListener('DOMContentLoaded',function(){
+        if(!isAdminLoggedIn()){
+            showAdminToast('로그인 후 관리자 문의를 확인할 수 있습니다.');
+            setTimeout(function(){location.href='/login'},900);
+            return;
+        }
+
         loadAdminInquiries();
     });
+
+    function getAuthToken(){
+        return localStorage.getItem('token')||sessionStorage.getItem('token');
+    }
+
+    function isAdminLoggedIn(){
+        return !!getAuthToken();
+    }
+
+    function getAuthOnlyHeaders(){
+        return {
+            'Authorization':'Bearer '+getAuthToken()
+        };
+    }
+
+    function getAuthJsonHeaders(){
+        return {
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+getAuthToken()
+        };
+    }
+
+    function handleAdminUnauthorized(){
+        showAdminToast('로그인이 필요합니다. 다시 로그인해주세요.');
+        setTimeout(function(){location.href='/login'},900);
+    }
 
     async function loadAdminInquiries(){
         var list=document.getElementById('adminInquiryList');
         list.innerHTML='<div class="admin-inq-empty">문의 내역을 불러오는 중입니다.</div>';
+
+        if(!isAdminLoggedIn()){
+            handleAdminUnauthorized();
+            return;
+        }
 
         try{
             var url='/api/admin/inquiries';
@@ -132,7 +157,15 @@
                 url+='?status='+adminInquiryFilter;
             }
 
-            var response=await fetch(url);
+            var response=await fetch(url,{
+                headers:getAuthOnlyHeaders()
+            });
+
+            if(response.status===401||response.status===403){
+                handleAdminUnauthorized();
+                return;
+            }
+
             var data=await response.json();
 
             if(!response.ok){
@@ -185,13 +218,13 @@
                 +'<div class="admin-inq-content">'+escapeHtml(item.content)+'</div>'
                 +answerHtml
                 +'<div class="admin-inq-actions">'
-                 +answerButton
+                +answerButton
                 +'</div>'
                 +'</div>';
         }).join('');
     }
 
-    function setAdminInquiryFilter(filter, element){
+    function setAdminInquiryFilter(filter,element){
         adminInquiryFilter=filter;
 
         document.querySelectorAll('.admin-inq-filter button').forEach(function(button){
@@ -257,6 +290,11 @@
             return;
         }
 
+        if(!isAdminLoggedIn()){
+            handleAdminUnauthorized();
+            return;
+        }
+
         var body={
             adminId:adminId,
             answer:answer
@@ -265,9 +303,14 @@
         try{
             var response=await fetch('/api/admin/inquiries/'+inquiryId+'/answer',{
                 method:'POST',
-                headers:{'Content-Type':'application/json'},
+                headers:getAuthJsonHeaders(),
                 body:JSON.stringify(body)
             });
+
+            if(response.status===401||response.status===403){
+                handleAdminUnauthorized();
+                return;
+            }
 
             var data=await response.json();
 
