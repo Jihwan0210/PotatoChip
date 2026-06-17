@@ -121,6 +121,24 @@
 .mp-btn.gray   { background: #fff; color: var(--mid); border: 1.5px solid #e2d9c8; }
 .mp-btn.red    { background: #e74c3c; color: #fff; }
 
+/* ── EMPTY STATE ── */
+.mp-empty { text-align: center; color: var(--muted); font-size: .84rem; padding: 32px 0; }
+
+/* ── WISHLIST ── */
+.wl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+.wl-card { background: var(--beige2); border-radius: 12px; overflow: hidden; transition: transform .2s; }
+.wl-card:hover { transform: translateY(-3px); }
+.wl-thumb { height: 130px; background: linear-gradient(145deg, var(--gp), var(--gl)); display: flex; align-items: center; justify-content: center; font-size: 3rem; overflow: hidden; }
+.wl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.wl-body { padding: 12px 14px; }
+.wl-cat { font-size: .65rem; color: var(--green); font-weight: 500; margin-bottom: 3px; }
+.wl-name { font-size: .84rem; font-weight: 600; color: var(--dark); margin-bottom: 6px; line-height: 1.3; }
+.wl-price-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 8px; }
+.wl-price { font-size: .9rem; font-weight: 700; color: var(--dark); }
+.wl-og { font-size: .72rem; color: var(--muted); text-decoration: line-through; }
+.wl-remove { width: 100%; padding: 7px; background: #fff; border: 1.5px solid #e2d9c8; border-radius: 8px; font-size: .76rem; color: var(--mid); cursor: pointer; font-family: inherit; transition: all .15s; }
+.wl-remove:hover { border-color: #e74c3c; color: #e74c3c; }
+
 /* 위험 구역 */
 .danger-card {
     background: #fff;
