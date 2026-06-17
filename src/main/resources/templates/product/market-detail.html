@@ -69,10 +69,6 @@
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:9px">📝 상품 설명</div>
                     <div style="font-size:.8rem;color:var(--mid);line-height:1.8" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 설명이 없습니다.</div>
                 </div>
-                <div style="border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px">
-                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 원산지 정보</div>
-                    <div style="font-size:.8rem;color:var(--mid);line-height:1.75" th:text="${product.origin}">원산지 정보</div>
-                </div>
                 <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-top:16px">
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:12px">🖼️ 상세 이미지</div>
                     <div style="display:flex;flex-direction:column;gap:12px">
@@ -212,7 +208,12 @@
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px">
                     <span style="color:var(--amber);font-size:.82rem">★★★★★</span>
                     <span style="font-size:.74rem;color:var(--muted)">4.9 (후기 312)</span>
-                    <span style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px">이번주 1위 🏆</span>
+
+
+                    <!-- 판매랭킹 로직 구현 -->
+                    <span th:if="${weekelyRanking != null}"
+                          style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px"
+                          th:text="'이번주 ' + ${weekelyRanking} + '위 🏆'"></span>
                 </div>
 
                 <!-- 수량 선택 -->
@@ -335,21 +336,22 @@
                 buyBtn.style.cursor = 'not-allowed';
             }
 
-            // 내 상품이면 찜도 비활성화
-            if (myEmail === sellerEmail) {
-                if (wishBtn) {
-                    wishBtn.disabled = true;
-                    wishBtn.style.opacity = '0.4';
-                    wishBtn.style.cursor = 'not-allowed';
-                }
-                if (wishImgBtn) {
-                    wishImgBtn.disabled = true;
-                    wishImgBtn.style.opacity = '0.4';
-                    wishImgBtn.style.cursor = 'not-allowed';
-                }
+            if (wishBtn) {
+                wishBtn.disabled = true;
+                wishBtn.style.opacity = '0.4';
+                wishBtn.style.cursor = 'not-allowed';
+                wishBtn.textContent = '판매자는 찜 할 수 없습니다';
+            }
+            if (wishImgBtn) {
+                wishImgBtn.disabled = true;
+                wishImgBtn.style.opacity = '0.4';
+                wishImgBtn.style.cursor = 'not-allowed';
+                wishImgBtn.title = '판매자는 찜 할 수 없습니다';
             }
         }
     });
+
+
 
     document.getElementById('deleteProductBtn').addEventListener('click', function() {
         const id = this.dataset.productId;
