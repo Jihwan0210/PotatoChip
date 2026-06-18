@@ -44,7 +44,8 @@ public class AuthController {
                 "message", "로그인 성공",
                 "token", token,
                 "email", user.getEmail(),
-                "role", user.getRole()
+                "role", user.getRole(),
+                "name", user.getName()
         ));
     }
 
@@ -76,6 +77,34 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // 이메일 중복 실시간 체크
+    @GetMapping("/api/check/email")
+    @ResponseBody
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    // 비밀번호 형식 실시간 체크
+    @PostMapping("/api/check/password")
+    @ResponseBody
+    public ResponseEntity<?> checkPassword(@RequestBody Map<String, String> body) {
+        String password = body.get("password");
+        boolean valid = password != null &&
+                password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~`]).{8,}$");
+        return ResponseEntity.ok(Map.of("valid", valid));
+    }
+
+    // 비밀번호 확인 실시간 체크
+    @PostMapping("/api/check/password-confirm")
+    @ResponseBody
+    public ResponseEntity<?> checkPasswordConfirm(@RequestBody Map<String, String> body) {
+        String password = body.get("password");
+        String passwordConfirm = body.get("passwordConfirm");
+        boolean match = password != null && password.equals(passwordConfirm);
+        return ResponseEntity.ok(Map.of("match", match));
     }
 
     // 비밀번호 재설정 페이지
