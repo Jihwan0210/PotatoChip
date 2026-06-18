@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Controller
@@ -106,23 +108,46 @@ public class ProductController {
     public String marketEdit(@PathVariable Long id, Model model) {
         ProductDTO product = productService.getProductById(id);
         model.addAttribute("product", product);
+
+        Integer discountRate = null;
+        if (product.getDiscountPrice() != null && product.getPrice() != null
+                && product.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            discountRate = product.getPrice().subtract(product.getDiscountPrice())
+                    .divide(product.getPrice(), 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .intValue();
+        }
+        model.addAttribute("discountRate", discountRate);
+
+
         return "product/market-edit";
     }
 
     @PostMapping("/market/edit/{id}")
     public String editProduct(@PathVariable Long id,
                               ProductDTO productDTO,
-                              @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) throws IOException {
+                              @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+                              @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
+                              @RequestParam(value = "deleteImageIds", required = false) List<Long> deleteImageIds) throws IOException {
         productDTO.setId(id);
         if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
             String url = fileService.upload(thumbnailFile);
             productDTO.setThumbnailUrl(url);
         } else {
-            // 기존 이미지 URL 유지함
             ProductDTO existing = productService.getProductById(id);
             productDTO.setThumbnailUrl(existing.getThumbnailUrl());
         }
         productService.modify(productDTO);
+
+        if (deleteImageIds != null && !deleteImageIds.isEmpty()) {
+            productImageService.deleteImages(deleteImageIds);
+        }
+
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            productImageService.uploadImages(productService.getProductEntity(id), imageFiles);
+        }
+
         return "redirect:/market/detail?id=" + id;
     }
 

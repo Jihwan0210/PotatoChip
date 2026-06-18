@@ -74,16 +74,20 @@
                                name="price"
                                class="form-input"
                                placeholder="12000"
+                               oninput="updateDiscountPreview()"
                                required>
                     </div>
 
                     <div class="form-group">
-                        <label>할인 가격</label>
-
+                        <label>할인율 (%)</label>
                         <input type="number"
-                               name="discountPrice"
+                               id="discountRateInput"
                                class="form-input"
-                               placeholder="8900">
+                               min="0" max="99"
+                               placeholder="예: 20"
+                               oninput="this.value = Math.min(Math.max(this.value, 0), 99); updateDiscountPreview()">
+                        <input type="hidden" name="discountPrice" id="discountPriceHidden">
+                        <div style="font-size:.72rem;color:var(--muted);margin-top:4px">※ 할인율은 99%까지 적용됩니다</div>
                     </div>
 
                     <div class="form-row">
@@ -101,7 +105,7 @@
                         </div>
                     </div>
                     <div id="discountDateHint" style="font-size:.75rem;color:var(--muted);margin-top:4px;display:block">
-                        💡 할인 가격 입력 시 날짜를 설정할 수 있습니다.
+                        💡 할인율 입력 시 날짜를 설정할 수 있습니다.
                     </div>
 
 
@@ -350,6 +354,30 @@
     </div>
 
 </div>
+
+<script>
+    function updateDiscountPreview() {
+        const price = Number(document.querySelector('[name=price]').value);
+        const rate  = Number(document.getElementById('discountRateInput').value);
+
+        const previewMain     = document.querySelector('.preview-main');
+        const previewDiscount = document.querySelector('.preview-discount');
+        const hiddenDiscount  = document.getElementById('discountPriceHidden');
+
+        if (!price) return;
+
+        if (rate > 0 && rate <= 99) {
+            const discounted = Math.round(price * (1 - rate / 100));
+            previewDiscount.textContent = `-${rate}%`;
+            previewMain.textContent     = discounted.toLocaleString() + '원';
+            hiddenDiscount.value        = discounted;
+        } else {
+            previewDiscount.textContent = '-30%';
+            previewMain.textContent     = price.toLocaleString() + '원';
+            hiddenDiscount.value        = '';
+        }
+    }
+</script>
 
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script> <!--우편번호 스크립트-->

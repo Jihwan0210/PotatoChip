@@ -33,6 +33,18 @@
                 </button>
             </div>
 
+            <!-- 판매자 계정 안내 -->
+            <div id="sellerGuide" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+                <div style="font-size:3rem;margin-bottom:12px">🚫</div>
+                <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">
+                    판매자 계정으로는 구매가 불가능합니다
+                </div>
+                <div style="font-size:.8rem;margin-bottom:20px">
+                    구매를 원하시면 구매자 계정을 이용해주세요.
+                </div>
+            </div>
+
+
             <!-- 로그인 시 노출 -->
             <div id="cartItems" style="display:none">
 
@@ -139,6 +151,10 @@
 
     if (!token || !role) {
         document.getElementById('loginGuide').style.display = 'block';
+        document.getElementById('cartItems').style.display = 'none';
+    } else if (role === 'SELLER') {
+        document.getElementById('loginGuide').style.display = 'none';
+        document.getElementById('sellerGuide').style.display = 'block';
         document.getElementById('cartItems').style.display = 'none';
     } else {
         document.getElementById('loginGuide').style.display = 'none';
