@@ -85,53 +85,57 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    public Product getProductEntity(Long id) {
+        return productRepository.findById(id).orElseThrow();
+    }
+
+    @Override
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
 
+
+
+
     @Override
-    public Page<ProductDTO> getProducts(String category, String keyword, String sort, String sellerEmail, Pageable pageable) {
+    public Page<ProductDTO> getProducts(String category, String keyword, String searchType, String sort, String sellerEmail, Pageable pageable) {
 
         LocalDate today = LocalDate.now();
-        LocalDate expireLimit = today.plusDays(4);
+        LocalDate expireLimit = today.plusDays(4); // 기한임박 기준: 오늘 + 4일
 
         Page<Product> products;
 
         if (sellerEmail != null) {
+            // 내 상품 필터: 정렬은 price/newest/기본만 지원 (popular/discount 제외)
             Sort sorting = switch (sort) {
                 case "price"  -> Sort.by("price").ascending();
                 case "newest" -> Sort.by("createdAt").descending();
                 default       -> Sort.by("id").descending();
             };
-            Pageable sortedPageable = PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    sorting
-            );
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
             products = productRepository.searchProductsBySellerEmail(
-                    sellerEmail, category, keyword, today, expireLimit, sortedPageable
+                    sellerEmail, category, keyword, searchType, today, expireLimit, sortedPageable
             );
         } else if ("popular".equals(sort)) {
+            // 인기순: WEEKLY salesCount 기준
             products = productRepository.searchProductsByPopular(
-                    category, keyword, today, expireLimit, pageable
+                    category, keyword, searchType, today, expireLimit, pageable
             );
         } else if ("discount".equals(sort)) {
+            // 할인율순: 할인율 높은 순, 할인 없는 상품 맨 뒤
             products = productRepository.searchProductsByDiscount(
-                    category, keyword, today, expireLimit, pageable
+                    category, keyword, searchType, today, expireLimit, pageable
             );
         } else {
+            // 가격순 / 최신순 / 기본(id 내림차순)
             Sort sorting = switch (sort) {
                 case "price"  -> Sort.by("price").ascending();
                 case "newest" -> Sort.by("createdAt").descending();
                 default       -> Sort.by("id").descending();
             };
-            Pageable sortedPageable = PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    sorting
-            );
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
             products = productRepository.searchProducts(
-                    category, keyword, today, expireLimit, sortedPageable
+                    category, keyword, searchType, today, expireLimit, sortedPageable
             );
         }
 

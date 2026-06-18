@@ -212,7 +212,26 @@ public class ReviewServiceImpl implements ReviewService {
         if (imageUrl == null || imageUrl.isBlank()) {
             return null;
         }
-
         return imageUrl.trim();
+    }
+
+    @Override
+    public List<ReviewDTO> getMyReviews(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("사용자 ID가 필요합니다.");
+        }
+
+        return reviewRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(review -> {
+                    Long helpfulCount = reviewHelpfulRepository.countByReviewId(review.getReviewId());
+                    Boolean helpfulByCurrentUser = reviewHelpfulRepository.existsByReviewIdAndUserId(
+                            review.getReviewId(),
+                            userId
+                    );
+
+                    return ReviewDTO.fromEntity(review, helpfulCount, helpfulByCurrentUser);
+                })
+                .toList();
     }
 }

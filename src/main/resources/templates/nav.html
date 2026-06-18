@@ -116,6 +116,42 @@
             location.href = '/login';
         }
 
+        function updateCartBadge() {
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            var role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
+
+            var badge = document.getElementById('cartBadge');
+
+            if (!badge) return;
+
+            if (!token || role === 'SELLER') {
+                badge.style.display = 'none';
+                return;
+            }
+
+
+            fetch('/cart/data', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+                .then(function(res) {
+                    if (!res.ok) { badge.style.display = 'none'; return null; }
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    var count = data.items ? data.items.length : 0;
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(function() { badge.style.display = 'none'; });
+        }
+
+        updateCartBadge();
+
     </script>
 </nav>
 </body>

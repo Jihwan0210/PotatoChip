@@ -378,25 +378,6 @@ function switchMktTab(i){
   if(ct) ct.style.display='block';
 }
 
-function doMktSearch(){
-  var q=document.getElementById('mktSearch');
-  var keyword=(q?q.value.trim():'').toLowerCase();
-  var c=document.getElementById('mktSearchClear');
-  if(c) c.style.display=keyword?'inline':'none';
-  if(!keyword) return;
-  switchMktTab(0);
-  var cards=document.querySelectorAll('#mkt-content-0 .pc2');
-  var shown=0;
-  cards.forEach(function(card){
-    var nm=card.textContent.toLowerCase();
-    var match=nm.indexOf(keyword)>=0;
-    card.style.display=match?'':'none';
-    if(match) shown++;
-  });
-  var cnt=document.querySelector('.pgrid-count');
-  if(cnt) cnt.innerHTML='검색 결과: <strong style="color:var(--dark)">'+shown+'</strong>개';
-}
-
 function clearMktSearch(){
   var q=document.getElementById('mktSearch');
   var c=document.getElementById('mktSearchClear');

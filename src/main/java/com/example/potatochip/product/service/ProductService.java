@@ -20,8 +20,8 @@ public interface ProductService {
 
     void modify(ProductDTO productDTO);
 
-    Page<ProductDTO> getProducts(String category, String keyword, String sort,  String sellerEmail, Pageable pageable);
+    public Page<ProductDTO> getProducts(String category, String keyword, String searchType, String sort, String sellerEmail, Pageable pageable);
 
-
+    Product getProductEntity(Long id);
 
 }
