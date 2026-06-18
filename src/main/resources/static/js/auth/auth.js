@@ -394,6 +394,27 @@ function openAddressSearch() {
     }).open();
 }
 
+/* ══ 소셜 로그인 콜백 처리 ══
+   KakaoController가 /login?oauth_token=...&oauth_name=...&oauth_email=...&oauth_role=... 로 리다이렉트하면
+   여기서 파라미터를 읽어 localStorage에 저장 후 홈으로 이동 */
+(function () {
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get('oauth_token');
+    if (!token) return;
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('name',  decodeURIComponent(params.get('oauth_name')  || ''));
+    localStorage.setItem('email', decodeURIComponent(params.get('oauth_email') || ''));
+    localStorage.setItem('role',  params.get('oauth_role') || 'BUYER');
+
+    var name = localStorage.getItem('name') || '고객';
+    showSuccessModal(
+        '로그인 성공! 🎉',
+        name + '님, 환영합니다! 못난이 농작물에 오신 것을 환영해요 🌿',
+        '/'
+    );
+})();
+
 /* ══ 로그아웃 ══ */
 function doLogout() {
     ['token', 'email', 'role', 'name'].forEach(function (k) {
