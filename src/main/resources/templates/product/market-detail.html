@@ -101,8 +101,6 @@
             <div style="border-bottom:1.5px solid var(--sand);display:flex;gap:0;margin-bottom:22px">
                 <div id="dtab-info" onclick="switchDetailTab('info')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2.5px solid var(--dark)">상품 정보</div>
                 <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
-                <div id="dtab-pickup" onclick="switchDetailTab('pickup')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">픽업 서비스</div>
-                <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
 
                 <div id="dtab-pickup"
                      th:data-pickup="${product.isPickupAvailable}"
@@ -219,26 +217,26 @@
 
 
                 <div th:if="${product.isPickupAvailable}">
-                <div style="background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px">
-                    <div style="font-size:.84rem;font-weight:500;color:var(--green);margin-bottom:7px">📍 농장 직접 픽업 서비스</div>
-                    <div style="font-size:.8rem;color:var(--mid);line-height:1.7">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
-                </div>
-                <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px">
-                    <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📍 농장 위치</div>
-                    <div style="font-size:.8rem;color:var(--mid);line-height:1.8">
-                        <strong th:text="${product.address}">농장위치</strong><br/>
-                        <strong th:text="${product.operatingHours}">운영시간</strong><br/>
-                        <strong th:text="${product.sellerPhone}">폰번호</strong><br/>
+                    <div style="background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px">
+                        <div style="font-size:.84rem;font-weight:500;color:var(--green);margin-bottom:7px">📍 농장 직접 픽업 서비스</div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.7">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
                     </div>
-                </div>
+                    <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+                        <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📍 농장 위치</div>
+                        <div style="font-size:.8rem;color:var(--mid);line-height:1.8">
+                            <strong th:text="${product.address}">농장위치</strong><br/>
+                            <strong th:text="${product.operatingHours}">운영시간</strong><br/>
+                            <strong th:text="${product.sellerPhone}">폰번호</strong><br/>
+                        </div>
+                    </div>
                 </div>
                 <div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--sand);margin-bottom:14px">
                     <div style="background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:6px">🗺️ 지도로 위치 확인</div>
                     <div id="map" style="width:100%;height:300px;"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#FEE500;color:#3C1E1E;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 카카오맵</div>
-                    <div style="display:flex;align-items:center;justify-content:center;gap:7px;background:#03C75A;color:#fff;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 네이버지도</div>
+                    <div onclick="openKakaoRoute()" style="display:flex;align-items:center;justify-content:center;gap:7px;background:#FEE500;color:#3C1E1E;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 카카오맵</div>
+                    <div onclick="openNaverSearch()" style="display:flex;align-items:center;justify-content:center;gap:7px;background:#03C75A;color:#fff;font-size:.82rem;font-weight:700;padding:12px;border-radius:9px;cursor:pointer">🗺️ 네이버지도</div>
                 </div>
                 <div style="background:#fff;border:1.5px solid var(--sand);border-radius:12px;padding:16px 18px">
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:10px">📋 픽업 예약 방법</div>
@@ -1212,6 +1210,44 @@
         }
 
         switchDetailTab('pickup');
+    }
+
+
+    function openKakaoRoute() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+            if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
+            return;
+        }
+
+        fetch('/api/route/kakao?productId=' + productId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+            .then(function (res) {
+                return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+            })
+            .then(function (result) {
+                if (!result.ok) {
+                    showToast(result.data.message || '길찾기 정보를 불러오지 못했어요 ㅠㅠ');
+                    return;
+                }
+                window.open(result.data.url, '_blank');
+            })
+            .catch(function () {
+                showToast('서버 연결에 실패했어요 ㅠㅠ');
+            });
+    }
+
+    function openNaverSearch() {
+        fetch('/api/products/' + productId)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var address = data.address || '판매처';
+                window.open('https://map.naver.com/p/search/' + encodeURIComponent(address), '_blank');
+            })
+            .catch(function () {
+                showToast('판매처 정보를 불러오지 못했어요 ㅠㅠ');
+            });
     }
 
 </script>
