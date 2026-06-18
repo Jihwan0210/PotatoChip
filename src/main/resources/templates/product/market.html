@@ -177,7 +177,7 @@
              style="cursor:pointer">
             <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
                 <div class="pbdg">
-                    <span class="pbdg-t pbdg-new">New</span>
+                    <span class="pbdg-t pbdg-new" th:if="${product.isNew()}">New</span>
                     <span class="pbdg-t pbdg-soon" th:if="${product.soonExpired}">⏰ 기한임박</span>
                 </div>
                 <div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>
