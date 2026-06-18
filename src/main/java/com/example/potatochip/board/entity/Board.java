@@ -93,15 +93,21 @@ public class Board {
             createdAt = LocalDateTime.now();
         }
 
-        if(viewCount == null) {
+        if (viewCount == null) {
             viewCount = 0;
         }
 
-        if(commentCount == null) {
+        if (commentCount == null) {
             commentCount = 0;
         }
+
+        if(likeCount == null) {
+            likeCount = 0;
+        }
+
     }
-    @OneToMany(mappedBy = "board" , cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<Comment> comments = new java.util.ArrayList<>();
 
     @Column(name = "image_url")
@@ -110,8 +116,18 @@ public class Board {
     public String getImageUrl() {
         return imageUrl;
     }
+
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+    @Column(name = "like_count")
+    private Integer likeCount;
 
+    public Integer getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(Integer likeCount) {
+        this.likeCount = likeCount;
+    }
 }
