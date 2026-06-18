@@ -14,20 +14,8 @@
         <li><a th:href="@{/faq}">FAQ</a></li>
     </ul>
     <div class="nav-r">
+        <!-- 알림 -->
         <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-        <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:none;align-items:center;justify-content:center;padding:0 2px;line-height:1"></span></span>
-
-        <!-- 로그인 시에만 보임 / 관리자 로그인시 mypage가 아닌 admin/dashboard로 이동-->
-        <button type="button"
-                class="n-ico"
-                id="nav-mypage"
-                onclick="goRolePage()"
-                style="display:none;cursor:pointer;font-size:.85rem;color:var(--mid);border:none;background:transparent"
-                title="마이페이지">👤</button>
-
-        <!-- 판매자일 때만 보임 -->
-        <a th:href="@{/farmer}" class="n-ico" id="nav-farmer"
-           style="display:none;cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
 
         <!-- 로그인 후: 이름 버튼 + 드롭다운 -->
         <div class="nav-user-wrap" id="nav-user-wrap" style="display:none">
@@ -36,6 +24,11 @@
                 <span class="nav-arrow">▾</span>
             </button>
             <div class="nav-dropdown" id="nav-dropdown">
+                <!-- BUYER: 장바구니 -->
+                <div class="nd-item" id="nd-cart" onclick="location.href='/cart'" style="display:none">
+                    🛒 <span>장바구니</span>
+                </div>
+                <!-- 역할별 페이지 링크 -->
                 <div class="nd-item" id="nd-role-page" onclick="goRolePage()">
                     <span id="nd-role-ico">👤</span>
                     <span id="nd-role-label">마이페이지</span>
@@ -52,54 +45,47 @@
     <script src="/js/app.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script>
-        // 로그인 상태에 따라 nav 제어
         (function () {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
-            const name = localStorage.getItem('name') || sessionStorage.getItem('name') || '사용자';
+            var token     = localStorage.getItem('token')     || sessionStorage.getItem('token');
+            var role      = (localStorage.getItem('role')     || sessionStorage.getItem('role')  || '').toUpperCase();
+            var name      = localStorage.getItem('name')      || sessionStorage.getItem('name')  || '사용자';
 
-            const loginBtn  = document.getElementById('btn-nav-login');
-            const userWrap  = document.getElementById('nav-user-wrap');
-            const userName  = document.getElementById('nav-user-name');
-            const mypageBtn = document.getElementById('nav-mypage');
-            const farmerBtn = document.getElementById('nav-farmer');
-            const ndRoleIco = document.getElementById('nd-role-ico');
-            const ndRoleLbl = document.getElementById('nd-role-label');
+            var loginBtn  = document.getElementById('btn-nav-login');
+            var userWrap  = document.getElementById('nav-user-wrap');
+            var userName  = document.getElementById('nav-user-name');
+            var ndCart    = document.getElementById('nd-cart');
+            var ndRoleIco = document.getElementById('nd-role-ico');
+            var ndRoleLbl = document.getElementById('nd-role-label');
 
             if (!token) {
-                if (loginBtn)  loginBtn.style.display  = '';
-                if (userWrap)  userWrap.style.display  = 'none';
-                if (mypageBtn) mypageBtn.style.display = 'none';
-                if (farmerBtn) farmerBtn.style.display = 'none';
+                if (loginBtn) loginBtn.style.display = '';
+                if (userWrap) userWrap.style.display = 'none';
                 return;
             }
 
-            // 로그인: 이름 버튼 표시, 로그인 버튼 숨김
+            // 로그인 상태: 이름 드롭다운 표시
             if (loginBtn) loginBtn.style.display = 'none';
-            if (userWrap) userWrap.style.display  = 'flex';
-            if (userName) userName.textContent     = name;
+            if (userWrap) userWrap.style.display = 'flex';
+            if (userName) userName.textContent   = name;
 
             if (role === 'SELLER') {
-                if (farmerBtn) farmerBtn.style.display = 'inline-flex';
-                if (mypageBtn) mypageBtn.style.display = 'none';
-                if (ndRoleIco) ndRoleIco.textContent   = '🌾';
-                if (ndRoleLbl) ndRoleLbl.textContent   = '농가 대시보드';
+                if (ndCart)    ndCart.style.display     = 'none';
+                if (ndRoleIco) ndRoleIco.textContent    = '🌾';
+                if (ndRoleLbl) ndRoleLbl.textContent    = '농가 대시보드';
                 return;
             }
 
             if (role === 'ADMIN') {
-                if (mypageBtn) { mypageBtn.style.display = 'inline-flex'; mypageBtn.textContent = '🛠️'; mypageBtn.style.color = 'var(--green)'; }
-                if (farmerBtn) farmerBtn.style.display = 'none';
-                if (ndRoleIco) ndRoleIco.textContent   = '🛠️';
-                if (ndRoleLbl) ndRoleLbl.textContent   = '관리자 대시보드';
+                if (ndCart)    ndCart.style.display     = 'none';
+                if (ndRoleIco) ndRoleIco.textContent    = '🛠️';
+                if (ndRoleLbl) ndRoleLbl.textContent    = '관리자 대시보드';
                 return;
             }
 
-            // BUYER
-            if (mypageBtn) { mypageBtn.style.display = 'inline-flex'; mypageBtn.textContent = '👤'; mypageBtn.style.color = 'var(--mid)'; }
-            if (farmerBtn) farmerBtn.style.display = 'none';
-            if (ndRoleIco) ndRoleIco.textContent   = '👤';
-            if (ndRoleLbl) ndRoleLbl.textContent   = '마이페이지';
+            // BUYER: 드롭다운에 장바구니
+            if (ndCart)  ndCart.style.display  = 'flex';
+            if (ndRoleIco) ndRoleIco.textContent = '👤';
+            if (ndRoleLbl) ndRoleLbl.textContent = '마이페이지';
         })();
 
         function toggleUserDropdown(e) {
@@ -113,58 +99,23 @@
         });
 
         function goRolePage() {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
-            if (!token)           { location.href = '/login'; return; }
-            if (role === 'ADMIN') { location.href = '/admin/dashboard'; return; }
-            if (role === 'SELLER'){ location.href = '/farmer'; return; }
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            var role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
+            if (!token)            { location.href = '/login'; return; }
+            if (role === 'ADMIN')  { location.href = '/admin/dashboard'; return; }
+            if (role === 'SELLER') { location.href = '/farmer'; return; }
             location.href = '/mypage';
         }
 
         function handleNavLogout() {
             if (typeof doLogout === 'function') { doLogout(); return; }
-            ['token','email','role','name','currentUserId'].forEach(function(k){
+            ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function (k) {
                 localStorage.removeItem(k);
                 sessionStorage.removeItem(k);
             });
             location.href = '/login';
         }
 
-        function updateCartBadge() {
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            var role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
-
-            var badge = document.getElementById('cartBadge');
-
-            if (!badge) return;
-
-            if (!token || role === 'SELLER') {
-                badge.style.display = 'none';
-                return;
-            }
-
-
-            fetch('/cart/data', {
-                headers: { 'Authorization': 'Bearer ' + token }
-            })
-                .then(function(res) {
-                    if (!res.ok) { badge.style.display = 'none'; return null; }
-                    return res.json();
-                })
-                .then(function(data) {
-                    if (!data) return;
-                    var count = data.items ? data.items.length : 0;
-                    if (count > 0) {
-                        badge.textContent = count;
-                        badge.style.display = 'flex';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                })
-                .catch(function() { badge.style.display = 'none'; });
-        }
-
-        updateCartBadge();
     </script>
 </nav>
 </body>
