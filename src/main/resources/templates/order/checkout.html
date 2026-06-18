@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>주문 완료 - 못난이 농작물</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <style>
+        .complete-wrap { max-width: 600px; margin: 80px auto; padding: 40px 5%; text-align: center; }
+        .icon-box { font-size: 5rem; margin-bottom: 20px; }
+        .title { font-family: 'Gaegu', cursive; font-size: 2.5rem; font-weight: 700; color: #5A9A30; margin-bottom: 10px; }
+        .sub-desc { color: #666; margin-bottom: 40px; font-size: 1.05rem; }
+
+        .receipt-card { background: #fff; border: 1.5px solid #E8DCC8; border-radius: 14px; padding: 30px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .r-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 15px; }
+        .r-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .r-label { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .r-value { color: #1A1A1A; font-weight: 700; font-size: 1rem; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 30px; }
+        .btn-home { flex: 1; padding: 16px; background: #E8DCC8; color: #1A1A1A; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .btn-mypage { flex: 1; padding: 16px; background: #5A9A30; color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div th:replace="nav :: nav"></div>
+
+<div class="complete-wrap">
+    <div class="icon-box">🎉</div>
+    <div class="title">주문이 완료되었어요!</div>
+    <div class="sub-desc">주문하신 못난이 농작물이 신선하게 도착할 예정입니다.</div>
+
+    <div class="receipt-card">
+        <div class="r-row">
+            <span class="r-label">주문 번호</span>
+            <span class="r-value" th:text="${order.orderNumber}">ORD-12345678</span>
+        </div>
+        <div class="r-row">
+            <span class="r-label">결제 일시</span>
+            <span class="r-value" th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">2026-06-18 15:30</span>
+        </div>
+        <div class="r-row">
+            <span class="r-label">배송지</span>
+            <span class="r-value" th:text="${order.shippingAddress}">서울시 강남구</span>
+        </div>
+        <div class="r-row">
+            <span class="r-label">배송 방법</span>
+            <span class="r-value" th:text="${order.deliveryType == 'pickup' ? '농장 픽업' : (order.deliveryType == 'express' ? '당일 배송' : '일반 택배')}">일반 택배</span>
+        </div>
+        <div class="r-row">
+            <span class="r-label">최종 결제 금액</span>
+            <span class="r-value" style="color:#F39C12; font-size: 1.2rem;" th:text="${#numbers.formatInteger(order.totalAmount + order.totalShippingFee, 0, 'COMMA')} + '원'">50,000원</span>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-home" onclick="location.href='/'">홈으로 가기</button>
+        <button class="btn-mypage" onclick="location.href='/mypage'">주문 내역 보기</button>
+    </div>
+</div>
+
+<div th:replace="footer :: footer"></div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
