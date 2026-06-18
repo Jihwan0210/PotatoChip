@@ -28,9 +28,13 @@ public class ProductImageServiceImpl implements ProductImageService{
 
         for (MultipartFile file : files) {
 
+            if (file == null || file.isEmpty()) continue; // 추가
+
+            String originalName = file.getOriginalFilename();
+            if (originalName == null || originalName.isBlank() || !originalName.contains(".")) continue; // 추가
+
             // UUID 파일명 생성
             String uuid = UUID.randomUUID().toString();
-            String originalName = file.getOriginalFilename();
             String ext = originalName.substring(originalName.lastIndexOf("."));
             String baseName = originalName.substring(0, originalName.lastIndexOf("."));
             String savedName = uuid + "_" + baseName.replaceAll("[^a-zA-Z0-9]", "") + ext;
@@ -46,6 +50,23 @@ public class ProductImageServiceImpl implements ProductImageService{
             image.setUuid("/uploads/products/" + savedName);
             productImageRepository.save(image);
         }
+    }
+    @Override
+    public List<ProductImage> getImagesByProduct(Product product) {
+        return productImageRepository.findByProduct(product);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImages(List<Long> imageIds) {
+        if (imageIds == null || imageIds.isEmpty()) return;
+
+        List<ProductImage> images = productImageRepository.findAllById(imageIds);
+        for (ProductImage image : images) {
+            File file = new File(System.getProperty("user.dir") + image.getUuid());
+            if (file.exists()) file.delete();
+        }
+        productImageRepository.deleteAllById(imageIds);
     }
 }
 

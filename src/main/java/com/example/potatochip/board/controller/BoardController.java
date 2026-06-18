@@ -1,53 +1,98 @@
 package com.example.potatochip.board.controller;
 
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardRequestDTO;
-import com.example.potatochip.board.dto.BoardResponseDTO;
+import com.example.potatochip.board.dto.BoardResponse;
+import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.service.BoardService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
-@RestController
-@RequestMapping("/boards")
+@Controller
+@RequiredArgsConstructor
 public class BoardController {
 
     private final BoardService boardService;
 
-    public BoardController(BoardService boardService) {
-        this.boardService = boardService;
+    @GetMapping("/board")
+    public String boardPage() {
+        return "board/board";
     }
 
-    // 전체 게시글 조회
-    @GetMapping
-    public List<BoardResponseDTO> getBoards() {
-        return boardService.getBoards();
+    @GetMapping("/api/board")
+    @ResponseBody
+    public List<BoardResponse> getBoards() {
+        return boardService.findAllResponse();
     }
 
-    // 게시글 상세 조회
-    @GetMapping("/{id}")
-    public BoardResponseDTO getBoard(@PathVariable Long id) {
-        return boardService.getBoard(id);
+    @GetMapping("/api/board/{id}")
+    @ResponseBody
+    public BoardResponse getBoard(@PathVariable Long id) {
+        return boardService.findResponseById(id);
     }
 
-    // 게시글 등록
-    @PostMapping
-    public BoardResponseDTO createBoard(@RequestBody BoardRequestDTO request) {
-        return boardService.createBoard(request);
+    @PostMapping(value = "/api/board", consumes = {"multipart/form-data"})
+    @ResponseBody
+    public BoardResponse createBoard(
+            @RequestPart("board") Board board,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            Authentication authentication
+    ) {
+        if (image != null && !image.isEmpty()) {
+            try {
+                String uploadDir = "C:/minsung/uploads/";
+                java.io.File folder = new java.io.File(uploadDir);
+
+                if (!folder.exists()) {
+                    folder.mkdirs();
+                }
+
+                String originalFileName = image.getOriginalFilename();
+                String savedFileName = java.util.UUID.randomUUID() + "_" + originalFileName;
+
+                java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
+                image.transferTo(destinationFile);
+
+                board.setImageUrl("/uploads/" + savedFileName);
+                System.out.println("📷 이미지 업로드 성공: /uploads/" + savedFileName);
+
+            } catch (java.io.IOException e) {
+                System.out.println("❌ 이미지 저장 중 에러 발생: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        return boardService.createBoard(board, authentication);
     }
 
-    // 게시글 수정
-    @PutMapping("/{id}")
-    public BoardResponseDTO updateBoard(
+    @PostMapping("/api/board/{id}/view")
+    @ResponseBody
+    public void increasedView(@PathVariable Long id) {
+        boardService.increaseView(id);
+    }
+
+    @DeleteMapping("/api/board/{id}")
+    @ResponseBody
+    public ResponseEntity<?> deleteBoard(
             @PathVariable Long id,
-            @RequestBody BoardRequestDTO request) {
-
-        return boardService.updateBoard(id, request);
+            Authentication authentication
+    ) {
+        boardService.deleteBoard(id, authentication);
+        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
     }
 
-    // 게시글 삭제
-    @DeleteMapping("/{id}")
-    public void deleteBoard(@PathVariable Long id) {
-        boardService.deleteBoard(id);
+    @PutMapping("/api/board/{id}")
+    @ResponseBody
+    public BoardResponse updateBoard(
+            @PathVariable Long id,
+            @RequestBody Board updatedBoard,
+            Authentication authentication
+    ) {
+        return boardService.updateBoard(id, updatedBoard, authentication);
     }
 }

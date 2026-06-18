@@ -129,9 +129,133 @@ function switchMktTab(i){
 
 function doMktSearch() {
     var keyword = document.getElementById('mktSearch').value.trim();
-    location.href = '/market?keyword=' + encodeURIComponent(keyword);
+    var searchType = document.getElementById('mktSearchType').value;
+    var url = new URL(window.location.href);
+    url.searchParams.set('keyword', keyword);
+    url.searchParams.set('searchType', searchType);
+    url.searchParams.set('page', '0');
+    window.location.href = url.toString();
 }
 
 function clearMktSearch() {
     location.href = '/market';
 }
+/* ══ WISHLIST (localStorage) ══ */
+
+function getWishKey() {
+    const email = localStorage.getItem('email') || sessionStorage.getItem('email');
+    return email ? 'wishlist_' + email : 'wishlist_guest';
+}
+
+function isLoggedIn() {
+    return !!(localStorage.getItem('email') || sessionStorage.getItem('email'));
+}
+
+// 찜 목록 가져오기
+function getWishlist() {
+    return JSON.parse(localStorage.getItem(getWishKey()) || '[]');
+}
+
+// 찜 저장
+function saveWishlist(list) {
+    localStorage.setItem(getWishKey(), JSON.stringify(list));
+}
+
+// 찜 토글 (상세페이지 메인 이미지 버튼)
+function toggleDetailWish(btn) {
+    if (!isLoggedIn()) {
+        showToast('로그인 후 이용해주세요');
+        return;
+    }
+    const list = getWishlist();
+    const id = String(productId);
+    const idx = list.indexOf(id);
+    if (idx === -1) {
+        list.push(id);
+        btn.textContent = '❤️';
+        showToast('❤️ 찜 목록에 추가됐어요!');
+    } else {
+        list.splice(idx, 1);
+        btn.textContent = '🤍';
+        showToast('찜 목록에서 제거됐어요');
+    }
+    saveWishlist(list);
+    syncWishBtns();
+}
+
+// 찜 토글 (상세페이지 하단 찜하기 버튼)
+function toggleDetailWish2(btn) {
+    toggleDetailWish(document.getElementById('detailWishBtn'));
+}
+
+// 두 버튼 동기화
+function syncWishBtns() {
+    const list = getWishlist();
+    const id = String(productId);
+    const isWished = list.includes(id);
+    const btn1 = document.getElementById('detailWishBtn');
+    const btn2 = document.getElementById('wishBtn2');
+    if (btn1) btn1.textContent = isWished ? '❤️' : '🤍';
+    if (btn2) btn2.textContent = isWished ? '❤️ 찜됨' : '🤍 찜하기';
+}
+
+// 마켓 찜 토글 (API 기반)
+async function toggleW(btn) {
+    if (!isLoggedIn()) {
+        showToast('로그인 후 이용해주세요');
+        return;
+    } const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+    if (role === 'SELLER') {
+        showToast('판매자 계정은 찜 기능을 이용할 수 없어요');
+        return;
+    }
+    const card = btn.closest('[data-id]') || btn.closest('.pc2');
+    const id = card ? String(card.dataset.id || '') : '';
+    if (!id) return;
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    try {
+        const res = await fetch('/wishlist/' + id, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.added) {
+            btn.textContent = '❤️';
+            showToast('❤️ 찜 목록에 추가됐어요!');
+        } else {
+            btn.textContent = '🤍';
+            showToast('찜 목록에서 제거됐어요');
+        }
+    } catch (e) {
+        showToast('오류가 발생했어요');
+    }
+}
+
+// 페이지 로드 시 찜 상태 복원
+document.addEventListener('DOMContentLoaded', function() {
+    // 상세페이지면 버튼 동기화
+    if (typeof productId !== 'undefined') {
+        syncWishBtns();
+    }
+
+    // 마켓 카드 찜 버튼 상태 복원 (API 기반)
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+        fetch('/wishlist', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+            .then(res => res.json())
+            .then(list => {
+                const ids = list.map(p => String(p.id));
+                document.querySelectorAll('.plk').forEach(function(btn) {
+                    const card = btn.closest('[data-id]') || btn.closest('.pc2');
+                    if (card && ids.includes(String(card.dataset.id || ''))) {
+                        btn.textContent = '❤️';
+                    }
+                });
+            })
+            .catch(e => console.error('찜 목록 로드 실패', e));
+    }
+});

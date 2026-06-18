@@ -55,20 +55,7 @@
     </style>
 </head>
 <body>
-<nav id="nav">
-    <div class="logo" onclick="location.href='/'" style="cursor:pointer;display:flex;align-items:center;gap:7px">
-        못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물
-    </div>
-    <ul class="nav-links">
-        <li><a th:href="@{/}" href="/">홈</a></li>
-        <li><a th:href="@{/market}" href="/market">마켓</a></li>
-        <li><a th:href="@{/faq}" href="/faq">FAQ</a></li>
-        <li><a th:href="@{/admin/inquiries}" href="/admin/inquiries" style="color:var(--dark);font-weight:700">문의 관리</a></li>
-    </ul>
-    <div class="nav-r">
-        <button class="btn-nav" onclick="location.href='/login'">로그인</button>
-    </div>
-</nav>
+<div th:replace="~{nav :: nav}"></div>
 
 <main class="admin-inq-page">
     <section class="admin-inq-head">
@@ -95,6 +82,8 @@
     </section>
 </main>
 
+<div th:replace="~{footer :: footer}"></div>
+
 <div id="answerModal" class="admin-modal">
     <div class="admin-modal-card">
         <div class="admin-modal-head">
@@ -111,13 +100,16 @@
     </div>
 </div>
 
-<script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
     var adminId=1;
     var adminInquiryFilter='all';
     var cachedAdminInquiries=[];
+    var initialInquiryId=null;
+    var initialInquiryHandled=false;
 
     document.addEventListener('DOMContentLoaded',function(){
+        var params=new URLSearchParams(location.search);
+        initialInquiryId=params.get('inquiryId')||params.get('id');
         loadAdminInquiries();
     });
 
@@ -142,6 +134,7 @@
 
             cachedAdminInquiries=Array.isArray(data)?data:[];
             renderAdminInquiries();
+            openInitialInquiryAnswerIfNeeded();
         }catch(error){
             list.innerHTML='<div class="admin-inq-empty">서버 연결에 실패했습니다.</div>';
         }
@@ -165,7 +158,7 @@
                 ? '<button type="button" class="admin-inq-btn disabled">답변 완료</button>'
                 : '<button type="button" class="admin-inq-btn answer" onclick="openAnswerModal('+item.id+')">답변하기</button>';
 
-            return '<div class="admin-inq-card">'
+            return '<div id="admin-inq-card-'+item.id+'" class="admin-inq-card">'
                 +'<div class="admin-inq-top">'
                 +'<div>'
                 +'<div class="admin-inq-badges">'
@@ -185,10 +178,42 @@
                 +'<div class="admin-inq-content">'+escapeHtml(item.content)+'</div>'
                 +answerHtml
                 +'<div class="admin-inq-actions">'
-                 +answerButton
+                +answerButton
                 +'</div>'
                 +'</div>';
         }).join('');
+    }
+
+
+    function openInitialInquiryAnswerIfNeeded(){
+        if(!initialInquiryId||initialInquiryHandled){
+            return;
+        }
+
+        var targetId=Number(initialInquiryId);
+        var item=cachedAdminInquiries.find(function(inquiry){
+            return Number(inquiry.id)===targetId;
+        });
+
+        if(!item){
+            return;
+        }
+
+        initialInquiryHandled=true;
+
+        var card=document.getElementById('admin-inq-card-'+targetId);
+        if(card){
+            card.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+
+        if(String(item.status||'').toLowerCase()==='answered'){
+            showAdminToast('이미 답변 완료된 문의입니다.');
+            return;
+        }
+
+        setTimeout(function(){
+            openAnswerModal(targetId);
+        },150);
     }
 
     function setAdminInquiryFilter(filter, element){

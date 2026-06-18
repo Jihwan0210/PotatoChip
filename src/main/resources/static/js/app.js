@@ -349,12 +349,6 @@ function markAllRead(){
 }
 
 /* ══ SORT ══ */
-function setSort(el){
-  el.parentElement.querySelectorAll('div').forEach(function(d){
-    d.style.color='var(--muted)';d.style.fontWeight='400';d.style.background='transparent';
-  });
-  el.style.color='var(--green)';el.style.fontWeight='700';el.style.background='var(--gp)';
-}
 
 /* ══ MARKET ══ */
 function catClick(el){
@@ -384,25 +378,6 @@ function switchMktTab(i){
   if(ct) ct.style.display='block';
 }
 
-function doMktSearch(){
-  var q=document.getElementById('mktSearch');
-  var keyword=(q?q.value.trim():'').toLowerCase();
-  var c=document.getElementById('mktSearchClear');
-  if(c) c.style.display=keyword?'inline':'none';
-  if(!keyword) return;
-  switchMktTab(0);
-  var cards=document.querySelectorAll('#mkt-content-0 .pc2');
-  var shown=0;
-  cards.forEach(function(card){
-    var nm=card.textContent.toLowerCase();
-    var match=nm.indexOf(keyword)>=0;
-    card.style.display=match?'':'none';
-    if(match) shown++;
-  });
-  var cnt=document.querySelector('.pgrid-count');
-  if(cnt) cnt.innerHTML='검색 결과: <strong style="color:var(--dark)">'+shown+'</strong>개';
-}
-
 function clearMktSearch(){
   var q=document.getElementById('mktSearch');
   var c=document.getElementById('mktSearchClear');
@@ -414,11 +389,6 @@ function clearMktSearch(){
 }
 
 /* ══ WISH / TOGGLE ══ */
-function toggleW(el){
-  var wished=el.textContent==='❤️';
-  el.textContent=wished?'🤍':'❤️';
-  showToast(wished?'찜 목록에서 제거됐어요':'❤️ 찜 목록에 추가됐어요!');
-}
 function toggleDetailWish(btn){
   var w=btn.textContent==='❤️';
   btn.textContent=w?'🤍':'❤️';
@@ -521,11 +491,7 @@ function switchFarmerTab(n){
     var c=document.getElementById('fcontent-'+i);
     var t=document.getElementById('ftab-'+i);
     if(c) c.style.display=(i===n?'block':'none');
-    if(t){
-      t.style.borderBottom=(i===n?'2px solid var(--dark)':'2px solid transparent');
-      t.style.color=(i===n?'var(--dark)':'var(--muted)');
-      t.style.fontWeight=(i===n?'500':'400');
-    }
+    if(t) t.classList.toggle('on', i===n);
   }
 }
 

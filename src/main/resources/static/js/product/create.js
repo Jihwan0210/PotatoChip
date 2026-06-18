@@ -73,33 +73,44 @@ function togglePickup() {
 }
 
 pickupSelect.addEventListener('change', togglePickup);
-togglePickup(); // 초기 상태 적용
+togglePickup();
+
+// 할인 날짜 활성화/비활성화
+const discountPriceInput = document.querySelector('[name=discountPrice]');
+const discountStartAt = document.querySelector('[name=discountStartAt]');
+const discountEndAt = document.querySelector('[name=discountEndAt]');
+
+function toggleDiscountDates() {
+    const hasDiscount = discountPriceInput.value.trim() !== '';
+    discountStartAt.disabled = !hasDiscount;
+    discountEndAt.disabled = !hasDiscount;
+    discountStartAt.style.opacity = hasDiscount ? '1' : '0.5';
+    discountEndAt.style.opacity = hasDiscount ? '1' : '0.5';
+    document.getElementById('discountDateHint').style.display = hasDiscount ? 'none' : 'block';
+    if (!hasDiscount) {
+        discountStartAt.value = '';
+        discountEndAt.value = '';
+    }
+}
+
+discountPriceInput.addEventListener('input', toggleDiscountDates);
+toggleDiscountDates();
 
 // 주소 검색 + 지도 미리보기
 function searchAddress() {
     new daum.Postcode({
         oncomplete: function(data) {
-
-            // 주소 input에 입력
             document.getElementById('pickupAddressInput').value = data.roadAddress;
-
-            // 주소 → 위도경도 변환 후 지도 표시
             const geocoder = new kakao.maps.services.Geocoder();
             geocoder.addressSearch(data.roadAddress, function(result, status) {
                 if (status === kakao.maps.services.Status.OK) {
                     const lat = result[0].y;
                     const lng = result[0].x;
-
-                    // hidden input에 위도경도 저장
                     document.getElementById('latitudeInput').value = lat;
                     document.getElementById('longitudeInput').value = lng;
-
-                    // 지도 그리기
                     const container = document.getElementById('kakaoMap');
                     const options = { center: new kakao.maps.LatLng(lat, lng), level: 3 };
                     const map = new kakao.maps.Map(container, options);
-
-                    // 마커 표시
                     const marker = new kakao.maps.Marker({
                         position: new kakao.maps.LatLng(lat, lng)
                     });
