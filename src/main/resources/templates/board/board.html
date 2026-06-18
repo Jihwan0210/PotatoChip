@@ -107,9 +107,15 @@
         .board-detail-meta { font-size: .72rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--beige); }
         .board-detail-body { background: var(--beige3); border-radius: 14px; padding: 16px 18px; color: var(--mid); font-size: .86rem; line-height: 1.85; white-space: pre-line; margin-bottom: 20px; }
         .board-detail-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        .board-action-btn { padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--beige); background: var(--white); color: var(--mid); font-size: .76rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
+
+        /* 🌟 좋아요 버튼 전용 고정 클래스 디자인 */
+        .board-action-btn { border: 1px solid #ffb3b3; background: #fff0f0; color: #ff4d4d; margin-right: 8px; cursor: pointer; font-weight: 500; padding: 6px 12px; border-radius: 6px; font-family: inherit; transition: all .15s; font-size: .76rem; }
         .board-action-btn:hover { border-color: var(--green); color: var(--green); }
+        .board-action-btn.danger { border: 1.5px solid var(--beige); background: var(--white); color: var(--mid); }
         .board-action-btn.danger:hover { border-color: #E84040; color: #E84040; }
+
+        /* 🌟 좋아요 활성화(중) 상태 스타일 */
+        .board-action-btn.active { border: 1px solid #ff4d4d !important; background: #ff4d4d !important; color: #ffffff !important; }
 
         /* ── TOAST ── */
         .board-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: .83rem; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.22); z-index: 99999; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -128,13 +134,10 @@
 </head>
 <body>
 
-<!-- ── NAV ── -->
 <div th:replace="~{nav :: nav}"></div>
 
-<!-- ── MAIN ── -->
 <main class="board-page">
 
-    <!-- HEAD -->
     <section class="board-head">
         <div>
             <div class="board-kicker">Community</div>
@@ -144,12 +147,9 @@
         <button class="board-write-btn" type="button" onclick="openWriteModal()">✏️ 글쓰기</button>
     </section>
 
-    <!-- BODY -->
     <div class="board-layout">
 
-        <!-- ── LEFT: 게시글 목록 ── -->
         <div>
-            <!-- 검색 -->
             <div class="board-search-card">
                 <div class="board-search-box">
                     <i class="ti ti-search" style="color:var(--muted);font-size:15px"></i>
@@ -157,7 +157,6 @@
                 </div>
             </div>
 
-            <!-- 탭 -->
             <div class="board-tabs">
                 <div class="board-tab on" data-cat="all" onclick="setTab(this)">전체 <span class="board-tab-cnt" id="cnt-all">0</span></div>
                 <div class="board-tab" data-cat="notice" onclick="setTab(this)">공지사항 <span class="board-tab-cnt" id="cnt-notice">0</span></div>
@@ -166,30 +165,24 @@
                 <div class="board-tab" data-cat="event" onclick="setTab(this)">이벤트 <span class="board-tab-cnt" id="cnt-event">0</span></div>
             </div>
 
-            <!-- 툴바 -->
             <div class="board-toolbar">
                 <div class="board-count">총 <strong id="boardCountNum">0</strong>개 게시글</div>
             </div>
 
-            <!-- 목록 -->
             <div class="post-list" id="postList">
                 <div class="post-empty">게시글을 불러오는 중입니다…</div>
             </div>
 
-            <!-- 페이지네이션 -->
             <div class="pagination" id="pagination"></div>
         </div>
 
-        <!-- ── RIGHT: 사이드바 ── -->
         <div class="sidebar">
-            <!-- 인기 게시글 -->
             <div class="sidebar-card">
                 <div class="sidebar-title">🔥 인기 게시글</div>
                 <div id="popularList">
                     <div style="font-size:.8rem;color:var(--muted)">불러오는 중…</div>
                 </div>
             </div>
-            <!-- 공지사항 -->
             <div class="sidebar-card">
                 <div class="sidebar-title">📌 공지사항</div>
                 <div id="noticeList">
@@ -201,7 +194,6 @@
     </div>
 </main>
 
-<!-- ── 글쓰기 모달 ── -->
 <div id="writeModal" class="board-modal">
     <div class="board-modal-card">
         <div class="board-modal-head">
@@ -225,16 +217,15 @@
             <textarea id="boardContent" class="board-form-input" rows="8" placeholder="게시글 내용을 입력해주세요."></textarea>
         </div>
 
-        <div calss="board-form-group" style="margin-top: 15px;">
-    <label for="boardImage" style="font-weight:600; margin-bottom: 8px; display: block;">📷 사진 첨부(선택)</label>
-    <input type="file" id="boardImage" class="board-form-input" accept="image/*" style="padding:8px;">
-    </div>
+        <div class="board-form-group" style="margin-top: 15px;">
+            <label for="boardImage" style="font-weight:600; margin-bottom: 8px; display: block;">📷 사진 첨부(선택)</label>
+            <input type="file" id="boardImage" class="board-form-input" accept="image/*" style="padding:8px;">
+        </div>
 
         <button class="board-submit-btn" type="button" onclick="submitPost()">등록하기</button>
     </div>
 </div>
 
-<!-- ── 상세 보기 모달 ── -->
 <div id="detailModal" class="board-modal">
     <div class="board-modal-card" style="max-width:600px">
         <div class="board-modal-head">
@@ -265,10 +256,8 @@
     </div>
 </div>
 
-<!-- ── 토스트 ── -->
 <div id="boardToast" class="board-toast"></div>
 
-<!-- ── FOOTER ── -->
 <footer>
     <div class="ft-g">
         <div>
@@ -311,6 +300,7 @@
     var POSTS_PER_PAGE = 10;
     var isEditMode = false;
     var editPostId = null;
+    var currentBoardIdForComment = null;
 
     // 로그인한 유저의 정보 안전하게 로드
     var currentUserId   = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
@@ -321,6 +311,17 @@
     ════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', function () {
         loadPosts();
+    });
+
+    // 모달 바깥 영역 클릭 시 닫기 기능 추가
+    document.addEventListener('click', function (e) {
+        ['writeModal','detailModal'].forEach(function (id) {
+            var modal = document.getElementById(id);
+            if (e.target === modal) {
+                if(id === 'writeModal') closeWriteModal();
+                else closeDetailModal();
+            }
+        });
     });
 
     /* ════════════════════════════════════════
@@ -485,18 +486,38 @@
     /* ════════════════════════════════════════
        DETAIL MODAL
     ════════════════════════════════════════ */
+    /* ════════════════════════════════════════
+           📝 DETAIL MODAL (조회수 중복 방지 완벽 반영본)
+        ════════════════════════════════════════ */
     function openDetail(id) {
         var post = allPosts.find(function (p) { return p.id === id; });
         if (!post) return;
 
-        post.viewCount = (post.viewCount || 0) + 1;
-        fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
+        // 🌟 1. 세션 스토리지에서 기존에 읽은 글 목록을 안전하게 가져옵니다.
+        var viewedPosts = JSON.parse(sessionStorage.getItem('viewed_posts_list') || '[]');
+        viewedPosts = viewedPosts.map(Number); // 숫자로 깔끔하게 통일
 
-        document.getElementById('detailTitle').textContent   = post.title;
-        document.getElementById('detailBadges').innerHTML    =
+        // 🌟 2. 중괄호 짝을 정확하게 맞춰서 처음 읽는 글일 때만 조회수를 올립니다.
+        if (!viewedPosts.includes(Number(id))) {
+            // 처음 읽는 글이라면 화면 카운트 +1 하고 서버에 보냄!
+            post.viewCount = (post.viewCount || 0) + 1;
+            fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
+
+            // 읽은 목록에 이 글 ID를 집어넣고 저장!
+            viewedPosts.push(Number(id));
+            sessionStorage.setItem('viewed_posts_list', JSON.stringify(viewedPosts));
+            console.log("🌱 [조회수] 처음 보는 글이라 조회수가 올랐습니다! ID:", id);
+        } else {
+            // 이미 목록에 있다면 아무것도 하지 않고 통과!
+            console.log("🌱 [조회수] 이미 읽은 글이라 조회수를 올리지 않습니다. ID:", id);
+        }
+
+        // ── 여기서부터 모달창에 데이터를 뿌려주는 기존 로직입니다 ──
+        document.getElementById('detailTitle').textContent = post.title;
+        document.getElementById('detailBadges').innerHTML =
             '<span class="post-category ' + getCatClass(post.category) + '">' + esc(getCatName(post.category)) + '</span>';
 
-        document.getElementById('detailMeta').innerHTML      =
+        document.getElementById('detailMeta').innerHTML =
             '<span>👤 ' + esc(post.author) + '</span>'
             + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
             + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
@@ -511,17 +532,23 @@
         }
         document.getElementById('detailContent').innerHTML = contentHtml + esc(post.content || '');
 
-        var actions = '';
+        // 좋아요 활성화 여부에 따른 클래스와 텍스트 지정
+        var likedPosts = JSON.parse(localStorage.getItem('liked_posts_list') || '[]');
+        likedPosts = likedPosts.map(Number);
+        var isAlreadyLiked = likedPosts.includes(Number(post.id));
+
+        var btnClass = isAlreadyLiked ? "board-action-btn active" : "board-action-btn";
+        var btnText = isAlreadyLiked ? "❤️ 좋아요 중" : "❤️ 좋아요";
+
+        var actions = '<button id="likeBtn" class="' + btnClass + '" onclick="clickLike(' + post.id + ')" data-liked="' + isAlreadyLiked + '">' + btnText + '</button>';
+
         if (currentUserEmail && post.author === currentUserEmail) {
-            actions = '<button class="board-action-btn" onclick="openEditModal(' + post.id + ')" style="border:1px solid #ccc; background:#fff; color:#333; margin-right:8px; cursor:pointer;">수정</button>'
+            actions += '<button class="board-action-btn danger" onclick="openEditModal(' + post.id + ')">수정</button>'
                 + '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')">삭제</button>';
         }
         document.getElementById('detailActions').innerHTML = actions;
 
-        if (typeof loadComments === 'function') {
-            loadComments(post.id);
-        }
-
+        loadComments(post.id);
         document.getElementById('detailModal').classList.add('open');
     }
 
@@ -557,16 +584,11 @@
 
         fetch('/api/board/' + id, {
             method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
+            headers: { 'Authorization': 'Bearer ' + token }
         })
             .then(function (res) {
-                if (res.ok) {
-                    return res.json();
-                } else {
-                    throw new Error('삭제 실패');
-                }
+                if (res.ok) return res.json();
+                else throw new Error('삭제 실패');
             })
             .then(function (data) {
                 allPosts = allPosts.filter(function (p) { return p.id !== id; });
@@ -591,9 +613,7 @@
 
         if (!token) {
             showToast('로그인 후 게시글을 작성할 수 있어요.');
-            setTimeout(function () {
-                location.href = '/login';
-            }, 900);
+            setTimeout(function () { location.href = '/login'; }, 900);
             return;
         }
 
@@ -611,60 +631,54 @@
         document.getElementById('writeModal').classList.add('open');
     }
 
-    // 💡 부러지고 끊겨있던 글쓰기 모달 닫기 완벽 복구
     function closeWriteModal() {
         document.getElementById('writeModal').classList.remove('open');
         isEditMode = false;
         editPostId = null;
     }
 
-    // 💡 부러지고 끊겨있던 글쓰기/수정 제출 함수 완벽 복구
     function submitPost() {
         var category = document.getElementById('boardCategory').value;
-        var title    = document.getElementById('boardTitle').value.trim();
-        var content  = document.getElementById('boardContent').value.trim();
+        var title = document.getElementById('boardTitle').value.trim();
+        var content = document.getElementById('boardContent').value.trim();
 
-        if (!title)   { showToast('제목을 입력해주세요.');  return; }
-        if (!content) { showToast('내용을 입력해주세요.');  return; }
+        if (!title) { showToast('제목을 입력해주세요.'); return; }
+        if (!content) { showToast('내용을 입력해주세요.'); return; }
 
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        var url = isEditMode ? '/api/board/' + editPostId : '/api/board';
-        var method = isEditMode ? 'PUT' : 'POST';
 
+        var url = isEditMode ? '/api/board/' + editPostId + '/update' : '/api/board';
         var formData = new FormData();
+        var boardData = {category: category, title: title, content: content};
 
-        if (!isEditMode) {
-            var boardData = { category: category, title: title, content: content };
-            formData.append("board", new Blob([JSON.stringify(boardData)], { type: "application/json" }));
+        formData.append("board", new Blob([JSON.stringify(boardData)], {type: "application/json"}));
 
-            var fileInput = document.getElementById('boardImage');
-            if (fileInput && fileInput.files[0]) {
-                formData.append("image", fileInput.files[0]);
-            }
+        var fileInput = document.getElementById('boardImage');
+        if (fileInput && fileInput.files[0]) {
+            formData.append("image", fileInput.files[0]);
         }
 
-        var fetchOptions = {
-            method: method,
-            headers: { 'Authorization': 'Bearer ' + token }
-        };
-
-        if (!isEditMode) {
-            fetchOptions.body = formData;
-        } else {
-            fetchOptions.headers['Content-Type'] = 'application/json';
-            fetchOptions.body = JSON.stringify({ category: category, title: title, content: content });
-        }
-
-        fetch(url, fetchOptions)
-            .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
+        })
+            .then(function (res) {
+                if (!res.ok) throw new Error("서버 응답 오류");
+                return res.json();
+            })
             .then(function (updatedPost) {
                 if (isEditMode) {
-                    var idx = allPosts.findIndex(function(p) { return p.id === editPostId; });
+                    var idx = allPosts.findIndex(function (p) { return p.id === editPostId; });
                     if (idx !== -1) allPosts[idx] = updatedPost;
                     showToast('게시글이 성공적으로 수정되었어요! 📝');
                 } else {
                     allPosts.unshift(updatedPost);
-                    showToast('사진과 함께 게시글이 등록되었어요! 🌱');
+                    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                        showToast('사진과 함께 게시글이 등록되었어요! 🌱');
+                    } else {
+                        showToast('게시글이 성공적으로 등록되었어요! 📝');
+                    }
                 }
                 closeWriteModal();
                 updateTabCounts();
@@ -672,16 +686,100 @@
                 renderSidebar();
             })
             .catch(function (err) {
-                console.error(err);
-                showToast('등록에 실패했어요.');
+                console.error("게시글 처리 에러:", err);
+                alert('등록 실패: 코드를 확인해 주세요.');
             });
     }
 
     /* ════════════════════════════════════════
+       LIKE TOGGLE (좋아요 정식 기능 분리 구역)
+    ════════════════════════════════════════ */
+    /* ════════════════════════════════════════
+        🌟 LIKE (글자 직관 판별 방식 - 진짜 최종)
+     ════════════════════════════════════════ */
+    function clickLike(id) {
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+        // 1. 화면에 있는 좋아요 버튼을 정확하게 가져옵니다.
+        var btn = document.getElementById('likeBtn');
+        if (!btn) return;
+
+        // 2. [가장 확실한 방법] 버튼 안에 '좋아요 중'이라는 글자가 포함되어 있으면 취소(true)입니다!
+        var isCancel = btn.innerHTML.includes('좋아요 중');
+
+        var url = isCancel ? `/api/board/${id}/unlike` : `/api/board/${id}/like`;
+        // 🔍 콘솔창 로그 (F12 눌러서 에러가 나는지 주소가 뭘로 가는지 감시용)
+        console.log("👉 [프론트] 현재 클릭한 글 ID:", id);
+        console.log("👉 [프론트] 이번 클릭이 취소인가요?:", isCancel);
+        console.log("👉 [프론트] 서버로 날리는 최종 주소:", url);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+
+            .then(function(res) {
+                // 404 등 서버 에러가 나면 여기서 에러를 가로챕니다.
+                if (!res.ok) throw new Error("서버 상태 오류 (Status: " + res.status + ")");
+
+                var post = allPosts.find(function (p) { return p.id === Number(id); });
+
+                if (post) {
+                    var likedPosts = JSON.parse(localStorage.getItem('liked_posts_list') || '[]');
+                    likedPosts = likedPosts.map(Number);
+
+                    if (isCancel) {
+                        // 💔 취소 성공 시: 화면 하트 수 -1
+                        post.likeCount = Math.max(0, (post.likeCount || 0) - 1);
+                        likedPosts = likedPosts.filter(function(postId) { return postId !== Number(id); });
+                        showToast('좋아요를 취소했습니다. 💔');
+                        updateLikeButtonUi(btn, false);
+                    } else {
+                        // ❤️ 등록 성공 시: 화면 하트 수 +1
+                        post.likeCount = (post.likeCount || 0) + 1;
+                        if (!likedPosts.includes(Number(id))) { likedPosts.push(Number(id)); }
+                        showToast('이 글을 좋아합니다! ❤️');
+                        updateLikeButtonUi(btn, true);
+                    }
+                    localStorage.setItem('liked_posts_list', JSON.stringify(likedPosts));
+                }
+
+                // 상단 메타 레이아웃 새로고침
+                document.getElementById('detailMeta').innerHTML =
+                    '<span>👤 ' + esc(post.author) + '</span>'
+                    + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
+                    + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
+                    + (post.likeCount != null ? '<span>❤️ ' + fmtNum(post.likeCount) + '</span>' : '')
+                    + (post.commentCount != null ? '<span>💬 ' + fmtNum(post.commentCount) + '</span>' : '');
+
+                renderPosts();
+                renderSidebar();
+            })
+            .catch(function(err) {
+                console.error("❌ 좋아요 처리 실패 원인:", err);
+                showToast('좋아요 처리에 실패했습니다.');
+            });
+    }
+
+    function updateLikeButtonUi(btn, isLiked) {
+        if (!btn) return;
+        if (isLiked) {
+            btn.className = "board-action-btn active";
+            btn.innerHTML = '❤️ 좋아요 중';
+        } else {
+            btn.className = "board-action-btn";
+            btn.innerHTML = '❤️ 좋아요';
+        }
+    }
+
+
+
+
+    /* ════════════════════════════════════════
        COMMENT (댓글 기능 구역)
     ════════════════════════════════════════ */
-    var currentBoardIdForComment = null;
-
     function loadComments(boardId) {
         currentBoardIdForComment = boardId;
         var commentListEl = document.getElementById('commentList');
@@ -690,7 +788,10 @@
         commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#888; padding:5px 0;">댓글을 불러오는 중...</div>';
 
         fetch('/api/board/' + boardId + '/comments')
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+                if (!res.ok) throw new Error("서버 응답 에러 (" + res.status + ")");
+                return res.json();
+            })
             .then(function (comments) {
                 if (!comments || comments.length === 0) {
                     commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#aaa; padding:10px 0;">아직 댓글이 없습니다. 첫 댓글을 남겨보세요! 🌱</div>';
@@ -713,7 +814,7 @@
                 }).join('');
             })
             .catch(function (err) {
-                console.error("댓글 로드 실패:", err);
+                console.error("댓글 로드 실패 원인:", err);
                 commentListEl.innerHTML = '<div style="font-size:0.85rem; color:red;">댓글을 불러오지 못했습니다.</div>';
             });
     }
@@ -760,7 +861,7 @@
         })
             .then(function (res) {
                 if (!res.ok) throw new Error();
-                showToast('댓글이 삭제되었습니다.');
+                showToast('댓글이 deleted 되었습니다.');
                 loadComments(currentBoardIdForComment);
                 loadPosts();
             })
@@ -806,134 +907,6 @@
         t.classList.add('show');
         setTimeout(function(){ t.classList.remove('show'); }, 2500);
     }
-</script>
-
-    // 모달 바깥 클릭 시 닫기
-    document.addEventListener('click', function (e) {
-        ['writeModal','detailModal'].forEach(function (id) {
-            var modal = document.getElementById(id);
-            if (e.target === modal) modal.classList.remove('open');
-        });
-        /* ════════════════════════════════════════
-   COMMENT (댓글 기능 구역 - 맨 아래에 붙여넣으세요)
-════════════════════════════════════════ */
-        var currentBoardIdForComment = null; // 현재 열린 게시글 ID를 저장할 변수
-
-function loadComments(boardId) {
-currentBoardIdForComment = boardId;
-var commentListEl = document.getElementById('commentList');
-if (!commentListEl) return;
-
-commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#888; padding:5px 0;">댓글을 불러오는 중...</div>';
-
-fetch('/api/board/' + boardId + '/comments')
-.then(function (res) {
-// 💡 디버깅용 로그: 서버 상태 코드가 200 정상인지 확인
-console.log("서버 응답 상태코드:", res.status);
-if (!res.ok) {
-throw new Error("서버 응답 에러 (" + res.status + ")");
-}
-return res.json();
-})
-.then(function (comments) {
-// 💡 디버깅용 로그: 서버에서 실제로 넘어온 데이터 리스트를 출력
-console.log("서버에서 받아온 댓글 데이터:", comments);
-
-if (!comments || comments.length === 0) {
-commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#aaa; padding:10px 0;">아직 댓글이 없습니다. 첫 댓글을 남겨보세요! 🌱</div>';
-return;
-}
-
-commentListEl.innerHTML = comments.map(function (c) {
-var deleteBtn = '';
-if (currentUserEmail && c.author === currentUserEmail) {
-deleteBtn = '<span onclick="deleteComment(' + c.id + ')" style="color:#ff6b6b; font-size:0.75rem; margin-left:10px; cursor:pointer; font-weight:bold;">삭제</span>';
-}
-
-return '<div style="border-bottom:1px solid #f7f7f7; padding:8px 0; font-size:0.85rem;">'
-    + '<div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#777; font-size:0.75rem;">'
-        + '<span>👤 ' + esc(c.author) + '</span>'
-        + '<span>' + fmtDate(c.createdAt) + deleteBtn + '</span>'
-        + '</div>'
-    + '<div style="color:#333; white-space:pre-wrap; padding-left:2px;">' + esc(c.content) + '</div>'
-    + '</div>';
-}).join('');
-})
-.catch(function (err) {
-console.error("댓글 로드 실제 실패 원인:", err);
-commentListEl.innerHTML = '<div style="font-size:0.85rem; color:red;">댓글을 불러오지 못했습니다.</div>';
-});
-}
-
-// 2. 댓글 작성하기 (POST)
-        function submitComment() {
-            var inputEl = document.getElementById('commentInput');
-            if (!inputEl) return;
-
-            var content = inputEl.value.trim();
-            if (!content) {
-                showToast('댓글 내용을 입력해주세요. 🌱');
-                return;
-            }
-
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (!token) {
-                showToast('로그인 후 댓글을 작성할 수 있어요.');
-                return;
-            }
-
-            if (!currentBoardIdForComment) {
-                showToast('게시글 정보를 찾을 수 없습니다.');
-                return;
-            }
-
-            fetch('/api/board/' + currentBoardIdForComment + '/comments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({ content: content })
-            })
-                .then(function (res) {
-                    if (!res.ok) throw new Error();
-                    return res.json();
-                })
-                .then(function (newComment) {
-                    inputEl.value = ''; // 입력창 비우기
-                    showToast('댓글이 등록되었어요! 💬');
-                    loadComments(currentBoardIdForComment); // 댓글 목록 새로고침
-                    if (typeof loadPosts === 'function') loadPosts(); // 메인 목록 카운트 갱신
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    showToast('댓글 등록에 실패했습니다.');
-                });
-        }
-
-// 3. 댓글 삭제하기 (DELETE)
-        function deleteComment(commentId) {
-            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
-
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-            fetch('/api/board/' + currentBoardIdForComment + '/comments/' + commentId, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-                .then(function (res) {
-                    if (!res.ok) throw new Error();
-                    showToast('댓글이 삭제되었습니다.');
-                    loadComments(currentBoardIdForComment); // 댓글 목록 새로고침
-                    if (typeof loadPosts === 'function') loadPosts(); // 메인 목록 카운트 갱신
-                })
-                .catch(function () {
-                    showToast('댓글 삭제에 실패했습니다.');
-                });
-        }
-    });
 </script>
 </body>
 </html>

@@ -53,6 +53,29 @@ public class BoardService {
         board.setViewCount(board.getViewCount() + 1);
         boardRepository.save(board);
     }
+    //좋아요 로직
+    public void toggleLike(Long id, boolean isCancel) {
+        Board board = findById(id);
+
+if (board == null) {
+    throw new IllegalArgumentException("해당 게시글이 존재하지 않습니다. id =" + id);
+}
+
+        if (board.getLikeCount() == null) {
+            board.setLikeCount(0);
+        }
+
+        if (isCancel) {
+
+            if (board.getLikeCount() > 0) {
+                board.setLikeCount(board.getLikeCount() - 1);
+            }
+        } else {
+
+            board.setLikeCount(board.getLikeCount() + 1);
+        }
+        boardRepository.saveAndFlush(board);
+    }
 
     // 삭제
     public void delete(Long id) {
