@@ -45,10 +45,10 @@
         .status-chip.hidden{background:#eee;color:#777}
         .empty{padding:24px;text-align:center;color:var(--muted);font-size:.82rem}
         .detail-box{display:none;background:var(--beige3);border:1.5px solid var(--beige);border-radius:18px;padding:18px;margin-top:14px}
-        .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-        .mini-card{background:#fff;border:1px solid var(--beige);border-radius:14px;padding:13px}
+        .detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
+        .mini-card{background:#fff;border:1px solid var(--beige);border-radius:14px;padding:13px;height:150px;display:flex;flex-direction:column;min-width:0}
         .mini-title{font-weight:700;color:var(--dark);font-size:.82rem;margin-bottom:6px}
-        .mini-text{font-size:.74rem;color:var(--mid);line-height:1.6}
+        .mini-text{font-size:.74rem;color:var(--mid);line-height:1.6;flex:1;min-height:0;overflow-y:auto;padding-right:6px;white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
         .review-table{min-width:1120px}
         .review-table th:nth-child(5),.review-table td:nth-child(5){width:360px;line-height:1.7}
         .review-content-cell{white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
@@ -56,7 +56,23 @@
         .review-hidden-row td{background:#f7f1e8!important;color:#999}
         .cell-main{display:block;line-height:1.55;color:var(--dark);font-weight:600}
         .cell-sub{display:block;margin-top:3px;color:var(--muted);font-size:.68rem;line-height:1.3}
-        @media(max-width:720px){.admin-head{padding:28px 6% 22px}.admin-table{min-width:760px}.admin-search{width:100%}}
+        .admin-pagination {display: flex;justify-content: center;align-items: center;gap: 6px;margin-top: 18px;flex-wrap: wrap;}
+        .admin-pagination button {min-width: 34px;height: 34px;border: 1.5px solid var(--sand, #e8dcc7);background: #fff;color: var(--mid);border-radius: 8px;font-size: .78rem;cursor: pointer;font-family: inherit;}
+        .admin-pagination button.on {background: var(--green);color: #fff;border-color: var(--green);font-weight: 700;}
+        .admin-pagination button:disabled {opacity: .35;cursor: not-allowed;}
+
+        .top-detail{margin-top:0;margin-bottom:14px}
+        .detail-close-row{display:flex;justify-content:flex-end;margin-bottom:8px}
+        .mini-scroll{max-height:none;overflow-y:auto}
+        .mini-text::-webkit-scrollbar{width:7px}
+        .mini-text::-webkit-scrollbar-thumb{background:var(--beige);border-radius:100px}
+        .mini-list{display:flex;flex-direction:column;gap:8px}
+        .mini-list-item{padding:8px 0;border-bottom:1px dashed var(--beige);line-height:1.65}
+        .mini-list-item:last-child{border-bottom:none}
+        .mini-list-title{display:block;color:var(--dark);font-weight:700;margin-bottom:2px}
+        .mini-list-sub{display:block;color:var(--muted);font-size:.68rem;line-height:1.45}
+        @media(max-width:1100px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:720px){.admin-head{padding:28px 6% 22px}.admin-table{min-width:760px}.admin-search{width:100%}.detail-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
@@ -87,6 +103,7 @@
         </div>
 
         <div id="section-buyers" class="admin-section">
+            <div id="buyerDetail" class="detail-box top-detail"></div>
             <div class="admin-card">
                 <div class="admin-card-title">구매자 관리</div>
                 <div class="admin-tools">
@@ -94,10 +111,10 @@
                 </div>
                 <div id="buyersTable" class="admin-table-wrap"></div>
             </div>
-            <div id="buyerDetail" class="detail-box"></div>
         </div>
 
         <div id="section-sellers" class="admin-section">
+            <div id="sellerDetail" class="detail-box top-detail"></div>
             <div class="admin-card">
                 <div class="admin-card-title">판매자 관리</div>
                 <div class="admin-tools">
@@ -105,7 +122,6 @@
                 </div>
                 <div id="sellersTable" class="admin-table-wrap"></div>
             </div>
-            <div id="sellerDetail" class="detail-box"></div>
         </div>
 
         <div id="section-products" class="admin-section">
@@ -172,6 +188,15 @@
         inquiries:{keyword:'',sortKey:'createdAt',sortDir:'desc'}
     };
 
+    const adminPaging = {
+        buyers: { page: 1, size: 10 },
+        sellers: { page: 1, size: 10 },
+        products: { page: 1, size: 10 },
+        orders: { page: 1, size: 10 },
+        reviews: { page: 1, size: 10 },
+        inquiries: { page: 1, size: 10 }
+    };
+
     document.addEventListener('DOMContentLoaded',function(){
         loadSummary();
     });
@@ -179,31 +204,37 @@
     document.addEventListener('input',function(event){
         if(event.target.id==='buyersSearch'){
             adminState.buyers.keyword=event.target.value;
+            resetAdminPage('buyers');
             renderBuyers();
         }
 
         if(event.target.id==='sellersSearch'){
             adminState.sellers.keyword=event.target.value;
+            resetAdminPage('sellers');
             renderSellers();
         }
 
         if(event.target.id==='productsSearch'){
             adminState.products.keyword=event.target.value;
+            resetAdminPage('products');
             renderProducts();
         }
 
         if(event.target.id==='ordersSearch'){
             adminState.orders.keyword=event.target.value;
+            resetAdminPage('orders');
             renderOrders();
         }
 
         if(event.target.id==='reviewsSearch'){
             adminState.reviews.keyword=event.target.value;
+            resetAdminPage('reviews');
             renderReviews();
         }
 
         if(event.target.id==='inquiriesSearch'){
             adminState.inquiries.keyword=event.target.value;
+            resetAdminPage('inquiries');
             renderInquiries();
         }
     });
@@ -351,7 +382,10 @@
         });
 
         data=applySort('buyers',data);
-        box.innerHTML=renderUserTable(data,'buyer');
+        var pagedData=getPagedData('buyers',data);
+
+        box.innerHTML=renderUserTable(pagedData,'buyer')
+            +renderPagination('buyers',data.length,'renderBuyers');
     }
 
     function renderSellers(){
@@ -363,7 +397,10 @@
         });
 
         data=applySort('sellers',data);
-        box.innerHTML=renderUserTable(data,'seller');
+        var pagedData=getPagedData('sellers',data);
+
+        box.innerHTML=renderUserTable(pagedData,'seller')
+            +renderPagination('sellers',data.length,'renderSellers');
     }
 
     function renderProducts(){
@@ -381,6 +418,8 @@
             return;
         }
 
+        var pagedData=getPagedData('products',data);
+
         box.innerHTML='<table class="admin-table"><thead><tr>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'id\')">ID '+sortIcon('products','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'name\')">상품명 '+sortIcon('products','name')+'</th>'
@@ -392,7 +431,7 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'statusText\')">상태 '+sortIcon('products','statusText')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'createdAt\')">등록일 '+sortIcon('products','createdAt')+'</th>'
             +'</tr></thead><tbody>'
-            +data.map(function(item){
+            +pagedData.map(function(item){
                 item.displayPrice=item.discountPrice||item.price;
 
                 return '<tr>'
@@ -407,7 +446,8 @@
                     +'<td>'+formatDate(item.createdAt)+'</td>'
                     +'</tr>';
             }).join('')
-            +'</tbody></table>';
+            +'</tbody></table>'
+            +renderPagination('products',data.length,'renderProducts');
     }
 
     function renderOrders(){
@@ -425,6 +465,8 @@
             return;
         }
 
+        var pagedData=getPagedData('orders',data);
+
         box.innerHTML='<table class="admin-table"><thead><tr>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'id\')">ID '+sortIcon('orders','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'orderNumber\')">주문번호 '+sortIcon('orders','orderNumber')+'</th>'
@@ -435,7 +477,7 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'status\')">상태 '+sortIcon('orders','status')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'createdAt\')">주문일 '+sortIcon('orders','createdAt')+'</th>'
             +'</tr></thead><tbody>'
-            +data.map(function(item){
+            +pagedData.map(function(item){
                 return '<tr>'
                     +'<td>'+escapeHtml(item.id)+'</td>'
                     +'<td>'+escapeHtml(item.orderNumber||'-')+'</td>'
@@ -447,7 +489,8 @@
                     +'<td>'+formatDate(item.createdAt)+'</td>'
                     +'</tr>';
             }).join('')
-            +'</tbody></table>';
+            +'</tbody></table>'
+            +renderPagination('orders',data.length,'renderOrders');
     }
 
     function renderReviews(){
@@ -468,6 +511,8 @@
             return;
         }
 
+        var pagedData=getPagedData('reviews',data);
+
         box.innerHTML='<table class="admin-table review-table"><thead><tr>'
             +'<th class="sort-th" onclick="sortAdminTable(\'reviews\',\'reviewId\')">ID '+sortIcon('reviews','reviewId')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'reviews\',\'productName\')">상품 '+sortIcon('reviews','productName')+'</th>'
@@ -479,7 +524,7 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'reviews\',\'createdAt\')">작성일 '+sortIcon('reviews','createdAt')+'</th>'
             +'<th>관리</th>'
             +'</tr></thead><tbody>'
-            +data.map(function(item){
+            +pagedData.map(function(item){
                 return '<tr id="review-row-'+item.reviewId+'" class="'+(item.hidden?'review-hidden-row':'')+'">'
                     +'<td>'+escapeHtml(item.reviewId)+'</td>'
                     +'<td><span class="cell-main">'+escapeHtml(item.productName||'-')+'</span><span class="cell-sub">ID '+escapeHtml(item.productId||'-')+'</span></td>'
@@ -495,7 +540,8 @@
                     +'</div></td>'
                     +'</tr>';
             }).join('')
-            +'</tbody></table>';
+            +'</tbody></table>'
+            +renderPagination('reviews',data.length,'renderReviews');
     }
 
     function renderInquiries(){
@@ -513,27 +559,42 @@
             return;
         }
 
+        var pagedData=getPagedData('inquiries',data);
+
         box.innerHTML='<table class="admin-table"><thead><tr>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'id\')">ID '+sortIcon('inquiries','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'userName\')">작성자 '+sortIcon('inquiries','userName')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'category\')">카테고리 '+sortIcon('inquiries','category')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'title\')">제목 '+sortIcon('inquiries','title')+'</th>'
+            +'<th>내용</th>'
+            +'<th>답변</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'status\')">상태 '+sortIcon('inquiries','status')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'createdAt\')">작성일 '+sortIcon('inquiries','createdAt')+'</th>'
             +'<th>관리</th>'
             +'</tr></thead><tbody>'
-            +data.map(function(item){
+            +pagedData.map(function(item){
+                var status=String(item.status||'-').toLowerCase();
+                var isAnswered=status==='answered';
+                var statusClass=status==='pending'?'warn':'';
+                var answerText=item.answer?shortText(item.answer,50):'미답변';
+                var actionButton=isAnswered
+                    ? '<button type="button" class="admin-btn gray" disabled>답변완료</button>'
+                    : '<button type="button" class="admin-btn amber" onclick="goInquiryAnswer('+item.id+')">답변하기</button>';
+
                 return '<tr>'
                     +'<td>'+escapeHtml(item.id)+'</td>'
                     +'<td>'+escapeHtml(item.userName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.userId||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.category||'-')+'</td>'
-                    +'<td>'+escapeHtml(shortText(item.title,50))+'</td>'
-                    +'<td><span class="status-chip '+(item.status==='pending'?'warn':'')+'">'+escapeHtml(item.status||'-')+'</span></td>'
+                    +'<td>'+escapeHtml(shortText(item.title||'-',50))+'</td>'
+                    +'<td>'+escapeHtml(shortText(item.content||'-',70))+'</td>'
+                    +'<td>'+escapeHtml(answerText)+'</td>'
+                    +'<td><span class="status-chip '+statusClass+'">'+escapeHtml(item.status||'-')+'</span></td>'
                     +'<td>'+formatDate(item.createdAt)+'</td>'
-                    +'<td><button type="button" class="admin-btn amber" onclick="location.href=\'/admin/inquiries\'">답변하기</button></td>'
+                    +'<td>'+actionButton+'</td>'
                     +'</tr>';
             }).join('')
-            +'</tbody></table>';
+            +'</tbody></table>'
+            +renderPagination('inquiries',data.length,'renderInquiries');
     }
 
     function renderUserTable(data,type){
@@ -625,15 +686,36 @@
     function renderUserDetail(data,type){
         var user=data.user||{};
 
-        return '<div class="admin-card-title">'+escapeHtml(user.name||'-')+' 상세 정보</div>'
+        return '<div class="admin-card-title">'+escapeHtml(user.name||'-')+' 님의 상세 정보</div>'
             +'<div class="detail-grid">'
-            +miniCard('회원정보','이메일: '+safe(user.email)+'<br>전화번호: '+safe(user.phone)+'<br>주소: '+safe(user.address)+'<br>가입일: '+formatDate(user.createdAt))
-            +miniCard('구매내역',renderSimpleList(data.orders,'order'))
-            +miniCard('작성 리뷰',renderSimpleList(data.writtenReviews,'review'))
-            +miniCard('작성 문의',renderSimpleList(data.inquiries,'inquiry'))
-            +(type==='seller'?miniCard('등록 상품',renderSimpleList(data.products,'product')):'')
-            +(type==='seller'?miniCard('판매 상품 리뷰',renderSimpleList(data.productReviews,'review')):'')
+            +miniCard(
+                '회원정보',
+                '회원 ID: '+safe(user.id)
+                +'<br>이메일: '+safe(user.email)
+                +'<br>전화번호: '+safe(user.phone)
+                +'<br>주소: '+safe(user.address)
+                +'<br>가입일: '+formatDate(user.createdAt),
+                false
+            )
+            +miniCard('구매내역',renderSimpleList(data.orders,'order'),true)
+            +miniCard('작성 리뷰',renderSimpleList(data.writtenReviews,'review'),true)
+            +miniCard('작성 문의',renderSimpleList(data.inquiries,'inquiry'),true)
+            +(type==='seller'?miniCard('등록 상품',renderSimpleList(data.products,'product'),true):'')
+            +(type==='seller'?miniCard('판매 상품 리뷰',renderSimpleList(data.productReviews,'review'),true):'')
             +'</div>';
+    }
+
+    function closeUserDetail(type){
+        var detailBox=document.getElementById(type==='buyer'?'buyerDetail':'sellerDetail');
+        if(detailBox){
+            detailBox.style.display='none';
+            detailBox.innerHTML='';
+        }
+    }
+
+
+    function goInquiryAnswer(inquiryId){
+        location.href='/admin/inquiries?inquiryId='+encodeURIComponent(inquiryId);
     }
 
     async function hideReview(reviewId){
@@ -689,6 +771,8 @@
             state.sortKey=key;
             state.sortDir='desc';
         }
+
+        resetAdminPage(type);
 
         if(type==='buyers')renderBuyers();
         if(type==='sellers')renderSellers();
@@ -775,8 +859,11 @@
         return '<div class="stat-card"><div class="stat-label">'+escapeHtml(label)+'</div><div class="stat-value">'+escapeHtml(value||0)+'</div></div>';
     }
 
-    function miniCard(title,content){
-        return '<div class="mini-card"><div class="mini-title">'+escapeHtml(title)+'</div><div class="mini-text">'+content+'</div></div>';
+    function miniCard(title, content, scrollable){
+        return '<div class="mini-card">'
+            + '<div class="mini-title">'+escapeHtml(title)+'</div>'
+            + '<div class="mini-text '+(scrollable ? 'mini-scroll' : '')+'">'+content+'</div>'
+            + '</div>';
     }
 
     function renderSimpleList(items,type){
@@ -784,25 +871,38 @@
             return '내역이 없습니다.';
         }
 
-        return items.slice(0,5).map(function(item){
+        return '<div class="mini-list">'+items.map(function(item){
             if(type==='order'){
-                return '주문 '+safe(item.orderNumber||item.id)+' / '+formatMoney(item.totalAmount)+' / '+safe(item.status);
+                return '<div class="mini-list-item">'
+                    + '<span class="mini-list-title">주문 '+safe(item.orderNumber||item.id)+'</span>'
+                    + '<span class="mini-list-sub">금액 '+formatMoney(item.totalAmount)+' / 상태 '+safe(item.status)+'</span>'
+                    + '</div>';
             }
 
             if(type==='review'){
-                return safe(item.productName)+' / '+safe(item.rating)+'점 / '+safe(shortText(item.content,35));
+                return '<div class="mini-list-item">'
+                    + '<span class="mini-list-title">'+safe(item.productName)+'</span>'
+                    + '<span class="mini-list-sub">'+safe(item.rating)+'점</span>'
+                    + '<div>'+safe(item.content)+'</div>'
+                    + '</div>';
             }
 
             if(type==='inquiry'){
-                return '['+safe(item.status)+'] '+safe(item.title);
+                return '<div class="mini-list-item">'
+                    + '<span class="mini-list-title">['+safe(item.status)+'] '+safe(item.title)+'</span>'
+                    + '<div>'+safe(item.content||'')+'</div>'
+                    + '</div>';
             }
 
             if(type==='product'){
-                return safe(item.name)+' / 재고 '+safe(item.stockQuantity)+' / '+safe(item.statusText);
+                return '<div class="mini-list-item">'
+                    + '<span class="mini-list-title">'+safe(item.name)+'</span>'
+                    + '<span class="mini-list-sub">재고 '+safe(item.stockQuantity)+' / '+safe(item.statusText)+'</span>'
+                    + '</div>';
             }
 
-            return safe(item.id);
-        }).join('<br>');
+            return '<div class="mini-list-item">'+safe(item.id)+'</div>';
+        }).join('')+'</div>';
     }
 
     function renderOrderItems(items){
@@ -879,6 +979,83 @@
             .replaceAll('>','&gt;')
             .replaceAll('"','&quot;')
             .replaceAll("'","&#039;");
+    }
+
+    function getPagedData(type, data) {
+        const paging = adminPaging[type];
+
+        if (!paging) {
+            return data;
+        }
+
+        const start = (paging.page - 1) * paging.size;
+        const end = start + paging.size;
+
+        return data.slice(start, end);
+    }
+
+    function renderPagination(type, totalCount, renderFunctionName) {
+        const paging = adminPaging[type];
+
+        if (!paging) {
+            return '';
+        }
+
+        const totalPage = Math.ceil(totalCount / paging.size);
+
+        if (totalPage <= 1) {
+            return '';
+        }
+
+        let html = `
+        <div class="admin-pagination">
+            <button type="button"
+                    onclick="changeAdminPage('${type}', ${paging.page - 1}, '${renderFunctionName}')"
+                    ${paging.page <= 1 ? 'disabled' : ''}>
+                이전
+            </button>
+    `;
+
+        for (let i = 1; i <= totalPage; i++) {
+            html += `
+            <button type="button"
+                    class="${paging.page === i ? 'on' : ''}"
+                    onclick="changeAdminPage('${type}', ${i}, '${renderFunctionName}')">
+                ${i}
+            </button>
+        `;
+        }
+
+        html += `
+            <button type="button"
+                    onclick="changeAdminPage('${type}', ${paging.page + 1}, '${renderFunctionName}')"
+                    ${paging.page >= totalPage ? 'disabled' : ''}>
+                다음
+            </button>
+        </div>
+    `;
+
+        return html;
+    }
+
+    function changeAdminPage(type, page, renderFunctionName) {
+        const paging = adminPaging[type];
+
+        if (!paging) {
+            return;
+        }
+
+        paging.page = page;
+
+        if (typeof window[renderFunctionName] === 'function') {
+            window[renderFunctionName]();
+        }
+    }
+
+    function resetAdminPage(type) {
+        if (adminPaging[type]) {
+            adminPaging[type].page = 1;
+        }
     }
 </script>
 </body>
