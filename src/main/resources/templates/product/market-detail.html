@@ -44,6 +44,29 @@
         .rv2-prod{border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;background:var(--gp);border-radius:7px;padding:3px 9px;font-size:.65rem;color:var(--green);font-weight:700;margin-bottom:9px;font-family:inherit}
         .rv2-prod:hover{background:var(--green);color:#fff}
         .helpful-active{background:var(--green)!important;color:#fff!important}
+        /* AI담당 추가: 리뷰 상세 모달 스타일 시작 */
+        .rv2{cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+        .rv2:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(90,74,58,.08);border-color:var(--gl)}
+        .review-detail-card{max-width:680px;max-height:86vh;overflow-y:auto}
+        .review-detail-card::-webkit-scrollbar{width:7px}
+        .review-detail-card::-webkit-scrollbar-thumb{background:var(--beige);border-radius:100px}
+        .review-detail-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+        .review-detail-user{display:flex;align-items:center;gap:10px}
+        .review-detail-avatar{width:40px;height:40px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+        .review-detail-name{font-size:.86rem;font-weight:700;color:var(--dark)}
+        .review-detail-date{font-size:.7rem;color:var(--muted);margin-top:2px}
+        .review-detail-stars{color:var(--amber);font-size:1rem;font-weight:700}
+        .review-detail-content{background:var(--beige3);border:1.5px solid var(--beige);border-radius:14px;padding:16px;font-size:.84rem;color:var(--mid);line-height:1.85;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin-bottom:14px}
+        .review-detail-image{margin-bottom:14px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:12px;text-align:center}
+        .review-detail-image img{max-width:100%;max-height:420px;object-fit:contain;border-radius:10px}
+        .review-detail-info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+        .review-detail-info-card{background:#fff;border:1.5px solid var(--beige);border-radius:12px;padding:12px;text-align:center}
+        .review-detail-info-label{font-size:.67rem;color:var(--muted);margin-bottom:5px}
+        .review-detail-info-value{font-size:.82rem;color:var(--dark);font-weight:700}
+        .review-detail-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px}
+        .review-detail-actions .hlp-btn{font-size:.72rem}
+        @media(max-width:640px){.review-detail-info{grid-template-columns:1fr}.review-detail-card{max-height:90vh}}
+        /* AI담당 추가: 리뷰 상세 모달 스타일 끝 */
         /* AI담당 추가: 리뷰 탭/AI 총평/도움돼요 관련 스타일 끝 */
     </style>
 </head>
@@ -376,6 +399,18 @@
 </div>
 <!-- AI담당 추가: 리뷰 작성/수정 모달 끝 -->
 
+<!-- AI담당 추가: 리뷰 상세보기 모달 시작 -->
+<div id="reviewDetailModal" class="review-modal" onclick="closeReviewDetail()">
+    <div class="review-modal-card review-detail-card" onclick="event.stopPropagation()">
+        <div class="review-modal-head">
+            <h2 class="review-modal-title">리뷰 상세보기</h2>
+            <button class="review-close-btn" type="button" onclick="closeReviewDetail()">✕</button>
+        </div>
+        <div id="reviewDetailContent"></div>
+    </div>
+</div>
+<!-- AI담당 추가: 리뷰 상세보기 모달 끝 -->
+
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4"></script>
 <script src="/js/app.js"></script>
 <script src="/js/product/product.js"></script>
@@ -474,18 +509,18 @@
                 buyBtn.style.cursor = 'not-allowed';
             }
 
-                if (wishBtn) {
-                    wishBtn.disabled = true;
-                    wishBtn.style.opacity = '0.4';
-                    wishBtn.style.cursor = 'not-allowed';
-                    wishBtn.textContent = '판매자는 찜 할 수 없습니다';
-                }
-                if (wishImgBtn) {
-                    wishImgBtn.disabled = true;
-                    wishImgBtn.style.opacity = '0.4';
-                    wishImgBtn.style.cursor = 'not-allowed';
-                    wishImgBtn.title = '판매자는 찜 할 수 없습니다';
-                }
+            if (wishBtn) {
+                wishBtn.disabled = true;
+                wishBtn.style.opacity = '0.4';
+                wishBtn.style.cursor = 'not-allowed';
+                wishBtn.textContent = '판매자는 찜 할 수 없습니다';
+            }
+            if (wishImgBtn) {
+                wishImgBtn.disabled = true;
+                wishImgBtn.style.opacity = '0.4';
+                wishImgBtn.style.cursor = 'not-allowed';
+                wishImgBtn.title = '판매자는 찜 할 수 없습니다';
+            }
         }
     });
 
@@ -580,7 +615,7 @@
     }
 
     // AI담당 추가: 리뷰 통계/목록/AI 총평/필터/작성/수정/삭제/도움돼요 기능 시작
-function initReviewPage() {
+    function initReviewPage() {
         loadReviewStats(currentProductId);
         loadReviewList(currentProductId);
         loadAiReviewSummary(currentProductId);
@@ -746,10 +781,10 @@ function initReviewPage() {
                 : '';
 
             var editDeleteHtml = isMine
-                ? '<div style="display:flex;gap:6px"><button class="hlp-btn" onclick="openReviewEditForm(' + review.reviewId + ')">수정</button><button class="hlp-btn" onclick="deleteReview(' + review.reviewId + ')">삭제</button></div>'
+                ? '<div style="display:flex;gap:6px"><button class="hlp-btn" onclick="event.stopPropagation(); openReviewEditForm(' + review.reviewId + ')">수정</button><button class="hlp-btn" onclick="event.stopPropagation(); deleteReview(' + review.reviewId + ')">삭제</button></div>'
                 : '';
 
-            return '<div class="rv2">'
+            return '<div class="rv2" onclick="openReviewDetail(' + review.reviewId + ')">'
                 + '<div class="rv2-top">'
                 + '<div class="rv2-auth">'
                 + '<div class="rv2-av ' + avatarClass + '">' + getReviewEmoji(review.rating) + '</div>'
@@ -761,7 +796,7 @@ function initReviewPage() {
                 + imageHtml
                 + '<div class="rv2-foot">'
                 + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
-                + '<button class="hlp-btn ' + (isHelpful ? 'helpful-active' : '') + '" onclick="toggleReviewHelpful(' + review.reviewId + ')">👍 도움돼요 <span id="helpfulCount-' + review.reviewId + '">' + helpfulCount + '</span></button>'
+                + '<button class="hlp-btn ' + (isHelpful ? 'helpful-active' : '') + '" onclick="event.stopPropagation(); toggleReviewHelpful(' + review.reviewId + ')">👍 도움돼요 <span id="helpfulCount-' + review.reviewId + '">' + helpfulCount + '</span></button>'
                 + editDeleteHtml
                 + '</div>'
                 + '<span class="rv2-cert">' + (review.repurchaseIntent ? '재구매 의향 있음' : '재구매 의향 없음') + '</span>'
@@ -769,6 +804,83 @@ function initReviewPage() {
                 + '</div>';
         }).join('');
     }
+
+
+
+    // AI담당 추가: 리뷰 카드 클릭 시 상세보기 모달 열기 시작
+    function openReviewDetail(reviewId) {
+        var review = cachedReviews.find(function (item) {
+            return Number(item.reviewId) === Number(reviewId);
+        });
+
+        if (!review) {
+            showReviewToast('리뷰 정보를 찾을 수 없어요.');
+            return;
+        }
+
+        var detailModal = document.getElementById('reviewDetailModal');
+        var detailContent = document.getElementById('reviewDetailContent');
+
+        if (!detailModal || !detailContent) {
+            return;
+        }
+
+        var imageUrl = normalizeReviewImageUrl(review.imageUrl);
+        var helpfulCount = Number(review.helpfulCount || 0);
+        var isMine = currentUserId !== null && review.userId === currentUserId;
+
+        var imageHtml = imageUrl
+            ? '<div class="review-detail-image"><img src="' + escapeHtml(imageUrl) + '" alt="리뷰 이미지" onerror="this.parentElement.style.display=\'none\'"></div>'
+            : '<div class="review-detail-image" style="color:var(--muted);font-size:.78rem">등록된 리뷰 사진이 없습니다.</div>';
+
+        var actionHtml = isMine
+            ? '<button class="hlp-btn" type="button" onclick="closeReviewDetail(); openReviewEditForm(' + review.reviewId + ')">수정</button>'
+            + '<button class="hlp-btn" type="button" onclick="closeReviewDetail(); deleteReview(' + review.reviewId + ')">삭제</button>'
+            : '';
+
+        detailContent.innerHTML =
+            '<div class="review-detail-meta">'
+            + '<div class="review-detail-user">'
+            + '<div class="review-detail-avatar">' + getReviewEmoji(review.rating) + '</div>'
+            + '<div><div class="review-detail-name">' + escapeHtml(review.displayName || '익명 구매자') + '</div>'
+            + '<div class="review-detail-date">' + formatReviewDate(review.createdAt) + '</div></div>'
+            + '</div>'
+            + '<div class="review-detail-stars">' + renderReviewStars(review.rating) + '</div>'
+            + '</div>'
+            + imageHtml
+            + '<div class="review-detail-content">' + escapeHtml(review.content || '-') + '</div>'
+            + '<div class="review-detail-info">'
+            + '<div class="review-detail-info-card"><div class="review-detail-info-label">평점</div><div class="review-detail-info-value">' + escapeHtml(review.rating || '-') + '점</div></div>'
+            + '<div class="review-detail-info-card"><div class="review-detail-info-label">재구매 의향</div><div class="review-detail-info-value">' + (review.repurchaseIntent ? '있음' : '없음') + '</div></div>'
+            + '<div class="review-detail-info-card"><div class="review-detail-info-label">도움돼요</div><div class="review-detail-info-value">' + helpfulCount + '</div></div>'
+            + '</div>'
+            + '<div class="review-detail-actions">'
+            + '<button class="hlp-btn ' + (review.helpfulByCurrentUser ? 'helpful-active' : '') + '" type="button" onclick="toggleReviewHelpfulFromDetail(' + review.reviewId + ')">👍 도움돼요</button>'
+            + actionHtml
+            + '<button class="hlp-btn" type="button" onclick="closeReviewDetail()">닫기</button>'
+            + '</div>';
+
+        detailModal.style.display = 'flex';
+    }
+
+    function closeReviewDetail() {
+        var detailModal = document.getElementById('reviewDetailModal');
+        if (detailModal) {
+            detailModal.style.display = 'none';
+        }
+    }
+
+    async function toggleReviewHelpfulFromDetail(reviewId) {
+        await toggleReviewHelpful(reviewId);
+        openReviewDetail(reviewId);
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeReviewDetail();
+        }
+    });
+    // AI담당 추가: 리뷰 카드 클릭 시 상세보기 모달 열기 끝
 
     function setReviewFilter(filter, element) {
         reviewFilter = filter;
@@ -981,7 +1093,7 @@ function initReviewPage() {
         }
     }
 
-function renderReviewStars(rating) {
+    function renderReviewStars(rating) {
         var safeRating = Number(rating || 0);
         var stars = '';
 
