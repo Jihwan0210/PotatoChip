@@ -63,4 +63,8 @@ public class ProductDTO {
 
     private String sellerEmail;
 
+    public boolean isNew() {
+        return createdAt != null && createdAt.isAfter(LocalDateTime.now().minusDays(5));
+    }
+
 }
