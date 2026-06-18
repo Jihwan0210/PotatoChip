@@ -102,6 +102,14 @@
                 <div id="dtab-info" onclick="switchDetailTab('info')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2.5px solid var(--dark)">상품 정보</div>
                 <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
                 <div id="dtab-pickup" onclick="switchDetailTab('pickup')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">픽업 서비스</div>
+                <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
+
+                <div id="dtab-pickup"
+                     th:data-pickup="${product.isPickupAvailable}"
+                     onclick="handlePickupTab(this)"
+                     style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">
+                    픽업 서비스
+                </div>
             </div>
 
             <!-- 상품정보 탭 -->
@@ -203,6 +211,14 @@
 
             <!-- 픽업 탭 -->
             <div id="detail-tab-pickup" style="display:none">
+
+                <div th:if="${!product.isPickupAvailable}"
+                     style="background:#fff5ef;border:1.5px solid #f5c8a8;border-radius:12px;padding:20px;text-align:center;color:#D05018;font-weight:600">
+                    🚫 픽업 서비스가 불가능한 제품입니다.
+                </div>
+
+
+                <div th:if="${product.isPickupAvailable}">
                 <div style="background:var(--gp);border:1.5px solid var(--gl);border-radius:12px;padding:16px 18px;margin-bottom:16px">
                     <div style="font-size:.84rem;font-weight:500;color:var(--green);margin-bottom:7px">📍 농장 직접 픽업 서비스</div>
                     <div style="font-size:.8rem;color:var(--mid);line-height:1.7">배송비 없이 농장에서 직접 수령하세요. 더 신선하고, 농부님과 직접 소통할 수 있어요. 방문 전 반드시 사전 예약을 해주세요.</div>
@@ -214,6 +230,7 @@
                         <strong th:text="${product.operatingHours}">운영시간</strong><br/>
                         <strong th:text="${product.sellerPhone}">폰번호</strong><br/>
                     </div>
+                </div>
                 </div>
                 <div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--sand);margin-bottom:14px">
                     <div style="background:var(--beige2);padding:11px 14px;font-size:.8rem;font-weight:500;color:var(--dark);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:6px">🗺️ 지도로 위치 확인</div>
@@ -283,7 +300,9 @@
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px">
                     <span id="detailRatingStars" style="color:var(--amber);font-size:.82rem">★★★★★</span>
                     <span id="detailReviewCountText" style="font-size:.74rem;color:var(--muted)">0.0 (후기 0)</span>
-                    <span style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px">이번주 1위 🏆</span>
+                    <span th:if="${weekelyRanking != null}"
+                          style="font-size:.72rem;color:var(--green);font-weight:500;margin-left:4px"
+                          th:text="'이번주 ' + ${weekelyRanking} + '위 🏆'"></span>
                 </div>
 
                 <!-- 수량 선택 -->
@@ -472,6 +491,28 @@
             if (tab === 'review') {
                 initReviewPage();
             }
+
+            // 상품담당 : 카카오맵 연동
+            var mapInitialized = false;
+
+            if (tab === 'pickup') {
+                setTimeout(function() {
+                    if (mapInitialized) return;
+                    fetch(`/api/products/${productId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const lat = data.latitude;
+                            const lng = data.longitude;
+                            if (!lat || !lng) return;
+                            var mapContainer = document.getElementById('map');
+                            var mapOption = { center: new kakao.maps.LatLng(lat, lng), level: 3 };
+                            var map = new kakao.maps.Map(mapContainer, mapOption);
+                            var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) });
+                            marker.setMap(map);
+                            mapInitialized = true;
+                        });
+                }, 100);
+            }
         };
     })();
 
@@ -545,20 +586,6 @@
         }).catch(() => showToast('오류가 발생했어요'));
     }
 
-    // 카카오맵
-    fetch(`/api/products/${productId}`)
-        .then(res => res.json())
-        .then(data => {
-            const lat = data.latitude;
-            const lng = data.longitude;
-            kakao.maps.load(function() {
-                var mapContainer = document.getElementById('map');
-                var mapOption = { center: new kakao.maps.LatLng(lat, lng), level: 3 };
-                var map = new kakao.maps.Map(mapContainer, mapOption);
-                var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) });
-                marker.setMap(map);
-            });
-        });
 
     function addToCartDetail(btn) {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -1172,6 +1199,20 @@
         alert(message);
     }
     // AI담당 추가: 리뷰 통계/목록/AI 총평/필터/작성/수정/삭제/도움돼요 기능 끝
+
+
+    function handlePickupTab(element) {
+
+        const pickupAvailable =
+            element.dataset.pickup === 'true';
+
+        if (!pickupAvailable) {
+            showToast('🚫 픽업 서비스가 불가능한 제품입니다.');
+            return;
+        }
+
+        switchDetailTab('pickup');
+    }
 
 </script>
 </body>
