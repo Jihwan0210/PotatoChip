@@ -107,15 +107,9 @@
         .board-detail-meta { font-size: .72rem; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--beige); }
         .board-detail-body { background: var(--beige3); border-radius: 14px; padding: 16px 18px; color: var(--mid); font-size: .86rem; line-height: 1.85; white-space: pre-line; margin-bottom: 20px; }
         .board-detail-actions { display: flex; gap: 8px; justify-content: flex-end; }
-
-        /* 🌟 좋아요 버튼 전용 고정 클래스 디자인 */
-        .board-action-btn { border: 1px solid #ffb3b3; background: #fff0f0; color: #ff4d4d; margin-right: 8px; cursor: pointer; font-weight: 500; padding: 6px 12px; border-radius: 6px; font-family: inherit; transition: all .15s; font-size: .76rem; }
+        .board-action-btn { padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--beige); background: var(--white); color: var(--mid); font-size: .76rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
         .board-action-btn:hover { border-color: var(--green); color: var(--green); }
-        .board-action-btn.danger { border: 1.5px solid var(--beige); background: var(--white); color: var(--mid); }
         .board-action-btn.danger:hover { border-color: #E84040; color: #E84040; }
-
-        /* 🌟 좋아요 활성화(중) 상태 스타일 */
-        .board-action-btn.active { border: 1px solid #ff4d4d !important; background: #ff4d4d !important; color: #ffffff !important; }
 
         /* ── TOAST ── */
         .board-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: .83rem; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.22); z-index: 99999; opacity: 0; transition: opacity .2s; pointer-events: none; }
@@ -129,6 +123,40 @@
         @media (max-width: 540px) {
             .board-head { padding: 24px 5% 20px; }
             .board-tabs { overflow-x: auto; }
+
+            .post-thumb-box {
+                width: 60px !important;
+                height: 60px !important;
+                border-radius: 8px;
+                overflow: hidden;
+                flex-shrink: 0;
+                border: 1px solid #e2e8f0;
+            }
+
+            .post-thumb-box img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .post-thumb-box.no-img {
+                background-color: #f8fafc;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .post-thumb-box.no-img span {
+                font-size: 11px;
+                color: #94a3b8;
+                text-align: center;
+                line-height: 1.3;
+            }
+            .post-item::after,
+            .post-item .green-dot,
+            .post-item span[style*="background-color"] {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -163,6 +191,7 @@
                 <div class="board-tab" data-cat="free" onclick="setTab(this)">자유게시판 <span class="board-tab-cnt" id="cnt-free">0</span></div>
                 <div class="board-tab" data-cat="farmer" onclick="setTab(this)">농가 이야기 <span class="board-tab-cnt" id="cnt-farmer">0</span></div>
                 <div class="board-tab" data-cat="event" onclick="setTab(this)">이벤트 <span class="board-tab-cnt" id="cnt-event">0</span></div>
+                <div class="board-tab" data-cat="promo" onclick="setTab(this)">홍보 게시판 <span class="board-tab-cnt" id="cnt-promo">0</span></div>
             </div>
 
             <div class="board-toolbar">
@@ -186,7 +215,7 @@
             <div class="sidebar-card">
                 <div class="sidebar-title">📌 공지사항</div>
                 <div id="noticeList">
-                    <div style="font-size:.8rem;color:var(--muted)">불러오는 중…</div>
+                    <div style="font-size:.8rem;color:var(--muted)">공지사항이 없습니다.</div>
                 </div>
             </div>
         </div>
@@ -203,10 +232,11 @@
         <div class="board-form-group">
             <label for="boardCategory">카테고리</label>
             <select id="boardCategory">
-                <option value="free">자유게시판</option>
-                <option value="farmer">농가 이야기</option>
-                <option value="event">이벤트</option>
-            </select>
+                <option value="notice">📌 공지사항</option>
+                <option value="free">✨ 자유게시판</option>
+                <option value="farmer">🌾 농가 이야기</option>
+                <option value="event">🎁 이벤트</option>
+                <option value="promo">📢 홍보 게시판</option> </select>
         </div>
         <div class="board-form-group">
             <label for="boardTitle">제목</label>
@@ -220,6 +250,15 @@
         <div class="board-form-group" style="margin-top: 15px;">
             <label for="boardImage" style="font-weight:600; margin-bottom: 8px; display: block;">📷 사진 첨부(선택)</label>
             <input type="file" id="boardImage" class="board-form-input" accept="image/*" style="padding:8px;">
+
+            <div id="editImagePreviewContainer" style="display: none; margin-top: 10px; align-items: center; gap: 10px; background: var(--beige3); padding: 8px; border-radius: 8px; border: 1px dashed var(--beige);">
+                <img id="editImagePreview" src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                <div style="flex: 1; font-size: 12px; color: var(--mid);">
+                    <span style="display:block; font-weight: 600;">기존 등록된 사진</span>
+                    <span id="editImageStatus" style="font-size: 11px; color: var(--muted);">유지 상태</span>
+                </div>
+                <button type="button" onclick="removeCurrentImage()" style="background: #ef4444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">삭제</button>
+            </div>
         </div>
 
         <button class="board-submit-btn" type="button" onclick="submitPost()">등록하기</button>
@@ -291,37 +330,30 @@
 <script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
     /* ════════════════════════════════════════
-       STATE
+       STATE (상태 관리 변수 구역)
     ════════════════════════════════════════ */
     var allPosts       = [];
     var currentCat     = 'all';
     var currentPage    = 1;
     var searchTimer    = null;
     var POSTS_PER_PAGE = 10;
-    var isEditMode = false;
-    var editPostId = null;
-    var currentBoardIdForComment = null;
+    var isEditMode     = false;
+    var editPostId     = null;
+
+    // 💡 수정 시 기존 이미지 경로를 기억 및 유지할 변수 탑재
+    var currentExistingImageUrl = null;
 
     // 로그인한 유저의 정보 안전하게 로드
     var currentUserId   = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
     var currentUserEmail = localStorage.getItem('email') || sessionStorage.getItem('email');
+    var currentUserRole  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
 
     /* ════════════════════════════════════════
        INIT
     ════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', function () {
+        setupBoardCategoryByRole();
         loadPosts();
-    });
-
-    // 모달 바깥 영역 클릭 시 닫기 기능 추가
-    document.addEventListener('click', function (e) {
-        ['writeModal','detailModal'].forEach(function (id) {
-            var modal = document.getElementById(id);
-            if (e.target === modal) {
-                if(id === 'writeModal') closeWriteModal();
-                else closeDetailModal();
-            }
-        });
     });
 
     /* ════════════════════════════════════════
@@ -373,7 +405,7 @@
     }
 
     function updateTabCounts() {
-        var cats = ['all', 'notice', 'free', 'farmer', 'event'];
+        var cats = ['all', 'notice', 'free', 'farmer', 'event', 'promo'];
         cats.forEach(function (cat) {
             var el = document.getElementById('cnt-' + cat);
             if (!el) return;
@@ -407,21 +439,37 @@
 
         list.innerHTML = paged.map(function (p) {
             var isNew = p.createdAt && (now - new Date(p.createdAt).getTime()) < 1000 * 60 * 60 * 24;
+
+            var currentLikeCount = (p.likeCount == null) ? 0 : p.likeCount;
+            var currentCommentCount = (p.commentCount == null) ? 0 : p.commentCount;
+
+            var thumbHtml = '';
+            if (p.imageUrl && p.imageUrl.trim() !== '') {
+                thumbHtml = '<div class="post-thumb-box"><img src="' + p.imageUrl + '" alt="썸네일"></div>';
+            } else {
+                thumbHtml = '<div class="post-thumb-box no-img"><span>사진<br>없음</span></div>';
+            }
+
             return '<div class="post-item" onclick="openDetail(' + p.id + ')">'
-                + '<div class="post-top">'
-                + '<span class="post-category ' + getCatClass(p.category) + '">' + esc(getCatName(p.category)) + '</span>'
-                + '<span class="post-title">' + esc(p.title) + '</span>'
-                + (isNew ? '<span class="post-new"></span>' : '')
-                + '</div>'
-                + '<div class="post-bottom">'
-                + '<span class="post-author">' + esc(p.author) + '</span>'
-                + '<span class="post-dot"></span>'
-                + '<span>' + fmtDate(p.createdAt) + '</span>'
-                + '<span class="post-dot"></span>'
-                + '<span class="post-meta-item"><i class="ti ti-eye" style="font-size:11px"></i> ' + fmtNum(p.viewCount) + '</span>'
-                + (p.likeCount  != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-heart" style="font-size:11px"></i> ' + fmtNum(p.likeCount)    + '</span>' : '')
-                + (p.commentCount != null ? '<span class="post-dot"></span><span class="post-meta-item"><i class="ti ti-message" style="font-size:11px"></i> ' + fmtNum(p.commentCount) + '</span>' : '')
-                + '</div>'
+                + '  <div class="post-text-content">'
+                + '    <div class="post-top">'
+                + '      <span class="post-category ' + getCatClass(p.category) + '">' + esc(getCatName(p.category)) + '</span>'
+                + '      <span class="post-title">' + esc(p.title) + '</span>'
+                +        (isNew ? '<span class="post-new"></span>' : '')
+                + '    </div>'
+                + '    <div class="post-bottom">'
+                + '      <span class="post-author">' + esc(displayAuthor(p)) + '</span>'
+                + '      <span class="post-dot"></span>'
+                + '      <span>' + fmtDate(p.createdAt) + '</span>'
+                + '      <span class="post-dot"></span>'
+                + '      <span class="post-meta-item"><i class="ti ti-eye" style="font-size:11px"></i> ' + fmtNum(p.viewCount || 0) + '</span>'
+                + '      <span class="post-dot"></span>'
+                + '      <span class="post-meta-item"><i class="ti ti-message" style="font-size:11px"></i> ' + fmtNum(currentCommentCount) + '</span>'
+                + '      <span class="post-dot"></span>'
+                + '      <span class="post-meta-item" style="color:#ef4444;"><i class="ti ti-heart-filled" style="font-size:11px"></i> ' + fmtNum(currentLikeCount) + '</span>'
+                + '    </div>'
+                + '  </div>'
+                +    thumbHtml
                 + '</div>';
         }).join('');
 
@@ -484,71 +532,82 @@
     }
 
     /* ════════════════════════════════════════
+       🆕 이미지 제어 추가 기능 함수 (기존 등록 이미지 가상 삭제 처리)
+    ════════════════════════════════════════ */
+    function removeCurrentImage() {
+        currentExistingImageUrl = null;
+        document.getElementById('editImageStatus').textContent = '등록 시 삭제됨';
+        document.getElementById('editImageStatus').style.color = '#ef4444';
+        showToast('기존 사진 삭제가 예약되었습니다. 등록하기를 누르면 반영됩니다. 🗑️');
+    }
+
+    /* ════════════════════════════════════════
        DETAIL MODAL
     ════════════════════════════════════════ */
-    /* ════════════════════════════════════════
-           📝 DETAIL MODAL (조회수 중복 방지 완벽 반영본)
-        ════════════════════════════════════════ */
+    var currentBoardIdForLike = null;
+
     function openDetail(id) {
         var post = allPosts.find(function (p) { return p.id === id; });
         if (!post) return;
 
-        // 🌟 1. 세션 스토리지에서 기존에 읽은 글 목록을 안전하게 가져옵니다.
-        var viewedPosts = JSON.parse(sessionStorage.getItem('viewed_posts_list') || '[]');
-        viewedPosts = viewedPosts.map(Number); // 숫자로 깔끔하게 통일
+        currentBoardIdForLike = id;
 
-        // 🌟 2. 중괄호 짝을 정확하게 맞춰서 처음 읽는 글일 때만 조회수를 올립니다.
-        if (!viewedPosts.includes(Number(id))) {
-            // 처음 읽는 글이라면 화면 카운트 +1 하고 서버에 보냄!
-            post.viewCount = (post.viewCount || 0) + 1;
-            fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
+        post.viewCount = (post.viewCount || 0) + 1;
+        fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
 
-            // 읽은 목록에 이 글 ID를 집어넣고 저장!
-            viewedPosts.push(Number(id));
-            sessionStorage.setItem('viewed_posts_list', JSON.stringify(viewedPosts));
-            console.log("🌱 [조회수] 처음 보는 글이라 조회수가 올랐습니다! ID:", id);
-        } else {
-            // 이미 목록에 있다면 아무것도 하지 않고 통과!
-            console.log("🌱 [조회수] 이미 읽은 글이라 조회수를 올리지 않습니다. ID:", id);
-        }
-
-        // ── 여기서부터 모달창에 데이터를 뿌려주는 기존 로직입니다 ──
         document.getElementById('detailTitle').textContent = post.title;
         document.getElementById('detailBadges').innerHTML =
             '<span class="post-category ' + getCatClass(post.category) + '">' + esc(getCatName(post.category)) + '</span>';
 
         document.getElementById('detailMeta').innerHTML =
-            '<span>👤 ' + esc(post.author) + '</span>'
+            '<span>👤 ' + esc(displayAuthor(post)) + '</span>'
             + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
             + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
-            + (post.likeCount    != null ? '<span>❤️ ' + fmtNum(post.likeCount)    + '</span>' : '')
-            + (post.commentCount != null ? '<span>💬 ' + fmtNum(post.commentCount) + '</span>' : '');
+            + '<span>💬 <span id="detailCommentCountSpan">' + fmtNum(post.commentCount || 0) + '</span></span>';
 
         var contentHtml = '';
         if (post.imageUrl) {
             contentHtml += '<div style="text-align:center; margin-bottom:20px;">'
-                + '<img src="' + post.imageUrl + '" style="max-width:100%; max-height:400px; border-radius:12px; object-fit:cover; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">'
+                + '<img src="' + post.imageUrl + '" style="max-width:100%; max-height:400px; border-radius:12px; object-fit:cover;">'
                 + '</div>';
         }
         document.getElementById('detailContent').innerHTML = contentHtml + esc(post.content || '');
 
-        // 좋아요 활성화 여부에 따른 클래스와 텍스트 지정
-        var likedPosts = JSON.parse(localStorage.getItem('liked_posts_list') || '[]');
-        likedPosts = likedPosts.map(Number);
-        var isAlreadyLiked = likedPosts.includes(Number(post.id));
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var headers = {};
+        if (token) headers['Authorization'] = 'Bearer ' + token;
 
-        var btnClass = isAlreadyLiked ? "board-action-btn active" : "board-action-btn";
-        var btnText = isAlreadyLiked ? "❤️ 좋아요 중" : "❤️ 좋아요";
+        fetch('/api/board/' + id + '/like/status', { headers: headers })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var actions = '';
+                actions += '<button type="button" id="likeBtn" onclick="clickLike()" class="board-action-btn" style="border:1px solid #e2e8f0; background:#fff; color:#475569; margin-right:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:0 16px; height:36px; border-radius:18px; font-size:0.875rem; font-weight:600; transition:all 0.2s;">'
+                    + '  <i id="likeIcon" class="ti ti-heart" style="font-size:1.1rem; color:#cbd5e1;"></i>'
+                    + '  <span id="detailLikeCount">' + fmtNum(data.likeCount) + '</span>'
+                    + '</button>';
 
-        var actions = '<button id="likeBtn" class="' + btnClass + '" onclick="clickLike(' + post.id + ')" data-liked="' + isAlreadyLiked + '">' + btnText + '</button>';
+                if (canEditPost(post)) {
+                    actions += '<button class="board-action-btn" onclick="openEditModal(' + post.id + ')" style="border:1px solid #ccc; background:#fff; color:#333; margin-right:8px; cursor:pointer; height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">수정</button>';
+                }
+                if (canDeletePost(post)) {
+                    actions += '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')" style="height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">삭제</button>';
+                }
 
-        if (currentUserEmail && post.author === currentUserEmail) {
-            actions += '<button class="board-action-btn danger" onclick="openEditModal(' + post.id + ')">수정</button>'
-                + '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')">삭제</button>';
+                document.getElementById('detailActions').innerHTML = actions;
+                updateHeartUI(data.isLiked);
+
+                post.likeCount = data.likeCount;
+                if (typeof renderPosts === 'function') { renderPosts(); }
+            })
+            .catch(function(e){
+                console.error(e);
+                document.getElementById('detailActions').innerHTML = '<button type="button" id="likeBtn" class="board-action-btn"><i id="likeIcon" class="ti ti-heart"></i><span id="detailLikeCount">0</span></button>';
+            });
+
+        if (typeof loadComments === 'function') {
+            loadComments(post.id);
         }
-        document.getElementById('detailActions').innerHTML = actions;
 
-        loadComments(post.id);
         document.getElementById('detailModal').classList.add('open');
     }
 
@@ -556,18 +615,42 @@
         document.getElementById('detailModal').classList.remove('open');
     }
 
+    /* ════════════════════════════════════════
+       🔄 업그레이드된 EDIT MODAL OPEN (수정창 열릴 때 사진 바인딩 연동)
+    ════════════════════════════════════════ */
     function openEditModal(id) {
         var post = allPosts.find(function (p) { return p.id === id; });
         if (!post) return;
 
+        if (!canEditPost(post)) {
+            showToast('수정 권한이 없습니다.');
+            return;
+        }
+
         closeDetailModal();
+        setupBoardCategoryByRole();
 
         isEditMode = true;
         editPostId = id;
 
+        // 💡 기존 이미지 경로 변수 확보
+        currentExistingImageUrl = post.imageUrl || null;
+
         document.getElementById('boardCategory').value = post.category;
         document.getElementById('boardTitle').value = post.title;
         document.getElementById('boardContent').value = post.content;
+        if (document.getElementById('boardImage')) document.getElementById('boardImage').value = '';
+
+        // 💡 수정전용 미리보기 처리
+        var previewContainer = document.getElementById('editImagePreviewContainer');
+        if (currentExistingImageUrl && currentExistingImageUrl.trim() !== '') {
+            document.getElementById('editImagePreview').src = currentExistingImageUrl;
+            document.getElementById('editImageStatus').textContent = '유지 상태';
+            document.getElementById('editImageStatus').style.color = 'var(--muted)';
+            if (previewContainer) previewContainer.style.display = 'flex';
+        } else {
+            if (previewContainer) previewContainer.style.display = 'none';
+        }
 
         var modalTitle = document.getElementById('modalTitle');
         if (modalTitle) {
@@ -578,17 +661,28 @@
     }
 
     function deletePost(id) {
+        var post = allPosts.find(function (p) { return p.id === id; });
+        if (post && !canDeletePost(post)) {
+            showToast('삭제 권한이 없습니다.');
+            return;
+        }
+
         if (!confirm('게시글을 삭제할까요?')) return;
 
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         fetch('/api/board/' + id, {
             method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
         })
             .then(function (res) {
-                if (res.ok) return res.json();
-                else throw new Error('삭제 실패');
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    throw new Error('삭제 실패');
+                }
             })
             .then(function (data) {
                 allPosts = allPosts.filter(function (p) { return p.id !== id; });
@@ -606,24 +700,31 @@
     }
 
     /* ════════════════════════════════════════
-       WRITE MODAL
+       🔄 업그레이드된 WRITE MODAL OPEN (초기화 로직 보강)
     ════════════════════════════════════════ */
     function openWriteModal() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         if (!token) {
             showToast('로그인 후 게시글을 작성할 수 있어요.');
-            setTimeout(function () { location.href = '/login'; }, 900);
+            setTimeout(function () {
+                location.href = '/login';
+            }, 900);
             return;
         }
 
         isEditMode = false;
         editPostId = null;
+        currentExistingImageUrl = null; // 초기화
+        setupBoardCategoryByRole();
 
         document.getElementById('boardCategory').value = 'free';
         document.getElementById('boardTitle').value = '';
         document.getElementById('boardContent').value = '';
         if (document.getElementById('boardImage')) document.getElementById('boardImage').value = '';
+
+        var previewContainer = document.getElementById('editImagePreviewContainer');
+        if (previewContainer) previewContainer.style.display = 'none';
 
         var modalTitle = document.getElementById('modalTitle');
         if (modalTitle) modalTitle.textContent = '게시글 작성하기 🌿';
@@ -637,48 +738,66 @@
         editPostId = null;
     }
 
+    /* ════════════════════════════════════════
+       🔄 완벽하게 통합된 SUBMIT POST (등록/수정 모두 FormData 파일 업로드 처리)
+    ════════════════════════════════════════ */
     function submitPost() {
         var category = document.getElementById('boardCategory').value;
-        var title = document.getElementById('boardTitle').value.trim();
-        var content = document.getElementById('boardContent').value.trim();
+        var title    = document.getElementById('boardTitle').value.trim();
+        var content  = document.getElementById('boardContent').value.trim();
 
-        if (!title) { showToast('제목을 입력해주세요.'); return; }
-        if (!content) { showToast('내용을 입력해주세요.'); return; }
+        if (!title)   { showToast('제목을 입력해주세요.');  return; }
+        if (!content) { showToast('내용을 입력해주세요.');  return; }
 
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-        var url = isEditMode ? '/api/board/' + editPostId + '/update' : '/api/board';
+        if (category === 'notice' && !isCurrentUserAdmin()) {
+            showToast('공지사항은 관리자만 작성할 수 있어요.');
+            return;
+        }
+
+        if (isEditMode) {
+            var originalPost = allPosts.find(function (p) { return p.id === editPostId; });
+            if (!originalPost || !canEditPost(originalPost)) {
+                showToast('수정 권한이 없습니다.');
+                return;
+            }
+        }
+
+        var url = isEditMode ? '/api/board/' + editPostId : '/api/board';
+        var method = isEditMode ? 'PUT' : 'POST';
+
+        // 💡 수정/등록 모두 파일 전송이 가능하도록 일관되게 FormData 통일 구축
         var formData = new FormData();
-        var boardData = {category: category, title: title, content: content};
 
-        formData.append("board", new Blob([JSON.stringify(boardData)], {type: "application/json"}));
+        var boardData = {
+            category: category,
+            title: title,
+            content: content,
+            imageUrl: currentExistingImageUrl // 💡 기존 사진 주소 넘겨서 무변화 상태 제어
+        };
+        formData.append("board", new Blob([JSON.stringify(boardData)], { type: "application/json" }));
 
+        // 새로 선택한 이미지 파일이 들어있는지 확인 후 할당
         var fileInput = document.getElementById('boardImage');
         if (fileInput && fileInput.files[0]) {
             formData.append("image", fileInput.files[0]);
         }
 
         fetch(url, {
-            method: 'POST',
+            method: method,
             headers: { 'Authorization': 'Bearer ' + token },
-            body: formData
+            body: formData // 💡 JSON 텍스트 대신 Multipart FormData Body 바인딩 고정
         })
-            .then(function (res) {
-                if (!res.ok) throw new Error("서버 응답 오류");
-                return res.json();
-            })
+            .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
             .then(function (updatedPost) {
                 if (isEditMode) {
-                    var idx = allPosts.findIndex(function (p) { return p.id === editPostId; });
+                    var idx = allPosts.findIndex(function(p) { return p.id === editPostId; });
                     if (idx !== -1) allPosts[idx] = updatedPost;
-                    showToast('게시글이 성공적으로 수정되었어요! 📝');
+                    showToast('게시글과 사진이 성공적으로 수정되었어요! 📝');
                 } else {
                     allPosts.unshift(updatedPost);
-                    if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                        showToast('사진과 함께 게시글이 등록되었어요! 🌱');
-                    } else {
-                        showToast('게시글이 성공적으로 등록되었어요! 📝');
-                    }
+                    showToast('사진과 함께 게시글이 등록되었어요! 🌱');
                 }
                 closeWriteModal();
                 updateTabCounts();
@@ -686,100 +805,16 @@
                 renderSidebar();
             })
             .catch(function (err) {
-                console.error("게시글 처리 에러:", err);
-                alert('등록 실패: 코드를 확인해 주세요.');
+                console.error(err);
+                showToast('등록/수정에 실패했어요. 서버 전송 설정을 확인해 주세요.');
             });
     }
-
-    /* ════════════════════════════════════════
-       LIKE TOGGLE (좋아요 정식 기능 분리 구역)
-    ════════════════════════════════════════ */
-    /* ════════════════════════════════════════
-        🌟 LIKE (글자 직관 판별 방식 - 진짜 최종)
-     ════════════════════════════════════════ */
-    function clickLike(id) {
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-        // 1. 화면에 있는 좋아요 버튼을 정확하게 가져옵니다.
-        var btn = document.getElementById('likeBtn');
-        if (!btn) return;
-
-        // 2. [가장 확실한 방법] 버튼 안에 '좋아요 중'이라는 글자가 포함되어 있으면 취소(true)입니다!
-        var isCancel = btn.innerHTML.includes('좋아요 중');
-
-        var url = isCancel ? `/api/board/${id}/unlike` : `/api/board/${id}/like`;
-        // 🔍 콘솔창 로그 (F12 눌러서 에러가 나는지 주소가 뭘로 가는지 감시용)
-        console.log("👉 [프론트] 현재 클릭한 글 ID:", id);
-        console.log("👉 [프론트] 이번 클릭이 취소인가요?:", isCancel);
-        console.log("👉 [프론트] 서버로 날리는 최종 주소:", url);
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        })
-
-            .then(function(res) {
-                // 404 등 서버 에러가 나면 여기서 에러를 가로챕니다.
-                if (!res.ok) throw new Error("서버 상태 오류 (Status: " + res.status + ")");
-
-                var post = allPosts.find(function (p) { return p.id === Number(id); });
-
-                if (post) {
-                    var likedPosts = JSON.parse(localStorage.getItem('liked_posts_list') || '[]');
-                    likedPosts = likedPosts.map(Number);
-
-                    if (isCancel) {
-                        // 💔 취소 성공 시: 화면 하트 수 -1
-                        post.likeCount = Math.max(0, (post.likeCount || 0) - 1);
-                        likedPosts = likedPosts.filter(function(postId) { return postId !== Number(id); });
-                        showToast('좋아요를 취소했습니다. 💔');
-                        updateLikeButtonUi(btn, false);
-                    } else {
-                        // ❤️ 등록 성공 시: 화면 하트 수 +1
-                        post.likeCount = (post.likeCount || 0) + 1;
-                        if (!likedPosts.includes(Number(id))) { likedPosts.push(Number(id)); }
-                        showToast('이 글을 좋아합니다! ❤️');
-                        updateLikeButtonUi(btn, true);
-                    }
-                    localStorage.setItem('liked_posts_list', JSON.stringify(likedPosts));
-                }
-
-                // 상단 메타 레이아웃 새로고침
-                document.getElementById('detailMeta').innerHTML =
-                    '<span>👤 ' + esc(post.author) + '</span>'
-                    + '<span>📅 ' + fmtDate(post.createdAt) + '</span>'
-                    + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
-                    + (post.likeCount != null ? '<span>❤️ ' + fmtNum(post.likeCount) + '</span>' : '')
-                    + (post.commentCount != null ? '<span>💬 ' + fmtNum(post.commentCount) + '</span>' : '');
-
-                renderPosts();
-                renderSidebar();
-            })
-            .catch(function(err) {
-                console.error("❌ 좋아요 처리 실패 원인:", err);
-                showToast('좋아요 처리에 실패했습니다.');
-            });
-    }
-
-    function updateLikeButtonUi(btn, isLiked) {
-        if (!btn) return;
-        if (isLiked) {
-            btn.className = "board-action-btn active";
-            btn.innerHTML = '❤️ 좋아요 중';
-        } else {
-            btn.className = "board-action-btn";
-            btn.innerHTML = '❤️ 좋아요';
-        }
-    }
-
-
-
 
     /* ════════════════════════════════════════
        COMMENT (댓글 기능 구역)
     ════════════════════════════════════════ */
+    var currentBoardIdForComment = null;
+
     function loadComments(boardId) {
         currentBoardIdForComment = boardId;
         var commentListEl = document.getElementById('commentList');
@@ -788,10 +823,7 @@
         commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#888; padding:5px 0;">댓글을 불러오는 중...</div>';
 
         fetch('/api/board/' + boardId + '/comments')
-            .then(function (res) {
-                if (!res.ok) throw new Error("서버 응답 에러 (" + res.status + ")");
-                return res.json();
-            })
+            .then(function (res) { return res.json(); })
             .then(function (comments) {
                 if (!comments || comments.length === 0) {
                     commentListEl.innerHTML = '<div style="font-size:0.85rem; color:#aaa; padding:10px 0;">아직 댓글이 없습니다. 첫 댓글을 남겨보세요! 🌱</div>';
@@ -800,13 +832,13 @@
 
                 commentListEl.innerHTML = comments.map(function (c) {
                     var deleteBtn = '';
-                    if (currentUserEmail && c.author === currentUserEmail) {
+                    if (isOwnComment(c)) {
                         deleteBtn = '<span onclick="deleteComment(' + c.id + ')" style="color:#ff6b6b; font-size:0.75rem; margin-left:10px; cursor:pointer; font-weight:bold;">삭제</span>';
                     }
 
                     return '<div style="border-bottom:1px solid #f7f7f7; padding:8px 0; font-size:0.85rem;">'
                         + '<div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#777; font-size:0.75rem;">'
-                        + '<span>👤 ' + esc(c.author) + '</span>'
+                        + '<span>👤 ' + esc(displayAuthor(c)) + '</span>'
                         + '<span>' + fmtDate(c.createdAt) + deleteBtn + '</span>'
                         + '</div>'
                         + '<div style="color:#333; white-space:pre-wrap; padding-left:2px;">' + esc(c.content) + '</div>'
@@ -814,7 +846,7 @@
                 }).join('');
             })
             .catch(function (err) {
-                console.error("댓글 로드 실패 원인:", err);
+                console.error("댓글 로드 실패:", err);
                 commentListEl.innerHTML = '<div style="font-size:0.85rem; color:red;">댓글을 불러오지 못했습니다.</div>';
             });
     }
@@ -843,7 +875,21 @@
                 inputEl.value = '';
                 showToast('댓글이 등록되었어요! 💬');
                 loadComments(currentBoardIdForComment);
-                loadPosts();
+
+                var commentSpan = document.getElementById('detailCommentCountSpan');
+                if (commentSpan) {
+                    var currentCnt = parseInt(commentSpan.textContent.replace(/,/g, '')) || 0;
+                    commentSpan.textContent = fmtNum(currentCnt + 1);
+                }
+
+                if (typeof allPosts !== 'undefined') {
+                    var postIdx = allPosts.findIndex(function(p) { return p.id === currentBoardIdForComment; });
+                    if (postIdx !== -1) {
+                        allPosts[postIdx].commentCount = (allPosts[postIdx].commentCount || 0) + 1;
+                        if (typeof renderPosts === 'function') renderPosts();
+                    }
+                }
+                if (typeof loadPosts === 'function') loadPosts();
             })
             .catch(function (err) {
                 console.error(err);
@@ -861,9 +907,23 @@
         })
             .then(function (res) {
                 if (!res.ok) throw new Error();
-                showToast('댓글이 deleted 되었습니다.');
+                showToast('댓글이 삭제되었습니다.');
                 loadComments(currentBoardIdForComment);
-                loadPosts();
+
+                var commentSpan = document.getElementById('detailCommentCountSpan');
+                if (commentSpan) {
+                    var currentCnt = parseInt(commentSpan.textContent.replace(/,/g, '')) || 0;
+                    commentSpan.textContent = fmtNum(Math.max(0, currentCnt - 1));
+                }
+
+                if (typeof allPosts !== 'undefined') {
+                    var postIdx = allPosts.findIndex(function(p) { return p.id === currentBoardIdForComment; });
+                    if (postIdx !== -1) {
+                        allPosts[postIdx].commentCount = Math.max(0, (allPosts[postIdx].commentCount || 1) - 1);
+                        if (typeof renderPosts === 'function') renderPosts();
+                    }
+                }
+                if (typeof loadPosts === 'function') loadPosts();
             })
             .catch(function () { showToast('댓글 삭제에 실패했습니다.'); });
     }
@@ -871,6 +931,103 @@
     /* ════════════════════════════════════════
        HELPERS / UTILS
     ════════════════════════════════════════ */
+
+    function isCurrentUserAdmin() {
+        return currentUserRole === 'ADMIN';
+    }
+
+    function setupBoardCategoryByRole() {
+        var select = document.getElementById('boardCategory');
+        if (!select) return;
+
+        var noticeOption = document.getElementById('noticeOption');
+
+        if (isCurrentUserAdmin()) {
+            if (!noticeOption) {
+                noticeOption = document.createElement('option');
+                noticeOption.id = 'noticeOption';
+                noticeOption.value = 'notice';
+                noticeOption.textContent = '공지사항';
+                select.insertBefore(noticeOption, select.firstChild);
+            }
+        } else if (noticeOption) {
+            noticeOption.remove();
+        }
+    }
+
+    function displayAuthor(item) {
+        if (!item) return '-';
+
+        return item.nickname
+            || item.authorNickname
+            || item.writerNickname
+            || item.displayName
+            || item.userName
+            || item.authorName
+            || item.writerName
+            || item.name
+            || item.author
+            || '-';
+    }
+
+    function getPostOwnerId(post) {
+        if (!post) return null;
+
+        var id = post.userId || post.authorId || post.writerId || post.createdById;
+        return id === null || id === undefined || id === '' ? null : Number(id);
+    }
+
+    function getPostOwnerEmail(post) {
+        if (!post) return '';
+        return post.authorEmail || post.email || post.writerEmail || post.createdByEmail || post.author || '';
+    }
+
+    function isOwnPost(post) {
+        var ownerId = getPostOwnerId(post);
+        if (currentUserId !== null && ownerId !== null && ownerId === currentUserId) {
+            return true;
+        }
+
+        var ownerEmail = getPostOwnerEmail(post);
+        return Boolean(currentUserEmail && ownerEmail && ownerEmail === currentUserEmail);
+    }
+
+    function canEditPost(post) {
+        if (!post) return false;
+
+        if (post.category === 'notice') {
+            return isCurrentUserAdmin();
+        }
+
+        return isOwnPost(post);
+    }
+
+    function canDeletePost(post) {
+        if (!post) return false;
+
+        if (isCurrentUserAdmin()) {
+            return true;
+        }
+
+        if (post.category === 'notice') {
+            return false;
+        }
+
+        return isOwnPost(post);
+    }
+
+    function isOwnComment(comment) {
+        if (!comment) return false;
+
+        var ownerId = comment.userId || comment.authorId || comment.writerId;
+        if (currentUserId !== null && ownerId !== null && ownerId !== undefined && Number(ownerId) === currentUserId) {
+            return true;
+        }
+
+        var ownerEmail = comment.authorEmail || comment.email || comment.writerEmail || comment.author;
+        return Boolean(currentUserEmail && ownerEmail && ownerEmail === currentUserEmail);
+    }
+
     function getCatName(c) {
         if (c==='notice') return '공지사항';
         if (c==='free') return '자유게시판';
@@ -906,6 +1063,63 @@
         t.textContent = m;
         t.classList.add('show');
         setTimeout(function(){ t.classList.remove('show'); }, 2500);
+    }
+
+    function updateHeartUI(isLiked) {
+        var icon = document.getElementById('likeIcon');
+        var btn = document.getElementById('likeBtn');
+        if (!icon || !btn) return;
+
+        if (isLiked) {
+            icon.className = "ti ti-heart-filled";
+            icon.style.color = "#ff6b6b";
+            btn.style.borderColor = "#ffa8a8";
+            btn.style.background = "#fff5f5";
+            btn.style.color = "#ff6b6b";
+        } else {
+            icon.className = "ti ti-heart";
+            icon.style.color = "#cbd5e1";
+            btn.style.borderColor = "#e2e8f0";
+            btn.style.background = "#fff";
+            btn.style.color = "#475569";
+        }
+    }
+
+    function clickLike() {
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+            alert('로그인 후 좋아요를 누를 수 있습니다. ❤️');
+            return;
+        }
+        if (!currentBoardIdForLike) return;
+
+        fetch('/api/board/' + currentBoardIdForLike + '/like', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+            .then(function (res) {
+                if (res.status === 401) { alert('로그인이 필요합니다.'); return; }
+                return res.json();
+            })
+            .then(function (data) {
+                if(!data) return;
+
+                document.getElementById('detailLikeCount').textContent = fmtNum(data.likeCount);
+                updateHeartUI(data.isLiked);
+
+                var idx = allPosts.findIndex(function(p) { return p.id === currentBoardIdForLike; });
+                if (idx !== -1) {
+                    allPosts[idx].likeCount = data.likeCount;
+                }
+
+                if (typeof renderPosts === 'function') {
+                    renderPosts();
+                }
+            })
+            .catch(function (err) {
+                console.error(err);
+                alert('좋아요 처리 중 오류가 발생했습니다.');
+            });
     }
 </script>
 </body>
