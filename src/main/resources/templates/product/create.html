@@ -232,6 +232,8 @@
 
                     </label>
 
+                    <div id="aiAnalyzeHint" style="display:none;font-size:.75rem;color:var(--green);margin-top:6px"></div>
+
                     <div class="form-group">
 
                         <label>상세 이미지</label>
@@ -376,6 +378,36 @@
             previewMain.textContent     = price.toLocaleString() + '원';
             hiddenDiscount.value        = '';
         }
+    }
+
+    // ===== AI 사진 분석으로 상품명/설명 자동완성 =====
+    document.querySelector('input[name="thumbnailFile"]').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        analyzeProductImage(file);
+    });
+
+    function analyzeProductImage(file) {
+        const nameInput = document.querySelector('input[name="name"]');
+        const descInput = document.querySelector('textarea[name="description"]');
+        const hint = document.getElementById('aiAnalyzeHint');
+
+        hint.style.display = 'block';
+        hint.textContent = '🤖 AI가 사진 보고 분석 중이에요...';
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('/market/api/analyze-image', { method: 'POST', body: formData })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.name) nameInput.value = data.name;
+                if (data.description) descInput.value = data.description;
+                hint.textContent = '✅ AI가 채워준 거예요, 꼭 확인하고 수정해주세요!';
+            })
+            .catch(function () {
+                hint.textContent = '⚠️ 분석 실패했어요, 직접 입력해주세요.';
+            });
     }
 </script>
 
