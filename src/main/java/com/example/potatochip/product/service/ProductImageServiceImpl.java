@@ -51,5 +51,22 @@ public class ProductImageServiceImpl implements ProductImageService{
             productImageRepository.save(image);
         }
     }
+    @Override
+    public List<ProductImage> getImagesByProduct(Product product) {
+        return productImageRepository.findByProduct(product);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImages(List<Long> imageIds) {
+        if (imageIds == null || imageIds.isEmpty()) return;
+
+        List<ProductImage> images = productImageRepository.findAllById(imageIds);
+        for (ProductImage image : images) {
+            File file = new File(System.getProperty("user.dir") + image.getUuid());
+            if (file.exists()) file.delete();
+        }
+        productImageRepository.deleteAllById(imageIds);
+    }
 }
 

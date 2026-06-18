@@ -1,5 +1,7 @@
-INSERT INTO product_rankings (product_id, seller_id, period_type, period_date, sales_count, rank)
-VALUES
-    (1, 1, 'weekly', CURDATE(), 150, 1),
-    (2, 1, 'weekly', CURDATE(), 120, 2),
-    (3, 2, 'weekly', CURDATE(), 90, 3);
+INSERT INTO product_rankings (period_date, period_type, sales_count, product_id, seller_id, ranking)
+VALUES ('2026-06-17', 'WEEKLY', 430, 13, 2, 1),
+       ('2026-06-17', 'WEEKLY', 150, 11, 1, 2),
+       ('2026-06-17', 'WEEKLY', 120, 12, 1, 3),
+       ('2026-06-17', 'DAILY', 150, 11, 1, 1),
+       ('2026-06-17', 'DAILY', 120, 12, 1, 2),
+       ('2026-06-17', 'DAILY', 430, 13, 2, 3);

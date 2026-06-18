@@ -129,7 +129,12 @@ function switchMktTab(i){
 
 function doMktSearch() {
     var keyword = document.getElementById('mktSearch').value.trim();
-    location.href = '/market?keyword=' + encodeURIComponent(keyword);
+    var searchType = document.getElementById('mktSearchType').value;
+    var url = new URL(window.location.href);
+    url.searchParams.set('keyword', keyword);
+    url.searchParams.set('searchType', searchType);
+    url.searchParams.set('page', '0');
+    window.location.href = url.toString();
 }
 
 function clearMktSearch() {
