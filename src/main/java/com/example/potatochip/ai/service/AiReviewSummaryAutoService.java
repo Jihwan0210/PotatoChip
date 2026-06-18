@@ -22,7 +22,7 @@ import java.util.List;
 public class AiReviewSummaryAutoService {
 
     private static final int FIRST_SUMMARY_REVIEW_COUNT = 10;
-    private static final int SUMMARY_REFRESH_INTERVAL = 5;
+    private static final int SUMMARY_REFRESH_INTERVAL = 2;
 
     private final ReviewRepository reviewRepository;
     private final AiReviewSummaryRepository aiReviewSummaryRepository;
