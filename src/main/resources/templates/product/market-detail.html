@@ -101,8 +101,6 @@
             <div style="border-bottom:1.5px solid var(--sand);display:flex;gap:0;margin-bottom:22px">
                 <div id="dtab-info" onclick="switchDetailTab('info')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;font-weight:500;color:var(--dark);cursor:pointer;border-bottom:2.5px solid var(--dark)">상품 정보</div>
                 <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
-                <div id="dtab-pickup" onclick="switchDetailTab('pickup')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">픽업 서비스</div>
-                <div id="dtab-review" onclick="switchDetailTab('review')" style="padding:0 20px;height:44px;display:flex;align-items:center;font-size:.84rem;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent">리뷰 <span id="detailReviewTabCount" style="color:var(--green);font-weight:600;margin-left:4px">0</span></div>
 
                 <div id="dtab-pickup"
                      th:data-pickup="${product.isPickupAvailable}"
