@@ -1,0 +1,102 @@
+/* ── FARMER DASHBOARD ── */
+#page-farmer { background: var(--beige2); }
+
+/* Header */
+.ft-header { background: #fff; border-bottom: 1.5px solid var(--sand); padding: 20px 5%; }
+.ft-header-label { font-size: .65rem; color: var(--green); letter-spacing: 1px; font-weight: 500; margin-bottom: 3px; }
+.ft-header-title { font-family: Gaegu, cursive; font-size: 1.5rem; font-weight: 700; color: var(--dark); }
+
+/* Tab bar */
+.ft-tab-bar { display: flex; border-top: 1px solid var(--sand); margin-top: 14px; }
+.ft-tab { padding: 0 20px; height: 44px; display: flex; align-items: center; font-size: .8rem; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+.ft-tab.on { font-weight: 500; color: var(--dark); border-bottom-color: var(--dark); }
+
+/* Main content */
+.ft-main { padding: 28px 5%; }
+.ft-section-title { font-family: Gaegu, cursive; font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 18px; }
+
+/* KPI grid */
+.ft-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.ft-kpi-card { background: #fff; border: 1.5px solid var(--sand); border-radius: 14px; padding: 20px 22px; }
+.ft-kpi-icon { font-size: 1rem; margin-bottom: 6px; }
+.ft-kpi-value { font-family: Gaegu, cursive; font-size: 1.7rem; font-weight: 700; color: var(--dark); line-height: 1; }
+.ft-kpi-label { font-size: .72rem; color: var(--muted); margin-top: 3px; }
+.ft-kpi-trend-up      { font-size: .68rem; color: var(--green); font-weight: 500; margin-top: 4px; }
+.ft-kpi-trend-neutral { font-size: .68rem; color: var(--muted); margin-top: 4px; }
+
+/* Action bar */
+.ft-action-bar   { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.ft-action-label { font-size: .88rem; font-weight: 600; color: var(--dark); }
+.ft-btn-group    { display: flex; gap: 8px; }
+.ft-btn-secondary { background: var(--beige2); color: var(--mid); border: 1.5px solid var(--sand); border-radius: 8px; padding: 7px 14px; font-size: .76rem; font-weight: 500; cursor: pointer; font-family: inherit; }
+.ft-btn-primary   { background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: .76rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+/* Table */
+.ft-table      { background: #fff; border: 1.5px solid var(--sand); border-radius: 14px; overflow: hidden; }
+.ft-table-head { display: grid; align-items: center; padding: 11px 18px; background: var(--beige2); font-size: .72rem; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--sand); }
+.ft-table-row  { display: grid; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--sand); font-size: .78rem; }
+.ft-table-row:last-child { border-bottom: none; }
+
+/* Column templates */
+.ft-order-grid  { grid-template-columns: 140px 1fr 60px 90px 80px 80px; }
+.ft-inv-grid    { grid-template-columns: 1fr 100px 100px 120px 100px; }
+.ft-settle-grid { grid-template-columns: 80px 1fr 120px 100px; }
+
+/* Cell types */
+.ft-cell-id    { color: var(--muted); font-size: .7rem; }
+.ft-cell-name  { font-weight: 500; color: var(--dark); }
+.ft-cell-c     { text-align: center; color: var(--mid); }
+.ft-cell-r     { text-align: right; font-weight: 700; color: var(--dark); }
+.ft-cell-date  { text-align: center; color: var(--muted); font-size: .7rem; }
+.ft-cell-badge { text-align: center; }
+.ft-cell-month { color: var(--mid); font-weight: 500; }
+
+/* Status badges */
+.ft-badge         { display: inline-block; border-radius: 10px; padding: 2px 8px; font-size: .68rem; font-weight: 700; }
+.ft-badge-warning { background: #fff5ef; color: var(--amber); border: 1px solid #f5d89c; }
+.ft-badge-success { background: var(--gp);    color: var(--green); border: 1px solid var(--gl); }
+.ft-badge-default { background: var(--beige2); color: var(--muted); border: 1px solid var(--sand); }
+.ft-badge-danger  { background: #fff0f0;      color: #E84040;      border: 1px solid #f5c0c0; }
+
+/* Inventory */
+.ft-inv-cell    { display: flex; align-items: center; gap: 10px; }
+.ft-inv-thumb   { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.ft-inv-thumb-gn { background: linear-gradient(145deg, var(--gp), var(--gl)); }
+.ft-inv-thumb-ap { background: linear-gradient(145deg, #FEF2E8, #F5C4A0); }
+.ft-stock-ok    { text-align: center; font-weight: 700; color: var(--dark); }
+.ft-stock-low   { text-align: center; font-weight: 700; color: var(--amber); }
+.ft-stock-out   { text-align: center; font-weight: 700; color: #E84040; }
+.ft-stock-total { text-align: center; color: var(--muted); }
+.ft-btn-edit    { background: var(--beige2); color: var(--mid); border: 1.5px solid var(--sand); border-radius: 7px; padding: 4px 10px; font-size: .7rem; cursor: pointer; font-family: inherit; display: block; margin: 0 auto; }
+
+/* Charts */
+.ft-chart-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.ft-chart-card   { background: #fff; border: 1.5px solid var(--sand); border-radius: 14px; padding: 20px 22px; }
+.ft-chart-title  { font-size: .82rem; font-weight: 500; color: var(--dark); margin-bottom: 14px; }
+.ft-bar-chart    { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-bottom: 8px; }
+.ft-bar-chart-sm { display: flex; align-items: flex-end; gap: 6px; height: 100px; margin-bottom: 8px; }
+.ft-bar-col      { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ft-bar          { width: 100%; background: var(--gl); border-radius: 4px 4px 0 0; }
+.ft-bar.on       { background: var(--green); }
+.ft-bar-sm       { width: 100%; background: var(--apricot); border-radius: 3px 3px 0 0; }
+.ft-bar-sm.on    { background: var(--amber); }
+.ft-bar-lbl      { font-size: .62rem; color: var(--muted); }
+.ft-bar-lbl.on   { color: var(--dark); font-weight: 700; }
+.ft-bar-sm-lbl   { font-size: .58rem; color: var(--muted); }
+.ft-bar-sm-lbl.on { color: var(--dark); font-weight: 700; }
+.ft-chart-foot   { font-size: .72rem; color: var(--muted); }
+
+/* Settlement */
+.ft-settle-cards-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.ft-settle-primary { background: linear-gradient(135deg, var(--green), #5A9A30); border-radius: 14px; padding: 18px 20px; }
+.ft-settle-white   { background: #fff; border: 1.5px solid var(--sand); border-radius: 14px; padding: 18px 20px; }
+.ft-settle-lbl { font-size: .72rem; margin-bottom: 4px; }
+.ft-settle-primary .ft-settle-lbl { color: rgba(255,255,255,.7); }
+.ft-settle-white   .ft-settle-lbl { color: var(--muted); }
+.ft-settle-val { font-family: Gaegu, cursive; font-size: 1.5rem; font-weight: 700; }
+.ft-settle-primary .ft-settle-val { color: #fff; }
+.ft-settle-white   .ft-settle-val { color: var(--dark); }
+.ft-settle-sub { font-size: .68rem; margin-top: 2px; }
+.ft-settle-primary        .ft-settle-sub { color: rgba(255,255,255,.6); }
+.ft-settle-white          .ft-settle-sub { color: var(--muted); }
+.ft-settle-white.complete .ft-settle-sub { color: var(--green); font-weight: 500; }

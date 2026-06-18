@@ -38,7 +38,7 @@ public class ProductRankings {
     @Column(nullable = false)
     private int salesCount = 0;
 
-    @Column(name = "ranking", nullable = false) //고침
+    @Column(name = "ranking", nullable = false)
     private int rank;
 
 
