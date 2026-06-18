@@ -12,7 +12,7 @@
         .admin-inq-head{background:var(--white);border-bottom:1.5px solid var(--beige);padding:34px 6% 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
         .admin-inq-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
         .admin-inq-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
-        .admin-inq-desc{color:var(--light);font-size:.84rem;line-height:QD1.7;margin-top:8px;max-width:620px}
+        .admin-inq-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:620px}
         .admin-inq-wrap{max-width:1040px;margin:0 auto;padding:34px 6% 80px}
         .admin-inq-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
         .admin-inq-filter{display:flex;gap:7px;flex-wrap:wrap}
@@ -104,51 +104,18 @@
     var adminId=1;
     var adminInquiryFilter='all';
     var cachedAdminInquiries=[];
+    var initialInquiryId=null;
+    var initialInquiryHandled=false;
 
     document.addEventListener('DOMContentLoaded',function(){
-        if(!isAdminLoggedIn()){
-            showAdminToast('로그인 후 관리자 문의를 확인할 수 있습니다.');
-            setTimeout(function(){location.href='/login'},900);
-            return;
-        }
-
+        var params=new URLSearchParams(location.search);
+        initialInquiryId=params.get('inquiryId')||params.get('id');
         loadAdminInquiries();
     });
-
-    function getAuthToken(){
-        return localStorage.getItem('token')||sessionStorage.getItem('token');
-    }
-
-    function isAdminLoggedIn(){
-        return !!getAuthToken();
-    }
-
-    function getAuthOnlyHeaders(){
-        return {
-            'Authorization':'Bearer '+getAuthToken()
-        };
-    }
-
-    function getAuthJsonHeaders(){
-        return {
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+getAuthToken()
-        };
-    }
-
-    function handleAdminUnauthorized(){
-        showAdminToast('로그인이 필요합니다. 다시 로그인해주세요.');
-        setTimeout(function(){location.href='/login'},900);
-    }
 
     async function loadAdminInquiries(){
         var list=document.getElementById('adminInquiryList');
         list.innerHTML='<div class="admin-inq-empty">문의 내역을 불러오는 중입니다.</div>';
-
-        if(!isAdminLoggedIn()){
-            handleAdminUnauthorized();
-            return;
-        }
 
         try{
             var url='/api/admin/inquiries';
@@ -157,15 +124,7 @@
                 url+='?status='+adminInquiryFilter;
             }
 
-            var response=await fetch(url,{
-                headers:getAuthOnlyHeaders()
-            });
-
-            if(response.status===401||response.status===403){
-                handleAdminUnauthorized();
-                return;
-            }
-
+            var response=await fetch(url);
             var data=await response.json();
 
             if(!response.ok){
@@ -175,6 +134,7 @@
 
             cachedAdminInquiries=Array.isArray(data)?data:[];
             renderAdminInquiries();
+            openInitialInquiryAnswerIfNeeded();
         }catch(error){
             list.innerHTML='<div class="admin-inq-empty">서버 연결에 실패했습니다.</div>';
         }
@@ -198,7 +158,7 @@
                 ? '<button type="button" class="admin-inq-btn disabled">답변 완료</button>'
                 : '<button type="button" class="admin-inq-btn answer" onclick="openAnswerModal('+item.id+')">답변하기</button>';
 
-            return '<div class="admin-inq-card">'
+            return '<div id="admin-inq-card-'+item.id+'" class="admin-inq-card">'
                 +'<div class="admin-inq-top">'
                 +'<div>'
                 +'<div class="admin-inq-badges">'
@@ -224,7 +184,39 @@
         }).join('');
     }
 
-    function setAdminInquiryFilter(filter,element){
+
+    function openInitialInquiryAnswerIfNeeded(){
+        if(!initialInquiryId||initialInquiryHandled){
+            return;
+        }
+
+        var targetId=Number(initialInquiryId);
+        var item=cachedAdminInquiries.find(function(inquiry){
+            return Number(inquiry.id)===targetId;
+        });
+
+        if(!item){
+            return;
+        }
+
+        initialInquiryHandled=true;
+
+        var card=document.getElementById('admin-inq-card-'+targetId);
+        if(card){
+            card.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+
+        if(String(item.status||'').toLowerCase()==='answered'){
+            showAdminToast('이미 답변 완료된 문의입니다.');
+            return;
+        }
+
+        setTimeout(function(){
+            openAnswerModal(targetId);
+        },150);
+    }
+
+    function setAdminInquiryFilter(filter, element){
         adminInquiryFilter=filter;
 
         document.querySelectorAll('.admin-inq-filter button').forEach(function(button){
@@ -290,11 +282,6 @@
             return;
         }
 
-        if(!isAdminLoggedIn()){
-            handleAdminUnauthorized();
-            return;
-        }
-
         var body={
             adminId:adminId,
             answer:answer
@@ -303,14 +290,9 @@
         try{
             var response=await fetch('/api/admin/inquiries/'+inquiryId+'/answer',{
                 method:'POST',
-                headers:getAuthJsonHeaders(),
+                headers:{'Content-Type':'application/json'},
                 body:JSON.stringify(body)
             });
-
-            if(response.status===401||response.status===403){
-                handleAdminUnauthorized();
-                return;
-            }
 
             var data=await response.json();
 
