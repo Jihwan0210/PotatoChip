@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     loadMyInfo();
+    loadMyOrders();
 });
 
 // 내 정보 조회
@@ -174,6 +175,7 @@ function switchMyTab(name) {
     });
 
     if (name === 'profile') loadMyInfo();
+    if (name === 'orders') loadMyOrders()
 }
 
 // 비밀번호 변경
@@ -249,4 +251,78 @@ function withdrawAccount() {
             }
         })
         .catch(function() { showToast('오류가 발생했습니다.'); });
+}
+var STATUS_LABELS = {
+    PAYMENT_COMPLETE: '결제완료',
+    PREPARING: '상품준비중',
+    SHIPPING: '배송중',
+    DELIVERED: '배송완료',
+    CANCELLED: '주문취소',
+    REFUNDED: '환불완료'
+};
+
+var DELIVERY_LABELS = {
+    delivery: '일반 택배',
+    express: '당일 배송',
+    pickup: '농장 픽업'
+};
+
+function loadMyOrders() {
+    const token = getToken();
+    fetch('/orders/my', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(function (res) {
+            if (res.status === 401) { location.href = '/login'; return null; }
+            return res.json();
+        })
+        .then(function (orders) {
+            if (!orders) return;
+            renderMyOrders(orders);
+        })
+        .catch(function (err) { console.error('주문 내역 조회 실패:', err); });
+}
+
+function renderMyOrders(orders) {
+    const token = getToken();
+    const box = document.getElementById('mycontent-orders');
+    if (!box) return;
+
+    if (!orders.length) {
+        box.innerHTML =
+            '<div class="mp-card">' +
+            '<div class="mp-section-title">📦 주문 내역</div>' +
+            '<div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">주문 내역이 없어요 🌿</div>' +
+            '</div>';
+        return;
+    }
+
+    var html = '<div class="mp-card"><div class="mp-section-title">📦 주문 내역</div>';
+
+    orders.forEach(function (order) {
+        var itemCount = (order.orderItems || []).length;
+        var finalAmount = (order.totalAmount || 0) + (order.totalShippingFee || 0);
+        var dateStr = order.createdAt ? order.createdAt.replace('T', ' ').slice(0, 16) : '';
+
+        html +=
+            '<div style="border:1.5px solid var(--sand);border-radius:12px;padding:16px;margin-bottom:12px">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+            '<span style="font-weight:700;font-size:.88rem;color:var(--dark)">' + order.orderNumber + '</span>' +
+            '<span style="font-size:.74rem;font-weight:700;color:var(--green);background:#eef7e6;border-radius:20px;padding:2px 10px">' +
+            (STATUS_LABELS[order.status] || order.status) +
+            '</span>' +
+            '</div>' +
+            '<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">' +
+            dateStr + ' · ' + (DELIVERY_LABELS[order.deliveryType] || order.deliveryType) + ' · 상품 ' + itemCount + '건' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<span style="font-weight:700;color:#F39C12">' + finalAmount.toLocaleString() + '원</span>' +
+            '<a href="/orders/complete/' + order.id + '?token=' + token + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>' +
+            '</div>' +
+            '</div>';
+    });
+
+    html += '</div>';
+    box.innerHTML = html;
 }

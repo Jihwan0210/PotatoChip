@@ -12,6 +12,8 @@ import com.example.potatochip.order.repository.OrderRepository;
 import com.example.potatochip.order.service.OrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/orders")
@@ -134,5 +138,17 @@ public class OrderController {
 
         model.addAttribute("order", orderDTO);
         return "order/checkout";
+    }
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyOrders(HttpServletRequest request) {
+        Long buyerId;
+        try {
+            buyerId = getLoginUserId(request);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+        }
+
+        List<OrderDTO> myOrders = orderService.getMyOrders(buyerId);
+        return ResponseEntity.ok(myOrders);
     }
 }
