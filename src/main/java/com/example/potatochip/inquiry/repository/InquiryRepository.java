@@ -15,4 +15,8 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     List<Inquiry> findByIsActiveTrueOrderByCreatedAtDesc();
 
     Optional<Inquiry> findByIdAndIsActiveTrue(Long id);
+
+    long countByStatusAndIsActiveTrue(String status);
+
+    long countByIsActiveTrue();
 }

@@ -138,7 +138,9 @@
                 <button type="button"
                         class="btn-hero"
                         style="margin-top:22px;background:var(--green)"
-                        onclick="alert('클릭됨')">
+                        th:data-login="@{/login}"
+                        th:data-mypage="@{/mypage}"
+                        onclick="location.href = (localStorage.getItem('token') || sessionStorage.getItem('token')) ? this.dataset.mypage : this.dataset.login">
                     로그인/회원 가입하기 <span class="ico">↗</span>
                 </button>
             </div>
