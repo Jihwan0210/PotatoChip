@@ -2,6 +2,7 @@ package com.example.potatochip.order.service;
 
 import com.example.potatochip.cart.entity.Cart;
 import com.example.potatochip.cart.repository.CartRepository;
+import com.example.potatochip.order.dto.OrderDTO;
 import com.example.potatochip.order.dto.OrderRequestDTO;
 import com.example.potatochip.order.entity.Order;
 import com.example.potatochip.order.entity.OrderItem;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,46 +43,77 @@ public class OrderServiceImpl implements OrderService {
                 .map(item -> item.getPriceSnapshot().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 4. 새로운 영수증(Order 마스터) 껍데기를 만듭니다.
+        // 4. 배송비: order.html에서 넘어온 값 사용, 없으면 0
+        BigDecimal shippingFee = requestDTO.getShippingFee() != null
+                ? requestDTO.getShippingFee()
+                : BigDecimal.ZERO;
+
+        // 5. 새로운 Order 생성
         Order newOrder = Order.builder()
                 .buyerId(buyerId)
-                // 🌟 orders.cart_id가 NOT NULL이라 반드시 채워줘야 합니다!
-                //    (이게 빠져서 "Column 'cart_id' cannot be null" 에러가 났던 부분)
                 .cartId(cart.getId())
-                // 주문번호는 "ORD-랜덤영어숫자" 형식으로 간지나게 생성!
                 .orderNumber("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .shippingAddress(requestDTO.getShippingAddress())
                 .paymentMethod(requestDTO.getPaymentMethod())
                 .deliveryType(requestDTO.getDeliveryType() != null ? requestDTO.getDeliveryType() : "delivery")
                 .pickupDatetime(requestDTO.getPickuptime())
                 .totalAmount(totalAmount)
-                .totalShippingFee(BigDecimal.ZERO) // 배송비는 일단 무료!
-                .status(OrderStatus.PAYMENT_COMPLETE) // 방금 만든 Enum 상태 적용!
+                .totalShippingFee(shippingFee)
+                .status(OrderStatus.PAYMENT_COMPLETE)
                 .build();
 
-        // 5. 장바구니(CartItem)에 있던 물건들을 하나씩 꺼내서, 영수증 상세 내역(OrderItem)으로 변신시킵니다!
+        // 6. CartItem → OrderItem 변환
         cart.getCartItems().forEach(cartItem -> {
             OrderItem orderItem = OrderItem.builder()
                     .productId(cartItem.getProductId())
-                    .sellerId(1L) // 임시: 나중엔 실제 상품 DB를 찔러서 판매자 ID를 가져와야 합니다.
+                    .sellerId(1L)
                     .quantity(cartItem.getQuantity())
                     .price(cartItem.getPriceSnapshot())
-                    // 🌟 OrderItem 만들 때 추가했던 필수값들 채워주기!
                     .shippingFee(BigDecimal.ZERO)
                     .status(OrderStatus.PAYMENT_COMPLETE)
                     .build();
-
-            // 영수증(Order) 껍데기에 이 상세 내역을 딱 붙여줍니다.
             newOrder.addOrderItem(orderItem);
         });
 
-        // 6. 속이 꽉 찬 영수증을 DB 창고에 영구적으로 저장합니다! (주문 완료)
+        // 7. DB에 저장
         Order savedOrder = orderRepository.save(newOrder);
 
-        // 7. 결제가 끝났으니 장바구니는 비워줍니다 (선택 사항)
-        cartRepository.delete(cart);
+        // 8. 장바구니 비우기
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
 
-        // 🌟 방금 저장된 주문의 ID를 반환합니다!
+        // 9. 저장된 주문 ID 반환
         return savedOrder.getId();
+    }
+
+    @Override
+    public List<OrderDTO> getMyOrders(Long buyerId) {
+        return orderRepository.findByBuyerIdOrderByCreatedAtDesc(buyerId)
+                .stream()
+                .map(this::toOrderDTO)
+                .collect(Collectors.toList());
+    }
+
+    private OrderDTO toOrderDTO(Order order) {
+        List<OrderDTO.OrderItemDTO> itemDTOs = order.getOrderItems().stream()
+                .map(item -> OrderDTO.OrderItemDTO.builder()
+                        .productId(item.getProductId())
+                        .quantity(item.getQuantity())
+                        .price(item.getPrice())
+                        .build())
+                .collect(Collectors.toList());
+
+        return OrderDTO.builder()
+                .id(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .shippingAddress(order.getShippingAddress())
+                .deliveryType(order.getDeliveryType())
+                .totalAmount(order.getTotalAmount())
+                .totalShippingFee(order.getTotalShippingFee())
+                .paymentMethod(order.getPaymentMethod())
+                .status(order.getStatus().name())
+                .createdAt(order.getCreatedAt())
+                .orderItems(itemDTOs)
+                .build();
     }
 }

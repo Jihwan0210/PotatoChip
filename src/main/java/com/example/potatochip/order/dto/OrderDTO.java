@@ -18,7 +18,7 @@ public class OrderDTO {
     private BigDecimal totalShippingFee;
     private String paymentMethod;
     private LocalDateTime createdAt;
-
+    private String status;
     // 주문한 상품 목록
     private List<OrderItemDTO> orderItems;
 
