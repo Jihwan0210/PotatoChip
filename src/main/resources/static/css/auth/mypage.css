@@ -1,0 +1,131 @@
+#page-mypage {
+    background: var(--beige2);
+    min-height: 100vh;
+    padding: 84px 24px 60px;
+}
+.mp-layout {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 24px;
+    max-width: 980px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+/* 사이드바 */
+.mp-sidebar {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 16px rgba(42,30,6,.07);
+    overflow: hidden;
+    position: sticky;
+    top: 84px;
+}
+.mp-user-box {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1.5px solid var(--beige2);
+}
+.mp-avatar {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--gp);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 10px;
+}
+.mp-sidebar-name {
+    font-family: Gaegu, cursive;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+.mp-sidebar-email {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: 3px;
+}
+.mp-nav { padding: 10px 0; }
+.mp-tab {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 20px;
+    font-size: .83rem;
+    color: var(--mid);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: background .15s;
+}
+.mp-tab:hover { background: var(--beige2); }
+.mp-tab.on {
+    background: var(--gp);
+    border-left-color: var(--green);
+    color: var(--dark);
+    font-weight: 600;
+}
+
+/* 콘텐츠 카드 */
+.mp-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(42,30,6,.06);
+    padding: 26px 28px;
+    margin-bottom: 18px;
+}
+.mp-card:last-child { margin-bottom: 0; }
+.mp-section-title {
+    font-family: Gaegu, cursive;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 18px;
+}
+.mp-card-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: .3px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+.mp-divider {
+    border: none;
+    border-top: 1.5px solid var(--beige2);
+    margin: 20px 0;
+}
+
+/* 폼 필드 */
+.mp-field { display: flex; flex-direction: column; gap: 13px; }
+.mp-field label { font-size: .74rem; color: var(--muted); display: block; margin-bottom: 4px; }
+.mp-field input, .mp-field textarea {
+    width: 100%;
+    border: 1.5px solid #e2d9c8;
+    border-radius: 9px;
+    padding: 10px 13px;
+    font-size: .84rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+}
+.mp-field input:focus, .mp-field textarea:focus { border-color: var(--green); }
+.mp-field input[readonly] { background: var(--beige2); color: var(--muted); }
+.mp-field textarea { resize: none; }
+
+/* 버튼 */
+.mp-btn-row { display: flex; gap: 10px; margin-top: 6px; }
+.mp-btn { flex: 1; border-radius: 10px; padding: 11px; font-size: .86rem; font-weight: 600; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s; }
+.mp-btn:hover { opacity: .88; }
+.mp-btn.green  { background: var(--green); color: #fff; }
+.mp-btn.outline{ background: #fff; color: var(--green); border: 1.5px solid var(--green); }
+.mp-btn.gray   { background: #fff; color: var(--mid); border: 1.5px solid #e2d9c8; }
+.mp-btn.red    { background: #e74c3c; color: #fff; }
+
+/* 위험 구역 */
+.danger-card {
+    background: #fff;
+    border: 1.5px solid #fecaca;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(231,76,60,.06);
+    padding: 26px 28px;
+}

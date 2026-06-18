@@ -1,5 +1,17 @@
 /* ══ LOGIN / SIGNUP ══ */
 
+function togglePw(btn) {
+    var input = btn.closest('.pw-wrap').querySelector('input');
+    var icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off';
+    } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye';
+    }
+}
+
 // localStorage 또는 sessionStorage에서 토큰 읽기
 function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -41,10 +53,54 @@ function swTab(t) {
     document.getElementById('lf').style.display = t === 'login' ? 'block' : 'none';
     document.getElementById('sf').style.display = t === 'signup' ? 'block' : 'none';
     document.getElementById('sv').style.display = 'none';
+    document.getElementById('ff').style.display = 'none';
     var tl = document.getElementById('tab-l');
     var ts = document.getElementById('tab-s');
     if (tl) { tl.classList.toggle('on', t === 'login'); }
     if (ts) { ts.classList.toggle('on', t === 'signup'); }
+}
+
+function showForgotView() {
+    document.getElementById('lf').style.display = 'none';
+    document.getElementById('sf').style.display = 'none';
+    document.getElementById('sv').style.display = 'none';
+    document.getElementById('ff').style.display = 'block';
+    var tl = document.getElementById('tab-l');
+    var ts = document.getElementById('tab-s');
+    if (tl) tl.classList.remove('on');
+    if (ts) ts.classList.remove('on');
+}
+
+function showLoginView() {
+    document.getElementById('ff').style.display = 'none';
+    document.getElementById('lf').style.display = 'block';
+    var tl = document.getElementById('tab-l');
+    if (tl) tl.classList.add('on');
+}
+
+function doForgotPassword() {
+    var email = document.getElementById('fe').value.trim();
+    var name = document.getElementById('fn').value.trim();
+
+    if (!email || !name) {
+        showToast('이메일과 이름을 모두 입력해주세요!');
+        return;
+    }
+
+    fetch('/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, name: name })
+    })
+        .then(function(res) { return res.json(); })
+        .then(function(result) {
+            if (result.token) {
+                location.href = '/resetpw?token=' + result.token;
+            } else {
+                showToast(result.error);
+            }
+        })
+        .catch(function() { showToast('오류가 발생했습니다.'); });
 }
 
 function doLogin() {
@@ -92,7 +148,7 @@ function doSignup() {
         password: document.querySelector('#sf input[name="password"]').value,
         passwordConfirm: document.querySelector('#sf input[name="passwordConfirm"]').value,
         phone: document.querySelector('#sf input[name="phone"]').value,
-        address: document.querySelector('#sf input[name="address"]').value,
+        address: (document.querySelector('#sf input[name="address"]').value + ' ' + document.querySelector('#sf input[name="addressDetail"]').value).trim(),
         nickname: document.querySelector('#sf input[name="nickname"]').value
     };
 
@@ -161,6 +217,18 @@ function switchMyTab(name) {
             }
         }
     });
+}
+
+/* ══ 주소 검색 ══ */
+function openAddressSearch() {
+    new daum.Postcode({
+        oncomplete: function(data) {
+            var addr = data.roadAddress || data.jibunAddress;
+            document.getElementById('sf-postcode').value = data.zonecode;
+            document.getElementById('sf-address').value = addr;
+            document.getElementById('sf-address-detail').focus();
+        }
+    }).open();
 }
 
 /* ══ 로그아웃 ══ */
