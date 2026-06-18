@@ -32,6 +32,7 @@
         .fg input, .fg select, .fg textarea {
             width: 100%; padding: 11px 14px; border: 1.5px solid var(--sand); border-radius: 8px;
             font-family: inherit; font-size: .9rem; transition: all .2s; background: #fff; color: var(--dark);
+            resize: none;
         }
         .fg input:focus, .fg select:focus, .fg textarea:focus {
             outline: none; border-color: var(--green);
@@ -366,7 +367,10 @@
         appendHidden(form, 'shippingFee', orderShippingFee);
         appendHidden(form, 'pointUsed', orderPointUsed);
         appendHidden(form, 'finalTotal', Math.max(0, productTotal + orderShippingFee - orderPointUsed));
-        // deliveryType은 이미 hidden input으로 form 내에 존재
+
+        // POST 시 서버가 토큰으로 사용자를 식별할 수 있도록 포함
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        appendHidden(form, 'token', token || '');
 
         form.submit();
     }
@@ -381,10 +385,6 @@
         }
         input.value = value;
     }
-
-    /* ════════════════════════════════════════
-       회원 정보 자동 입력
-    ════════════════════════════════════════ */
     async function autofillMemberInfo() {
         const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         const loadingBadge  = document.getElementById('loadingBadge');
@@ -443,10 +443,6 @@
             if (loadingBadge) loadingBadge.style.display = 'none';
         }
     }
-
-    /* ════════════════════════════════════════
-       초기화
-    ════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', function () {
         if (!token || !role) return; // 비로그인 시 초기화 스킵
 
