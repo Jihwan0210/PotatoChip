@@ -20,6 +20,7 @@ public class ProductRecommendationDTO {
     private String productName;
     private String productCategory;
     private String thumbnailUrl;
+    private String type;
     private String reason;
     private BigDecimal score;
     private Integer rankOrder;
@@ -35,6 +36,7 @@ public class ProductRecommendationDTO {
                 recommendation.getProduct().getName(),
                 recommendation.getProduct().getCategory(),
                 recommendation.getProduct().getThumbnailUrl(),
+                recommendation.getType() != null ? recommendation.getType().name() : null,
                 recommendation.getReason(),
                 recommendation.getScore(),
                 recommendation.getRankOrder(),

@@ -30,7 +30,11 @@ public class ProductRecommendation {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(nullable = false, length = 30)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProductRecommendationType type;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
 
     @Column(nullable = false, precision = 5, scale = 4)
@@ -45,10 +49,11 @@ public class ProductRecommendation {
     @Column(name = "generated_at", nullable = false)
     private LocalDateTime generatedAt;
 
-    public ProductRecommendation(Long userId, String sessionId, Product product, String reason, BigDecimal score, Integer rankOrder, LocalDateTime expiresAt) {
+    public ProductRecommendation(Long userId, String sessionId, Product product, ProductRecommendationType type, String reason, BigDecimal score, Integer rankOrder, LocalDateTime expiresAt) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.product = product;
+        this.type = type;
         this.reason = reason;
         this.score = score;
         this.rankOrder = rankOrder;
@@ -58,6 +63,14 @@ public class ProductRecommendation {
 
     @PrePersist
     public void prePersist() {
-        this.generatedAt = LocalDateTime.now();
+        if (this.generatedAt == null) {
+            this.generatedAt = LocalDateTime.now();
+        }
+
+        if (this.type == null) {
+            this.type = ProductRecommendationType.AI;
+        }
     }
+
+
 }
