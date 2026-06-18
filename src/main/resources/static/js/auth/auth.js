@@ -12,7 +12,6 @@ function togglePw(btn) {
     }
 }
 
-// localStorage 또는 sessionStorage에서 토큰 읽기
 function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
 }
@@ -23,19 +22,142 @@ function filterPasswordChars(el) { el.value = el.value.replace(/[^a-zA-Z0-9!@#$%
 function filterDigits(el) { el.value = el.value.replace(/[^0-9]/g, '').slice(0, 11); }
 function filterNicknameChars(el) { el.value = el.value.replace(/[^가-힣a-zA-Z]/g, ''); }
 
+/* ══ 실시간 검증 상태 관리 ══ */
+
+function setFgState(fg, state, msg) {
+    fg.classList.remove('error', 'valid');
+    var err = fg.querySelector('.fg-err');
+    var ok = fg.querySelector('.fg-ok');
+    if (state === 'error') {
+        fg.classList.add('error');
+        if (err) err.textContent = msg || '';
+        if (ok) ok.textContent = '';
+    } else if (state === 'valid') {
+        fg.classList.add('valid');
+        if (ok) ok.textContent = msg || '';
+        if (err) err.textContent = '';
+    } else {
+        if (err) err.textContent = '';
+        if (ok) ok.textContent = '';
+    }
+}
+
+/* 이메일 중복 실시간 체크 (blur 이벤트) */
+var _emailTimer = null;
+function checkEmailLive(input) {
+    var email = input.value.trim();
+    var fg = input.closest('.fg');
+    if (!email) { setFgState(fg, ''); return; }
+    if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+$/.test(email)) {
+        setFgState(fg, 'error', '이메일 형식을 확인해주세요.');
+        return;
+    }
+    clearTimeout(_emailTimer);
+    _emailTimer = setTimeout(function () {
+        fetch('/api/check/email?email=' + encodeURIComponent(email))
+            .then(function (res) { return res.json(); })
+            .then(function (result) {
+                if (result.exists) {
+                    setFgState(fg, 'error', '이미 사용 중인 이메일이에요.');
+                } else {
+                    setFgState(fg, 'valid', '사용 가능한 이메일이에요. ✓');
+                }
+            })
+            .catch(function () {});
+    }, 300);
+}
+
+/* 비밀번호 형식 실시간 체크 (input 이벤트) */
+var _pwTimer = null;
+function validatePasswordLive(input) {
+    var pw = input.value;
+    var fg = input.closest('.fg');
+    if (!pw) { setFgState(fg, ''); return; }
+    clearTimeout(_pwTimer);
+    _pwTimer = setTimeout(function () {
+        fetch('/api/check/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw })
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (result) {
+                if (result.valid) {
+                    setFgState(fg, 'valid', '안전한 비밀번호에요. ✓');
+                } else {
+                    setFgState(fg, 'error', '영어, 숫자, 특수문자를 포함해 8자 이상 입력해주세요.');
+                }
+                var confirmInput = document.querySelector('#sf input[name="passwordConfirm"]');
+                if (confirmInput && confirmInput.value) validatePasswordConfirmLive(confirmInput);
+            })
+            .catch(function () {});
+    }, 400);
+}
+
+/* 비밀번호 확인 실시간 체크 (input 이벤트) */
+var _pwConfirmTimer = null;
+function validatePasswordConfirmLive(input) {
+    var confirm = input.value;
+    var fg = input.closest('.fg');
+    var pwInput = document.querySelector('#sf input[name="password"]');
+    var pw = pwInput ? pwInput.value : '';
+    if (!confirm) { setFgState(fg, ''); return; }
+    clearTimeout(_pwConfirmTimer);
+    _pwConfirmTimer = setTimeout(function () {
+        fetch('/api/check/password-confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw, passwordConfirm: confirm })
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (result) {
+                if (result.match) {
+                    setFgState(fg, 'valid', '비밀번호가 일치해요. ✓');
+                } else {
+                    setFgState(fg, 'error', '비밀번호가 일치하지 않아요.');
+                }
+            })
+            .catch(function () {});
+    }, 300);
+}
+
+/* ══ 역할 전환 (필드 초기화 포함) ══ */
 function toggleRoleFields(sel) {
     var isFarmer = sel.value === '판매자(농가)';
     var addrGroup = document.getElementById('addressGroup');
     var nickGroup = document.getElementById('nicknameGroup');
     if (addrGroup) addrGroup.style.display = isFarmer ? 'none' : '';
     if (nickGroup) nickGroup.style.display = isFarmer ? 'none' : '';
+
+    // 역할 전환 시 입력 필드 초기화
+    var sf = document.getElementById('sf');
+    if (sf) {
+        sf.querySelectorAll('input[name]').forEach(function (input) {
+            if (input.name !== 'role' && !input.readOnly) input.value = '';
+        });
+        var postcode = document.getElementById('sf-postcode');
+        var address = document.getElementById('sf-address');
+        var detail = document.getElementById('sf-address-detail');
+        if (postcode) postcode.value = '';
+        if (address) address.value = '';
+        if (detail) detail.value = '';
+        sf.querySelectorAll('.fg').forEach(function (fg) {
+            fg.classList.remove('error', 'valid');
+            var err = fg.querySelector('.fg-err');
+            var ok = fg.querySelector('.fg-ok');
+            if (err) err.textContent = '';
+            if (ok) ok.textContent = '';
+        });
+    }
 }
 
 function clearFieldErrors() {
     document.querySelectorAll('#sf .fg').forEach(function (fg) {
-        fg.classList.remove('error');
+        fg.classList.remove('error', 'valid');
         var err = fg.querySelector('.fg-err');
+        var ok = fg.querySelector('.fg-ok');
         if (err) err.textContent = '';
+        if (ok) ok.textContent = '';
     });
 }
 
@@ -44,9 +166,7 @@ function showFieldError(name, msg) {
     if (!input) return;
     var fg = input.closest('.fg');
     if (!fg) return;
-    fg.classList.add('error');
-    var err = fg.querySelector('.fg-err');
-    if (err) err.textContent = msg;
+    setFgState(fg, 'error', msg);
 }
 
 function swTab(t) {
@@ -78,6 +198,45 @@ function showLoginView() {
     if (tl) tl.classList.add('on');
 }
 
+/* ══ 성공 모달 ══ */
+var _smRedirectTimer = null;
+function showSuccessModal(title, msg, redirectUrl) {
+    var modal = document.getElementById('success-modal');
+    if (!modal) { location.href = redirectUrl || '/'; return; }
+
+    document.getElementById('sm-title').textContent = title;
+    document.getElementById('sm-msg').textContent = msg;
+
+    var smBtn = document.getElementById('sm-btn');
+    if (smBtn && redirectUrl) smBtn.onclick = function () { location.href = redirectUrl; };
+
+    modal.style.display = 'flex';
+
+    // 타이머 바 애니메이션 (3초)
+    var bar = document.getElementById('sm-bar');
+    if (bar) {
+        bar.style.transition = 'none';
+        bar.style.width = '100%';
+        setTimeout(function () {
+            bar.style.transition = 'width 3s linear';
+            bar.style.width = '0%';
+        }, 60);
+    }
+
+    clearTimeout(_smRedirectTimer);
+    if (redirectUrl) {
+        _smRedirectTimer = setTimeout(function () { location.href = redirectUrl; }, 3000);
+    }
+}
+
+function handleSmOverlayClick(e) {
+    if (e.target === document.getElementById('success-modal')) {
+        clearTimeout(_smRedirectTimer);
+        document.getElementById('success-modal').style.display = 'none';
+    }
+}
+
+/* ══ 비밀번호 찾기 ══ */
 function doForgotPassword() {
     var email = document.getElementById('fe').value.trim();
     var name = document.getElementById('fn').value.trim();
@@ -92,17 +251,18 @@ function doForgotPassword() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email, name: name })
     })
-        .then(function(res) { return res.json(); })
-        .then(function(result) {
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
             if (result.token) {
                 location.href = '/resetpw?token=' + result.token;
             } else {
                 showToast(result.error);
             }
         })
-        .catch(function() { showToast('오류가 발생했습니다.'); });
+        .catch(function () { showToast('오류가 발생했습니다.'); });
 }
 
+/* ══ 로그인 ══ */
 function doLogin() {
     const email = document.getElementById('le').value;
     const password = document.getElementById('lp').value;
@@ -121,18 +281,17 @@ function doLogin() {
         .then(res => res.json())
         .then(result => {
             if (result.token) {
-                if (remember) {
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('email', result.email);
-                    localStorage.setItem('role', result.role);
-                } else {
-                    sessionStorage.setItem('token', result.token);
-                    sessionStorage.setItem('email', result.email);
-                    sessionStorage.setItem('role', result.role);
-                }
+                var storage = remember ? localStorage : sessionStorage;
+                storage.setItem('token', result.token);
+                storage.setItem('email', result.email);
+                storage.setItem('role', result.role);
+                storage.setItem('name', result.name || '');
                 document.getElementById('lf').style.display = 'none';
-                document.getElementById('sv').style.display = 'block';
-                setTimeout(function () { location.href = '/'; }, 1800);
+                showSuccessModal(
+                    '로그인 성공! 🎉',
+                    (result.name || '고객') + '님, 환영합니다! 못난이 농작물에 오신 것을 환영해요 🌿',
+                    '/'
+                );
             } else {
                 showToast(result.error);
             }
@@ -140,6 +299,7 @@ function doLogin() {
         .catch(err => showToast('오류가 발생했습니다.'));
 }
 
+/* ══ 회원가입 ══ */
 function doSignup() {
     const data = {
         name: document.querySelector('#sf input[name="name"]').value,
@@ -188,10 +348,13 @@ function doSignup() {
         .then(result => {
             if (result.message) {
                 document.getElementById('sf').style.display = 'none';
-                document.getElementById('sv').style.display = 'block';
-                document.getElementById('sv-t').textContent = '회원가입 완료!';
-                document.getElementById('sv-m').textContent = '못난이 농작물 가족이 되신 걸 환영해요! 🌿';
-                setTimeout(function () { location.href = '/'; }, 2000);
+                showSuccessModal(
+                    '회원가입 완료! 🎉',
+                    '못난이 농작물 가족이 되신 걸 환영해요! 로그인 페이지로 이동합니다 🌿',
+                    '/login'
+                );
+                var smBtn = document.getElementById('sm-btn');
+                if (smBtn) smBtn.textContent = '로그인하러 가기 →';
             } else {
                 alert(result.error);
             }
@@ -222,7 +385,7 @@ function switchMyTab(name) {
 /* ══ 주소 검색 ══ */
 function openAddressSearch() {
     new daum.Postcode({
-        oncomplete: function(data) {
+        oncomplete: function (data) {
             var addr = data.roadAddress || data.jibunAddress;
             document.getElementById('sf-postcode').value = data.zonecode;
             document.getElementById('sf-address').value = addr;
@@ -231,13 +394,32 @@ function openAddressSearch() {
     }).open();
 }
 
+/* ══ 소셜 로그인 콜백 처리 ══
+   KakaoController가 /login?oauth_token=...&oauth_name=...&oauth_email=...&oauth_role=... 로 리다이렉트하면
+   여기서 파라미터를 읽어 localStorage에 저장 후 홈으로 이동 */
+(function () {
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get('oauth_token');
+    if (!token) return;
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('name',  decodeURIComponent(params.get('oauth_name')  || ''));
+    localStorage.setItem('email', decodeURIComponent(params.get('oauth_email') || ''));
+    localStorage.setItem('role',  params.get('oauth_role') || 'BUYER');
+
+    var name = localStorage.getItem('name') || '고객';
+    showSuccessModal(
+        '로그인 성공! 🎉',
+        name + '님, 환영합니다! 못난이 농작물에 오신 것을 환영해요 🌿',
+        '/'
+    );
+})();
+
 /* ══ 로그아웃 ══ */
 function doLogout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    localStorage.removeItem('role');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('email');
-    sessionStorage.removeItem('role');
+    ['token', 'email', 'role', 'name'].forEach(function (k) {
+        localStorage.removeItem(k);
+        sessionStorage.removeItem(k);
+    });
     location.href = '/login';
 }

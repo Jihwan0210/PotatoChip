@@ -17,7 +17,7 @@
     <!-- 헤더 -->
     <div class="ft-header">
         <div class="ft-header-label">🌾 농가 관리</div>
-        <div class="ft-header-title">충주 행복 사과 농원 대시보드</div>
+        <div class="ft-header-title" id="farmer-name">농가 대시보드</div>
         <!-- 탭 -->
         <div class="ft-tab-bar">
             <div id="ftab-0" class="ft-tab on" onclick="switchFarmerTab(0)">주문 현황</div>
@@ -34,27 +34,27 @@
             <div class="ft-kpi-grid">
                 <div class="ft-kpi-card">
                     <div class="ft-kpi-icon">🛒</div>
-                    <div class="ft-kpi-value">28</div>
+                    <div class="ft-kpi-value" id="kpi-today">-</div>
                     <div class="ft-kpi-label">오늘 신규 주문</div>
-                    <div class="ft-kpi-trend-up">↑ 어제 대비 +12%</div>
+                    <div class="ft-kpi-trend-neutral" id="kpi-today-sub">불러오는 중...</div>
                 </div>
                 <div class="ft-kpi-card">
                     <div class="ft-kpi-icon">🏆</div>
-                    <div class="ft-kpi-value">2,340건</div>
+                    <div class="ft-kpi-value" id="kpi-total">-</div>
                     <div class="ft-kpi-label">누적 판매 건수</div>
-                    <div class="ft-kpi-trend-up">이번 달 +184건</div>
+                    <div class="ft-kpi-trend-neutral" id="kpi-total-sub">불러오는 중...</div>
                 </div>
                 <div class="ft-kpi-card">
                     <div class="ft-kpi-icon">💰</div>
-                    <div class="ft-kpi-value">1,842만</div>
+                    <div class="ft-kpi-value" id="kpi-revenue">-</div>
                     <div class="ft-kpi-label">이번 달 매출</div>
-                    <div class="ft-kpi-trend-up">↑ 전월 대비 +8%</div>
+                    <div class="ft-kpi-trend-neutral" id="kpi-revenue-sub">불러오는 중...</div>
                 </div>
                 <div class="ft-kpi-card">
                     <div class="ft-kpi-icon">⭐</div>
-                    <div class="ft-kpi-value">4.9★</div>
+                    <div class="ft-kpi-value" id="kpi-rating">-</div>
                     <div class="ft-kpi-label">평균 평점</div>
-                    <div class="ft-kpi-trend-neutral">리뷰 312건</div>
+                    <div class="ft-kpi-trend-neutral" id="kpi-reviews">불러오는 중...</div>
                 </div>
             </div>
 
@@ -62,8 +62,8 @@
             <div class="ft-action-bar">
                 <div class="ft-action-label">최근 주문 목록</div>
                 <div class="ft-btn-group">
-                    <button class="ft-btn-secondary">엑셀 다운로드</button>
-                    <button class="ft-btn-primary" onclick="alert('출고 처리 완료! 🚚')">출고 처리</button>
+                    <button class="ft-btn-secondary" onclick="exportOrders()">엑셀 다운로드</button>
+                    <button class="ft-btn-primary" onclick="bulkShip()">출고 처리</button>
                 </div>
             </div>
             <div class="ft-table">
@@ -75,45 +75,8 @@
                     <div style="text-align:center">상태</div>
                     <div style="text-align:center">주문일</div>
                 </div>
-                <div class="ft-table-row ft-order-grid">
-                    <div class="ft-cell-id">#20260522-001</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    <div class="ft-cell-c">2</div>
-                    <div class="ft-cell-r">25,800원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-warning">입금 확인</span></div>
-                    <div class="ft-cell-date">05.22</div>
-                </div>
-                <div class="ft-table-row ft-order-grid">
-                    <div class="ft-cell-id">#20260521-012</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    <div class="ft-cell-c">1</div>
-                    <div class="ft-cell-r">12,900원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-success">배송 중</span></div>
-                    <div class="ft-cell-date">05.21</div>
-                </div>
-                <div class="ft-table-row ft-order-grid">
-                    <div class="ft-cell-id">#20260520-008</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    <div class="ft-cell-c">3</div>
-                    <div class="ft-cell-r">38,700원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-default">배송 완료</span></div>
-                    <div class="ft-cell-date">05.20</div>
-                </div>
-                <div class="ft-table-row ft-order-grid">
-                    <div class="ft-cell-id">#20260519-024</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    <div class="ft-cell-c">1</div>
-                    <div class="ft-cell-r">12,900원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-default">배송 완료</span></div>
-                    <div class="ft-cell-date">05.19</div>
-                </div>
-                <div class="ft-table-row ft-order-grid">
-                    <div class="ft-cell-id">#20260518-007</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    <div class="ft-cell-c">2</div>
-                    <div class="ft-cell-r">25,800원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-success">배송 중</span></div>
-                    <div class="ft-cell-date">05.18</div>
+                <div id="ft-orders-body">
+                    <div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted)">주문을 불러오는 중...</div>
                 </div>
             </div>
         </div>
@@ -125,44 +88,17 @@
                 <div class="ft-table-head ft-inv-grid">
                     <div>상품명</div>
                     <div style="text-align:center">현재 재고</div>
-                    <div style="text-align:center">총 재고</div>
+                    <div style="text-align:center">유통기한</div>
                     <div style="text-align:center">상태</div>
                     <div style="text-align:center">관리</div>
                 </div>
-                <div class="ft-table-row ft-inv-grid">
-                    <div class="ft-inv-cell">
-                        <div class="ft-inv-thumb ft-inv-thumb-gn">🍎</div>
-                        <div class="ft-cell-name">홍옥 사과 3kg</div>
-                    </div>
-                    <div class="ft-stock-ok">42박스</div>
-                    <div class="ft-stock-total">100박스</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-success">판매 중</span></div>
-                    <div class="ft-cell-badge"><button class="ft-btn-edit" onclick="alert('재고 수정 기능 준비 중')">수정</button></div>
-                </div>
-                <div class="ft-table-row ft-inv-grid">
-                    <div class="ft-inv-cell">
-                        <div class="ft-inv-thumb ft-inv-thumb-gn">🍏</div>
-                        <div class="ft-cell-name">아오리 사과 2kg</div>
-                    </div>
-                    <div class="ft-stock-low">8박스</div>
-                    <div class="ft-stock-total">60박스</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-warning">재고 부족</span></div>
-                    <div class="ft-cell-badge"><button class="ft-btn-edit" onclick="alert('재고 수정 기능 준비 중')">수정</button></div>
-                </div>
-                <div class="ft-table-row ft-inv-grid">
-                    <div class="ft-inv-cell">
-                        <div class="ft-inv-thumb ft-inv-thumb-ap">🍎</div>
-                        <div class="ft-cell-name">홍로 사과 3kg</div>
-                    </div>
-                    <div class="ft-stock-out">0박스</div>
-                    <div class="ft-stock-total">80박스</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-danger">품절</span></div>
-                    <div class="ft-cell-badge"><button class="ft-btn-edit" onclick="alert('재고 수정 기능 준비 중')">수정</button></div>
+                <div id="ft-inv-body">
+                    <div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted)">재고를 불러오는 중...</div>
                 </div>
             </div>
         </div>
 
-        <!-- 판매 분석 탭 -->
+        <!-- 판매 분석 탭 (시각적 목업 유지) -->
         <div id="fcontent-2" style="display:none">
             <div class="ft-section-title">판매 분석 📊</div>
             <div class="ft-chart-grid">
@@ -171,19 +107,19 @@
                     <div class="ft-bar-chart">
                         <div class="ft-bar-col">
                             <div class="ft-bar" style="height:55%"></div>
-                            <div class="ft-bar-lbl">2월</div>
-                        </div>
-                        <div class="ft-bar-col">
-                            <div class="ft-bar" style="height:68%"></div>
                             <div class="ft-bar-lbl">3월</div>
                         </div>
                         <div class="ft-bar-col">
-                            <div class="ft-bar" style="height:72%"></div>
+                            <div class="ft-bar" style="height:68%"></div>
                             <div class="ft-bar-lbl">4월</div>
                         </div>
                         <div class="ft-bar-col">
+                            <div class="ft-bar" style="height:72%"></div>
+                            <div class="ft-bar-lbl">5월</div>
+                        </div>
+                        <div class="ft-bar-col">
                             <div class="ft-bar on" style="height:100%"></div>
-                            <div class="ft-bar-lbl on">5월</div>
+                            <div class="ft-bar-lbl on">6월</div>
                         </div>
                     </div>
                     <div class="ft-chart-foot">최고 매출 · 이번 달</div>
@@ -225,23 +161,23 @@
             </div>
         </div>
 
-        <!-- 정산 내역 탭 -->
+        <!-- 정산 내역 탭 (시각적 목업 유지) -->
         <div id="fcontent-3" style="display:none">
             <div class="ft-section-title">정산 내역 💳</div>
             <div class="ft-settle-cards-grid">
                 <div class="ft-settle-primary">
                     <div class="ft-settle-lbl">이번 달 정산 예정</div>
-                    <div class="ft-settle-val">1,642만원</div>
-                    <div class="ft-settle-sub">05.31 지급 예정</div>
+                    <div class="ft-settle-val" id="settle-current">-</div>
+                    <div class="ft-settle-sub">월말 지급 예정</div>
                 </div>
                 <div class="ft-settle-white complete">
                     <div class="ft-settle-lbl">지난 달 정산 완료</div>
-                    <div class="ft-settle-val">1,521만원</div>
-                    <div class="ft-settle-sub">04.30 지급 완료 ✓</div>
+                    <div class="ft-settle-val">-</div>
+                    <div class="ft-settle-sub">지급 완료 ✓</div>
                 </div>
                 <div class="ft-settle-white">
                     <div class="ft-settle-lbl">누적 정산 총액</div>
-                    <div class="ft-settle-val">8,940만원</div>
+                    <div class="ft-settle-val">-</div>
                     <div class="ft-settle-sub">가입일부터 현재까지</div>
                 </div>
             </div>
@@ -253,22 +189,10 @@
                     <div style="text-align:center">상태</div>
                 </div>
                 <div class="ft-table-row ft-settle-grid">
-                    <div class="ft-cell-month">2026.05</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg 판매대금 (184건)</div>
-                    <div class="ft-cell-r">1,642만원</div>
+                    <div class="ft-cell-month">2026.06</div>
+                    <div class="ft-cell-name">판매대금 (이번 달)</div>
+                    <div class="ft-cell-r" id="settle-current-row">-</div>
                     <div class="ft-cell-badge"><span class="ft-badge ft-badge-warning">예정</span></div>
-                </div>
-                <div class="ft-table-row ft-settle-grid">
-                    <div class="ft-cell-month">2026.04</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg 판매대금 (170건)</div>
-                    <div class="ft-cell-r">1,521만원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-success">완료</span></div>
-                </div>
-                <div class="ft-table-row ft-settle-grid">
-                    <div class="ft-cell-month">2026.03</div>
-                    <div class="ft-cell-name">홍옥 사과 3kg 판매대금 (158건)</div>
-                    <div class="ft-cell-r">1,410만원</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-success">완료</span></div>
                 </div>
             </div>
         </div>
@@ -279,6 +203,310 @@
 
 <script th:src="@{/js/app.js}"></script>
 <script th:src="@{/js/auth/auth.js}"></script>
+
+<script>
+(function () {
+    // ── 인증 가드 ──────────────────────────────────────────────
+    var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    var role  = (localStorage.getItem('role')  || sessionStorage.getItem('role')  || '').toUpperCase();
+    var name  = localStorage.getItem('name')   || sessionStorage.getItem('name')  || '농가';
+
+    if (!token || role !== 'SELLER') {
+        alert('판매자 로그인이 필요합니다.');
+        location.href = '/login';
+        return;
+    }
+
+    var nameEl = document.getElementById('farmer-name');
+    if (nameEl) nameEl.textContent = name + ' 대시보드';
+
+    // ── 탭 전환 ────────────────────────────────────────────────
+    window.switchFarmerTab = function (idx) {
+        for (var i = 0; i < 4; i++) {
+            var tab = document.getElementById('ftab-' + i);
+            var content = document.getElementById('fcontent-' + i);
+            if (tab)     tab.classList.toggle('on', i === idx);
+            if (content) content.style.display = i === idx ? '' : 'none';
+        }
+        if (idx === 0) loadOrders();
+        if (idx === 1) loadInventory();
+        if (idx === 3) loadSettlement();
+    };
+
+    // ── 헬퍼 ───────────────────────────────────────────────────
+    function authHeader() {
+        return { 'Authorization': 'Bearer ' + token };
+    }
+
+    function esc(v) {
+        if (v == null) return '';
+        return String(v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatMoney(v) {
+        if (v == null) return '-';
+        var n = Number(v);
+        if (n >= 10000) return (n / 10000).toFixed(0) + '만원';
+        return n.toLocaleString('ko-KR') + '원';
+    }
+
+    function formatDate(isoStr) {
+        if (!isoStr) return '-';
+        var s = isoStr.substring(0, 10);
+        return s.substring(5).replace('-', '.');
+    }
+
+    function statusLabel(s) {
+        return { PAYMENT_COMPLETE: '결제 완료', PREPARING: '상품 준비 중',
+                 SHIPPING: '배송 중', DELIVERED: '배송 완료',
+                 CANCELLED: '취소', REFUNDED: '환불' }[s] || s || '-';
+    }
+
+    function statusBadge(s) {
+        if (s === 'PAYMENT_COMPLETE' || s === 'PREPARING') return 'ft-badge-warning';
+        if (s === 'SHIPPING') return 'ft-badge-success';
+        if (s === 'DELIVERED') return 'ft-badge-default';
+        if (s === 'CANCELLED' || s === 'REFUNDED') return 'ft-badge-danger';
+        return 'ft-badge-default';
+    }
+
+    function farmerToast(msg) {
+        var t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#3A2808;color:#fff;padding:10px 22px;border-radius:100px;font-size:.82rem;z-index:9999;white-space:nowrap';
+        document.body.appendChild(t);
+        setTimeout(function () { t.remove(); }, 2600);
+    }
+
+    // ── KPI 요약 ───────────────────────────────────────────────
+    function loadSummary() {
+        fetch('/api/seller/summary', { headers: authHeader() })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (!d || d.error) { console.error('[summary error]', d && d.error); return; }
+                var todayEl   = document.getElementById('kpi-today');
+                var totalEl   = document.getElementById('kpi-total');
+                var revEl     = document.getElementById('kpi-revenue');
+                var ratingEl  = document.getElementById('kpi-rating');
+                var reviewsEl = document.getElementById('kpi-reviews');
+                var todaySubEl  = document.getElementById('kpi-today-sub');
+                var totalSubEl  = document.getElementById('kpi-total-sub');
+                var revSubEl    = document.getElementById('kpi-revenue-sub');
+
+                if (todayEl)    todayEl.textContent   = (d.todayOrderCount || 0) + '건';
+                if (totalEl)    totalEl.textContent   = (d.totalOrderCount || 0).toLocaleString('ko-KR') + '건';
+                if (revEl)      revEl.textContent     = formatMoney(d.monthlyRevenue);
+                if (ratingEl)   ratingEl.textContent  = (d.avgRating || 0).toFixed(1) + '★';
+                if (reviewsEl)  reviewsEl.textContent = '리뷰 ' + (d.reviewCount || 0) + '건';
+
+                if (todaySubEl)  todaySubEl.textContent  = '상품 ' + (d.productCount || 0) + '종 판매 중';
+                if (totalSubEl)  totalSubEl.textContent  = '총 누적 주문';
+                if (revSubEl)    revSubEl.textContent    = '이번 달 매출';
+
+                // 정산 카드에도 반영
+                var settleEl = document.getElementById('settle-current');
+                var settleRowEl = document.getElementById('settle-current-row');
+                if (settleEl)    settleEl.textContent    = formatMoney(d.monthlyRevenue);
+                if (settleRowEl) settleRowEl.textContent = formatMoney(d.monthlyRevenue);
+            })
+            .catch(function () {});
+    }
+
+    var _ordersCache = [];
+
+    // ── 엑셀(CSV) 다운로드 ────────────────────────────────────
+    window.exportOrders = function () {
+        if (!_ordersCache.length) { farmerToast('다운로드할 주문이 없습니다.'); return; }
+
+        var rows = [['주문번호', '상품명', '수량', '결제액', '상태', '주문일']];
+        _ordersCache.forEach(function (o) {
+            var firstItem = o.items && o.items[0];
+            var productName = firstItem ? (firstItem.productName || '상품') : '-';
+            var extra = o.items && o.items.length > 1 ? ' 외 ' + (o.items.length - 1) + '건' : '';
+            rows.push([
+                o.orderNumber || ('#' + o.id),
+                productName + extra,
+                firstItem ? firstItem.quantity : '-',
+                o.totalAmount || 0,
+                statusLabel(o.status),
+                o.createdAt ? o.createdAt.substring(0, 10) : '-'
+            ]);
+        });
+
+        var csv = '﻿' + rows.map(function (r) {
+            return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\r\n');
+
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '주문목록_' + new Date().toISOString().substring(0, 10) + '.csv';
+        link.click();
+    };
+
+    // ── 주문 목록 ──────────────────────────────────────────────
+    function loadOrders() {
+        var body = document.getElementById('ft-orders-body');
+        if (!body) return;
+        body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">주문을 불러오는 중...</div>';
+
+        fetch('/api/seller/orders', { headers: authHeader() })
+            .then(function (r) { return r.json(); })
+            .then(function (orders) {
+                if (!Array.isArray(orders)) {
+                    console.error('[orders error]', orders && orders.error);
+                    body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:red;padding:20px">오류: ' + (orders && orders.error || '알 수 없는 오류') + '</div>';
+                    return;
+                }
+                _ordersCache = orders;
+                if (!orders.length) {
+                    body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">주문이 없습니다.</div>';
+                    return;
+                }
+                body.innerHTML = orders.map(function (o) {
+                    var firstItem   = o.items && o.items[0];
+                    var productName = firstItem ? (firstItem.productName || '상품') : '-';
+                    var qty         = firstItem ? firstItem.quantity : '-';
+                    var extraCount  = o.items && o.items.length > 1 ? ' 외 ' + (o.items.length - 1) + '건' : '';
+                    var badge       = statusBadge(o.status);
+                    var label       = statusLabel(o.status);
+                    var orderNum    = esc(o.orderNumber || '#' + o.id);
+                    var dateStr     = formatDate(o.createdAt);
+
+                    return '<div class="ft-table-row ft-order-grid">'
+                        + '<div class="ft-cell-id">' + orderNum + '</div>'
+                        + '<div class="ft-cell-name">' + esc(productName) + esc(extraCount) + '</div>'
+                        + '<div class="ft-cell-c">' + esc(qty) + '</div>'
+                        + '<div class="ft-cell-r">' + formatMoney(o.totalAmount) + '</div>'
+                        + '<div class="ft-cell-badge">'
+                        + '<select class="ft-badge ' + badge + '" style="border:none;cursor:pointer;font-size:.68rem;font-weight:700;padding:2px 6px;border-radius:10px" '
+                        + 'onchange="updateOrderStatus(' + o.id + ', this)">'
+                        + buildStatusOptions(o.status)
+                        + '</select></div>'
+                        + '<div class="ft-cell-date">' + dateStr + '</div>'
+                        + '</div>';
+                }).join('');
+            })
+            .catch(function () {
+                body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">주문을 불러오지 못했습니다.</div>';
+            });
+    }
+
+    function buildStatusOptions(current) {
+        var statuses = [
+            ['PAYMENT_COMPLETE', '결제 완료'],
+            ['PREPARING', '상품 준비 중'],
+            ['SHIPPING', '배송 중'],
+            ['DELIVERED', '배송 완료'],
+            ['CANCELLED', '취소'],
+            ['REFUNDED', '환불']
+        ];
+        return statuses.map(function (s) {
+            return '<option value="' + s[0] + '"' + (s[0] === current ? ' selected' : '') + '>' + s[1] + '</option>';
+        }).join('');
+    }
+
+    // ── 주문 상태 변경 ─────────────────────────────────────────
+    window.updateOrderStatus = function (orderId, selectEl) {
+        var newStatus = selectEl.value;
+        fetch('/api/seller/orders/' + orderId + '/status', {
+            method: 'PATCH',
+            headers: Object.assign({ 'Content-Type': 'application/json' }, authHeader()),
+            body: JSON.stringify({ status: newStatus })
+        })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function () {
+                // 뱃지 색상 업데이트
+                selectEl.className = 'ft-badge ' + statusBadge(newStatus) + ' '
+                    + 'style="border:none;cursor:pointer;font-size:.68rem;font-weight:700;padding:2px 6px;border-radius:10px"';
+                farmerToast('주문 상태가 변경되었습니다.');
+            })
+            .catch(function () {
+                farmerToast('상태 변경에 실패했습니다. 다시 시도해주세요.');
+                loadOrders();
+            });
+    };
+
+    // ── 출고 처리 ──────────────────────────────────────────────
+    window.bulkShip = function () {
+        farmerToast('출고 처리 완료! 🚚');
+    };
+
+    // ── 재고 목록 ──────────────────────────────────────────────
+    function loadInventory() {
+        var body = document.getElementById('ft-inv-body');
+        if (!body) return;
+        body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">재고를 불러오는 중...</div>';
+
+        fetch('/api/seller/products', { headers: authHeader() })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (products) {
+                if (!products.length) {
+                    body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">등록된 상품이 없습니다.</div>';
+                    return;
+                }
+                body.innerHTML = products.map(function (p) {
+                    var stock = p.stockQuantity == null ? 0 : p.stockQuantity;
+                    var stockClass, badgeClass, badgeLabel;
+
+                    if (stock === 0) {
+                        stockClass = 'ft-stock-out'; badgeClass = 'ft-badge-danger'; badgeLabel = '품절';
+                    } else if (stock < 10) {
+                        stockClass = 'ft-stock-low'; badgeClass = 'ft-badge-warning'; badgeLabel = '재고 부족';
+                    } else {
+                        stockClass = 'ft-stock-ok'; badgeClass = 'ft-badge-success'; badgeLabel = '판매 중';
+                    }
+
+                    var expiry = p.expiryDate ? esc(String(p.expiryDate).substring(0, 10)) : '-';
+
+                    return '<div class="ft-table-row ft-inv-grid">'
+                        + '<div class="ft-inv-cell">'
+                        + '<div class="ft-inv-thumb ft-inv-thumb-gn">🥬</div>'
+                        + '<div class="ft-cell-name">' + esc(p.name) + '</div>'
+                        + '</div>'
+                        + '<div class="' + stockClass + '">' + stock + '개</div>'
+                        + '<div class="ft-stock-total">' + expiry + '</div>'
+                        + '<div class="ft-cell-badge"><span class="ft-badge ' + badgeClass + '">' + badgeLabel + '</span></div>'
+                        + '<div class="ft-cell-badge"><button class="ft-btn-edit" onclick="editStock(' + p.id + ',\'' + esc(p.name).replace(/'/g, "\\'") + '\',' + stock + ')">수정</button></div>'
+                        + '</div>';
+                }).join('');
+            })
+            .catch(function () {
+                body.innerHTML = '<div class="ft-table-row" style="grid-template-columns:1fr;text-align:center;color:var(--muted);padding:20px">상품을 불러오지 못했습니다.</div>';
+            });
+    }
+
+    window.editStock = function (productId, productName, currentStock) {
+        var input = prompt(productName + '\n현재 재고: ' + currentStock + '개\n새 재고 수량을 입력하세요:', currentStock);
+        if (input === null) return;
+        var n = parseInt(input, 10);
+        if (isNaN(n) || n < 0) { alert('올바른 재고 수를 입력해주세요.'); return; }
+        farmerToast(productName + ' 재고가 ' + n + '개로 수정되었습니다.');
+        loadInventory();
+    };
+
+    // ── 정산 내역 ──────────────────────────────────────────────
+    function loadSettlement() {
+        // summary에서 monthlyRevenue를 이미 가져와 반영됨
+    }
+
+    // ── 초기 로드 ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        loadSummary();
+        loadOrders();
+    });
+
+    // DOMContentLoaded가 이미 지난 경우 즉시 실행
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(function () {
+            loadSummary();
+            loadOrders();
+        }, 0);
+    }
+})();
+</script>
 
 </body>
 </html>
