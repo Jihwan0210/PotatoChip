@@ -16,11 +16,18 @@
 <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 0;margin-top:64px">
     <div style="font-size:.65rem;color:var(--green);letter-spacing:1px;font-weight:500;margin-bottom:6px">Market</div>
     <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);margin-bottom:14px">못난이 마켓 🌿</div>
+
     <!-- 검색바 -->
     <div style="display:flex;align-items:center;gap:8px;max-width:600px;margin-bottom:14px">
+        <select id="mktSearchType" style="border:1.5px solid var(--sand);border-radius:8px;padding:9px 10px;font-size:.78rem;color:var(--mid);background:#fff;font-family:inherit;cursor:pointer;outline:none">
+            <option value="all"    th:selected="${searchType == 'all'}">전체</option>
+            <option value="name"   th:selected="${searchType == 'name'}">상품명</option>
+            <option value="farm"   th:selected="${searchType == 'farm'}">원산지</option>
+            <option value="region" th:selected="${searchType == 'region'}">농장 위치</option>
+        </select>
         <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--beige2);border:1.5px solid var(--sand);border-radius:10px;padding:9px 14px">
             <span style="font-size:.85rem;color:var(--muted)">🔍</span>
-            <input id="mktSearch" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..." style="flex:1;border:none;outline:none;font-size:.82rem;color:var(--dark);background:transparent;font-family:inherit"/>
+            <input id="mktSearch" th:value="${keyword}" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..." style="flex:1;border:none;outline:none;font-size:.82rem;color:var(--dark);background:transparent;font-family:inherit"/>
             <span id="mktSearchClear" onclick="clearMktSearch()" style="font-size:.85rem;color:var(--muted);cursor:pointer;display:none">×</span>
         </div>
         <button onclick="doMktSearch()" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">검색</button>
@@ -34,13 +41,13 @@
 </div>
 
 <!-- 맞춤추천 팝업 -->
-<div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:300px;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990;overflow:hidden">
-    <div style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+<div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:300px;min-width:300px;max-width:420px;min-height:400px;max-height:640px;resize:both;overflow:auto;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990">
+    <div id="recPopupHeader" style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:move;border-radius:16px 16px 0 0">
         <div>
             <div style="font-size:.78rem;font-weight:700;color:#fff;font-family:Gaegu,cursive">✨ 맞춤 추천</div>
             <div style="font-size:.65rem;color:rgba(255,255,255,.7);margin-top:2px">카테고리 · 구매이력 기반</div>
         </div>
-        <span onclick="closeRecPopup()" style="cursor:pointer;color:rgba(255,255,255,.8);font-size:1.1rem;line-height:1">✕</span>
+        <span onclick="closeRecPopup()" onmousedown="event.stopPropagation()" style="cursor:pointer;color:rgba(255,255,255,.8);font-size:1.1rem;line-height:1">✕</span>
     </div>
     <div style="padding:12px 14px">
         <div style="font-size:.7rem;font-weight:500;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:5px">🛒 최근 구매 기반 추천</div>
@@ -68,25 +75,53 @@
                 <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">9,000원</div>
             </div>
         </div>
-        <div style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">🥦 채소 카테고리 인기</div>
-        <div onclick="location.href='/market'" style="display:flex;gap:10px;padding:9px 0;cursor:pointer;align-items:center">
-            <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🥔</div>
-            <div style="flex:1;min-width:0">
-                <div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px">감자 구매 고객 인기</div>
-                <div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">고구마 2kg (소형)</div>
-                <div style="font-size:.65rem;color:var(--muted)">강원 해피팜</div>
+        <div style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">📂 카테고리별 인기 보기</div>
+        <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none">
+            <div class="mf" th:classappend="${category == '채소'} ? ' on'" onclick="popupCategoryF(this)">채소 🥦</div>
+            <div class="mf" th:classappend="${category == '과일'} ? ' on'" onclick="popupCategoryF(this)">과일 🍎</div>
+            <div class="mf" th:classappend="${category == '곡류'} ? ' on'" onclick="popupCategoryF(this)">곡류 🌾</div>
+            <div class="mf" th:classappend="${category == '버섯'} ? ' on'" onclick="popupCategoryF(this)">버섯 🍄</div>
+            <div class="mf" th:classappend="${category == '뿌리채소'} ? ' on'" onclick="popupCategoryF(this)">뿌리채소 🥕</div>
+        </div>
+        <div id="popupCategoryRankingArea">
+            <div th:if="${not #lists.isEmpty(categoryTopRankings)}" style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">
+                🔥 <span th:text="${category}"></span> 카테고리 인기
             </div>
-            <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:.78rem;font-weight:700;color:var(--amber)">7,500원</div>
-                <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">11,000원</div>
+            <div th:each="ranking, stat : ${categoryTopRankings}"
+                 th:onclick="|location.href='@{/market/detail(id=${ranking.product.id})}'|"
+                 th:styleappend="${!stat.last} ? 'border-bottom:1px solid var(--sand)' : ''"
+                 style="display:flex;gap:10px;padding:9px 0;cursor:pointer;align-items:center">
+                <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden;position:relative">
+                    <img th:if="${ranking.product.thumbnailUrl != null and !ranking.product.thumbnailUrl.isEmpty()}"
+                         th:src="${ranking.product.thumbnailUrl}"
+                         alt="상품 이미지"
+                         style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0"/>
+                    <span th:unless="${ranking.product.thumbnailUrl != null and !ranking.product.thumbnailUrl.isEmpty()}">🏆</span>
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px" th:text="${category + ' 인기 ' + (stat.index + 1) + '위'}"></div>
+                    <div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" th:text="${ranking.product.name}"></div>
+                    <div style="font-size:.65rem;color:var(--muted)" th:text="${ranking.product.origin}"></div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                    <div style="font-size:.78rem;font-weight:700;color:var(--amber)"
+                         th:if="${ranking.product.discountPrice != null}"
+                         th:text="${#numbers.formatInteger(ranking.product.discountPrice, 3, 'COMMA')} + '원'"></div>
+                    <div style="font-size:.78rem;font-weight:700;color:var(--amber)"
+                         th:unless="${ranking.product.discountPrice != null}"
+                         th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"></div>
+                    <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through"
+                         th:if="${ranking.product.discountPrice != null}"
+                         th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"></div>
+                </div>
             </div>
+            <div th:if="${#lists.isEmpty(categoryTopRankings)}" style="font-size:.72rem;color:var(--muted);padding:9px 0">카테고리를 선택하면 그 카테고리 인기 상품을 보여드려요</div>
         </div>
     </div>
     <div style="padding:0 14px 12px">
         <button onclick="location.href='/market';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">전체 추천 상품 보기 →</button>
     </div>
 </div>
-
 <!-- 필터 -->
 <div class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
     <div class="mf" th:classappend="${category == '' or category == '전체'} ? ' on'" onclick="mktF(this)">전체</div>
@@ -170,7 +205,7 @@
              style="cursor:pointer">
             <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
                 <div class="pbdg">
-                    <span class="pbdg-t pbdg-new">New</span>
+                    <span class="pbdg-t pbdg-new" th:if="${product.isNew()}">New</span>
                     <span class="pbdg-t pbdg-soon" th:if="${product.soonExpired}">⏰ 기한임박</span>
                 </div>
                 <div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>
@@ -310,6 +345,101 @@
     // ===== 맞춤추천 팝업 =====
     function openRecPopup() { document.getElementById('recPopup').style.display = 'block'; }
     function closeRecPopup() { document.getElementById('recPopup').style.display = 'none'; }
+
+
+    // ===== 맞춤추천 팝업 드래그 이동 =====
+    (function () {
+        var popup = document.getElementById('recPopup');
+        var header = document.getElementById('recPopupHeader');
+        var isDragging = false, startX = 0, startY = 0;
+
+        header.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            var rect = popup.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            popup.style.right = 'auto';
+            popup.style.bottom = 'auto';
+            popup.style.left = rect.left + 'px';
+            popup.style.top = rect.top + 'px';
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            var maxLeft = window.innerWidth - popup.offsetWidth;
+            var maxTop = window.innerHeight - popup.offsetHeight;
+            var newLeft = Math.min(Math.max(0, e.clientX - startX), maxLeft);
+            var newTop = Math.min(Math.max(0, e.clientY - startY), maxTop);
+            popup.style.left = newLeft + 'px';
+            popup.style.top = newTop + 'px';
+        });
+
+        document.addEventListener('mouseup', function () {
+            isDragging = false;
+            document.body.style.userSelect = '';
+        });
+    })();
+
+    // 팝업 안 카테고리 클릭 → 페이지 이동 없이 그 카테고리 인기상품만 fetch
+    function popupCategoryF(el) {
+        el.parentElement.querySelectorAll('.mf').forEach(function (x) { x.classList.remove('on'); });
+        el.classList.add('on');
+
+        var txt = el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g, '').trim();
+        var area = document.getElementById('popupCategoryRankingArea');
+        area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">불러오는 중...</div>';
+
+        fetch('/market/api/category-ranking?category=' + encodeURIComponent(txt))
+            .then(function (res) { return res.json(); })
+            .then(function (items) { renderPopupCategoryRanking(txt, items); })
+            .catch(function () {
+                area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">불러오는 중 오류가 났어요</div>';
+            });
+    }
+
+    function renderPopupCategoryRanking(category, items) {
+        var area = document.getElementById('popupCategoryRankingArea');
+
+        if (!items || items.length === 0) {
+            area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">' + category + ' 카테고리 랭킹 데이터가 없어요</div>';
+            return;
+        }
+
+        var html = '<div style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">🔥 ' + category + ' 카테고리 인기</div>';
+
+        items.forEach(function (item, idx) {
+            var hasDiscount = item.discountPrice != null;
+            var mainPrice = Math.round(hasDiscount ? item.discountPrice : item.price).toLocaleString('ko-KR') + '원';
+            var borderStyle = idx < items.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+            var thumbHtml = item.thumbnailUrl
+                ? '<img src="' + item.thumbnailUrl + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0">'
+                : '🏆';
+
+            html += '<div onclick="location.href=\'/market/detail?id=' + item.id + '\'" style="display:flex;gap:10px;padding:9px 0;cursor:pointer;align-items:center;' + borderStyle + '">'
+                + '<div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden;position:relative">' + thumbHtml + '</div>'
+                + '<div style="flex:1;min-width:0">'
+                + '<div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px">' + category + ' 인기 ' + (idx + 1) + '위</div>'
+                + '<div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + item.name + '</div>'
+                + '<div style="font-size:.65rem;color:var(--muted)">' + item.origin + '</div>'
+                + '</div>'
+                + '<div style="text-align:right;flex-shrink:0">'
+                + '<div style="font-size:.78rem;font-weight:700;color:var(--amber)">' + mainPrice + '</div>'
+                + (hasDiscount ? '<div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">' + Math.round(item.price).toLocaleString('ko-KR') + '원</div>' : '')
+                + '</div>'
+                + '</div>';
+        });
+
+        area.innerHTML = html;
+    }
+
+    // 페이지 로드 시 표시 확인하고 팝업 자동으로 다시 열기
+    (function () {
+        if (sessionStorage.getItem('keepRecPopupOpen') === '1') {
+            sessionStorage.removeItem('keepRecPopupOpen');
+            openRecPopup();
+        }
+    })();
 </script>
 </body>
 </html>

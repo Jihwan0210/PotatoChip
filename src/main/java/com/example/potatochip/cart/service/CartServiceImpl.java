@@ -59,7 +59,6 @@ public class CartServiceImpl implements CartService {
     }
     @Override
     @Transactional
-    // 🌟 여기 괄호 안도 CartItemDTO 로 맞춰주세요!
     public void addCartItem(CartItemDTO requestDTO) {
         Cart cart = cartRepository.findByBuyerId(requestDTO.getBuyerId())
                 .orElseGet(() -> Cart.builder().buyerId(requestDTO.getBuyerId()).build());
@@ -94,8 +93,6 @@ public class CartServiceImpl implements CartService {
     public void removeCartItem(Long buyerId, Long productId) {
         Cart cart = cartRepository.findByBuyerId(buyerId)
                 .orElseThrow(() -> new IllegalArgumentException("장바구니가 존재하지 않습니다."));
-
-        // 🌟 서비스(알바생)가 가방을 열어 직접 삭제 조건을 걸고 지웁니다!
         cart.getCartItems().removeIf(item -> item.getProductId().equals(productId));
 
         cartRepository.save(cart);
@@ -106,8 +103,6 @@ public class CartServiceImpl implements CartService {
     public void updateCartItemQuantity(Long buyerId, Long productId, int quantity) {
         Cart cart = cartRepository.findByBuyerId(buyerId)
                 .orElseThrow(() -> new IllegalArgumentException("장바구니가 존재하지 않습니다."));
-
-        // 🌟 서비스(알바생)가 가방을 열어 직접 상품을 찾고 수량을 바꿉니다!
         cart.getCartItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst()
