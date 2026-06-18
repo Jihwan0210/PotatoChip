@@ -1,5 +1,6 @@
 package com.example.potatochip.board.controller;
 
+import com.example.potatochip.board.dto.BoardResponse;
 import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -16,53 +19,47 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    // 페이지 이동
     @GetMapping("/board")
     public String boardPage() {
         return "board/board";
     }
 
-    // 전체 조회
     @GetMapping("/api/board")
     @ResponseBody
-    public List<Board> getBoards() {
-        return boardService.findAll();
+    public List<BoardResponse> getBoards() {
+        return boardService.findAllResponse();
     }
 
-    // 단건 조회
     @GetMapping("/api/board/{id}")
     @ResponseBody
-    public Board getBoard(@PathVariable Long id) {
-        return boardService.findById(id);
+    public BoardResponse getBoard(@PathVariable Long id) {
+        return boardService.findResponseById(id);
     }
 
-    // 1. 게시글 생성 (원래 잘 작동하던 코드)
     @PostMapping(value = "/api/board", consumes = {"multipart/form-data"})
     @ResponseBody
-    public Board createBoard(
+    public BoardResponse createBoard(
             @RequestPart("board") Board board,
-            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             Authentication authentication
     ) {
-        String email = authentication.getName();
-        board.setAuthor(email);
-
         if (image != null && !image.isEmpty()) {
             try {
                 String uploadDir = "C:/minsung/uploads/";
                 java.io.File folder = new java.io.File(uploadDir);
+
                 if (!folder.exists()) {
                     folder.mkdirs();
                 }
 
                 String originalFileName = image.getOriginalFilename();
-                String savedFileName = java.util.UUID.randomUUID().toString() + "_" + originalFileName;
+                String savedFileName = java.util.UUID.randomUUID() + "_" + originalFileName;
 
                 java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
                 image.transferTo(destinationFile);
 
                 board.setImageUrl("/uploads/" + savedFileName);
-                System.out.println("📷 이미지 업로드 및 엔티티 매핑 성공: /uploads/" + savedFileName);
+                System.out.println("📷 이미지 업로드 성공: /uploads/" + savedFileName);
 
             } catch (java.io.IOException e) {
                 System.out.println("❌ 이미지 저장 중 에러 발생: " + e.getMessage());
@@ -70,108 +67,95 @@ public class BoardController {
             }
         }
 
-        return boardService.save(board);
+        return boardService.createBoard(board, authentication);
     }
 
-    // 2. 게시글 수정 (톰캣 버그 방지를 위해 POST + /update 경로로 안전하게 분리)
-    @PostMapping(value = "/api/board/{id}/update", consumes = {"multipart/form-data"})
-    @ResponseBody
-    public Board updateBoard(
-            @PathVariable Long id,
-            @RequestPart("board") Board updatedBoard,
-            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image,
-            Authentication authentication
-    ) {
-        // 기존 게시글 조회
-        Board board = boardService.findById(id);
-
-        // 권한 체크
-        if (authentication == null || !board.getAuthor().equals(authentication.getName())) {
-            throw new RuntimeException("수정 권한이 없습니다.");
-        }
-
-        // 기본 정보 갱신 (오타 수정 반영)
-        board.setTitle(updatedBoard.getTitle());
-        board.setContent(updatedBoard.getContent());
-        board.setCategory(updatedBoard.getCategory());
-
-        // 수정할 새 이미지가 들어온 경우에만 가로채서 업로드 처리
-        if (image != null && !image.isEmpty()) {
-            try {
-                String uploadDir = "C:/minsung/uploads/";
-                java.io.File folder = new java.io.File(uploadDir);
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-
-                String originalFileName = image.getOriginalFilename();
-                String savedFileName = java.util.UUID.randomUUID().toString() + "_" + originalFileName;
-
-                java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
-                image.transferTo(destinationFile);
-
-                board.setImageUrl("/uploads/" + savedFileName);
-                System.out.println("🔄 [수정] 이미지 업데이트 완료: /uploads/" + savedFileName);
-
-            } catch (java.io.IOException e) {
-                System.out.println("❌ [수정] 이미지 저장 중 에러 발생: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        // 이미지를 첨부 안 했으면 기존 board.getImageUrl()이 그대로 유지됩니다.
-
-        return boardService.save(board);
-    }
-
-    // 조회수 증가
     @PostMapping("/api/board/{id}/view")
     @ResponseBody
     public void increasedView(@PathVariable Long id) {
         boardService.increaseView(id);
     }
 
-    //좋아요 수 증가 API
-@PostMapping("/api/board/{id}/like")
-@ResponseBody
-public void addLike(@PathVariable("id") Long id) {
-        System.out.println("\uD83D\uDCEC [서버] 좋아요 등록 요청 진입! 게시글 ID:" + id);
- boardService.toggleLike(id,false);
-}
-        @PostMapping("/api/board/{id}/unlike")
-        @ResponseBody
-        public void removeLike(@PathVariable("id") Long id) {
-System.out.println("📬 [서버] 좋아요 취소 요청 진입! 게시글 ID: " + id);
-        boardService.toggleLike(id,true);
-        }
-
-
-    // 삭제
     @DeleteMapping("/api/board/{id}")
     @ResponseBody
     public ResponseEntity<?> deleteBoard(
             @PathVariable Long id,
             Authentication authentication
     ) {
-        System.out.println("=== 삭제 요청 진입! 게시글 ID: " + id);
+        boardService.deleteBoard(id, authentication);
+        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+    }
 
+    @PutMapping(value = "/api/board/{id}", consumes = {"multipart/form-data"})
+    @ResponseBody
+    public BoardResponse updateBoard(
+            @PathVariable Long id,
+            @RequestPart("board") Board updatedBoard,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            Authentication authentication
+    ) {
+
+        if (image != null && !image.isEmpty()) {
+        try {
+            String uploadDir = "C:/minsung/uploads/";
+            java.io.File folder = new java.io.File(uploadDir);
+
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            String originalFileName = image.getOriginalFilename();
+            String savedFileName = java.util.UUID.randomUUID() + "_" + originalFileName;
+
+            java.io.File destinationFile =
+                    new java.io.File(uploadDir + savedFileName);
+
+            image.transferTo(destinationFile);
+
+            updatedBoard.setImageUrl("/uploads/" + savedFileName);
+
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+        return boardService.updateBoard(id, updatedBoard, authentication);
+    }
+
+    @PostMapping("/api/board/{id}/like")
+    @ResponseBody
+    public ResponseEntity<?> toggleLike(@PathVariable Long id, Authentication authentication) {
         if (authentication == null) {
-            System.out.println("❌ 인증 객체가 null입니다. 토큰이 안 넘어왔을 수 있습니다.");
-            return ResponseEntity.status(401).body(java.util.Map.of("error", "로그인이 필요합니다."));
+            return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         }
+        String userEmail = authentication.getName(); // Spring Security에서 로그인한 유저 이메일 추출
+        int updatedLikeCount = boardService.toggleLike(id, userEmail);
 
-        Board board = boardService.findById(id);
+        // 좋아요 카운트와 현재 유저의 하트 온/오프 상태를 같이 프론트에 응답
+        return ResponseEntity.ok(Map.of(
+                "likeCount", updatedLikeCount,
+                "isLiked", boardService.isLikedByUser(id, userEmail)
+        ));
+    }
 
-        System.out.println("DB에 저장된 작성자: " + board.getAuthor());
-        System.out.println("현재 로그인한 유저: " + authentication.getName());
+    @GetMapping("/api/board/{id}/like/status")
+    @ResponseBody
+    public ResponseEntity<?> getLikeStatus(@PathVariable Long id, Authentication authentication) {
+        String userEmail = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
 
-        if (!board.getAuthor().equals(authentication.getName())) {
-            System.out.println("❌ 작성자가 일치하지 않아 삭제가 거부되었습니다.");
-            return ResponseEntity.status(403).body(java.util.Map.of("error", "삭제 권한이 없습니다."));
-        }
+        // 1. DB에서 실시간으로 해당 게시글 정보를 안전하게 가져옵니다.
+        com.example.potatochip.board.entity.Board board = boardService.findById(id);
 
-        boardService.delete(id);
-        System.out.println("✅ 삭제 성공!");
+        // 2. 만약 DB에 좋아요 수가 null로 박혀있다면 안전하게 0으로 처리해 줍니다.
+        int currentLikeCount = (board.getLikeCount() == null) ? 0 : board.getLikeCount();
 
-        return ResponseEntity.ok().body(java.util.Map.of("message", "삭제 완료"));
+        // 3. 현재 로그인한 유저가 하트를 눌렀는지 여부 판단
+        boolean isLiked = boardService.isLikedByUser(id, userEmail);
+
+        // 4. 🚨 Map.of 대신 null 안전성이 보장되는 HashMap을 사용하여 500 에러를 원천 차단합니다.
+        java.util.Map<String, Object> responseMap = new java.util.HashMap<>();
+        responseMap.put("likeCount", currentLikeCount);
+        responseMap.put("isLiked", isLiked);
+
+        return ResponseEntity.ok(responseMap);
     }
 }
