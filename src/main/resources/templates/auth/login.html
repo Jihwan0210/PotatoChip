@@ -62,12 +62,12 @@
             <div id="sf" style="display:none">
                 <div class="name-row">
                     <div class="fg">
-                        <label>이름</label>
+                        <label>이름 <span class="req">*</span></label>
                         <input name="name" placeholder="이름" type="text" onblur="filterKorean(this)"/>
                         <div class="fg-err"></div>
                     </div>
                     <div class="fg">
-                        <label>역할</label>
+                        <label>역할 <span class="req">*</span></label>
                         <select name="role" onchange="toggleRoleFields(this)">
                             <option>구매자</option>
                             <option>판매자(농가)</option>
@@ -75,33 +75,36 @@
                     </div>
                 </div>
                 <div class="fg">
-                    <label>이메일</label>
-                    <input name="email" placeholder="이메일을 입력해주세요" type="text" oninput="filterEmailChars(this)"/>
+                    <label>이메일 <span class="req">*</span></label>
+                    <input name="email" placeholder="이메일을 입력해주세요" type="text" oninput="filterEmailChars(this)" onblur="checkEmailLive(this)"/>
                     <div class="fg-err"></div>
+                    <div class="fg-ok"></div>
                 </div>
                 <div class="fg">
-                    <label>비밀번호</label>
+                    <label>비밀번호 <span class="req">*</span></label>
                     <div class="pw-wrap">
-                        <input name="password" placeholder="8자 이상 입력해주세요" type="password" oninput="filterPasswordChars(this)"/>
+                        <input name="password" placeholder="8자 이상, 영어+숫자+특수문자" type="password" oninput="filterPasswordChars(this);validatePasswordLive(this)"/>
                         <button type="button" class="pw-eye" onclick="togglePw(this)"><i class="ti ti-eye"></i></button>
                     </div>
                     <div class="fg-err"></div>
+                    <div class="fg-ok"></div>
                 </div>
                 <div class="fg">
-                    <label>비밀번호 확인</label>
+                    <label>비밀번호 확인 <span class="req">*</span></label>
                     <div class="pw-wrap">
-                        <input name="passwordConfirm" placeholder="비밀번호를 다시 입력해주세요" type="password"/>
+                        <input name="passwordConfirm" placeholder="비밀번호를 다시 입력해주세요" type="password" oninput="validatePasswordConfirmLive(this)"/>
                         <button type="button" class="pw-eye" onclick="togglePw(this)"><i class="ti ti-eye"></i></button>
                     </div>
                     <div class="fg-err"></div>
+                    <div class="fg-ok"></div>
                 </div>
                 <div class="fg">
-                    <label>전화번호</label>
+                    <label>전화번호 <span class="req">*</span></label>
                     <input name="phone" placeholder="숫자만 입력해주세요" type="tel" maxlength="11" oninput="filterDigits(this)"/>
                     <div class="fg-err"></div>
                 </div>
                 <div class="fg" id="addressGroup">
-                    <label>주소</label>
+                    <label>주소 <span class="req">*</span></label>
                     <div style="display:flex;gap:6px;margin-bottom:6px">
                         <input id="sf-postcode" name="postcode" placeholder="우편번호" type="text" readonly style="width:110px;flex-shrink:0;background:var(--beige2);cursor:default"/>
                         <button type="button" onclick="openAddressSearch()" style="flex-shrink:0;padding:0 14px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">주소 검색</button>
@@ -111,7 +114,7 @@
                     <div class="fg-err"></div>
                 </div>
                 <div class="fg" id="nicknameGroup">
-                    <label>닉네임 <span style="color:var(--muted);font-size:.72rem">*선택</span></label>
+                    <label>닉네임 <span style="color:var(--muted);font-size:.72rem">(선택)</span></label>
                     <input name="nickname" placeholder="닉네임을 입력해주세요" type="text" onblur="filterNicknameChars(this)"/>
                     <div class="fg-err"></div>
                 </div>
@@ -157,6 +160,20 @@
 </div>
 
 <div th:replace="footer :: footer"></div>
+
+<!-- 로그인/회원가입 성공 모달 -->
+<div id="success-modal" class="sm-overlay" style="display:none" onclick="handleSmOverlayClick(event)">
+    <div class="sm-box">
+        <span class="sm-ico">🎉</span>
+        <h3 id="sm-title" class="sm-title">로그인 성공!</h3>
+        <p id="sm-msg" class="sm-msg">못난이 농작물에 오신 것을 환영해요! 🌿</p>
+        <div class="sm-progress">
+            <div class="sm-bar" id="sm-bar"></div>
+        </div>
+        <p class="sm-redirect-txt">잠시 후 자동으로 이동합니다</p>
+        <button class="btn-submit" id="sm-btn" onclick="location.href='/'">지금 바로 이동 →</button>
+    </div>
+</div>
 
 <script th:src="@{/js/app.js}"></script>
 <script th:src="@{/js/auth/auth.js}"></script>
