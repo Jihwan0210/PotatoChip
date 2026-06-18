@@ -290,9 +290,11 @@
         var tiEl = el.querySelector('.del-ti');
         selectedDeliveryLabel = tiEl ? tiEl.textContent.trim() : '🚚 일반 배송';
 
-        // 픽업이면 pickup, 아니면 delivery
+        // 픽업이면 pickup, 당일이면 express, 나머지는 delivery
         if (selectedDeliveryLabel.includes('픽업')) {
             selectedDeliveryType = 'pickup';
+        } else if (selectedDeliveryLabel.includes('당일')) {
+            selectedDeliveryType = 'express';
         } else {
             selectedDeliveryType = 'delivery';
         }
@@ -322,7 +324,9 @@
         sessionStorage.setItem('selectedDeliveryType',  selectedDeliveryType);
         sessionStorage.setItem('selectedDeliveryFee',   selectedDeliveryFee);
         sessionStorage.setItem('selectedDeliveryLabel', selectedDeliveryLabel);
-        location.href = '/orders';
+
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        location.href = '/orders?token=' + (token || '');
     }
 
 
