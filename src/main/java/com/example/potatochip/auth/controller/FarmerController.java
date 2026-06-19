@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,7 +18,20 @@ public class FarmerController {
     private final SellerService sellerService;
 
     @GetMapping("/farmer")
-    public String farmer() {
+    public String farmer(Authentication authentication, Model model) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+            return "redirect:/login";
+        }
+        try {
+            User seller = sellerService.findByEmail(authentication.getName());
+            model.addAttribute("sellerName", seller.getName());
+            model.addAttribute("summary",    sellerService.getSummary(seller.getId()));
+            model.addAttribute("orders",     sellerService.getOrderList(seller.getId()));
+            model.addAttribute("products",   sellerService.getProductList(seller.getId()));
+        } catch (Exception e) {
+            return "redirect:/login";
+        }
         return "auth/farmer";
     }
 
