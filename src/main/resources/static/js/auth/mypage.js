@@ -54,6 +54,8 @@ function loadMyInfo() {
             if (nameEl) nameEl.textContent = (data.name || '') + '님';
             var emailEl = document.getElementById('mp-display-email');
             if (emailEl) emailEl.textContent = data.email || '';
+            var pointsEl = document.getElementById('mp-display-points');
+            if (pointsEl) pointsEl.textContent = (data.points || 0).toLocaleString();
         })
         .catch(err => console.error('내 정보 조회 실패:', err));
 }

@@ -13,4 +13,5 @@ public class OrderRequestDTO {
     private String paymentMethod;   // 결제 수단 (card, bank_transfer 등)
     private String deliveryType;    // 배송 방법 (delivery, pickup)
     private LocalDateTime pickuptime; // 픽업 시간 (픽업일 경우만)
+    private Integer pointUsed;      // 사용한 포인트
 }

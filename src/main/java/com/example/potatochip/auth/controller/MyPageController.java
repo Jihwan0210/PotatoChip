@@ -51,7 +51,8 @@ public class MyPageController {
                 "nickname", user.getNickname() != null ? user.getNickname() : "",
                 "phone",   user.getPhone()    != null ? user.getPhone()    : "",
                 "address", user.getAddress()  != null ? user.getAddress()  : "",
-                "role",    user.getRole()
+                "role",    user.getRole(),
+                "points",  user.getPoints()   != null ? user.getPoints()   : 0
         ));
     }
 

@@ -1,5 +1,7 @@
 package com.example.potatochip.order.service;
 
+import com.example.potatochip.auth.entity.User;
+import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.cart.entity.Cart;
 import com.example.potatochip.cart.repository.CartRepository;
 import com.example.potatochip.order.dto.OrderRequestDTO;
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private final UserRepository userRepository;
 
 
     @Override
@@ -76,10 +80,21 @@ public class OrderServiceImpl implements OrderService {
         // 6. 속이 꽉 찬 영수증을 DB 창고에 영구적으로 저장합니다! (주문 완료)
         Order savedOrder = orderRepository.save(newOrder);
 
-        // 7. 결제가 끝났으니 장바구니는 비워줍니다 (선택 사항)
+        // 7. 포인트 차감 및 구매 적립 처리
+        int pointUsed = requestDTO.getPointUsed() != null ? requestDTO.getPointUsed() : 0;
+        BigDecimal finalAmount = totalAmount.subtract(BigDecimal.valueOf(pointUsed)).max(BigDecimal.ZERO);
+        int earnedPoints = finalAmount.divide(BigDecimal.valueOf(100), 0, RoundingMode.FLOOR).intValue();
+
+        userRepository.findById(buyerId).ifPresent(user -> {
+            int current = user.getPoints() != null ? user.getPoints() : 0;
+            user.setPoints(Math.max(0, current - pointUsed) + earnedPoints);
+            userRepository.save(user);
+        });
+
+        // 8. 결제가 끝났으니 장바구니는 비워줍니다 (선택 사항)
         cartRepository.delete(cart);
 
-        // 🌟 방금 저장된 주문의 ID를 반환합니다!
+        // 방금 저장된 주문의 ID를 반환합니다!
         return savedOrder.getId();
     }
 }
