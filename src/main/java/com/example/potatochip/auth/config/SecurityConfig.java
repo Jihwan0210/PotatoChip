@@ -44,9 +44,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/board").authenticated()     // 게시글 생성 시 로그인 필수
                         .requestMatchers(HttpMethod.PUT, "/api/board/**").authenticated()    // 게시글 수정 시 로그인 필수
                         .requestMatchers(HttpMethod.DELETE, "/api/board/**").authenticated() // 게시글 삭제 시 로그인 필수
-
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/order-items/**").authenticated()
                         // 4. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
+
+
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
 
