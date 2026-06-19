@@ -75,6 +75,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             order by r.createdAt desc
             """)
     List<Review> findBySellerIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("sellerId") Long sellerId);
-
+    boolean existsByOrderItemIdAndUserIdAndIsActiveTrue(Long orderItemId, Long userId);
 
 }
