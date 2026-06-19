@@ -36,24 +36,27 @@ public class SecurityConfig {
                         // 1. 누구나 접근 가능한 정적 자원 및 인증 API (+ 업로드된 이미지 경로 추가)
                         .requestMatchers("/signup", "/login", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
 
-                        // 2. 문의사항(Inquiry) 관련 권한 인증 설정 (develop 변경사항 반영)
-                        .requestMatchers("/api/inquires/**").authenticated() // 로그인시 문의 허용
-                        .requestMatchers("/api/admin/inquires/**").authenticated() // 관리자 로그인시 문의 답변 허용
+                        // 2. 관리자 전용 경로 - ADMIN 역할만 접근 가능
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
 
-                        // 3. 게시판(Board) 관련 권한 인증 설정 (feature/Operations 변경사항 반영)
+                        // 3. 문의사항(Inquiry) 관련 권한 인증 설정 (develop 변경사항 반영)
+                        .requestMatchers("/api/inquires/**").authenticated() // 로그인시 문의 허용
+
+                        // 4. 게시판(Board) 관련 권한 인증 설정 (feature/Operations 변경사항 반영)
                         .requestMatchers(HttpMethod.POST, "/api/board").authenticated()     // 게시글 생성 시 로그인 필수
                         .requestMatchers(HttpMethod.PUT, "/api/board/**").authenticated()    // 게시글 수정 시 로그인 필수
                         .requestMatchers(HttpMethod.DELETE, "/api/board/**").authenticated() // 게시글 삭제 시 로그인 필수
 
-                        // 4. WebSocket 핸드셰이크 허용
+                        // 5. WebSocket 핸드셰이크 허용
                         .requestMatchers("/ws-chat/**").permitAll()
 
-                        // 5. 채팅 API 인증 필요
+                        // 6. 채팅 API 인증 필요
                         .requestMatchers("/chat/**").authenticated()
 
                         // 6. 그 외 나머지 요청은 우선 허용
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/order-items/**").authenticated()
+
                         // 7. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
 
