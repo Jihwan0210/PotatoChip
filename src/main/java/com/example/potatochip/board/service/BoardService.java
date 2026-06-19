@@ -6,23 +6,29 @@ import com.example.potatochip.board.dto.BoardResponse;
 import com.example.potatochip.board.dto.CommentResponse;
 import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.entity.Comment;
+import com.example.potatochip.board.entity.BoardLike;
 import com.example.potatochip.board.repository.BoardRepository;
 import com.example.potatochip.board.repository.CommentRepository;
+import com.example.potatochip.board.repository.BoardLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true) // 기본적으로 읽기 전용으로 설정하여 성능 최적화
 public class BoardService {
 
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final BoardLikeRepository boardLikeRepository;
 
     // 전체 조회
     public List<BoardResponse> findAllResponse() {
@@ -32,7 +38,7 @@ public class BoardService {
                 .toList();
     }
 
-    // 단건 조회
+    // 단건 조회 (엔티티 반환)
     public Board findById(Long id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -41,113 +47,89 @@ public class BoardService {
                 ));
     }
 
+    // 단건 조회 (DTO 반환)
     public BoardResponse findResponseById(Long id) {
         Board board = findById(id);
         return BoardResponse.from(board, getDisplayNameByEmail(board.getAuthor()));
     }
 
-    // 저장
-    public Board save(Board board) {
-        if (board.getViewCount() == null) {
-            board.setViewCount(0);
+    // 🌟 [인스타 토글] 좋아요 누르기 / 취소 로직
+    @Transactional
+    public int toggleLike(Long boardId, String userEmail) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."
+                ));
+
+        Optional<BoardLike> alreadyLike = boardLikeRepository.findByBoardAndUserEmail(board, userEmail);
+
+        if (board.getLikeCount() == null) {
+            board.setLikeCount(0);
         }
-        if (board.getCommentCount() == null) {
-            board.setCommentCount(0);
+
+        if (alreadyLike.isPresent()) {
+            // 1. 이미 눌려있다면: 좋아요 취소 (인스타 하트 불 끄기)
+            boardLikeRepository.delete(alreadyLike.get());
+            boardLikeRepository.flush();
+
+            board.setLikeCount(Math.max(0, board.getLikeCount() - 1));
+        } else {
+            // 2. 안 눌려있다면: 좋아요 저장 (인스타 하트 불 켜기)
+            BoardLike boardLike = new BoardLike(board, userEmail);
+            boardLikeRepository.save(boardLike);
+
+            board.setLikeCount(board.getLikeCount() + 1);
         }
-        if (board.getCreatedAt() == null) {
-            board.setCreatedAt(java.time.LocalDateTime.now());
-        }
-        return boardRepository.save(board);
+
+        Board savedBoard = boardRepository.saveAndFlush(board);
+        // 🌟 최신 변경 사항을 DB에 안전하게 밀어 넣고 반영된 좋아요 카운트 반환
+        System.out.println("====== [좋아요 디버깅] 글ID: " + boardId + " | 현재 누적 좋아요 수: " + savedBoard.getLikeCount() + " ======");
+        return savedBoard.getLikeCount();
     }
 
-    // 게시글 생성 권한 포함
-    public BoardResponse createBoard(Board board, Authentication authentication) {
-        User loginUser = getLoginUser(authentication);
+    // 🌟 현재 로그인한 사용자가 이 게시글에 좋아요를 눌렀는지 확인
+    public boolean isLikedByUser(Long boardId, String userEmail) {
+        if (userEmail == null || userEmail.isBlank()) return false;
+        return boardLikeRepository.existsByBoardIdAndUserEmail(boardId, userEmail);
+    }
 
-        if (isNotice(board.getCategory()) && !isAdmin(loginUser)) {
+    // 게시글 작성
+    @Transactional
+    public BoardResponse createBoard(Board board, Authentication authentication) {
+        User user = getAuthenticatedUser(authentication);
+
+        if (isNotice(board.getCategory()) && !isAdmin(user)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "공지사항은 관리자만 작성할 수 있습니다."
             );
         }
 
-        board.setAuthor(loginUser.getEmail());
+        board.setAuthor(user.getEmail());
+        if (board.getViewCount() == null) board.setViewCount(0);
+        if (board.getCommentCount() == null) board.setCommentCount(0);
+        if (board.getLikeCount() == null) board.setLikeCount(0);
 
-        Board saved = save(board);
-        return BoardResponse.from(saved, getDisplayName(loginUser));
+        Board savedBoard = boardRepository.save(board);
+        return BoardResponse.from(savedBoard, getDisplayName(user));
     }
 
-    // 게시글 수정 권한 포함
-    public BoardResponse updateBoard(Long id, Board updatedBoard, Authentication authentication) {
-        User loginUser = getLoginUser(authentication);
+    // 조회수 증가
+    @Transactional
+    public void increaseView(Long id) {
         Board board = findById(id);
-
-        boolean admin = isAdmin(loginUser);
-        boolean owner = isOwner(board, loginUser);
-        boolean notice = isNotice(board.getCategory());
-
-        // 공지사항 수정은 관리자만 가능
-        if (notice) {
-            if (!admin) {
-                throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN,
-                        "공지사항은 관리자만 수정할 수 있습니다."
-                );
-            }
-        }
-        // 일반 글 수정은 작성자 본인만 가능
-        else {
-            if (!owner) {
-                throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN,
-                        "본인이 작성한 글만 수정할 수 있습니다."
-                );
-            }
-        }
-
-        // 일반 회원이 카테고리를 공지사항으로 바꾸는 것 차단
-        if (isNotice(updatedBoard.getCategory()) && !admin) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "공지사항으로 변경할 수 없습니다."
-            );
-        }
-
-        // 관리자가 일반 회원 글을 수정하는 것 차단
-        if (!notice && admin && !owner) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "관리자는 일반 회원 글을 수정할 수 없습니다."
-            );
-        }
-
-        board.setTitle(updatedBoard.getTitle());
-        board.setContent(updatedBoard.getContent());
-        board.setCategory(updatedBoard.getCategory());
-
-        Board saved = save(board);
-        return BoardResponse.from(saved, getDisplayNameByEmail(saved.getAuthor()));
+        if (board.getViewCount() == null) board.setViewCount(0);
+        board.setViewCount(board.getViewCount() + 1);
+        boardRepository.save(board);
     }
 
-    // 게시글 삭제 권한 포함
+    // 게시글 삭제
+    @Transactional
     public void deleteBoard(Long id, Authentication authentication) {
-        User loginUser = getLoginUser(authentication);
         Board board = findById(id);
+        User user = getAuthenticatedUser(authentication);
 
-        boolean admin = isAdmin(loginUser);
-        boolean owner = isOwner(board, loginUser);
-        boolean notice = isNotice(board.getCategory());
-
-        // 공지사항 삭제는 관리자만
-        if (notice && !admin) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "공지사항은 관리자만 삭제할 수 있습니다."
-            );
-        }
-
-        // 일반 글 삭제는 작성자 본인 또는 관리자
-        if (!notice && !owner && !admin) {
+        if (!isOwner(board, user) && !isAdmin(user)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "삭제 권한이 없습니다."
@@ -157,18 +139,37 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
-    // 조회수 증가
-    public void increaseView(Long id) {
+    // 게시글 수정
+    @Transactional
+    public BoardResponse updateBoard(Long id, Board updatedBoard, Authentication authentication) {
         Board board = findById(id);
-        if (board.getViewCount() == null) {
-            board.setViewCount(0);
+        User user = getAuthenticatedUser(authentication);
+
+        if (!isOwner(board, user)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "수정 권한이 없습니다."
+            );
         }
-        board.setViewCount(board.getViewCount() + 1);
+
+        if (isNotice(updatedBoard.getCategory()) && !isAdmin(user)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "공지사항 카테고리로 수정할 권한이 없습니다."
+            );
+        }
+
+        board.setTitle(updatedBoard.getTitle());
+        board.setContent(updatedBoard.getContent());
+        board.setCategory(updatedBoard.getCategory());
+        board.setImageUrl(updatedBoard.getImageUrl());
+
         boardRepository.save(board);
+        return BoardResponse.from(board, getDisplayNameByEmail(board.getAuthor()));
     }
 
-    // 댓글 목록 조회
-    public List<CommentResponse> findCommentResponsesByBoardId(Long boardId) {
+    // 특정 게시글의 댓글 조회
+    public List<CommentResponse> findCommentsByBoardId(Long boardId) {
         return commentRepository.findByBoardIdOrderByCreatedAtAsc(boardId)
                 .stream()
                 .map(comment -> CommentResponse.from(comment, getDisplayNameByEmail(comment.getAuthor())))
@@ -176,66 +177,57 @@ public class BoardService {
     }
 
     // 댓글 저장
+    @Transactional
     public CommentResponse saveComment(Long boardId, String content, Authentication authentication) {
-        User loginUser = getLoginUser(authentication);
+        User user = getAuthenticatedUser(authentication);
 
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "해당 게시글이 존재하지 않습니다. ID: " + boardId
+                        HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."
                 ));
 
         Comment comment = new Comment();
         comment.setBoard(board);
         comment.setContent(content);
+        comment.setAuthor(user.getEmail());
 
-        // DB에는 이메일 저장
-        comment.setAuthor(loginUser.getEmail());
+        Comment savedComment = commentRepository.save(comment);
 
-        Comment saved = commentRepository.save(comment);
-
-        // 댓글 수 증가
         if (board.getCommentCount() == null) {
             board.setCommentCount(0);
         }
         board.setCommentCount(board.getCommentCount() + 1);
         boardRepository.save(board);
 
-        return CommentResponse.from(saved, getDisplayName(loginUser));
+        return CommentResponse.from(savedComment, getDisplayName(user));
     }
 
     // 댓글 삭제
+    @Transactional
     public void deleteComment(Long commentId, Authentication authentication) {
-        User loginUser = getLoginUser(authentication);
+        User user = getAuthenticatedUser(authentication);
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "해당 댓글이 존재하지 않습니다. ID: " + commentId
+                        HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."
                 ));
 
-        boolean admin = isAdmin(loginUser);
-        boolean owner = comment.getAuthor().equals(loginUser.getEmail());
-
-        // 댓글 삭제는 일단 작성자 또는 관리자 허용
-        if (!owner && !admin) {
+        if (!comment.getAuthor().equals(user.getEmail()) && !isAdmin(user)) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "댓글 삭제 권한이 없습니다."
+                    HttpStatus.FORBIDDEN, "댓글 삭제 권한이 없습니다."
             );
         }
 
         Board board = comment.getBoard();
-
-        commentRepository.delete(comment);
-
-        if (board.getCommentCount() != null && board.getCommentCount() > 0) {
-            board.setCommentCount(board.getCommentCount() - 1);
+        if (board != null && board.getCommentCount() != null) {
+            board.setCommentCount(Math.max(0, board.getCommentCount() - 1));
             boardRepository.save(board);
         }
+
+        commentRepository.delete(comment);
     }
 
-    private User getLoginUser(Authentication authentication) {
+    private User getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,

@@ -49,3 +49,42 @@
 .success-view { display: none; text-align: center; padding: 16px 0; }
 .success-ico { font-size: 3rem; margin-bottom: 12px; display: block; }
 .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ── 필수항목 별표 ── */
+.req { color: #e74c3c; font-size: .8rem; margin-left: 2px; }
+
+/* ── 실시간 검증 상태 ── */
+.fg-ok { color: #27ae60; font-size: .76rem; margin-top: 4px; display: none; }
+.fg.valid .fg-ok { display: block; }
+.fg.valid .fg-err { display: none !important; }
+.fg.valid input, .fg.valid select { border-color: #27ae60 !important; }
+
+/* ── 성공 모달 ── */
+.sm-overlay {
+    position: fixed; inset: 0; z-index: 600;
+    background: rgba(42,30,6,.52);
+    backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    animation: smFadeIn .25s ease;
+}
+@keyframes smFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.sm-box {
+    background: #fff;
+    border-radius: 26px;
+    padding: 52px 44px 40px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 24px 64px rgba(42,30,6,.22);
+    animation: smScaleIn .28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes smScaleIn { from { opacity:0; transform: scale(.88); } to { opacity:1; transform: scale(1); } }
+
+.sm-ico { font-size: 3.4rem; display: block; margin-bottom: 14px; }
+.sm-title { font-family: 'Gaegu', cursive; font-size: 1.5rem; color: var(--dark); margin-bottom: 8px; }
+.sm-msg { font-size: .84rem; color: var(--mid); line-height: 1.7; margin-bottom: 20px; }
+
+.sm-progress { height: 5px; background: var(--beige2); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
+.sm-bar { height: 100%; background: var(--green); border-radius: 99px; width: 100%; }
+.sm-redirect-txt { font-size: .72rem; color: var(--muted); margin-bottom: 18px; }

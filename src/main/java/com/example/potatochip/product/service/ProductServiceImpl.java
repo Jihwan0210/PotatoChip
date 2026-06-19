@@ -20,6 +20,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.example.potatochip.notification.service.NotificationService;
+import com.example.potatochip.product.entity.Wishlist;
+import com.example.potatochip.product.repository.WishRepository;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,8 @@ public class ProductServiceImpl implements ProductService{
     private final ModelMapper modelMapper;
     private final FileService fileService;
     private final UserRepository userRepository;
+    private final WishRepository wishRepository;
+    private final NotificationService notificationService;
 
 
 
@@ -80,8 +87,32 @@ public class ProductServiceImpl implements ProductService{
     public void modify(ProductDTO productDTO) {
         Optional<Product> result = productRepository.findById(productDTO.getId());
         Product product = result.orElseThrow();
+
+        BigDecimal oldPrice = product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+
         product.changeEntity(productDTO);
         productRepository.save(product);
+
+        BigDecimal newPrice = product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+
+        if (oldPrice != null && newPrice != null && oldPrice.compareTo(newPrice) != 0) {
+            List<Wishlist> wishlists = wishRepository.findByProductId(product.getId());
+
+            for (Wishlist wishlist : wishlists) {
+                notificationService.createPriceChangedNotification(
+                        wishlist.getUser().getId(),
+                        product.getId(),
+                        product.getName(),
+                        oldPrice,
+                        newPrice
+                );
+            }
+        }
+    }
+
+    @Override
+    public Product getProductEntity(Long id) {
+        return productRepository.findById(id).orElseThrow();
     }
 
     @Override
