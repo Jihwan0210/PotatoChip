@@ -96,4 +96,21 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                               @Param("today") LocalDate today,
                                               @Param("expireLimit") LocalDate expireLimit,
                                               Pageable pageable);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.category = :category " +
+            "AND p.id <> :productId " +
+            "ORDER BY p.createdAt DESC")
+    List<Product> findRelatedByCategory(@Param("category") String category,
+                                        @Param("productId") Long productId,
+                                        Pageable pageable);
+
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.seller.id = :sellerId " +
+            "AND p.id <> :productId " +
+            "ORDER BY p.createdAt DESC")
+    List<Product> findRelatedBySeller(@Param("sellerId") Long sellerId,
+                                      @Param("productId") Long productId,
+                                      Pageable pageable);
+
 }
