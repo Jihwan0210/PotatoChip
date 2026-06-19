@@ -7,7 +7,6 @@
 
     <link rel="stylesheet" href="/css/product/create.css">
 
-
 </head>
 
 <body>
@@ -108,7 +107,6 @@
                         💡 할인율 입력 시 날짜를 설정할 수 있습니다.
                     </div>
 
-
                 </div>
 
                 <div class="form-row">
@@ -158,8 +156,6 @@
 
                         </select>
                     </div>
-
-
 
                 </div>
 
@@ -211,6 +207,22 @@
 
                     <label>대표 이미지</label>
 
+                    <!-- ✅ AI 토글 -->
+                    <div style="display:flex; align-items:center; justify-content:space-between;
+                                background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px;
+                                padding:10px 14px; margin-bottom:10px;">
+                        <span style="font-size:.85rem; font-weight:600; color:#16a34a;">
+                            🤖 AI 사진 분석으로 상품명 · 설명 자동완성
+                        </span>
+                        <label style="position:relative; width:42px; height:24px; cursor:pointer; display:inline-block;">
+                            <input type="checkbox" id="aiToggle" checked style="opacity:0; width:0; height:0;">
+                            <span id="toggleSlider" style="position:absolute; inset:0; background:#4caf50; border-radius:99px; transition:.2s;">
+                                <span id="toggleThumb" style="position:absolute; left:3px; top:3px; width:18px; height:18px;
+                                      background:#fff; border-radius:50%; transition:.2s; display:block; transform:translateX(18px);"></span>
+                            </span>
+                        </label>
+                    </div>
+
                     <label class="thumb-upload">
 
                         <div class="thumb-icon">
@@ -232,7 +244,7 @@
 
                     </label>
 
-                    <div id="aiAnalyzeHint" style="display:none;font-size:.75rem;color:var(--green);margin-top:6px"></div>
+                    <div id="aiAnalyzeHint" style="font-size:.75rem;color:var(--green);margin-top:6px"></div>
 
                     <div class="form-group">
 
@@ -252,17 +264,21 @@
                                 JPG, PNG 파일 여러 장 업로드 가능
                             </div>
 
+                            <!-- ✅ id 추가 -->
                             <input type="file"
                                    name="imageFiles"
+                                   id="detailImageInput"
                                    accept="image/*"
                                    multiple
                                    hidden>
 
                         </label>
 
+                        <!-- ✅ 상세이미지 프리뷰 그리드 -->
+                        <div id="detailPreviewGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(90px,1fr));
+                             gap:8px; margin-top:10px;"></div>
+
                     </div>
-
-
 
                 </div>
 
@@ -293,8 +309,8 @@
 
         </div>
 
-        <!-- 오른쪽 미리보기 -->
-        <div class="create-card preview-card">
+        <!-- ✅ 오른쪽 미리보기 - sticky 추가 -->
+        <div class="create-card preview-card" style="position:sticky; top:24px;">
 
             <div class="preview-top">
                 <img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:0"/>
@@ -358,16 +374,14 @@
 </div>
 
 <script>
+    // 할인 미리보기
     function updateDiscountPreview() {
         const price = Number(document.querySelector('[name=price]').value);
         const rate  = Number(document.getElementById('discountRateInput').value);
-
         const previewMain     = document.querySelector('.preview-main');
         const previewDiscount = document.querySelector('.preview-discount');
         const hiddenDiscount  = document.getElementById('discountPriceHidden');
-
         if (!price) return;
-
         if (rate > 0 && rate <= 99) {
             const discounted = Math.round(price * (1 - rate / 100));
             previewDiscount.textContent = `-${rate}%`;
@@ -380,39 +394,100 @@
         }
     }
 
-    // ===== AI 사진 분석으로 상품명/설명 자동완성 =====
+    // ✅ AI 토글 슬라이더 동기화
+    const aiToggle = document.getElementById('aiToggle');
+    const slider   = document.getElementById('toggleSlider');
+    const thumb    = document.getElementById('toggleThumb');
+
+    function syncToggleStyle() {
+        if (aiToggle.checked) {
+            slider.style.background = '#4caf50';
+            thumb.style.transform   = 'translateX(18px)';
+        } else {
+            slider.style.background = '#ccc';
+            thumb.style.transform   = 'translateX(0)';
+        }
+    }
+
+    aiToggle.addEventListener('change', function () {
+        syncToggleStyle();
+        const hint = document.getElementById('aiAnalyzeHint');
+        if (!this.checked) {
+            hint.textContent = '🔕 AI 자동완성이 꺼져 있어요. 직접 입력해주세요.';
+        } else {
+            hint.textContent = '';
+        }
+    });
+
+    // ✅ 대표이미지 - AI 분석 토글 연동
     document.querySelector('input[name="thumbnailFile"]').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (!file) return;
-        analyzeProductImage(file);
+        if (aiToggle.checked) analyzeProductImage(file);
     });
 
     function analyzeProductImage(file) {
         const nameInput = document.querySelector('input[name="name"]');
         const descInput = document.querySelector('textarea[name="description"]');
         const hint = document.getElementById('aiAnalyzeHint');
-
-        hint.style.display = 'block';
         hint.textContent = '🤖 AI가 사진 보고 분석 중이에요...';
-
         const formData = new FormData();
         formData.append('image', file);
-
         fetch('/market/api/analyze-image', { method: 'POST', body: formData })
             .then(function (res) { return res.json(); })
             .then(function (data) {
-                if (data.name) nameInput.value = data.name;
-                if (data.description) descInput.value = data.description;
+                if (data.name) {
+                    nameInput.value = data.name;
+                    nameInput.dispatchEvent(new Event('input'));
+                }
+                if (data.description) {
+                    descInput.value = data.description;
+                    descInput.dispatchEvent(new Event('input'));
+                }
                 hint.textContent = '✅ AI가 채워준 거예요, 꼭 확인하고 수정해주세요!';
             })
             .catch(function () {
                 hint.textContent = '⚠️ 분석 실패했어요, 직접 입력해주세요.';
             });
     }
+
+    // ✅ 상세이미지 프리뷰
+    let detailFiles = [];
+
+    document.getElementById('detailImageInput').addEventListener('change', function (e) {
+        Array.from(e.target.files).forEach(function (file) {
+            const idx = detailFiles.length;
+            detailFiles.push(file);
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const grid = document.getElementById('detailPreviewGrid');
+                const div  = document.createElement('div');
+                div.dataset.index = idx;
+                div.style.cssText = 'position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1.5px solid #e0e0e0;';
+                div.innerHTML =
+                    '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;">' +
+                    '<button type="button" onclick="removeDetail(this,' + idx + ')" ' +
+                    'style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);' +
+                    'color:#fff;border:none;border-radius:50%;width:20px;height:20px;' +
+                    'font-size:.7rem;cursor:pointer;">✕</button>';
+                grid.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+        this.value = '';
+    });
+
+    function removeDetail(btn, idx) {
+        detailFiles[idx] = null;
+        btn.closest('[data-index]').remove();
+        const dt = new DataTransfer();
+        detailFiles.filter(function(f){ return f !== null; }).forEach(function(f){ dt.items.add(f); });
+        document.getElementById('detailImageInput').files = dt.files;
+    }
 </script>
 
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4&libraries=services"></script>
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script> <!--우편번호 스크립트-->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script src="/js/product/create.js"></script>
 </body>
 </html>
