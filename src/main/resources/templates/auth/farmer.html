@@ -160,32 +160,37 @@
             </div>
         </div>
 
-        <!-- ── 탭 2: 판매 분석 (시각적 목업) ── -->
+        <!-- ── 탭 2: 판매 분석 ── -->
         <div id="fcontent-2" style="display:none">
             <div class="ft-section-title">판매 분석 📊</div>
             <div class="ft-chart-grid">
+                <!-- 월별 매출 -->
                 <div class="ft-chart-card">
-                    <div class="ft-chart-title">월별 매출 추이</div>
+                    <div class="ft-chart-title">월별 매출 추이 (최근 6개월)</div>
                     <div class="ft-bar-chart">
-                        <div class="ft-bar-col"><div class="ft-bar" style="height:55%"></div><div class="ft-bar-lbl">3월</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar" style="height:68%"></div><div class="ft-bar-lbl">4월</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar" style="height:72%"></div><div class="ft-bar-lbl">5월</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar on" style="height:100%"></div><div class="ft-bar-lbl on">6월</div></div>
+                        <div class="ft-bar-col" th:each="m : ${salesAnalysis.monthlyStats}">
+                            <div th:class="${m.isCurrent ? 'ft-bar on' : 'ft-bar'}"
+                                 th:style="'height:' + ${m.heightPct} + '%'"></div>
+                            <div th:class="${m.isCurrent ? 'ft-bar-lbl on' : 'ft-bar-lbl'}"
+                                 th:text="${m.label}">-</div>
+                        </div>
                     </div>
-                    <div class="ft-chart-foot">최고 매출 · 이번 달</div>
+                    <div class="ft-chart-foot"
+                         th:text="${salesAnalysis.hasSales ? '최고 매출 · ' + salesAnalysis.peakMonthLabel : '아직 매출 데이터가 없어요'}">-</div>
                 </div>
+                <!-- 요일별 패턴 -->
                 <div class="ft-chart-card">
                     <div class="ft-chart-title">요일별 주문 패턴</div>
                     <div class="ft-bar-chart-sm">
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:60%"></div><div class="ft-bar-sm-lbl">월</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:75%"></div><div class="ft-bar-sm-lbl">화</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:55%"></div><div class="ft-bar-sm-lbl">수</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:65%"></div><div class="ft-bar-sm-lbl">목</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm on" style="height:100%"></div><div class="ft-bar-sm-lbl on">금</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:90%"></div><div class="ft-bar-sm-lbl">토</div></div>
-                        <div class="ft-bar-col"><div class="ft-bar-sm" style="height:82%"></div><div class="ft-bar-sm-lbl">일</div></div>
+                        <div class="ft-bar-col" th:each="w : ${salesAnalysis.weekdayStats}">
+                            <div th:class="${w.isToday ? 'ft-bar-sm on' : 'ft-bar-sm'}"
+                                 th:style="'height:' + ${w.heightPct} + '%'"></div>
+                            <div th:class="${w.isToday ? 'ft-bar-sm-lbl on' : 'ft-bar-sm-lbl'}"
+                                 th:text="${w.day}">-</div>
+                        </div>
                     </div>
-                    <div class="ft-chart-foot">금요일에 주문이 가장 많아요</div>
+                    <div class="ft-chart-foot"
+                         th:text="${salesAnalysis.hasSales ? salesAnalysis.peakDay + '요일에 주문이 가장 많아요' : '아직 주문 데이터가 없어요'}">-</div>
                 </div>
             </div>
         </div>
@@ -197,17 +202,19 @@
                 <div class="ft-settle-primary">
                     <div class="ft-settle-lbl">이번 달 정산 예정</div>
                     <div class="ft-settle-val"
-                         th:text="${#numbers.formatDecimal(summary.monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                         th:text="${#numbers.formatDecimal(settlement.thisMonthRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
                     <div class="ft-settle-sub">월말 지급 예정</div>
                 </div>
                 <div class="ft-settle-white complete">
                     <div class="ft-settle-lbl">지난 달 정산 완료</div>
-                    <div class="ft-settle-val">-</div>
+                    <div class="ft-settle-val"
+                         th:text="${#numbers.formatDecimal(settlement.lastMonthRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
                     <div class="ft-settle-sub">지급 완료 ✓</div>
                 </div>
                 <div class="ft-settle-white">
                     <div class="ft-settle-lbl">누적 정산 총액</div>
-                    <div class="ft-settle-val">-</div>
+                    <div class="ft-settle-val"
+                         th:text="${#numbers.formatDecimal(settlement.totalRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
                     <div class="ft-settle-sub">가입일부터 현재까지</div>
                 </div>
             </div>
@@ -218,12 +225,21 @@
                     <div style="text-align:right">금액</div>
                     <div style="text-align:center">상태</div>
                 </div>
-                <div class="ft-table-row ft-settle-grid">
-                    <div class="ft-cell-month">2026.06</div>
-                    <div class="ft-cell-name">판매대금 (이번 달)</div>
+                <div th:if="${#lists.isEmpty(settlement.settlements)}"
+                     class="ft-table-row"
+                     style="grid-template-columns:1fr;text-align:center;color:var(--muted)">
+                    정산 내역이 없습니다.
+                </div>
+                <div class="ft-table-row ft-settle-grid" th:each="s : ${settlement.settlements}">
+                    <div class="ft-cell-month" th:text="${s.month}">-</div>
+                    <div class="ft-cell-name"
+                         th:text="${s.isCurrent ? '판매대금 (이번 달)' : '판매대금 (' + s.month + ')'}">-</div>
                     <div class="ft-cell-r"
-                         th:text="${#numbers.formatDecimal(summary.monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
-                    <div class="ft-cell-badge"><span class="ft-badge ft-badge-warning">예정</span></div>
+                         th:text="${#numbers.formatDecimal(s.amount, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-cell-badge">
+                        <span th:class="${s.isCurrent ? 'ft-badge ft-badge-warning' : 'ft-badge ft-badge-success'}"
+                              th:text="${s.status}">-</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -243,7 +259,7 @@ var _ordersCache = /*[[${orders}]]*/ [];
 /*]]>*/
 </script>
 
-<script>
+<script th:inline="none">
 (function () {
 
     // ── 상태 뱃지 색상 초기 적용 ──────────────────────────────
@@ -315,7 +331,33 @@ var _ordersCache = /*[[${orders}]]*/ [];
         if (input === null) return;
         var n = parseInt(input, 10);
         if (isNaN(n) || n < 0) { alert('올바른 재고 수를 입력해주세요.'); return; }
-        farmerToast(productName + ' 재고가 ' + n + '개로 수정되었습니다.');
+
+        fetch('/api/seller/products/' + productId + '/stock', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+            body: JSON.stringify({ stock: n })
+        })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function () {
+            btn.dataset.stock = n;
+
+            var row       = btn.parentElement.parentElement;   // ft-table-row
+            var stockDiv  = row.children[1];                   // 재고 숫자 div
+            var badgeSpan = row.children[3].querySelector('span'); // 배지 span
+
+            // 재고 숫자 업데이트
+            stockDiv.textContent = n + '개';
+            stockDiv.className = n === 0 ? 'ft-stock-out' : (n < 10 ? 'ft-stock-low' : 'ft-stock-ok');
+
+            // 배지 업데이트
+            badgeSpan.textContent = n === 0 ? '품절' : (n < 10 ? '재고 부족' : '판매 중');
+            badgeSpan.className   = 'ft-badge ' + (n === 0 ? 'ft-badge-danger' : (n < 10 ? 'ft-badge-warning' : 'ft-badge-success'));
+
+            farmerToast(productName + ' 재고가 ' + n + '개로 수정되었습니다.');
+        })
+        .catch(function () {
+            farmerToast('재고 수정에 실패했습니다. 다시 시도해주세요.');
+        });
     };
 
     // ── CSV 다운로드 ───────────────────────────────────────────
