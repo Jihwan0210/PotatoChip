@@ -6,6 +6,8 @@ import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.auth.service.AuthService;
 import com.example.potatochip.auth.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,10 +29,10 @@ public class AuthController {
         return "auth/login";
     }
 
-    // 로그인 - JWT 토큰 반환
+    // 로그인 - JWT 토큰 반환 + 쿠키 설정
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto, HttpServletResponse response) {
         boolean success = authService.login(dto);
 
         if (!success) {
@@ -40,11 +42,18 @@ public class AuthController {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow();
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
+        // Thymeleaf 페이지에서 서버 인증이 되도록 쿠키에도 저장
+        Cookie jwtCookie = new Cookie("jwt", token);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(jwtCookie);
+
         return ResponseEntity.ok(Map.of(
                 "message", "로그인 성공",
                 "token", token,
                 "email", user.getEmail(),
-                "role", user.getRole()
+                "role", user.getRole(),
+                "name", user.getName()
         ));
     }
 
@@ -76,6 +85,34 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // 이메일 중복 실시간 체크
+    @GetMapping("/api/check/email")
+    @ResponseBody
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    // 비밀번호 형식 실시간 체크
+    @PostMapping("/api/check/password")
+    @ResponseBody
+    public ResponseEntity<?> checkPassword(@RequestBody Map<String, String> body) {
+        String password = body.get("password");
+        boolean valid = password != null &&
+                password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?~`]).{8,}$");
+        return ResponseEntity.ok(Map.of("valid", valid));
+    }
+
+    // 비밀번호 확인 실시간 체크
+    @PostMapping("/api/check/password-confirm")
+    @ResponseBody
+    public ResponseEntity<?> checkPasswordConfirm(@RequestBody Map<String, String> body) {
+        String password = body.get("password");
+        String passwordConfirm = body.get("passwordConfirm");
+        boolean match = password != null && password.equals(passwordConfirm);
+        return ResponseEntity.ok(Map.of("match", match));
     }
 
     // 비밀번호 재설정 페이지

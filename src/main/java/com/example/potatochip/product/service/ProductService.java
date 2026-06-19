@@ -22,4 +22,6 @@ public interface ProductService {
 
     public Page<ProductDTO> getProducts(String category, String keyword, String searchType, String sort, String sellerEmail, Pageable pageable);
 
+    Product getProductEntity(Long id);
+
 }

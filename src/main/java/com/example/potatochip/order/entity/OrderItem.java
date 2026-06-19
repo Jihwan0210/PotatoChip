@@ -1,6 +1,5 @@
 package com.example.potatochip.order.entity;
 
-import com.example.potatochip.order.entity.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,12 +34,12 @@ public class OrderItem {
     @Column(name = "shipping_fee", nullable = false)
     @Builder.Default
     private BigDecimal shippingFee = BigDecimal.ZERO;
-    // 기본 배송비 0원
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = OrderConverter.class)
     @Column(nullable = false)
     @Builder.Default
     private OrderStatus status = OrderStatus.PAYMENT_COMPLETE;
     // 기본 상태: 결제완료
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
