@@ -34,11 +34,22 @@ public class ProductImageAnalysisServiceImpl implements ProductImageAnalysisServ
         Resource imageResource = new ByteArrayResource(image.getBytes());
 
         String prompt = """
-                이 농산물 사진을 보고 온라인 마켓에 등록할 상품명과 상품 설명을 한국어로 만들어줘.
-                반드시 아래 JSON 형식으로만 답해. 다른 말은 절대 하지 마.
-                {"name": "상품명", "description": "2~3문장 설명"}
-                """;
-
+        이 사진에 있는 농산물을 보고 아래 JSON 형식으로만 답해. 다른 말은 절대 하지 마. 마크다운 금지.
+        {"name": "상품명", "description": "상품설명"}
+        
+        규칙:
+        - name: 농산물 이름과 중량 포함 (예: 못난이 감자 3kg)
+        - description: 아래 말투와 규칙을 따를 것
+          * 농부가 직접 손으로 쓴 것처럼 구어체로
+          * 자기 농장 자랑, 직접 키웠다는 느낌
+          * 못생겼지만 맛은 보장한다는 내용 자연스럽게 포함
+          * 2~3문장, 너무 길지 않게
+          * AI 느낌 나는 단어 금지 (최상급, 신선도, 영양, 친환경 같은 딱딱한 단어 쓰지 마)
+        
+        예시 description:
+        "저희 밭에서 직접 캔 감자인데 모양이 좀 삐뚤어졌어요 ㅎㅎ 그래도 쪄먹으면 진짜 맛있습니다. 모양만 못났지 맛은 자신있어요!"
+        "올해 사과가 좀 작고 울퉁불퉁하게 자랐는데 당도는 오히려 더 좋아요. 직접 먹어보고 올리는 거라 믿고 드셔도 됩니다~"
+        """;
         UserMessage userMessage = UserMessage.builder()
                 .text(prompt)
                 .media(new Media(mimeType, imageResource))

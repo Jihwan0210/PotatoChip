@@ -358,6 +358,12 @@
                         style="width:100%;padding:10px;border:1.5px solid var(--sand);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--mid);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .2s">
                     🤍 찜하기
                 </button>
+
+                <!-- 채팅 버튼 -->
+                <button id="chatBtn" onclick="handleChatBtnClick()"
+                        style="width:100%;padding:10px;border:1.5px solid var(--green);border-radius:10px;background:#fff;font-size:.8rem;font-weight:500;color:var(--green);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;transition:all .2s">
+                    💬 농부님과 채팅하기
+                </button>
                 <button id="deleteProductBtn"
                         th:data-seller-email="${product.sellerEmail}"
                         th:data-product-id="${product.id}"
@@ -428,7 +434,41 @@
 </div>
 <!-- AI담당 추가: 리뷰 상세보기 모달 끝 -->
 
+<!-- ── 채팅 모달 (구매자 → 판매자) ── -->
+<div id="chatModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:10000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;height:560px;display:flex;flex-direction:column;box-shadow:0 12px 44px rgba(0,0,0,.22);overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--sand);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+            <div>
+                <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark)">💬 농부님과 채팅</div>
+                <div id="chatRoomLabel" style="font-size:.72rem;color:var(--muted);margin-top:2px"></div>
+            </div>
+            <button onclick="closeChatModal()" style="border:none;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
+        </div>
+        <div id="chatMsgList" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:2px;background:var(--beige3)"></div>
+        <div style="padding:12px 16px;border-top:1px solid var(--sand);display:flex;gap:8px;flex-shrink:0;background:#fff">
+            <input id="chatInput" type="text" placeholder="메시지를 입력하세요..."
+                   onkeydown="if(event.key==='Enter')sendChatMessage()"
+                   style="flex:1;padding:10px 13px;border:1.5px solid var(--sand);border-radius:10px;font-size:.84rem;outline:none;font-family:inherit;color:var(--dark)">
+            <button onclick="sendChatMessage()"
+                    style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">전송</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── 채팅 목록 모달 (판매자 → 내 채팅 보기) ── -->
+<div id="chatListModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:10000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:20px;width:100%;max-width:400px;max-height:520px;display:flex;flex-direction:column;box-shadow:0 12px 44px rgba(0,0,0,.22);overflow:hidden">
+        <div style="padding:16px 20px;border-bottom:1px solid var(--sand);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+            <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--dark)">💬 구매자 채팅 목록</div>
+            <button onclick="document.getElementById('chatListModal').style.display='none'" style="border:none;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
+        </div>
+        <div id="chatListContent" style="flex:1;overflow-y:auto;padding:8px"></div>
+    </div>
+</div>
+
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/product/product.js"></script>
 <script th:inline="javascript">
@@ -521,6 +561,9 @@
         const payload = JSON.parse(atob(token.split('.')[1]));
         const myEmail = payload.sub;
         const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+
+        // 채팅 버튼 초기화
+        initChatBtn(myEmail, role);
 
         // 내 상품이면 삭제/수정 버튼 표시
         if (myEmail === sellerEmail) {
@@ -1198,6 +1241,184 @@
     }
     // AI담당 추가: 리뷰 통계/목록/AI 총평/필터/작성/수정/삭제/도움돼요 기능 끝
 
+
+    // ── 채팅 ──────────────────────────────────────────
+    var stompClient   = null;
+    var currentRoomId = null;
+    var isMySellProduct = false;
+
+    // 버튼 텍스트/동작 결정 (DOMContentLoaded 내부에서 호출)
+    function initChatBtn(myEmail, role) {
+        var chatBtn = document.getElementById('chatBtn');
+        if (!chatBtn) return;
+        if (myEmail === sellerEmail) {
+            isMySellProduct = true;
+            chatBtn.innerHTML = '💬 내 채팅 보기';
+        } else if (role === 'SELLER') {
+            chatBtn.style.display = 'none'; // 타 판매자는 숨김
+        }
+    }
+
+    function handleChatBtnClick() {
+        if (isMySellProduct) openChatListModal();
+        else openChatModal();
+    }
+
+    // 구매자: 채팅방 생성 or 입장
+    function openChatModal() {
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) {
+            if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
+            return;
+        }
+        fetch('/chat/rooms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ productId: productId })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(room) {
+            if (room.message) { showToast(room.message); return; }
+            currentRoomId = room.id;
+            document.getElementById('chatRoomLabel').textContent = '🌾 ' + room.sellerName + ' 농부님';
+            document.getElementById('chatMsgList').innerHTML = '';
+            document.getElementById('chatModal').style.display = 'flex';
+            loadChatHistory(currentRoomId, token);
+            connectStomp(currentRoomId, token);
+        })
+        .catch(function() { showToast('채팅을 시작할 수 없어요.'); });
+    }
+
+    // 판매자: 이 상품의 채팅 목록
+    function openChatListModal() {
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        if (!token) return;
+        fetch('/chat/rooms/seller/product/' + productId, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(rooms) {
+            var content = document.getElementById('chatListContent');
+            if (!rooms.length) {
+                content.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:.84rem">아직 채팅이 없어요.</div>';
+            } else {
+                content.innerHTML = rooms.map(function(room) {
+                    var unread = room.unreadCount > 0
+                        ? '<span style="background:#E84040;color:#fff;font-size:.6rem;font-weight:700;border-radius:50%;padding:2px 5px;margin-left:6px">' + room.unreadCount + '</span>'
+                        : '';
+                    var lastTime = room.lastMessageAt ? room.lastMessageAt.substring(11, 16) : '';
+                    return '<div onclick="openChatFromList(' + room.id + ')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s" onmouseover="this.style.background=\'var(--beige2)\'" onmouseout="this.style.background=\'#fff\'">'
+                        + '<div style="width:38px;height:38px;border-radius:50%;background:var(--gp);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">👤</div>'
+                        + '<div style="flex:1;min-width:0">'
+                        + '<div style="font-size:.84rem;font-weight:600;color:var(--dark)">' + escapeHtml(room.buyerName) + ' 님' + unread + '</div>'
+                        + '<div style="font-size:.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(room.lastMessage || '메시지 없음') + '</div>'
+                        + '</div>'
+                        + '<div style="font-size:.65rem;color:var(--muted);flex-shrink:0">' + lastTime + '</div>'
+                        + '</div>';
+                }).join('');
+            }
+            document.getElementById('chatListModal').style.display = 'flex';
+        })
+        .catch(function() { showToast('채팅 목록을 불러올 수 없어요.'); });
+    }
+
+    // 판매자가 목록에서 특정 방 선택
+    function openChatFromList(roomId) {
+        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        currentRoomId = roomId;
+        document.getElementById('chatListModal').style.display = 'none';
+        document.getElementById('chatMsgList').innerHTML = '';
+        document.getElementById('chatRoomLabel').textContent = '구매자와의 채팅';
+        document.getElementById('chatModal').style.display = 'flex';
+        loadChatHistory(roomId, token);
+        connectStomp(roomId, token);
+    }
+
+    function loadChatHistory(roomId, token) {
+        fetch('/chat/rooms/' + roomId + '/messages', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(messages) {
+            var list = document.getElementById('chatMsgList');
+            list.innerHTML = '';
+            messages.forEach(function(msg) { appendChatMessage(msg); });
+            list.scrollTop = list.scrollHeight;
+            // 읽음 처리
+            fetch('/chat/rooms/' + roomId + '/read', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        });
+    }
+
+    function connectStomp(roomId, token) {
+        if (stompClient) stompClient.deactivate();
+        stompClient = new StompJs.Client({
+            webSocketFactory: function() { return new SockJS('/ws-chat'); },
+            connectHeaders: { Authorization: 'Bearer ' + token },
+            onConnect: function() {
+                stompClient.subscribe('/topic/room/' + roomId, function(frame) {
+                    var msg = JSON.parse(frame.body);
+                    appendChatMessage(msg);
+                    var list = document.getElementById('chatMsgList');
+                    list.scrollTop = list.scrollHeight;
+                });
+            },
+            onStompError: function() { showToast('채팅 연결에 실패했어요.'); }
+        });
+        stompClient.activate();
+    }
+
+    function sendChatMessage() {
+        var input = document.getElementById('chatInput');
+        var content = input.value.trim();
+        if (!content || !stompClient || !stompClient.connected) return;
+        stompClient.publish({
+            destination: '/app/chat/' + currentRoomId,
+            body: JSON.stringify({ content: content })
+        });
+        input.value = '';
+    }
+
+    function appendChatMessage(msg) {
+        var myId = Number(localStorage.getItem('currentUserId'));
+        var isMe = msg.senderId === myId;
+        var list = document.getElementById('chatMsgList');
+
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isMe ? 'flex-end' : 'flex-start') + ';margin-bottom:10px';
+
+        if (!isMe) {
+            var nameEl = document.createElement('div');
+            nameEl.style.cssText = 'font-size:.65rem;color:var(--muted);margin-bottom:3px;padding-left:2px';
+            nameEl.textContent = msg.senderName;
+            wrap.appendChild(nameEl);
+        }
+
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:flex-end;gap:5px;' + (isMe ? 'flex-direction:row-reverse' : '');
+
+        var bubble = document.createElement('div');
+        bubble.style.cssText = 'max-width:72%;padding:9px 13px;border-radius:' + (isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px') + ';background:' + (isMe ? 'var(--green)' : '#fff') + ';color:' + (isMe ? '#fff' : 'var(--dark)') + ';font-size:.83rem;line-height:1.55;word-break:keep-all;border:1.5px solid ' + (isMe ? 'transparent' : 'var(--sand)');
+        bubble.textContent = msg.content;
+
+        var time = document.createElement('div');
+        time.style.cssText = 'font-size:.6rem;color:var(--muted);flex-shrink:0;padding-bottom:2px';
+        time.textContent = msg.sentAt ? msg.sentAt.substring(11, 16) : '';
+
+        row.appendChild(bubble);
+        row.appendChild(time);
+        wrap.appendChild(row);
+        list.appendChild(wrap);
+    }
+
+    function closeChatModal() {
+        document.getElementById('chatModal').style.display = 'none';
+        if (stompClient) { stompClient.deactivate(); stompClient = null; }
+        currentRoomId = null;
+    }
+    // ── 채팅 끝 ──────────────────────────────────────
 
     function handlePickupTab(element) {
 
