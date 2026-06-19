@@ -1,21 +1,81 @@
 package com.example.potatochip.ai.service;
 
 import com.example.potatochip.ai.dto.ProductRecommendationDTO;
+import com.example.potatochip.product.entity.Product;
+import com.example.potatochip.product.repository.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-public interface ProductRecommendationService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ProductRecommendationService {
 
-    // 기존 호환용: AI 추천으로 처리
-    List<ProductRecommendationDTO> generateRecommendations(ProductRecommendationDTO request);
+    private static final int RELATED_LIMIT = 3;
 
-    List<ProductRecommendationDTO> getRecommendations(Long userId, String sessionId);
+    private final ProductRepository productRepository;
 
-    List<ProductRecommendationDTO> generateAiRecommendations(ProductRecommendationDTO request);
+    public List<ProductRecommendationDTO> getProducts(Long productId) {
+        Product baseProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
-    List<ProductRecommendationDTO> getAiRecommendations(Long userId, String sessionId);
+        Map<Long, ProductRecommendationDTO> result = new LinkedHashMap<>();
 
-    List<ProductRecommendationDTO> generatePopularRecommendations();
+        List<Product> sameCategoryProducts = productRepository.findRelatedByCategory(
+                baseProduct.getCategory(),
+                baseProduct.getId(),
+                PageRequest.of(0, RELATED_LIMIT)
+        );
 
-    List<ProductRecommendationDTO> getPopularRecommendations();
+        for (Product product : sameCategoryProducts) {
+            addRecommendation(
+                    result,
+                    product,
+                    "같은 " + baseProduct.getCategory() + " 카테고리 상품이에요."
+            );
+        }
+
+        if (result.size() < RELATED_LIMIT && baseProduct.getSeller() != null) {
+            List<Product> sameSellerProducts = productRepository.findRelatedBySeller(
+                    baseProduct.getSeller().getId(),
+                    baseProduct.getId(),
+                    PageRequest.of(0, RELATED_LIMIT)
+            );
+
+            for (Product product : sameSellerProducts) {
+                addRecommendation(
+                        result,
+                        product,
+                        "같은 판매자의 다른 상품이에요."
+                );
+
+                if (result.size() >= RELATED_LIMIT) {
+                    break;
+                }
+            }
+        }
+
+        return result.values()
+                .stream()
+                .limit(RELATED_LIMIT)
+                .toList();
+    }
+
+    private void addRecommendation(
+            Map<Long, ProductRecommendationDTO> result,
+            Product product,
+            String reason
+    ) {
+        if (product == null || result.containsKey(product.getId())) {
+            return;
+        }
+
+        result.put(product.getId(), ProductRecommendationDTO.from(product, reason));
+    }
 }
