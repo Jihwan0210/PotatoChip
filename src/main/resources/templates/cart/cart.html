@@ -321,6 +321,18 @@
 
     // ── 결제하기: 배송 선택 정보를 sessionStorage에 저장 후 이동 ─────────
     function goToOrder() {
+        var checkedIds = [];
+        document.querySelectorAll('[data-product-id]').forEach(function(row) {
+            var productId = row.dataset.productId;
+            var chk = document.getElementById('check-' + productId);
+            if (chk && chk.checked) checkedIds.push(String(productId));
+        });
+
+        if (checkedIds.length === 0) {
+            alert('주문할 상품을 선택해주세요.');
+            return;
+        }
+        sessionStorage.setItem('selectedProductIds',   JSON.stringify(checkedIds));
         sessionStorage.setItem('selectedDeliveryType',  selectedDeliveryType);
         sessionStorage.setItem('selectedDeliveryFee',   selectedDeliveryFee);
         sessionStorage.setItem('selectedDeliveryLabel', selectedDeliveryLabel);
