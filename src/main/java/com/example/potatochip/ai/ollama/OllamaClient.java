@@ -91,4 +91,64 @@ public class OllamaClient {
 
         return content.toString().trim();
     }
+
+    public String recommendProductReason(String prompt) {
+        Map<String, Object> request = Map.of(
+                "model", model,
+                "stream", false,
+                "messages", List.of(
+                        Map.of(
+                                "role", "system",
+                                "content", """
+                                    너는 못난이 농산물 쇼핑몰의 상품 추천 문구 생성기다.
+
+                                    반드시 지켜라:
+                                    - 한국어만 사용한다.
+                                    - 영어, 중국어, 일본어를 절대 사용하지 않는다.
+                                    - 추천 이유 한 문장만 출력한다.
+                                    - 따옴표, 번호, 목록, 마크다운을 쓰지 않는다.
+                                    - 60자 이내로 작성한다.
+                                    - 과장하지 않는다.
+                                    - 없는 효능이나 품질을 지어내지 않는다.
+                                    - “것 같다”, “보인다”, “추측된다”를 쓰지 않는다.
+                                    - 출력은 추천 이유 문장 하나뿐이다.
+                                    """
+                        ),
+                        Map.of(
+                                "role", "user",
+                                "content", prompt
+                        )
+                ),
+                "options", Map.of(
+                        "temperature", 0.1,
+                        "top_p", 0.6,
+                        "num_predict", 80
+                )
+        );
+
+        Map response = restClient.post()
+                .uri("/api/chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(Map.class);
+
+        if (response == null || response.get("message") == null) {
+            return "구매 이력을 바탕으로 추천된 상품이에요.";
+        }
+
+        Object messageObject = response.get("message");
+
+        if (!(messageObject instanceof Map<?, ?> message)) {
+            return "구매 이력을 바탕으로 추천된 상품이에요.";
+        }
+
+        Object content = message.get("content");
+
+        if (content == null) {
+            return "구매 이력을 바탕으로 추천된 상품이에요.";
+        }
+
+        return content.toString().trim();
+    }
 }
