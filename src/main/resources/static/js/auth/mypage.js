@@ -176,6 +176,77 @@ function switchMyTab(name) {
 
     if (name === 'profile') loadMyInfo();
     if (name === 'orders') loadMyOrders()
+    if (name === 'wishlist') loadWishlist();
+}
+
+// 찜 목록 조회
+function loadWishlist() {
+    var token = getToken();
+    if (!token) return;
+    var container = document.getElementById('wishlist-container');
+    if (!container) return;
+
+    fetch('/mypage/wishlist', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(res) {
+        if (res.status === 401) { location.href = '/login'; return null; }
+        if (!res.ok) throw new Error('status ' + res.status);
+        return res.json();
+    })
+    .then(function(items) {
+        if (!items) return;
+        if (!Array.isArray(items) || items.length === 0) {
+            container.innerHTML = '<div class="mp-empty">찜한 상품이 없어요 🌿</div>';
+            return;
+        }
+        var html = '<div class="wl-grid">';
+        items.forEach(function(p) {
+            var thumb = p.thumbnailUrl
+                ? '<img src="' + p.thumbnailUrl + '" alt="' + p.name + '"/>'
+                : '🥬';
+            var priceHtml = p.discountPrice
+                ? '<span class="wl-price">' + Number(p.discountPrice).toLocaleString() + '원</span>'
+                  + '<span class="wl-og">' + Number(p.price).toLocaleString() + '원</span>'
+                : '<span class="wl-price">' + Number(p.price).toLocaleString() + '원</span>';
+            html += '<div class="wl-card" id="wl-' + p.id + '">'
+                + '<div class="wl-thumb">' + thumb + '</div>'
+                + '<div class="wl-body">'
+                + '<div class="wl-cat">' + (p.category || '') + '</div>'
+                + '<div class="wl-name">' + p.name + '</div>'
+                + '<div class="wl-price-row">' + priceHtml + '</div>'
+                + '<button class="wl-remove" onclick="removeWish(' + p.id + ')">❤️ 찜 해제</button>'
+                + '</div></div>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    })
+    .catch(function() {
+        container.innerHTML = '<div class="mp-empty">불러오기 실패했어요 ㅠㅠ</div>';
+    });
+}
+
+// 찜 해제
+function removeWish(productId) {
+    var token = getToken();
+    if (!token) return;
+    fetch('/wishlist/' + productId, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (!data.added) {
+            var card = document.getElementById('wl-' + productId);
+            if (card) card.remove();
+            var container = document.getElementById('wishlist-container');
+            if (container && !container.querySelector('.wl-card')) {
+                container.innerHTML = '<div class="mp-empty">찜한 상품이 없어요 🌿</div>';
+            }
+            showToast('찜 목록에서 제거됐어요');
+        }
+    })
+    .catch(function() { showToast('오류가 발생했어요 ㅠㅠ'); });
 }
 
 // 비밀번호 변경

@@ -9,21 +9,8 @@ document.querySelector('[name=origin]').addEventListener('input', function() {
 });
 
 // 판매 가격 / 할인 가격
-document.querySelector('[name=price]').addEventListener('input', updatePrice);
-document.querySelector('[name=discountPrice]').addEventListener('input', updatePrice);
-
-function updatePrice() {
-    const price = document.querySelector('[name=price]').value;
-    const discount = document.querySelector('[name=discountPrice]').value;
-    if (price && discount) {
-        const rate = Math.round((1 - discount / price) * 100);
-        document.querySelector('.preview-discount').textContent = `-${rate}%`;
-        document.querySelector('.preview-main').textContent = Number(discount).toLocaleString() + '원';
-    } else if (price) {
-        document.querySelector('.preview-discount').textContent = '';
-        document.querySelector('.preview-main').textContent = Number(price).toLocaleString() + '원';
-    }
-}
+document.querySelector('[name=price]').addEventListener('input', updateDiscountPreview);
+document.getElementById('discountRateInput').addEventListener('input', updateDiscountPreview);
 
 // 카테고리
 document.querySelector('[name=category]').addEventListener('change', function() {
@@ -76,12 +63,12 @@ pickupSelect.addEventListener('change', togglePickup);
 togglePickup();
 
 // 할인 날짜 활성화/비활성화
-const discountPriceInput = document.querySelector('[name=discountPrice]');
+const discountRateEl = document.getElementById('discountRateInput');
 const discountStartAt = document.querySelector('[name=discountStartAt]');
 const discountEndAt = document.querySelector('[name=discountEndAt]');
 
 function toggleDiscountDates() {
-    const hasDiscount = discountPriceInput.value.trim() !== '';
+    const hasDiscount = discountRateEl.value.trim() !== '' && Number(discountRateEl.value) > 0;
     discountStartAt.disabled = !hasDiscount;
     discountEndAt.disabled = !hasDiscount;
     discountStartAt.style.opacity = hasDiscount ? '1' : '0.5';
@@ -93,7 +80,7 @@ function toggleDiscountDates() {
     }
 }
 
-discountPriceInput.addEventListener('input', toggleDiscountDates);
+discountRateEl.addEventListener('input', toggleDiscountDates);
 toggleDiscountDates();
 
 // 주소 검색 + 지도 미리보기
