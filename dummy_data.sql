@@ -80,3 +80,107 @@ INSERT INTO reviews (product_id, user_id, rating, content, repurchase_intent, is
     (SELECT id FROM users WHERE email = 'dummy_buyer2@test.com'),
     5, '가격 대비 최고! 못난이라도 맛은 일품', true, false, true, DATE_SUB(NOW(), INTERVAL 4 DAY), DATE_SUB(NOW(), INTERVAL 4 DAY), false
   );
+
+
+SELECT id, email FROM users WHERE role = 'SELLER';
+SELECT id, name, price FROM products WHERE seller_id = 9;
+SELECT id, name, price FROM products WHERE seller_id = 10;
+SELECT id, name, price FROM products WHERE seller_id = 11;
+
+
+
+
+-- ── 1월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2601-001', 9, '서울시 강남구 테헤란로 1', 203000, 3000, 'card', 'delivery', 'delivered', '2026-01-05 10:30:00', '2026-01-05 10:30:00');
+SET @o1 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o1, 1, 10, 1, 200000, 3000, 'delivered', '2026-01-05 10:30:00', '2026-01-05 10:30:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2601-002', 9, '서울시 마포구 홍대입구 22', 249246, 3000, 'card', 'delivery', 'delivered', '2026-01-16 14:00:00', '2026-01-16 14:00:00');
+SET @o2 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o2, 2, 10, 2, 123123, 3000, 'delivered', '2026-01-16 14:00:00', '2026-01-16 14:00:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2601-003', 9, '부산시 해운대구 마린시티 5', 203000, 3000, 'card', 'delivery', 'delivered', '2026-01-22 09:15:00', '2026-01-22 09:15:00');
+SET @o3 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o3, 1, 10, 1, 200000, 3000, 'delivered', '2026-01-22 09:15:00', '2026-01-22 09:15:00');
+
+-- ── 2월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2602-001', 9, '서울시 서초구 반포대로 10', 126123, 3000, 'card', 'delivery', 'delivered', '2026-02-10 11:00:00', '2026-02-10 11:00:00');
+SET @o4 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o4, 2, 10, 1, 123123, 3000, 'delivered', '2026-02-10 11:00:00', '2026-02-10 11:00:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2602-002', 9, '인천시 연수구 송도대로 7', 403000, 3000, 'card', 'delivery', 'delivered', '2026-02-15 16:30:00', '2026-02-15 16:30:00');
+SET @o5 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o5, 1, 10, 2, 200000, 3000, 'delivered', '2026-02-15 16:30:00', '2026-02-15 16:30:00');
+
+-- ── 3월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2603-001', 9, '대전시 유성구 대학로 99', 372369, 3000, 'card', 'delivery', 'delivered', '2026-03-11 13:20:00', '2026-03-11 13:20:00');
+SET @o6 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o6, 2, 10, 3, 123123, 3000, 'delivered', '2026-03-11 13:20:00', '2026-03-11 13:20:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2603-002', 9, '서울시 강남구 삼성로 300', 203000, 3000, 'card', 'delivery', 'delivered', '2026-03-25 10:00:00', '2026-03-25 10:00:00');
+SET @o7 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o7, 1, 10, 1, 200000, 3000, 'delivered', '2026-03-25 10:00:00', '2026-03-25 10:00:00');
+
+-- ── 4월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2604-001', 9, '광주시 서구 상무대로 55', 249246, 3000, 'card', 'delivery', 'shipping', '2026-04-07 15:45:00', '2026-04-07 15:45:00');
+SET @o8 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o8, 2, 10, 2, 123123, 3000, 'shipping', '2026-04-07 15:45:00', '2026-04-07 15:45:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2604-002', 9, '서울시 용산구 이태원로 88', 203000, 3000, 'card', 'delivery', 'shipping', '2026-04-17 09:30:00', '2026-04-17 09:30:00');
+SET @o9 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o9, 1, 10, 1, 200000, 3000, 'shipping', '2026-04-17 09:30:00', '2026-04-17 09:30:00');
+
+-- ── 5월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2605-001', 9, '서울시 성동구 왕십리로 3', 126123, 3000, 'card', 'delivery', 'preparing', '2026-05-06 12:00:00', '2026-05-06 12:00:00');
+SET @o10 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o10, 2, 10, 1, 123123, 3000, 'preparing', '2026-05-06 12:00:00', '2026-05-06 12:00:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2605-002', 9, '경기도 성남시 분당구 판교로 7', 403000, 3000, 'card', 'delivery', 'payment_complete', '2026-05-20 17:10:00', '2026-05-20 17:10:00');
+SET @o11 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o11, 1, 10, 2, 200000, 3000, 'payment_complete', '2026-05-20 17:10:00', '2026-05-20 17:10:00');
+
+-- ── 6월 ──────────────────────────────────────────
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2606-001', 9, '서울시 종로구 율곡로 10', 126123, 3000, 'card', 'delivery', 'payment_complete', '2026-06-02 10:20:00', '2026-06-02 10:20:00');
+SET @o12 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o12, 2, 10, 1, 123123, 3000, 'payment_complete', '2026-06-02 10:20:00', '2026-06-02 10:20:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2606-002', 9, '대구시 수성구 달구벌대로 200', 203000, 3000, 'card', 'delivery', 'payment_complete', '2026-06-13 14:50:00', '2026-06-13 14:50:00');
+SET @o13 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o13, 1, 10, 1, 200000, 3000, 'payment_complete', '2026-06-13 14:50:00', '2026-06-13 14:50:00');
+
+INSERT INTO orders (order_number, buyer_id, shipping_address, total_amount, total_shipping_fee, payment_method, delivery_type, status, created_at, updated_at)
+VALUES ('ORD-2606-003', 9, '서울시 마포구 와우산로 5', 249246, 3000, 'card', 'delivery', 'payment_complete', '2026-06-19 09:00:00', '2026-06-19 09:00:00');
+SET @o14 = LAST_INSERT_ID();
+INSERT INTO order_items (order_id, product_id, seller_id, quantity, price, shipping_fee, status, created_at, updated_at)
+VALUES (@o14, 2, 10, 2, 123123, 3000, 'payment_complete', '2026-06-19 09:00:00', '2026-06-19 09:00:00');
+
+
+
+
+
