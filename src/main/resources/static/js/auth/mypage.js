@@ -371,29 +371,48 @@ function renderMyOrders(orders) {
 
     var html = '<div class="mp-card"><div class="mp-section-title">📦 주문 내역</div>';
 
-    orders.forEach(function (order) {
-        var itemCount = (order.orderItems || []).length;
+    orders.forEach(function (order, index) {
+        var items = order.orderItems || [];
+        var firstItem = items[0] || {};
+        var thumbnail = firstItem.thumbnailUrl
+            ? firstItem.thumbnailUrl
+            : 'https://placehold.co/56x56?text=🥔';
+        var firstName = firstItem.productName || '상품 정보 없음';
+        var displayName = items.length > 1
+            ? firstName + ' 외 ' + (items.length - 1) + '개'
+            : firstName;
+
         var finalAmount = (order.totalAmount || 0) + (order.totalShippingFee || 0);
         var dateStr = order.createdAt ? order.createdAt.replace('T', ' ').slice(0, 16) : '';
+        var isLast = index === orders.length - 1;
 
         html +=
-            '<div style="border:1.5px solid var(--sand);border-radius:12px;padding:16px;margin-bottom:12px">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-            '<span style="font-weight:700;font-size:.88rem;color:var(--dark)">' + order.orderNumber + '</span>' +
-            '<span style="font-size:.74rem;font-weight:700;color:var(--green);background:#eef7e6;border-radius:20px;padding:2px 10px">' +
+            '<div style="display:flex;gap:14px;padding:16px 0;align-items:flex-start;' +
+            (!isLast ? 'border-bottom:1.5px solid #e8dcc8;margin-bottom:2px;' : '') + '">' +
+            '<img src="' + thumbnail + '" ' +
+            'style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;background:var(--bg)" ' +
+            'onerror="this.src=\'https://placehold.co/56x56?text=🥔\'"/>' +
+            '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px">' +
+            '<span style="font-weight:700;font-size:.92rem;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' +
+            displayName +
+            '</span>' +
+            '<span style="font-size:.74rem;font-weight:700;color:var(--green);background:#eef7e6;border-radius:20px;padding:2px 10px;flex-shrink:0">' +
             (STATUS_LABELS[order.status] || order.status) +
             '</span>' +
             '</div>' +
+            '<div style="font-size:.74rem;color:var(--muted);margin-bottom:6px">' + order.orderNumber + '</div>' +
             '<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">' +
-            dateStr + ' · ' + (DELIVERY_LABELS[order.deliveryType] || order.deliveryType) + ' · 상품 ' + itemCount + '건' +
+            dateStr + ' · ' + (DELIVERY_LABELS[order.deliveryType] || order.deliveryType) +
             '</div>' +
             '<div style="display:flex;justify-content:space-between;align-items:center">' +
             '<span style="font-weight:700;color:#F39C12">' + finalAmount.toLocaleString() + '원</span>' +
-            '<a href="/orders/complete/' + order.id + '?token=' + token + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>' +
+            '<a href="/orders/complete/' + order.id + '?token=' + token + '" ' +
+            'style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>' +
+            '</div>' +
             '</div>' +
             '</div>';
     });
-
     html += '</div>';
     box.innerHTML = html;
 }
