@@ -93,6 +93,7 @@
                         <!-- 장바구니 아이템 목록 -->
                         <div class="oi-row"
                              th:each="item, idx : ${cartDTO.items}"
+                             th:data-product-id="${item.productId}"
                              th:data-price="${item.price}"
                              th:data-qty="${item.quantity}"
                              th:data-pickup="${item.isPickupAvailable}">
@@ -273,10 +274,26 @@
         productTotal = 0;
         hasPickupUnavailable = false;
 
-        document.querySelectorAll('#orderItemsBox .oi-row').forEach(row => {
-            const price = parseFloat(row.dataset.price) || 0;
-            const qty = parseInt(row.dataset.qty) || 0;
-            const pickup = row.dataset.pickup === 'true';
+        // sessionStorage에서 체크된 상품 ID 목록 읽기
+        var raw = sessionStorage.getItem('selectedProductIds');
+        var selectedIds = raw ? JSON.parse(raw) : null;
+
+        document.querySelectorAll('#orderItemsBox .oi-row').forEach(function(row) {
+            var productId = String(row.dataset.productId);
+
+            // 체크 안 된 상품은 숨기기
+            if (selectedIds && !selectedIds.includes(productId)) {
+                row.style.display = 'none';
+                // 해당 row 안의 hidden input도 비활성화 (form 제출에서 제외)
+                row.querySelectorAll('input[type="hidden"]').forEach(function(inp) {
+                    inp.disabled = true;
+                });
+                return;
+            }
+
+            var price = parseFloat(row.dataset.price) || 0;
+            var qty = parseInt(row.dataset.qty) || 0;
+            var pickup = row.dataset.pickup === 'true';
 
             productTotal += price * qty;
             if (!pickup) hasPickupUnavailable = true;
@@ -284,10 +301,9 @@
 
         recalc();
 
-        // 주문 상품이 없으면 결제 버튼 비활성화
-        const itemCount = document.querySelectorAll('#orderItemsBox .oi-row').length;
-        document.getElementById('btnOrder').disabled = itemCount === 0;
-        if (itemCount === 0) {
+        var visibleCount = document.querySelectorAll('#orderItemsBox .oi-row:not([style*="display: none"])').length;
+        document.getElementById('btnOrder').disabled = visibleCount === 0;
+        if (visibleCount === 0) {
             document.getElementById('btnOrder').style.opacity = '0.5';
             document.getElementById('btnOrder').style.cursor = 'not-allowed';
         }
@@ -377,6 +393,18 @@
         // POST 시 서버가 토큰으로 사용자를 식별할 수 있도록 포함
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         appendHidden(form, 'token', token || '');
+
+        var rawIds = sessionStorage.getItem('selectedProductIds');
+        if (rawIds) {
+            form.querySelectorAll('input[name="selectedProductIds"]').forEach(function(el) { el.remove(); });
+            JSON.parse(rawIds).forEach(function(id) {
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'selectedProductIds';
+                inp.value = id;
+                form.appendChild(inp);
+            });
+        }
 
         form.submit();
     }

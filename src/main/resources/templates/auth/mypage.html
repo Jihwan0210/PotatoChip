@@ -35,6 +35,16 @@
                 <div class="mp-tab"    id="my-tab-profile" onclick="switchMyTab('profile')">⚙️ 프로필 설정</div>
             </div>
         </aside>
+        <script>
+            // localStorage에서 이름 즉시 표시 (fetch 전에도 보이도록)
+            (function() {
+                var name = localStorage.getItem('name') || sessionStorage.getItem('name');
+                if (name) {
+                    var el = document.getElementById('mp-display-name');
+                    if (el) el.textContent = name + '님';
+                }
+            })();
+        </script>
 
         <!-- 콘텐츠 -->
         <div>
@@ -44,6 +54,7 @@
                 <div class="mp-card">
                     <div class="mp-section-title">📦 주문 내역</div>
                     <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">주문 내역이 없어요 🌿</div>
+
                 </div>
             </div>
 
