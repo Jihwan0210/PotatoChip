@@ -11,20 +11,66 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/products")
+@RequestMapping("/api/ai/recommendations")
 public class ProductRecommendationController {
 
-    private final ProductRecommendationService ProductRecommendationService;
+    private final ProductRecommendationService productRecommendationService;
 
-    @GetMapping("/{productId}/related-recommendations")
-    public ResponseEntity<?> getRelatedRecommendations(@PathVariable Long productId) {
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateRecommendations(@RequestBody ProductRecommendationDTO request) {
         try {
             List<ProductRecommendationDTO> recommendations =
-                    ProductRecommendationService.getProducts(productId);
+                    productRecommendationService.generateRecommendations(request);
 
             return ResponseEntity.ok(recommendations);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductRecommendationDTO>> getRecommendations(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String sessionId
+    ) {
+        return ResponseEntity.ok(
+                productRecommendationService.getRecommendations(userId, sessionId)
+        );
+    }
+
+    @PostMapping("/generate/ai")
+    public ResponseEntity<?> generateAiRecommendations(@RequestBody ProductRecommendationDTO request) {
+        try {
+            List<ProductRecommendationDTO> recommendations =
+                    productRecommendationService.generateAiRecommendations(request);
+
+            return ResponseEntity.ok(recommendations);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/ai")
+    public ResponseEntity<List<ProductRecommendationDTO>> getAiRecommendations(
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String sessionId
+    ) {
+        return ResponseEntity.ok(
+                productRecommendationService.getAiRecommendations(userId, sessionId)
+        );
+    }
+
+    @PostMapping("/generate/popular")
+    public ResponseEntity<List<ProductRecommendationDTO>> generatePopularRecommendations() {
+        return ResponseEntity.ok(
+                productRecommendationService.generatePopularRecommendations()
+        );
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<ProductRecommendationDTO>> getPopularRecommendations() {
+        return ResponseEntity.ok(
+                productRecommendationService.getPopularRecommendations()
+        );
     }
 }

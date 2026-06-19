@@ -34,6 +34,7 @@ public class ProductRecommendation {
     @Column(nullable = false, length = 20)
     private ProductRecommendationType type;
 
+    @Lob
     @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
 
@@ -49,7 +50,16 @@ public class ProductRecommendation {
     @Column(name = "generated_at", nullable = false)
     private LocalDateTime generatedAt;
 
-    public ProductRecommendation(Long userId, String sessionId, Product product, ProductRecommendationType type, String reason, BigDecimal score, Integer rankOrder, LocalDateTime expiresAt) {
+    public ProductRecommendation(
+            Long userId,
+            String sessionId,
+            Product product,
+            ProductRecommendationType type,
+            String reason,
+            BigDecimal score,
+            Integer rankOrder,
+            LocalDateTime expiresAt
+    ) {
         this.userId = userId;
         this.sessionId = sessionId;
         this.product = product;
@@ -71,6 +81,4 @@ public class ProductRecommendation {
             this.type = ProductRecommendationType.AI;
         }
     }
-
-
 }
