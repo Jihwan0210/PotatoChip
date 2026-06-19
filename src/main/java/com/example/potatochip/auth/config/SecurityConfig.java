@@ -45,7 +45,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/board/**").authenticated()    // 게시글 수정 시 로그인 필수
                         .requestMatchers(HttpMethod.DELETE, "/api/board/**").authenticated() // 게시글 삭제 시 로그인 필수
 
-                        // 4. 그 외 나머지 요청은 우선 허용
+                        // 4. WebSocket 핸드셰이크 허용
+                        .requestMatchers("/ws-chat/**").permitAll()
+
+                        // 5. 채팅 API 인증 필요
+                        .requestMatchers("/chat/**").authenticated()
+
+                        // 6. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
