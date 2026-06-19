@@ -17,13 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    // 로그아웃 버튼 전환
-    const btnNav = document.querySelector('.btn-nav');
-    if (btnNav) {
-        btnNav.textContent = '로그아웃';
-        btnNav.setAttribute('onclick', 'doLogout()');
-    }
-
     loadMyInfo();
     loadMyOrders();
 });
@@ -55,6 +48,8 @@ function loadMyInfo() {
             if (nameEl) nameEl.textContent = (data.name || '') + '님';
             var emailEl = document.getElementById('mp-display-email');
             if (emailEl) emailEl.textContent = data.email || '';
+            var pointsEl = document.getElementById('mp-display-points');
+            if (pointsEl) pointsEl.textContent = (data.points || 0).toLocaleString();
         })
         .catch(err => console.error('내 정보 조회 실패:', err));
 }

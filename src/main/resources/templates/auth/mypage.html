@@ -23,6 +23,9 @@
                 <div class="mp-avatar">👤</div>
                 <div class="mp-sidebar-name" id="mp-display-name">로딩 중...</div>
                 <div class="mp-sidebar-email" id="mp-display-email"></div>
+                <div style="display:inline-flex;align-items:center;gap:4px;background:#f0faf3;border-radius:20px;padding:4px 12px;margin-top:8px;font-size:.78rem;font-weight:700;color:var(--green)">
+                    🌿 <span id="mp-display-points">0</span>P 보유
+                </div>
             </div>
             <div class="mp-nav">
                 <div class="mp-tab on" id="my-tab-orders"  onclick="switchMyTab('orders')">📦 주문 내역</div>
@@ -32,6 +35,16 @@
                 <div class="mp-tab"    id="my-tab-profile" onclick="switchMyTab('profile')">⚙️ 프로필 설정</div>
             </div>
         </aside>
+        <script>
+            // localStorage에서 이름 즉시 표시 (fetch 전에도 보이도록)
+            (function() {
+                var name = localStorage.getItem('name') || sessionStorage.getItem('name');
+                if (name) {
+                    var el = document.getElementById('mp-display-name');
+                    if (el) el.textContent = name + '님';
+                }
+            })();
+        </script>
 
         <!-- 콘텐츠 -->
         <div>
