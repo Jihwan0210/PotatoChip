@@ -1,0 +1,116 @@
+
+@baseUrl = http://localhost:8080
+@userId = 1
+@sessionId = test-session-001
+@token = 여기에_JWT_토큰_입력
+
+### 0. 서버 동작 확인 - 인기추천 조회
+GET {{baseUrl}}/api/ai/recommendations/popular
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 1. 인기상품 추천 생성
+### AI/Ollama 사용 안 함.
+### product_rankings, wishlists, reviews 기반으로 POPULAR 타입 추천 생성.
+POST {{baseUrl}}/api/ai/recommendations/generate/popular
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 2. 인기상품 추천 조회
+### 저장된 POPULAR 추천이 있으면 조회, 없거나 만료되면 서버 로직에서 새로 생성.
+GET {{baseUrl}}/api/ai/recommendations/popular
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 3. AI 상품 추천 생성 - 로그인 사용자 기준
+### 구매 이력 기반 후보 상품 선정 + Ollama 추천 이유 생성.
+### Ollama가 실행 중이어야 AI 이유 생성이 정상 동작함.
+POST {{baseUrl}}/api/ai/recommendations/generate/ai
+Content-Type: application/json
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+{
+  "userId": {{userId}},
+  "sessionId": null
+}
+
+
+### 4. AI 상품 추천 조회 - 로그인 사용자 기준
+GET {{baseUrl}}/api/ai/recommendations/ai?userId={{userId}}
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 5. AI 상품 추천 생성 - 비로그인 세션 기준
+### 구매 이력이 없으므로 인기상품 fallback 중심으로 추천될 가능성이 큼.
+POST {{baseUrl}}/api/ai/recommendations/generate/ai
+Content-Type: application/json
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+{
+  "userId": null,
+  "sessionId": "{{sessionId}}"
+}
+
+
+### 6. AI 상품 추천 조회 - 비로그인 세션 기준
+GET {{baseUrl}}/api/ai/recommendations/ai?sessionId={{sessionId}}
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 7. 기존 API 호환 테스트 - generate
+### 기존 /api/ai/recommendations/generate 가 AI 추천 생성으로 연결되는지 확인.
+POST {{baseUrl}}/api/ai/recommendations/generate
+Content-Type: application/json
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+{
+  "userId": {{userId}},
+  "sessionId": null
+}
+
+
+### 8. 기존 API 호환 테스트 - get
+### 기존 /api/ai/recommendations 가 AI 추천 조회로 연결되는지 확인.
+GET {{baseUrl}}/api/ai/recommendations?userId={{userId}}
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+
+### 9. 잘못된 요청 테스트
+### userId와 sessionId가 둘 다 없으면 400 또는 예외 응답이 나와야 정상.
+POST {{baseUrl}}/api/ai/recommendations/generate/ai
+Content-Type: application/json
+Accept: application/json
+# Authorization: Bearer {{token}}
+
+{
+  "userId": null,
+  "sessionId": null
+}
+
+
+### 10. Ollama 직접 확인
+### Ollama 서버가 실행 중이면 응답이 와야 함.
+### Spring 앱이 아니라 로컬 Ollama API 직접 테스트.
+POST http://localhost:11434/api/chat
+Content-Type: application/json
+Accept: application/json
+
+{
+  "model": "gemma2:latest",
+  "stream": false,
+  "messages": [
+    {
+      "role": "user",
+      "content": "감자를 자주 구매한 사용자에게 당근을 추천하는 이유를 한국어 한 문장으로 써줘."
+    }
+  ]
+}

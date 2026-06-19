@@ -4,6 +4,7 @@ import com.example.potatochip.inquiry.dto.InquiryAnswerRequest;
 import com.example.potatochip.inquiry.dto.InquiryDTO;
 import com.example.potatochip.inquiry.entity.Inquiry;
 import com.example.potatochip.inquiry.repository.InquiryRepository;
+import com.example.potatochip.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class InquiryServiceImpl implements InquiryService {
     private static final Long DEFAULT_ADMIN_ID = 1L;
 
     private final InquiryRepository inquiryRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -140,6 +142,12 @@ public class InquiryServiceImpl implements InquiryService {
         Long adminId = request.getAdminId() == null ? DEFAULT_ADMIN_ID : request.getAdminId();
 
         inquiry.answer(request.getAnswer(), adminId);
+
+        notificationService.createInquiryAnsweredNotification(
+                inquiry.getUserId(),
+                inquiry.getId(),
+                inquiry.getTitle()
+        );
 
         return InquiryDTO.fromEntity(inquiry);
     }
