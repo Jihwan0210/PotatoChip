@@ -52,7 +52,12 @@ public class SecurityConfig {
                         .requestMatchers("/chat/**").authenticated()
 
                         // 6. 그 외 나머지 요청은 우선 허용
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/order-items/**").authenticated()
+                        // 7. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
+
+
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
 

@@ -40,88 +40,26 @@
     </div>
 </div>
 
-<!-- 맞춤추천 팝업 -->
-<div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:300px;min-width:300px;max-width:420px;min-height:400px;max-height:640px;resize:both;overflow:auto;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990">
-    <div id="recPopupHeader" style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:move;border-radius:16px 16px 0 0">
+<!-- 인기상품추천 팝업 -->
+<div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:420px;height:460px;min-width:320px;min-height:300px;max-width:90vw;max-height:82vh;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990;overflow:hidden;resize:both">
+    <div id="recPopupHeader" style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none">
         <div>
-            <div style="font-size:.78rem;font-weight:700;color:#fff;font-family:Gaegu,cursive">✨ 맞춤 추천</div>
-            <div style="font-size:.65rem;color:rgba(255,255,255,.7);margin-top:2px">카테고리 · 구매이력 기반</div>
+            <div style="font-size:1rem;font-weight:700;color:#fff;font-family:Gaegu,cursive">🔥 인기상품 추천</div>
+            <div style="font-size:.76rem;color:rgba(255,255,255,.86);margin-top:3px;font-weight:600">주문수 · 찜수 · 리뷰수 · 평점 · 최신등록순 기반</div>
         </div>
-        <span onclick="closeRecPopup()" onmousedown="event.stopPropagation()" style="cursor:pointer;color:rgba(255,255,255,.8);font-size:1.1rem;line-height:1">✕</span>
+        <span class="rec-popup-close" onclick="closeRecPopup()" style="cursor:pointer;color:rgba(255,255,255,.85);font-size:1.2rem;line-height:1">✕</span>
     </div>
-    <div style="padding:12px 14px">
-        <div style="font-size:.7rem;font-weight:500;color:var(--amber);margin-bottom:10px;display:flex;align-items:center;gap:5px">🛒 최근 구매 기반 추천</div>
-        <div onclick="location.href='/market'" style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--sand);cursor:pointer;align-items:center">
-            <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🍎</div>
-            <div style="flex:1;min-width:0">
-                <div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px">사과 재구매 추천</div>
-                <div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">아오리 사과 2kg</div>
-                <div style="font-size:.65rem;color:var(--muted)">충북 사과 농원</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:.78rem;font-weight:700;color:var(--amber)">9,800원</div>
-                <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">14,000원</div>
-            </div>
-        </div>
-        <div onclick="location.href='/market'" style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--sand);cursor:pointer;align-items:center">
-            <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,#FEF2E8,#F5C4A0);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">🥕</div>
-            <div style="flex:1;min-width:0">
-                <div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px">당근 구매 후 자주 함께</div>
-                <div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">제주 비트 1kg</div>
-                <div style="font-size:.65rem;color:var(--muted)">제주 청정 농장</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:.78rem;font-weight:700;color:var(--amber)">6,200원</div>
-                <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">9,000원</div>
-            </div>
-        </div>
-        <div style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">📂 카테고리별 인기 보기</div>
-        <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;scrollbar-width:none">
-            <div class="mf" th:classappend="${category == '채소'} ? ' on'" onclick="popupCategoryF(this)">채소 🥦</div>
-            <div class="mf" th:classappend="${category == '과일'} ? ' on'" onclick="popupCategoryF(this)">과일 🍎</div>
-            <div class="mf" th:classappend="${category == '곡류'} ? ' on'" onclick="popupCategoryF(this)">곡류 🌾</div>
-            <div class="mf" th:classappend="${category == '버섯'} ? ' on'" onclick="popupCategoryF(this)">버섯 🍄</div>
-            <div class="mf" th:classappend="${category == '뿌리채소'} ? ' on'" onclick="popupCategoryF(this)">뿌리채소 🥕</div>
-        </div>
-        <div id="popupCategoryRankingArea">
-            <div th:if="${not #lists.isEmpty(categoryTopRankings)}" style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">
-                🔥 <span th:text="${category}"></span> 카테고리 인기
-            </div>
-            <div th:each="ranking, stat : ${categoryTopRankings}"
-                 th:onclick="|location.href='@{/market/detail(id=${ranking.product.id})}'|"
-                 th:styleappend="${!stat.last} ? 'border-bottom:1px solid var(--sand)' : ''"
-                 style="display:flex;gap:10px;padding:9px 0;cursor:pointer;align-items:center">
-                <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden;position:relative">
-                    <img th:if="${ranking.product.thumbnailUrl != null and !ranking.product.thumbnailUrl.isEmpty()}"
-                         th:src="${ranking.product.thumbnailUrl}"
-                         alt="상품 이미지"
-                         style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0"/>
-                    <span th:unless="${ranking.product.thumbnailUrl != null and !ranking.product.thumbnailUrl.isEmpty()}">🏆</span>
-                </div>
-                <div style="flex:1;min-width:0">
-                    <div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px" th:text="${category + ' 인기 ' + (stat.index + 1) + '위'}"></div>
-                    <div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" th:text="${ranking.product.name}"></div>
-                    <div style="font-size:.65rem;color:var(--muted)" th:text="${ranking.product.origin}"></div>
-                </div>
-                <div style="text-align:right;flex-shrink:0">
-                    <div style="font-size:.78rem;font-weight:700;color:var(--amber)"
-                         th:if="${ranking.product.discountPrice != null}"
-                         th:text="${#numbers.formatInteger(ranking.product.discountPrice, 3, 'COMMA')} + '원'"></div>
-                    <div style="font-size:.78rem;font-weight:700;color:var(--amber)"
-                         th:unless="${ranking.product.discountPrice != null}"
-                         th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"></div>
-                    <div style="font-size:.62rem;color:var(--muted);text-decoration:line-through"
-                         th:if="${ranking.product.discountPrice != null}"
-                         th:text="${#numbers.formatInteger(ranking.product.price, 3, 'COMMA')} + '원'"></div>
-                </div>
-            </div>
-            <div th:if="${#lists.isEmpty(categoryTopRankings)}" style="font-size:.72rem;color:var(--muted);padding:9px 0">카테고리를 선택하면 그 카테고리 인기 상품을 보여드려요</div>
+    <div style="padding:14px 16px;max-height:calc(100% - 112px);overflow:auto">
+        <div style="font-size:.86rem;font-weight:700;color:var(--amber);margin-bottom:12px;display:flex;align-items:center;gap:6px">🔥 지금 인기 있는 상품</div>
+        <div id="popularRecommendationList" style="min-height:80px">
+            <div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오는 중...</div>
         </div>
     </div>
     <div style="padding:0 14px 12px">
         <button onclick="location.href='/market';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">전체 추천 상품 보기 →</button>
     </div>
 </div>
+
 <!-- 필터 -->
 <div class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
     <div class="mf" th:classappend="${category == '' or category == '전체'} ? ' on'" onclick="mktF(this)">전체</div>
@@ -205,7 +143,7 @@
              style="cursor:pointer">
             <div class="pc2-thumb gn" style="position:relative;overflow:hidden">
                 <div class="pbdg">
-                    <span class="pbdg-t pbdg-new" th:if="${product.isNew()}">New</span>
+                    <span class="pbdg-t pbdg-new">New</span>
                     <span class="pbdg-t pbdg-soon" th:if="${product.soonExpired}">⏰ 기한임박</span>
                 </div>
                 <div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>
@@ -270,19 +208,16 @@
 </div>
 
 <!-- ======= 탭 1: AI 추천 ======= -->
-<div id="mkt-content-1" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
+<div id="mkt-content-1" style="display:none;padding:28px 5%;max-width:1240px;margin:0 auto">
     <div style="background:linear-gradient(135deg,var(--gp),#f0fce8);border:1.5px solid var(--gl);border-radius:16px;padding:20px 24px;margin-bottom:22px;display:flex;align-items:center;gap:16px">
         <div style="width:44px;height:44px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🤖</div>
         <div>
-            <div style="font-family:Gaegu,cursive;font-size:1rem;font-weight:700;color:var(--green);margin-bottom:3px">AI 맞춤 추천</div>
-            <div style="font-size:.78rem;color:var(--mid)">구매 패턴과 계절을 분석해 딱 맞는 상품을 추천해드려요</div>
+            <div style="font-family:Gaegu,cursive;font-size:1rem;font-weight:700;color:var(--green);margin-bottom:3px">AI 상품 추천</div>
+            <div style="font-size:.78rem;color:var(--mid)">구매 이력 기반 추천 상품과 AI 추천 이유를 보여드려요</div>
         </div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px">
-        <div class="pc2" onclick="location.href='/market/detail?id=1'"><div class="pc2-thumb gn"><div class="pbdg"><span class="pbdg-t pbdg-new">AI픽</span></div><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🍎</div><div class="pc2-body"><div class="pc2-farm">충주 행복 사과 농원</div><div class="pc2-nm">홍옥 사과 3kg</div><div class="pc2-pr"><span class="pc2-disc">-35%</span><span class="pc2-price">12,900원</span></div><button class="btn-add" onclick="event.stopPropagation();location.href='/market/detail?id=1'">🔍 상세보기</button></div></div>
-        <div class="pc2" onclick="location.href='/market/detail?id=2'"><div class="pc2-thumb ap"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥕</div><div class="pc2-body"><div class="pc2-farm">제주 청정 당근 농장</div><div class="pc2-nm">굴곡진 당근 2kg</div><div class="pc2-pr"><span class="pc2-disc">-50%</span><span class="pc2-price">5,900원</span></div><button class="btn-add" onclick="event.stopPropagation();location.href='/market/detail?id=2'">🔍 상세보기</button></div></div>
-        <div class="pc2" onclick="location.href='/market/detail?id=3'"><div class="pc2-thumb mt"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥦</div><div class="pc2-body"><div class="pc2-farm">전남 나주 이순신 농장</div><div class="pc2-nm">비균형 브로콜리 1.5kg</div><div class="pc2-pr"><span class="pc2-disc">-28%</span><span class="pc2-price">8,640원</span></div><button class="btn-add" onclick="event.stopPropagation();location.href='/market/detail?id=3'">🔍 상세보기</button></div></div>
-        <div class="pc2" onclick="location.href='/market/detail?id=4'"><div class="pc2-thumb gn"><div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>🥔</div><div class="pc2-body"><div class="pc2-farm">강원 해피팜</div><div class="pc2-nm">황토 감자 5kg</div><div class="pc2-pr"><span class="pc2-disc">-40%</span><span class="pc2-price">9,500원</span></div><button class="btn-add" onclick="event.stopPropagation();location.href='/market/detail?id=4'">🔍 상세보기</button></div></div>
+    <div id="aiRecommendationGrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
+        <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천 상품을 불러오는 중...</div>
     </div>
 </div>
 
@@ -291,6 +226,269 @@
 <script src="/js/product/product.js"></script>
 <script src="/js/app.js"></script>
 <script>
+    // ===== 추천 API 공통 =====
+    var aiRecommendationsLoaded = false;
+    var popularRecommendationsLoaded = false;
+
+    function getRecommendationToken() {
+        return localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    }
+
+    function getLoginUserId() {
+        var storedUserId = localStorage.getItem('userId')
+                || sessionStorage.getItem('userId')
+                || localStorage.getItem('id')
+                || sessionStorage.getItem('id');
+
+        if (storedUserId && !isNaN(Number(storedUserId))) {
+            return Number(storedUserId);
+        }
+
+        var token = getRecommendationToken();
+        if (!token || token.split('.').length < 2) {
+            return null;
+        }
+
+        try {
+            var payload = JSON.parse(atob(token.split('.')[1]));
+            var tokenUserId = payload.userId || payload.id || payload.memberId || payload.user_id;
+            if (tokenUserId && !isNaN(Number(tokenUserId))) {
+                return Number(tokenUserId);
+            }
+        } catch (e) {
+            return null;
+        }
+
+        return null;
+    }
+
+    function getOrCreateRecommendationSessionId() {
+        var sessionId = localStorage.getItem('recommendationSessionId')
+                || sessionStorage.getItem('recommendationSessionId');
+
+        if (!sessionId) {
+            sessionId = 'mkt-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('recommendationSessionId', sessionId);
+        }
+
+        return sessionId;
+    }
+
+    function buildRecommendationTarget() {
+        var userId = getLoginUserId();
+        if (userId) {
+            return {
+                query: '?userId=' + encodeURIComponent(userId),
+                body: { userId: userId, sessionId: null }
+            };
+        }
+
+        var sessionId = getOrCreateRecommendationSessionId();
+        return {
+            query: '?sessionId=' + encodeURIComponent(sessionId),
+            body: { userId: null, sessionId: sessionId }
+        };
+    }
+
+    function fetchRecommendationJson(url, options) {
+        options = options || {};
+        options.headers = options.headers || {};
+        options.headers['Accept'] = 'application/json';
+
+        var token = getRecommendationToken();
+        if (token) {
+            options.headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        return fetch(url, options).then(function(response) {
+            if (!response.ok) {
+                throw new Error('추천 API 호출 실패: ' + response.status);
+            }
+            return response.json();
+        });
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+    }
+
+    function getRecommendationEmoji(category) {
+        if (category === '과일') return '🍎';
+        if (category === '곡류') return '🌾';
+        if (category === '버섯') return '🍄';
+        if (category === '뿌리채소') return '🥕';
+        if (category === '채소') return '🥦';
+        return '🌿';
+    }
+
+    function renderAiRecommendations(items) {
+        var grid = document.getElementById('aiRecommendationGrid');
+        if (!grid) return;
+
+        if (!items || items.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">아직 추천 상품이 없습니다.</div>';
+            return;
+        }
+
+        grid.innerHTML = items.map(function(item) {
+            var detailUrl = '/market/detail?id=' + encodeURIComponent(item.productId);
+            var thumb = item.thumbnailUrl
+                ? '<img src="' + escapeHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit"/>'
+                : '<span>' + getRecommendationEmoji(item.productCategory) + '</span>';
+
+            var reason = item.reason || '구매 이력을 바탕으로 추천된 상품이에요.';
+
+            return ''
+                + '<div class="pc2" onclick="location.href=\'' + detailUrl + '\'" style="cursor:pointer;display:flex;flex-direction:column;min-height:420px">'
+                + '  <div class="pc2-thumb gn" style="position:relative;overflow:hidden;height:180px;flex-shrink:0">'
+                + '    <div class="pbdg"><span class="pbdg-t pbdg-new">AI픽</span></div>'
+                + '    <div class="plk" onclick="event.stopPropagation();toggleW(this)">🤍</div>'
+                +      thumb
+                + '  </div>'
+                + '  <div class="pc2-body" style="display:flex;flex-direction:column;flex:1">'
+                + '    <div class="pc2-farm">' + escapeHtml(item.productCategory || '추천 상품') + '</div>'
+                + '    <div class="pc2-nm">' + escapeHtml(item.productName || '상품명 없음') + '</div>'
+                +      renderRecommendationPriceHtml(item)
+                + '    <button class="btn-add" onclick="event.stopPropagation();location.href=\'' + detailUrl + '\'">🔍 상세보기</button>'
+                + '    <div onclick="event.stopPropagation()" style="margin-top:12px;background:#fff;border-top:1px dashed var(--sand);padding-top:10px;font-size:.74rem;color:var(--mid);line-height:1.55">'
+                + '      <div style="font-weight:700;color:var(--green);font-family:Gaegu,cursive;font-size:.88rem;margin-bottom:3px">🤖 이 상품을 추천한 이유</div>'
+                + '      <div>' + escapeHtml(reason) + '</div>'
+                + '    </div>'
+                + '  </div>'
+                + '</div>';
+        }).join('');
+    }
+
+    function renderRecommendationPriceHtml(item) {
+        var price = Number(item.productDiscountPrice || item.discountPrice || item.discountedPrice || item.productPrice || item.price || 0);
+        var originalPrice = Number(item.productPrice || item.originalPrice || item.price || 0);
+        var hasDiscount = originalPrice > 0 && price > 0 && originalPrice > price;
+
+        if (!price) {
+            return '<div class="pc2-pr" style="margin-top:7px"><span class="pc2-price">가격 확인</span></div>';
+        }
+
+        var discountRate = hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0;
+
+        return ''
+            + '<div class="pc2-pr" style="margin-top:7px">'
+            + (hasDiscount ? '<span class="pc2-disc">-' + discountRate + '%</span>' : '')
+            + '<span class="pc2-price">' + formatRecommendationPrice(price) + '원</span>'
+            + (hasDiscount ? '<span class="pc2-og">' + formatRecommendationPrice(originalPrice) + '원</span>' : '')
+            + '</div>';
+    }
+
+    function formatRecommendationPrice(value) {
+        return Number(value || 0).toLocaleString('ko-KR');
+    }
+
+    function renderPopularRecommendations(items) {
+        var list = document.getElementById('popularRecommendationList');
+        if (!list) return;
+
+        if (!items || items.length === 0) {
+            list.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:14px 0;text-align:center">인기상품이 없습니다.</div>';
+            return;
+        }
+
+        var visibleItems = items.slice(0, 6);
+
+        list.innerHTML = visibleItems.map(function(item, index) {
+            var detailUrl = '/market/detail?id=' + encodeURIComponent(item.productId);
+            var image = item.thumbnailUrl
+                    ? '<img src="' + escapeHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;border-radius:10px"/>'
+                    : getRecommendationEmoji(item.productCategory);
+            var border = index === visibleItems.length - 1 ? '' : 'border-bottom:1px solid var(--sand);';
+
+            return ''
+                + '<div onclick="location.href=\'' + detailUrl + '\'" style="display:flex;gap:12px;padding:12px 0;' + border + 'cursor:pointer;align-items:center">'
+                + '  <div style="width:54px;height:54px;border-radius:11px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0;overflow:hidden">' + image + '</div>'
+                + '  <div style="flex:1;min-width:0">'
+                + '    <div style="font-size:.72rem;color:var(--green);font-weight:700;margin-bottom:2px">인기상품 추천</div>'
+                + '    <div style="font-size:.86rem;font-weight:700;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(item.productName || '상품명 없음') + '</div>'
+                +      renderPopularRecommendationPriceHtml(item)
+                + '  </div>'
+                + '  <div style="font-size:.82rem;color:var(--amber);font-weight:800;flex-shrink:0">#' + escapeHtml(item.rankOrder || index + 1) + '</div>'
+                + '</div>';
+        }).join('');
+    }
+
+    function renderPopularRecommendationPriceHtml(item) {
+        var price = Number(item.productDiscountPrice || item.discountPrice || item.discountedPrice || item.productPrice || item.price || 0);
+        var originalPrice = Number(item.productPrice || item.originalPrice || item.price || 0);
+        var hasDiscount = originalPrice > 0 && price > 0 && originalPrice > price;
+
+        if (!price) {
+            return '<div style="font-size:.78rem;color:var(--amber);font-weight:800;margin-top:4px">가격 확인</div>';
+        }
+
+        var discountRate = hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0;
+
+        return ''
+            + '<div style="display:flex;align-items:baseline;gap:6px;margin-top:4px;flex-wrap:wrap">'
+            + (hasDiscount ? '<span style="font-size:.72rem;color:var(--amber);font-weight:900">-' + discountRate + '%</span>' : '')
+            + '<span style="font-size:.84rem;color:var(--amber);font-weight:900">' + formatRecommendationPrice(price) + '원</span>'
+            + (hasDiscount ? '<span style="font-size:.68rem;color:var(--muted);text-decoration:line-through">' + formatRecommendationPrice(originalPrice) + '원</span>' : '')
+            + '</div>';
+    }
+
+    function loadAiRecommendations() {
+        var grid = document.getElementById('aiRecommendationGrid');
+        if (!grid) return;
+
+        if (aiRecommendationsLoaded) return;
+        aiRecommendationsLoaded = true;
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천 상품을 불러오는 중...</div>';
+
+        var target = buildRecommendationTarget();
+
+        fetchRecommendationJson('/api/ai/recommendations/ai' + target.query)
+                .then(function(items) {
+                    if (items && items.length > 0) return items;
+
+                    return fetchRecommendationJson('/api/ai/recommendations/generate/ai', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(target.body)
+                    });
+                })
+                .then(renderAiRecommendations)
+                .catch(function(error) {
+                    aiRecommendationsLoaded = false;
+                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천을 불러오지 못했습니다.</div>';
+                    console.error(error);
+                });
+    }
+
+    function loadPopularRecommendations() {
+        var list = document.getElementById('popularRecommendationList');
+        if (!list) return;
+
+        if (popularRecommendationsLoaded) return;
+        popularRecommendationsLoaded = true;
+        list.innerHTML = '<div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오는 중...</div>';
+
+        fetchRecommendationJson('/api/ai/recommendations/popular')
+                .then(function(items) {
+                    if (items && items.length > 0) return items;
+
+                    return fetchRecommendationJson('/api/ai/recommendations/generate/popular', {
+                        method: 'POST'
+                    });
+                })
+                .then(renderPopularRecommendations)
+                .catch(function(error) {
+                    popularRecommendationsLoaded = false;
+                    list.innerHTML = '<div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오지 못했습니다.</div>';
+                    console.error(error);
+                });
+    }
+
     // ===== 탭 전환 =====
     function switchMktTab(n) {
         for (var i = 0; i < 2; i++) {
@@ -307,19 +505,17 @@
 
     // ===== 정렬 =====
     function setSort(type) {
-        // 버튼 스타일 초기화
         ['popular','discount','price','newest'].forEach(function(t) {
             var btn = document.getElementById('sort-btn-' + t);
             if (btn) { btn.style.fontWeight = '400'; btn.style.color = 'var(--muted)'; btn.style.background = ''; }
         });
-        // 선택된 버튼 활성화
+
         var active = document.getElementById('sort-btn-' + type);
         if (active) { active.style.fontWeight = '700'; active.style.color = 'var(--green)'; active.style.background = 'var(--gp)'; }
 
-        // 현재 URL 파라미터 유지하면서 sort만 변경
         var url = new URL(window.location.href);
         url.searchParams.set('sort', type);
-        url.searchParams.set('page', '0'); // 정렬 변경 시 첫 페이지로
+        url.searchParams.set('page', '0');
         window.location.href = url.toString();
     }
 
@@ -342,103 +538,70 @@
         });
     })();
 
-    // ===== 맞춤추천 팝업 =====
-    function openRecPopup() { document.getElementById('recPopup').style.display = 'block'; }
-    function closeRecPopup() { document.getElementById('recPopup').style.display = 'none'; }
-
-
-    // ===== 맞춤추천 팝업 드래그 이동 =====
-    (function () {
+    // ===== 인기상품추천 팝업 =====
+    function openRecPopup() {
         var popup = document.getElementById('recPopup');
-        var header = document.getElementById('recPopupHeader');
-        var isDragging = false, startX = 0, startY = 0;
+        if (!popup) return;
 
-        header.addEventListener('mousedown', function (e) {
-            isDragging = true;
-            var rect = popup.getBoundingClientRect();
-            startX = e.clientX - rect.left;
-            startY = e.clientY - rect.top;
-            popup.style.right = 'auto';
-            popup.style.bottom = 'auto';
-            popup.style.left = rect.left + 'px';
-            popup.style.top = rect.top + 'px';
-            document.body.style.userSelect = 'none';
-        });
-
-        document.addEventListener('mousemove', function (e) {
-            if (!isDragging) return;
-            var maxLeft = window.innerWidth - popup.offsetWidth;
-            var maxTop = window.innerHeight - popup.offsetHeight;
-            var newLeft = Math.min(Math.max(0, e.clientX - startX), maxLeft);
-            var newTop = Math.min(Math.max(0, e.clientY - startY), maxTop);
-            popup.style.left = newLeft + 'px';
-            popup.style.top = newTop + 'px';
-        });
-
-        document.addEventListener('mouseup', function () {
-            isDragging = false;
-            document.body.style.userSelect = '';
-        });
-    })();
-
-    // 팝업 안 카테고리 클릭 → 페이지 이동 없이 그 카테고리 인기상품만 fetch
-    function popupCategoryF(el) {
-        el.parentElement.querySelectorAll('.mf').forEach(function (x) { x.classList.remove('on'); });
-        el.classList.add('on');
-
-        var txt = el.textContent.replace(/[🥦🍎🌾🍄🥕⏰\s]/g, '').trim();
-        var area = document.getElementById('popupCategoryRankingArea');
-        area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">불러오는 중...</div>';
-
-        fetch('/market/api/category-ranking?category=' + encodeURIComponent(txt))
-            .then(function (res) { return res.json(); })
-            .then(function (items) { renderPopupCategoryRanking(txt, items); })
-            .catch(function () {
-                area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">불러오는 중 오류가 났어요</div>';
-            });
+        popup.style.display = 'block';
+        loadPopularRecommendations();
     }
 
-    function renderPopupCategoryRanking(category, items) {
-        var area = document.getElementById('popupCategoryRankingArea');
+    function closeRecPopup() {
+        var popup = document.getElementById('recPopup');
+        if (popup) popup.style.display = 'none';
+    }
 
-        if (!items || items.length === 0) {
-            area.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:9px 0">' + category + ' 카테고리 랭킹 데이터가 없어요</div>';
+    (function initRecPopupDrag() {
+        var popup = document.getElementById('recPopup');
+        var header = document.getElementById('recPopupHeader');
+
+        if (!popup || !header) {
             return;
         }
 
-        var html = '<div style="font-size:.7rem;font-weight:500;color:var(--amber);margin:10px 0 8px;display:flex;align-items:center;gap:5px">🔥 ' + category + ' 카테고리 인기</div>';
+        var dragging = false;
+        var offsetX = 0;
+        var offsetY = 0;
 
-        items.forEach(function (item, idx) {
-            var hasDiscount = item.discountPrice != null;
-            var mainPrice = Math.round(hasDiscount ? item.discountPrice : item.price).toLocaleString('ko-KR') + '원';
-            var borderStyle = idx < items.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
-            var thumbHtml = item.thumbnailUrl
-                ? '<img src="' + item.thumbnailUrl + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0">'
-                : '🏆';
+        header.addEventListener('mousedown', function(event) {
+            if (event.target && event.target.classList && event.target.classList.contains('rec-popup-close')) {
+                return;
+            }
 
-            html += '<div onclick="location.href=\'/market/detail?id=' + item.id + '\'" style="display:flex;gap:10px;padding:9px 0;cursor:pointer;align-items:center;' + borderStyle + '">'
-                + '<div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,var(--gp),var(--gl));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden;position:relative">' + thumbHtml + '</div>'
-                + '<div style="flex:1;min-width:0">'
-                + '<div style="font-size:.65rem;color:var(--green);font-weight:500;margin-bottom:1px">' + category + ' 인기 ' + (idx + 1) + '위</div>'
-                + '<div style="font-size:.76rem;font-weight:500;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + item.name + '</div>'
-                + '<div style="font-size:.65rem;color:var(--muted)">' + item.origin + '</div>'
-                + '</div>'
-                + '<div style="text-align:right;flex-shrink:0">'
-                + '<div style="font-size:.78rem;font-weight:700;color:var(--amber)">' + mainPrice + '</div>'
-                + (hasDiscount ? '<div style="font-size:.62rem;color:var(--muted);text-decoration:line-through">' + Math.round(item.price).toLocaleString('ko-KR') + '원</div>' : '')
-                + '</div>'
-                + '</div>';
+            dragging = true;
+
+            var rect = popup.getBoundingClientRect();
+            offsetX = event.clientX - rect.left;
+            offsetY = event.clientY - rect.top;
+
+            popup.style.left = rect.left + 'px';
+            popup.style.top = rect.top + 'px';
+            popup.style.right = 'auto';
+            popup.style.bottom = 'auto';
+
+            document.body.style.userSelect = 'none';
         });
 
-        area.innerHTML = html;
-    }
+        document.addEventListener('mousemove', function(event) {
+            if (!dragging) {
+                return;
+            }
 
-    // 페이지 로드 시 표시 확인하고 팝업 자동으로 다시 열기
-    (function () {
-        if (sessionStorage.getItem('keepRecPopupOpen') === '1') {
-            sessionStorage.removeItem('keepRecPopupOpen');
-            openRecPopup();
-        }
+            var maxLeft = window.innerWidth - popup.offsetWidth;
+            var maxTop = window.innerHeight - popup.offsetHeight;
+
+            var nextLeft = Math.min(Math.max(event.clientX - offsetX, 8), Math.max(maxLeft - 8, 8));
+            var nextTop = Math.min(Math.max(event.clientY - offsetY, 8), Math.max(maxTop - 8, 8));
+
+            popup.style.left = nextLeft + 'px';
+            popup.style.top = nextTop + 'px';
+        });
+
+        document.addEventListener('mouseup', function() {
+            dragging = false;
+            document.body.style.userSelect = '';
+        });
     })();
 </script>
 </body>
