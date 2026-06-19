@@ -110,7 +110,17 @@
         .board-action-btn { padding: 8px 16px; border-radius: 100px; border: 1.5px solid var(--beige); background: var(--white); color: var(--mid); font-size: .76rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
         .board-action-btn:hover { border-color: var(--green); color: var(--green); }
         .board-action-btn.danger:hover { border-color: #E84040; color: #E84040; }
-
+        .board-detail-body img {
+            display: block !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            height: auto !important;
+            margin: 15px auto !important;
+            border-radius: 12px !important;
+            object-fit: cover!important;
+            width: 400px!important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1)!important;
+        }
         /* ── TOAST ── */
         .board-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: .83rem; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.22); z-index: 99999; opacity: 0; transition: opacity .2s; pointer-events: none; }
         .board-toast.show { opacity: 1; }
@@ -124,38 +134,42 @@
             .board-head { padding: 24px 5% 20px; }
             .board-tabs { overflow-x: auto; }
 
-            .post-thumb-box {
-                width: 60px !important;
-                height: 60px !important;
-                border-radius: 8px;
-                overflow: hidden;
-                flex-shrink: 0;
-                border: 1px solid #e2e8f0;
-            }
-
-            .post-thumb-box img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .post-thumb-box.no-img {
-                background-color: #f8fafc;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
-
-            .post-thumb-box.no-img span {
-                font-size: 11px;
-                color: #94a3b8;
-                text-align: center;
-                line-height: 1.3;
-            }
             .post-item::after,
             .post-item .green-dot,
             .post-item span[style*="background-color"] {
                 display: none !important;
+            }
+            .detail-post-image{
+                width:150px;
+                height:150px;
+                object-fit:cover;
+                border-radius:12px;
+                display:block;
+                margin:0 auto;
+            }
+            #detailContent img {
+                display: block !important;
+                width: 150% !important;
+                height: 150px !important;
+                margin: 20px auto !important;
+                border-radius: 12px !important;
+                object-fit: cover;
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .post-item {
+                display: block !important;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px;
+                border-bottom: 1px solid #f1f5f9;
+                cursor: pointer;
+            }
+
+            /* 텍스트 영역을 유연하게 늘어나게 함 */
+            .post-text-content {
+                flex: 1;
+                min-width: 0; /* 글자가 길어지면 말줄임표 처리되도록 */
             }
         }
     </style>
@@ -469,7 +483,6 @@
                 + '      <span class="post-meta-item" style="color:#ef4444;"><i class="ti ti-heart-filled" style="font-size:11px"></i> ' + fmtNum(currentLikeCount) + '</span>'
                 + '    </div>'
                 + '  </div>'
-                +    thumbHtml
                 + '</div>';
         }).join('');
 
@@ -565,14 +578,14 @@
             + '<span>👀 ' + fmtNum(post.viewCount) + '</span>'
             + '<span>💬 <span id="detailCommentCountSpan">' + fmtNum(post.commentCount || 0) + '</span></span>';
 
-        var contentHtml = '';
+        var imageHtml = '';
         if (post.imageUrl) {
-            contentHtml += '<div style="text-align:center; margin-bottom:20px;">'
-                + '<img src="' + post.imageUrl + '" style="max-width:100%; max-height:400px; border-radius:12px; object-fit:cover;">'
-                + '</div>';
+            imageHtml = '<div style="text-align:center; margin-bottom:20px;">' +
+                '<img src="' + post.imageUrl + '" style="display:block; width:100%; max-width:500px; height:auto; margin:0 auto; border-radius:12px; object-fit:contain;">' +
+                '</div>';
         }
-        document.getElementById('detailContent').innerHTML = contentHtml + esc(post.content || '');
 
+        document.getElementById('detailContent').innerHTML = imageHtml + '<div style="white-space:pre-line;">' + esc(post.content || '') + '</div>';
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         var headers = {};
         if (token) headers['Authorization'] = 'Bearer ' + token;
@@ -705,6 +718,7 @@
     function openWriteModal() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
+        // 1. 로그인 체크
         if (!token) {
             showToast('로그인 후 게시글을 작성할 수 있어요.');
             setTimeout(function () {
@@ -713,22 +727,44 @@
             return;
         }
 
+        // 2. 초기화 설정
         isEditMode = false;
         editPostId = null;
-        currentExistingImageUrl = null; // 초기화
+        currentExistingImageUrl = null;
         setupBoardCategoryByRole();
 
+        // 3. 입력 필드 초기화
         document.getElementById('boardCategory').value = 'free';
         document.getElementById('boardTitle').value = '';
         document.getElementById('boardContent').value = '';
-        if (document.getElementById('boardImage')) document.getElementById('boardImage').value = '';
 
+        // 4. 이미지 첨부 초기화 및 # 특수문자 방어 로직 추가
+        var fileInput = document.getElementById('boardImage');
+        if (fileInput) {
+            fileInput.value = ''; // 이전에 선택된 파일 정보 비우기
+
+            // 사용자가 파일을 선택하는 즉시 이름 검사
+            fileInput.onchange = function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    // 파일 이름에 #이 포함되어 있는지 확인
+                    if (file.name.includes('#')) {
+                        alert('파일 이름에 특수문자(#)는 사용할 수 없습니다. 이름을 변경해주세요.');
+                        this.value = ''; // 검사 통과 못 하면 선택 취소 (초기화)
+                        return false;
+                    }
+                }
+            };
+        }
+
+        // 5. 미리보기 및 모달 UI 설정
         var previewContainer = document.getElementById('editImagePreviewContainer');
         if (previewContainer) previewContainer.style.display = 'none';
 
         var modalTitle = document.getElementById('modalTitle');
         if (modalTitle) modalTitle.textContent = '게시글 작성하기 🌿';
 
+        // 6. 모달 열기
         document.getElementById('writeModal').classList.add('open');
     }
 
@@ -861,6 +897,8 @@
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) { showToast('로그인 후 댓글을 작성할 수 있어요.'); return; }
         if (!currentBoardIdForComment) { showToast('게시글 정보를 찾을 수 없습니다.'); return; }
+
+        console.log("전송할 토큰 확인:", token);
 
         fetch('/api/board/' + currentBoardIdForComment + '/comments', {
             method: 'POST',
@@ -1086,28 +1124,49 @@
     }
 
     function clickLike() {
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token =
+            localStorage.getItem('token') ||
+            sessionStorage.getItem('token');
+
         if (!token) {
             alert('로그인 후 좋아요를 누를 수 있습니다. ❤️');
             return;
         }
-        if (!currentBoardIdForLike) return;
 
-        fetch('/api/board/' + currentBoardIdForLike + '/like', {
+        if (!currentBoardIdForLike) {
+            return;
+        }
+
+        fetch(`/api/board/${currentBoardIdForLike}/like`, {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         })
             .then(function (res) {
-                if (res.status === 401) { alert('로그인이 필요합니다.'); return; }
+                if (res.status === 401) {
+                    alert('로그인이 필요합니다.');
+                    return null;
+                }
+
+                if (!res.ok) {
+                    throw new Error('좋아요 요청 실패');
+                }
+
                 return res.json();
             })
             .then(function (data) {
-                if(!data) return;
+                if (!data) return;
 
-                document.getElementById('detailLikeCount').textContent = fmtNum(data.likeCount);
+                document.getElementById('detailLikeCount').textContent =
+                    fmtNum(data.likeCount);
+
                 updateHeartUI(data.isLiked);
 
-                var idx = allPosts.findIndex(function(p) { return p.id === currentBoardIdForLike; });
+                var idx = allPosts.findIndex(function (p) {
+                    return p.id === currentBoardIdForLike;
+                });
+
                 if (idx !== -1) {
                     allPosts[idx].likeCount = data.likeCount;
                 }
