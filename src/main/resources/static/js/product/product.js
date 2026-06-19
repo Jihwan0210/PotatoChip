@@ -258,4 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(e => console.error('찜 목록 로드 실패', e));
     }
+
+
 });

@@ -86,13 +86,76 @@ public class BoardController {
         return ResponseEntity.ok(Map.of("message", "삭제 완료"));
     }
 
-    @PutMapping("/api/board/{id}")
+    @PutMapping(value = "/api/board/{id}", consumes = {"multipart/form-data"})
     @ResponseBody
     public BoardResponse updateBoard(
             @PathVariable Long id,
-            @RequestBody Board updatedBoard,
+            @RequestPart("board") Board updatedBoard,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             Authentication authentication
     ) {
+
+        if (image != null && !image.isEmpty()) {
+        try {
+            String uploadDir = "C:/minsung/uploads/";
+            java.io.File folder = new java.io.File(uploadDir);
+
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+
+            String originalFileName = image.getOriginalFilename();
+            String savedFileName = java.util.UUID.randomUUID() + "_" + originalFileName;
+
+            java.io.File destinationFile =
+                    new java.io.File(uploadDir + savedFileName);
+
+            image.transferTo(destinationFile);
+
+            updatedBoard.setImageUrl("/uploads/" + savedFileName);
+
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
         return boardService.updateBoard(id, updatedBoard, authentication);
+    }
+
+    @PostMapping("/api/board/{id}/like")
+    @ResponseBody
+    public ResponseEntity<?> toggleLike(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
+        }
+        String userEmail = authentication.getName(); // Spring Security에서 로그인한 유저 이메일 추출
+        int updatedLikeCount = boardService.toggleLike(id, userEmail);
+
+        // 좋아요 카운트와 현재 유저의 하트 온/오프 상태를 같이 프론트에 응답
+        return ResponseEntity.ok(Map.of(
+                "likeCount", updatedLikeCount,
+                "isLiked", boardService.isLikedByUser(id, userEmail)
+        ));
+    }
+
+    @GetMapping("/api/board/{id}/like/status")
+    @ResponseBody
+    public ResponseEntity<?> getLikeStatus(@PathVariable Long id, Authentication authentication) {
+        String userEmail = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
+
+        // 1. DB에서 실시간으로 해당 게시글 정보를 안전하게 가져옵니다.
+        com.example.potatochip.board.entity.Board board = boardService.findById(id);
+
+        // 2. 만약 DB에 좋아요 수가 null로 박혀있다면 안전하게 0으로 처리해 줍니다.
+        int currentLikeCount = (board.getLikeCount() == null) ? 0 : board.getLikeCount();
+
+        // 3. 현재 로그인한 유저가 하트를 눌렀는지 여부 판단
+        boolean isLiked = boardService.isLikedByUser(id, userEmail);
+
+        // 4. 🚨 Map.of 대신 null 안전성이 보장되는 HashMap을 사용하여 500 에러를 원천 차단합니다.
+        java.util.Map<String, Object> responseMap = new java.util.HashMap<>();
+        responseMap.put("likeCount", currentLikeCount);
+        responseMap.put("isLiked", isLiked);
+
+        return ResponseEntity.ok(responseMap);
     }
 }
