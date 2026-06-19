@@ -3,6 +3,7 @@ package com.example.potatochip.auth.filter;
 import com.example.potatochip.auth.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,26 +26,39 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String token = extractToken(request);
 
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+        if (token != null && jwtUtil.validateToken(token)) {
+            String email = jwtUtil.getEmail(token);
+            String role  = jwtUtil.getRole(token);
 
-            if (jwtUtil.validateToken(token)) {
-                String email = jwtUtil.getEmail(token);
-                String role = jwtUtil.getRole(token);
-
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                email,
-                                null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                        );
-
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                    );
+            SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        // 1. Authorization 헤더 우선 (JS fetch 방식)
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        // 2. 쿠키 fallback (Thymeleaf 페이지 네비게이션 방식)
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

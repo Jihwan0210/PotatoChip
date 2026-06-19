@@ -6,6 +6,8 @@ import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.auth.service.AuthService;
 import com.example.potatochip.auth.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,10 +29,10 @@ public class AuthController {
         return "auth/login";
     }
 
-    // 로그인 - JWT 토큰 반환
+    // 로그인 - JWT 토큰 반환 + 쿠키 설정
     @PostMapping("/login")
     @ResponseBody
-    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto, HttpServletResponse response) {
         boolean success = authService.login(dto);
 
         if (!success) {
@@ -39,6 +41,12 @@ public class AuthController {
 
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow();
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+
+        // Thymeleaf 페이지에서 서버 인증이 되도록 쿠키에도 저장
+        Cookie jwtCookie = new Cookie("jwt", token);
+        jwtCookie.setPath("/");
+        jwtCookie.setMaxAge(60 * 60 * 24 * 7);
+        response.addCookie(jwtCookie);
 
         return ResponseEntity.ok(Map.of(
                 "message", "로그인 성공",
