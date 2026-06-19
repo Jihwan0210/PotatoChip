@@ -107,7 +107,33 @@
                 farmerButton.style.display = 'none';
             }
         })();
+        (function updateCartBadge() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const badge = document.getElementById('cartBadge');
+            if (!badge) return;
 
+            if (!token) {
+                badge.style.display = 'none';
+                return;
+            }
+
+            fetch('/cart/data', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+                .then(res => res.ok ? res.json() : null)
+                .then(cart => {
+                    const count = (cart && cart.items) ? cart.items.length : 0;
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(() => {
+                    badge.style.display = 'none';
+                });
+        })();
         function goRolePage() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';

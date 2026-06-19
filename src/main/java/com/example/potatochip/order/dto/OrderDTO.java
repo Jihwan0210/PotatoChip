@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Getter
 @Builder
 public class OrderDTO {
@@ -19,7 +20,6 @@ public class OrderDTO {
     private String paymentMethod;
     private LocalDateTime createdAt;
     private String status;
-    // 주문한 상품 목록
     private List<OrderItemDTO> orderItems;
 
     @Getter
@@ -29,5 +29,7 @@ public class OrderDTO {
         private Long productId;
         private int quantity;
         private BigDecimal price;
+        private String productName;
+        private String thumbnailUrl;
     }
 }
