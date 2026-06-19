@@ -44,6 +44,9 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive; // 계정 활성화 여부
 
+    @Column(name = "points", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer points = 0;
+
     private LocalDateTime deletedAt; // 탈퇴 일시
 
     private String withdrawalReason; // 탈퇴 사유

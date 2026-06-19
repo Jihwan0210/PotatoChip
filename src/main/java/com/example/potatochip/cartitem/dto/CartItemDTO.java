@@ -18,4 +18,8 @@ public class CartItemDTO {
     private String thumbnailUrl;
     private String origin;
     private Boolean isPickupAvailable;
+
+    public BigDecimal getSubtotal() {
+        return price != null ? price.multiply(BigDecimal.valueOf(quantity)) : BigDecimal.ZERO;
+    }
 }
