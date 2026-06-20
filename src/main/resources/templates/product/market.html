@@ -36,7 +36,7 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:-1.5px">
         <div id="mkt-tab-0" onclick="switchMktTab(0)" style="padding:12px 0;text-align:center;border-bottom:2px solid var(--green);font-size:.8rem;font-weight:500;color:var(--dark);cursor:pointer">전체 상품</div>
         <div id="mkt-tab-1" onclick="switchMktTab(1)" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer">AI 추천</div>
-        <div id="mkt-tab-2" onclick="openRecPopup()" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">🔥 인기상품추천</div>
+        <div id="mkt-tab-2" onclick="openRecPopup()" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">✨ 맞춤추천</div>
     </div>
 </div>
 
@@ -56,12 +56,12 @@
         </div>
     </div>
     <div style="padding:0 14px 12px">
-        <button onclick="location.href='/market';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">마켓 전체 보기 →</button>
+        <button onclick="location.href='/market';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">전체 추천 상품 보기 →</button>
     </div>
 </div>
 
 <!-- 필터 -->
-<div id="mktFilterBar" class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
+<div class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
     <div class="mf" th:classappend="${category == '' or category == '전체'} ? ' on'" onclick="mktF(this)">전체</div>
     <div class="mf" th:classappend="${category == '채소'} ? ' on'" onclick="mktF(this)">채소 🥦</div>
     <div class="mf" th:classappend="${category == '과일'} ? ' on'" onclick="mktF(this)">과일 🍎</div>
@@ -497,18 +497,10 @@
             if (t) { t.style.borderBottom = 'none'; t.style.color = 'var(--muted)'; t.style.fontWeight = '400'; }
             if (c) c.style.display = 'none';
         }
-
         var el = document.getElementById('mkt-tab-' + n);
         var ct = document.getElementById('mkt-content-' + n);
-        var filterBar = document.getElementById('mktFilterBar');
-
         if (el) { el.style.borderBottom = '2px solid var(--green)'; el.style.color = 'var(--dark)'; el.style.fontWeight = '500'; }
         if (ct) ct.style.display = 'block';
-        if (filterBar) filterBar.style.display = n === 0 ? 'flex' : 'none';
-
-        if (n === 1) {
-            loadAiRecommendations();
-        }
     }
 
     // ===== 정렬 =====

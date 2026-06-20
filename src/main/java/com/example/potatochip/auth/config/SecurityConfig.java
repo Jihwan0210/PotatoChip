@@ -53,6 +53,10 @@ public class SecurityConfig {
                         // 6. 채팅 API 인증 필요
                         .requestMatchers("/chat/**").authenticated()
 
+                        // 6. 그 외 나머지 요청은 우선 허용
+                        .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/order-items/**").authenticated()
+
                         // 7. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
                 )
