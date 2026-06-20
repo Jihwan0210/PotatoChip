@@ -59,14 +59,18 @@ public class Inquiry {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Builder
-    public Inquiry(Long userId, Long productId, Long orderId, String category, String title, String content) {
+    public Inquiry(Long userId, Long productId, Long orderId, String category, String title, String content, String imageUrl) {
         this.userId = userId;
         this.productId = productId;
         this.orderId = orderId;
         this.category = category;
         this.title = title;
         this.content = content;
+        this.imageUrl = imageUrl;
         this.status = "pending";
         this.isActive = true;
         this.createdAt = LocalDateTime.now();
@@ -77,12 +81,13 @@ public class Inquiry {
         return this.userId.equals(userId);
     }
 
-    public void updateInquiry(String category, String title, String content, Long productId, Long orderId) {
+    public void updateInquiry(String category, String title, String content, Long productId, Long orderId, String imageUrl) {
         this.category = category;
         this.title = title;
         this.content = content;
         this.productId = productId;
         this.orderId = orderId;
+        this.imageUrl = imageUrl;
         this.updatedAt = LocalDateTime.now();
     }
 
