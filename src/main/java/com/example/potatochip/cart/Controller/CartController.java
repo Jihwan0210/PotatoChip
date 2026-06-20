@@ -9,12 +9,15 @@ import com.example.potatochip.cartitem.dto.CartItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/cart")
@@ -24,11 +27,42 @@ public class CartController {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    // 페이지만 반환 (Thymeleaf NullPointerException 방지용 빈 객체)
     @GetMapping
-    public String cartPage(Model model) {
-        model.addAttribute("cart", new CartDTO());
-        model.addAttribute("totalPrice", BigDecimal.ZERO);
+    public String cartPage(Authentication authentication, Model model) {
+        boolean isLoggedIn = authentication != null
+                && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getName());
+
+        if (!isLoggedIn) {
+            model.addAttribute("isLoggedIn", false);
+            model.addAttribute("isSeller", false);
+            model.addAttribute("userPoints", 0);
+            model.addAttribute("pickupItems", List.of());
+            model.addAttribute("deliveryItems", List.of());
+            return "cart/cart";
+        }
+
+        User user = userRepository.findByEmail(authentication.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
+
+        boolean isSeller = user.getRole() != null && "SELLER".equals(user.getRole().name());
+        model.addAttribute("isLoggedIn", true);
+        model.addAttribute("isSeller", isSeller);
+        model.addAttribute("userPoints", user.getPoints() != null ? user.getPoints() : 0);
+
+        if (isSeller) {
+            model.addAttribute("pickupItems", List.of());
+            model.addAttribute("deliveryItems", List.of());
+        } else {
+            CartDTO cartDTO = cartService.getMyCart(user.getId());
+            List<CartItemDTO> items = cartDTO.getItems() != null ? cartDTO.getItems() : List.of();
+            model.addAttribute("pickupItems", items.stream()
+                    .filter(i -> Boolean.TRUE.equals(i.getIsPickupAvailable()))
+                    .collect(Collectors.toList()));
+            model.addAttribute("deliveryItems", items.stream()
+                    .filter(i -> !Boolean.TRUE.equals(i.getIsPickupAvailable()))
+                    .collect(Collectors.toList()));
+        }
         return "cart/cart";
     }
 

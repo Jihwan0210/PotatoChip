@@ -14,137 +14,145 @@
         <li><a th:href="@{/faq}">FAQ</a></li>
     </ul>
     <div class="nav-r">
+        <!-- 알림 -->
         <div style="position:relative">
-            <span class="n-ico" id="bellIcon" style="cursor:pointer;position:relative">🔔<span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px">0</span></span><div id="notificationDropdown" style="display:none;position:fixed;right:70px;top:64px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 10px 30px rgba(42,30,6,.14);z-index:99999;overflow:hidden"><div style="padding:13px 15px;border-bottom:1px solid var(--sand);font-size:.86rem;font-weight:700;color:var(--dark)">알림</div><div id="notificationList" style="max-height:360px;overflow:auto"><div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오는 중...</div></div></div></div>
-        <span class="n-ico" onclick="location.href='/cart'" style="cursor:pointer;position:relative">🛒<span id="cartBadge" style="position:absolute;top:-5px;right:-7px;background:var(--amber);color:#fff;font-size:.52rem;font-weight:700;min-width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 2px;line-height:1">3</span></span>
+        <span class="n-ico" id="bellIcon" style="cursor:pointer;position:relative">🔔<span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px">0</span></span><div id="notificationDropdown" style="display:none;position:fixed;right:70px;top:64px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 10px 30px rgba(42,30,6,.14);z-index:99999;overflow:hidden"><div style="padding:13px 15px;border-bottom:1px solid var(--sand);font-size:.86rem;font-weight:700;color:var(--dark)">알림</div><div id="notificationList" style="max-height:360px;overflow:auto"><div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오는 중...</div></div></div></div>
+        <!-- 로그인 후: 이름 버튼 + 드롭다운 -->
+        <div class="nav-user-wrap" id="nav-user-wrap" style="display:none">
+            <button type="button" class="btn-nav nav-user-btn" id="nav-user-btn" onclick="toggleUserDropdown(event)">
+                <span id="nav-user-name">사용자</span>
+                <span class="nav-arrow">▾</span>
+            </button>
+            <div class="nav-dropdown" id="nav-dropdown">
+                <!-- BUYER: 장바구니 -->
+                <div class="nd-item" id="nd-cart" onclick="location.href='/cart'" style="display:none">
+                    🛒 <span>장바구니</span>
+                </div>
+                <!-- 역할별 페이지 링크 -->
+                <div class="nd-item" id="nd-role-page" onclick="goRolePage()">
+                    <span id="nd-role-ico">👤</span>
+                    <span id="nd-role-label">마이페이지</span>
+                </div>
+                <div class="nd-divider"></div>
+                <div class="nd-item nd-logout" onclick="handleNavLogout()">🚪 로그아웃</div>
+            </div>
+        </div>
 
-        <!-- 로그인 시에만 보임 / 관리자 로그인시 mypage가 아닌 admin/dashboard로 이동-->
-        <!-- 로그인 시에만 보임 / 관리자 로그인시 mypage가 아닌 admin/dashboard로 이동-->
-        <button type="button"
-                class="n-ico"
-                id="nav-mypage"
-                onclick="goRolePage()"
-                style="display:none;cursor:pointer;font-size:.85rem;color:var(--mid);border:none;background:transparent"
-                title="마이페이지">👤</button>
 
-        <!-- 판매자일 때만 보임 -->
-        <a th:href="@{/farmer}" class="n-ico" id="nav-farmer"
-           style="display:none;cursor:pointer;font-size:.85rem;color:var(--green)" title="농가 대시보드">🌾</a>
-
+        <!-- 비로그인 시: 로그인 버튼 -->
         <a th:href="@{/login}" class="btn-nav" id="btn-nav-login">로그인</a>
     </div>
 
     <script src="/js/app.js"></script>
     <script src="/js/auth/auth.js"></script>
     <script>
-        // 로그인 상태에 따라 nav아이콘 제어
-        (function() {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
-            const normalizedRole = role.toUpperCase();
+        (function () {
+            var token     = localStorage.getItem('token')     || sessionStorage.getItem('token');
+            var role      = (localStorage.getItem('role')     || sessionStorage.getItem('role')  || '').toUpperCase();
+            var name      = localStorage.getItem('name')      || sessionStorage.getItem('name')  || '사용자';
 
-            const loginButton = document.getElementById('btn-nav-login');
-            const mypageButton = document.getElementById('nav-mypage');
-            const farmerButton = document.getElementById('nav-farmer');
+            var loginBtn  = document.getElementById('btn-nav-login');
+            var userWrap  = document.getElementById('nav-user-wrap');
+            var userName  = document.getElementById('nav-user-name');
+            var ndCart    = document.getElementById('nd-cart');
+            var ndRoleIco = document.getElementById('nd-role-ico');
+            var ndRoleLbl = document.getElementById('nd-role-label');
 
             if (!token) {
-                if (mypageButton) {
-                    mypageButton.style.display = 'none';
-                }
-
-                if (farmerButton) {
-                    farmerButton.style.display = 'none';
-                }
-
-                if (loginButton) {
-                    loginButton.textContent = '로그인';
-                    loginButton.setAttribute('href', '/login');
-                    loginButton.removeAttribute('onclick');
-                }
-
+                if (loginBtn) loginBtn.style.display = '';
+                if (userWrap) userWrap.style.display = 'none';
                 return;
             }
 
-            if (loginButton) {
-                loginButton.textContent = '로그아웃';
-                loginButton.removeAttribute('href');
-                loginButton.setAttribute('onclick', 'handleNavLogout()');
-            }
+            // 로그인 상태: 이름 드롭다운 표시
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (userWrap) userWrap.style.display = 'flex';
+            if (userName) userName.textContent   = name;
 
-            if (normalizedRole === 'SELLER') {
-                if (farmerButton) {
-                    farmerButton.style.display = 'inline-flex';
-                }
-
-                if (mypageButton) {
-                    mypageButton.style.display = 'none';
-                }
-
+            if (role === 'SELLER') {
+                if (ndCart)    ndCart.style.display     = 'none';
+                if (ndRoleIco) ndRoleIco.textContent    = '🌾';
+                if (ndRoleLbl) ndRoleLbl.textContent    = '농가 대시보드';
                 return;
             }
 
-            if (normalizedRole === 'ADMIN') {
-                if (mypageButton) {
-                    mypageButton.style.display = 'inline-flex';
-                    mypageButton.title = '관리자 대시보드';
-                    mypageButton.textContent = '🛠️';
-                    mypageButton.style.color = 'var(--green)';
-                }
-
-                if (farmerButton) {
-                    farmerButton.style.display = 'none';
-                }
-
+            if (role === 'ADMIN') {
+                if (ndCart)    ndCart.style.display     = 'none';
+                if (ndRoleIco) ndRoleIco.textContent    = '🛠️';
+                if (ndRoleLbl) ndRoleLbl.textContent    = '관리자 대시보드';
                 return;
             }
 
-            if (mypageButton) {
-                mypageButton.style.display = 'inline-flex';
-                mypageButton.title = '마이페이지';
-                mypageButton.textContent = '👤';
-                mypageButton.style.color = 'var(--mid)';
-            }
-
-            if (farmerButton) {
-                farmerButton.style.display = 'none';
-            }
+            // BUYER: 드롭다운에 장바구니
+            if (ndCart)  ndCart.style.display  = 'flex';
+            if (ndRoleIco) ndRoleIco.textContent = '👤';
+            if (ndRoleLbl) ndRoleLbl.textContent = '마이페이지';
         })();
 
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('nav-dropdown').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function () {
+            var dd = document.getElementById('nav-dropdown');
+            if (dd) dd.classList.remove('open');
+        });
+
         function goRolePage() {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
-
-            if (!token) {
-                location.href = '/login';
-                return;
-            }
-
-            if (role.toUpperCase() === 'ADMIN') {
-                location.href = '/admin/dashboard';
-                return;
-            }
-
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            var role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
+            if (!token)            { location.href = '/login'; return; }
+            if (role === 'ADMIN')  { location.href = '/admin/dashboard'; return; }
+            if (role === 'SELLER') { location.href = '/farmer'; return; }
             location.href = '/mypage';
         }
 
         function handleNavLogout() {
-            if (typeof doLogout === 'function') {
-                doLogout();
+            if (typeof doLogout === 'function') { doLogout(); return; }
+            ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function (k) {
+                localStorage.removeItem(k);
+                sessionStorage.removeItem(k);
+            });
+            location.href = '/login';
+        }
+
+        function updateCartBadge() {
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            var role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
+
+            var badge = document.getElementById('cartBadge');
+
+            if (!badge) return;
+
+            if (!token || role === 'SELLER') {
+                badge.style.display = 'none';
                 return;
             }
 
-            localStorage.removeItem('token');
-            localStorage.removeItem('email');
-            localStorage.removeItem('role');
-            localStorage.removeItem('currentUserId');
 
-            sessionStorage.removeItem('token');
-            sessionStorage.removeItem('email');
-            sessionStorage.removeItem('role');
-            sessionStorage.removeItem('currentUserId');
-
-            location.href = '/login';
+            fetch('/cart/data', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+                .then(function(res) {
+                    if (!res.ok) { badge.style.display = 'none'; return null; }
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (!data) return;
+                    var count = data.items ? data.items.length : 0;
+                    if (count > 0) {
+                        badge.textContent = count;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(function() { badge.style.display = 'none'; });
         }
+
+        updateCartBadge();
+
         function getNavToken() {
             return localStorage.getItem('token') || sessionStorage.getItem('token');
         }
