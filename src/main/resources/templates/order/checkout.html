@@ -7,36 +7,126 @@
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
     <link th:href="@{/css/style.css}" rel="stylesheet"/>
     <style>
-        .complete-wrap { max-width: 600px; margin: 80px auto; padding: 40px 5%; text-align: center; }
-        .icon-box { font-size: 5rem; margin-bottom: 20px; }
-        .title { font-family: 'Gaegu', cursive; font-size: 2.5rem; font-weight: 700; color: #5A9A30; margin-bottom: 10px; }
-        .sub-desc { color: #666; margin-bottom: 40px; font-size: 1.05rem; }
+        .complete-wrap {
+            max-width: 600px; margin: 80px auto; padding: 0 5% 60px; text-align: center;
+        }
+        .complete-header { margin-bottom: 32px; }
+        .icon-box { font-size: 4rem; margin-bottom: 12px; }
+        .title {
+            font-family: 'Gaegu', cursive; font-size: 2.2rem; font-weight: 700;
+            color: #5A9A30; margin-bottom: 6px;
+        }
+        .order-number-badge {
+            display: inline-block;
+            background: #f6f2ec; border: 1.5px solid #E8DCC8; border-radius: 20px;
+            padding: 4px 16px; font-size: .82rem; color: #888; margin-bottom: 8px;
+        }
+        .order-number-badge strong { color: #1A1A1A; font-weight: 700; }
+        .sub-desc { color: #888; font-size: .92rem; }
+        .items-card {
+            background: #fff; border: 1.5px solid #E8DCC8; border-radius: 14px;
+            padding: 20px 24px; text-align: left; margin-bottom: 16px;
+        }
+        .items-card-title {
+            font-family: 'Gaegu', cursive; font-size: 1rem; font-weight: 700;
+            color: #1A1A1A; margin-bottom: 14px; padding-bottom: 10px;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        .item-row {
+            display: flex; align-items: center; gap: 14px;
+            padding: 10px 0; border-bottom: 1px solid #f6f2ec;
+        }
+        .item-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .item-thumb {
+            width: 52px; height: 52px; object-fit: cover;
+            border-radius: 8px; flex-shrink: 0; background: #f6f2ec;
+        }
+        .item-info { flex: 1; min-width: 0; }
+        .item-name {
+            font-size: .88rem; font-weight: 700; color: #1A1A1A;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 3px;
+        }
+        .item-qty { font-size: .76rem; color: #888; }
+        .item-price { font-size: .88rem; font-weight: 700; color: #1A1A1A; flex-shrink: 0; }
 
-        .receipt-card { background: #fff; border: 1.5px solid #E8DCC8; border-radius: 14px; padding: 30px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .r-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 15px; }
-        .r-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .r-label { color: #888; font-size: 0.9rem; font-weight: 500; }
-        .r-value { color: #1A1A1A; font-weight: 700; font-size: 1rem; }
-
-        .btn-group { display: flex; gap: 10px; margin-top: 30px; }
-        .btn-home { flex: 1; padding: 16px; background: #E8DCC8; color: #1A1A1A; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        .btn-mypage { flex: 1; padding: 16px; background: #5A9A30; color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .receipt-card {
+            background: #fff; border: 1.5px solid #E8DCC8; border-radius: 14px;
+            padding: 24px; text-align: left; margin-bottom: 16px;
+        }
+        .receipt-card-title {
+            font-family: 'Gaegu', cursive; font-size: 1rem; font-weight: 700;
+            color: #1A1A1A; margin-bottom: 14px; padding-bottom: 10px;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        .r-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid #f6f2ec;
+        }
+        .r-row:last-child { border-bottom: none; }
+        .r-label { color: #888; font-size: .85rem; font-weight: 500; }
+        .r-value { color: #1A1A1A; font-weight: 700; font-size: .92rem; }
+        .r-total { margin-top: 6px; padding-top: 14px; border-top: 1.5px solid #E8DCC8 !important; }
+        .r-total .r-label { font-size: .95rem; color: #1A1A1A; font-weight: 700; }
+        .r-total .r-value { font-size: 1.25rem; color: #F39C12; }
+        .btn-group { display: flex; gap: 10px; margin-top: 24px; }
+        .btn-home {
+            flex: 1; padding: 15px; background: #E8DCC8; color: #1A1A1A;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+            font-size: .9rem; font-family: inherit;
+        }
+        .btn-mypage {
+            flex: 1; padding: 15px; background: #5A9A30; color: #fff;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+            font-size: .9rem; font-family: inherit;
+        }
+        .btn-home:hover { background: #ddd0bb; }
+        .btn-mypage:hover { background: #4a8428; }
     </style>
 </head>
 <body>
-
 <div th:replace="nav :: nav"></div>
-
 <div class="complete-wrap">
-    <div class="icon-box">🎉</div>
-    <div class="title">주문이 완료되었어요!</div>
-    <div class="sub-desc">주문하신 못난이 농작물이 신선하게 도착할 예정입니다.</div>
-
-    <div class="receipt-card">
-        <div class="r-row">
-            <span class="r-label">주문 번호</span>
-            <span class="r-value" th:text="${order.orderNumber}">ORD-12345678</span>
+    <div class="complete-header">
+        <div class="icon-box">🎉</div>
+        <div class="title">결제 완료!</div>
+        <div class="order-number-badge">
+            주문번호 <strong th:text="${order.orderNumber}">ORD-12345678</strong>
         </div>
+        <div class="sub-desc">못난이 농작물이 곧 도착할 예정입니다 🌿</div>
+    </div>
+    <div class="items-card">
+        <div class="items-card-title">📦 주문 물품</div>
+        <div th:if="${order.orderItems != null and !#lists.isEmpty(order.orderItems)}">
+            <div class="item-row" th:each="item : ${order.orderItems}">
+                <img class="item-thumb"
+                     th:src="${item.thumbnailUrl != null and !#strings.isEmpty(item.thumbnailUrl)
+                               ? item.thumbnailUrl
+                               : 'https://placehold.co/52x52?text=🥔'}"
+                     alt="상품 이미지"/>
+                <div class="item-info">
+                    <div class="item-name" th:text="${item.productName}">상품명</div>
+                    <div class="item-qty">
+                        <span th:text="${#numbers.formatInteger(item.price, 0, 'COMMA')}">0</span>원
+                        × <span th:text="${item.quantity}">1</span>개
+                    </div>
+                </div>
+                <div class="item-price">
+                    <span th:text="${#numbers.formatInteger(item.price * item.quantity, 0, 'COMMA')}">0</span>원
+                </div>
+            </div>
+        </div>
+
+        <!-- 상품 정보가 없을 때 -->
+        <div th:if="${order.orderItems == null or #lists.isEmpty(order.orderItems)}"
+             style="text-align:center;color:#888;font-size:.84rem;padding:16px 0">
+            상품 정보를 불러올 수 없습니다.
+        </div>
+    </div>
+
+    <!-- 결제 요약 -->
+    <div class="receipt-card">
+        <div class="receipt-card-title">💳 결제 정보</div>
         <div class="r-row">
             <span class="r-label">결제 일시</span>
             <span class="r-value" th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">2026-06-18 15:30</span>
@@ -47,11 +137,27 @@
         </div>
         <div class="r-row">
             <span class="r-label">배송 방법</span>
-            <span class="r-value" th:text="${order.deliveryType == 'pickup' ? '농장 픽업' : (order.deliveryType == 'express' ? '당일 배송' : '일반 택배')}">일반 택배</span>
+            <span class="r-value"
+                  th:text="${order.deliveryType == 'pickup' ? '농장 픽업' :
+                             (order.deliveryType == 'express' ? '당일 배송' : '일반 택배')}">일반 택배</span>
         </div>
         <div class="r-row">
+            <span class="r-label">결제 수단</span>
+            <span class="r-value"
+                  th:text="${order.paymentMethod == 'card' ? '신용/체크카드' :
+                             (order.paymentMethod == 'kakaopay' ? '카카오페이' :
+                             (order.paymentMethod == 'toss' ? '토스페이' : '무통장 입금'))}">신용카드</span>
+        </div>
+        <div class="r-row">
+            <span class="r-label">배송비</span>
+            <span class="r-value"
+                  th:text="${order.totalShippingFee == 0 ? '무료' :
+                             #numbers.formatInteger(order.totalShippingFee, 0, 'COMMA') + '원'}">무료</span>
+        </div>
+        <div class="r-row r-total">
             <span class="r-label">최종 결제 금액</span>
-            <span class="r-value" style="color:#F39C12; font-size: 1.2rem;" th:text="${#numbers.formatInteger(order.totalAmount + order.totalShippingFee, 0, 'COMMA')} + '원'">50,000원</span>
+            <span class="r-value"
+                  th:text="${#numbers.formatInteger(order.totalAmount + order.totalShippingFee, 0, 'COMMA') + '원'}">50,000원</span>
         </div>
     </div>
 

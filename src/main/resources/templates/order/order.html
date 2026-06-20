@@ -93,6 +93,7 @@
                         <!-- 장바구니 아이템 목록 -->
                         <div class="oi-row"
                              th:each="item, idx : ${cartDTO.items}"
+                             th:data-product-id="${item.productId}"
                              th:data-price="${item.price}"
                              th:data-qty="${item.quantity}"
                              th:data-pickup="${item.isPickupAvailable}">
@@ -213,14 +214,19 @@
                     </div>
 
                     <div style="font-size:.8rem;margin:15px 0 6px;color:var(--mid);font-weight:500">쿠폰 / 포인트</div>
-                    <div class="pt-row">
-                        <input type="text" class="pt-in" placeholder="쿠폰 코드 입력">
-                        <button type="button" class="btn-pt" onclick="alert('쿠폰 기능은 준비중입니다.')">적용</button>
+                    <div style="display:flex;justify-content:space-between;align-items:center;
+                                padding:10px 14px;background:var(--bg);border:1.5px solid var(--sand);
+                                border-radius:8px;margin-bottom:8px">
+                        <span style="font-size:.82rem;color:var(--muted)">🎟️ 쿠폰</span>
+                        <span style="font-size:.78rem;color:var(--muted)">적용 없음</span>
                     </div>
-                    <div class="pt-row" style="margin-bottom:6px">
-                        <input type="number" id="ptIn" class="pt-in" placeholder="포인트 사용 (보유: 2,000P)" min="0" max="2000">
-                        <button type="button" class="btn-pt" onclick="applyPt()">사용</button>
+                    <div style="display:flex;justify-content:space-between;align-items:center;
+                                padding:10px 14px;background:var(--bg);border:1.5px solid var(--sand);
+                                border-radius:8px;margin-bottom:8px">
+                        <span style="font-size:.82rem;color:var(--mid)">🌿 포인트 사용</span>
+                        <span id="pt-order-display" style="font-size:.88rem;font-weight:700;color:var(--green)">0P</span>
                     </div>
+                    <input type="hidden" id="ptIn" value="0"/>
 
                     <div class="cs-row">
                         <span style="color:var(--muted)">포인트</span>
@@ -246,10 +252,10 @@
 <script th:src="@{/js/app.js}"></script>
 <script>
     // 전역 상태
-
     let productTotal = 0;
-    let orderShippingFee = 0; // 배송비 (app.js의 전역 var sf와 이름 충돌 방지)
-    let orderPointUsed = 0;   // 포인트 할인 (app.js의 전역 var pd와 이름 충돌 방지)
+    let orderShippingFee = 0;
+    let orderPointUsed = 0;
+    let userPoints = 0;        // 실제 보유 포인트 (서버에서 로드)
     let hasPickupUnavailable = false;
 
     // ── 로그인 체크 (cart.html과 동일 패턴) ──
@@ -268,10 +274,26 @@
         productTotal = 0;
         hasPickupUnavailable = false;
 
-        document.querySelectorAll('#orderItemsBox .oi-row').forEach(row => {
-            const price = parseFloat(row.dataset.price) || 0;
-            const qty = parseInt(row.dataset.qty) || 0;
-            const pickup = row.dataset.pickup === 'true';
+        // sessionStorage에서 체크된 상품 ID 목록 읽기
+        var raw = sessionStorage.getItem('selectedProductIds');
+        var selectedIds = raw ? JSON.parse(raw) : null;
+
+        document.querySelectorAll('#orderItemsBox .oi-row').forEach(function(row) {
+            var productId = String(row.dataset.productId);
+
+            // 체크 안 된 상품은 숨기기
+            if (selectedIds && !selectedIds.includes(productId)) {
+                row.style.display = 'none';
+                // 해당 row 안의 hidden input도 비활성화 (form 제출에서 제외)
+                row.querySelectorAll('input[type="hidden"]').forEach(function(inp) {
+                    inp.disabled = true;
+                });
+                return;
+            }
+
+            var price = parseFloat(row.dataset.price) || 0;
+            var qty = parseInt(row.dataset.qty) || 0;
+            var pickup = row.dataset.pickup === 'true';
 
             productTotal += price * qty;
             if (!pickup) hasPickupUnavailable = true;
@@ -279,10 +301,9 @@
 
         recalc();
 
-        // 주문 상품이 없으면 결제 버튼 비활성화
-        const itemCount = document.querySelectorAll('#orderItemsBox .oi-row').length;
-        document.getElementById('btnOrder').disabled = itemCount === 0;
-        if (itemCount === 0) {
+        var visibleCount = document.querySelectorAll('#orderItemsBox .oi-row:not([style*="display: none"])').length;
+        document.getElementById('btnOrder').disabled = visibleCount === 0;
+        if (visibleCount === 0) {
             document.getElementById('btnOrder').style.opacity = '0.5';
             document.getElementById('btnOrder').style.cursor = 'not-allowed';
         }
@@ -314,20 +335,21 @@
         recalc();
     }
 
-    // 포인트 적용
-
+    // 포인트 적용 (order 페이지는 읽기 전용 — sessionStorage 값을 한 번만 세팅)
     function applyPt() {
         const input = document.getElementById('ptIn');
         let val = parseInt(input.value) || 0;
-        const maxPoint = 2000;
 
         if (val < 0) val = 0;
-        if (val > maxPoint) { alert('보유 포인트를 초과했습니다.'); val = maxPoint; }
-        if (val > productTotal + orderShippingFee) val = productTotal + orderShippingFee;
+        if (val > userPoints) val = userPoints;
+        if (val > productTotal + orderShippingFee) val = Math.floor(productTotal + orderShippingFee);
 
         orderPointUsed = val;
         input.value = val;
-        document.getElementById('cs-pt').textContent = '-' + val.toLocaleString() + '원';
+
+        var displayEl = document.getElementById('pt-order-display');
+        if (displayEl) displayEl.textContent = val > 0 ? val.toLocaleString() + 'P 사용' : '0P';
+        document.getElementById('cs-pt').textContent = val > 0 ? '-' + val.toLocaleString() + '원' : '-0원';
         recalc();
     }
     // 금액 재계산
@@ -372,6 +394,18 @@
         var token = localStorage.getItem('token') || sessionStorage.getItem('token');
         appendHidden(form, 'token', token || '');
 
+        var rawIds = sessionStorage.getItem('selectedProductIds');
+        if (rawIds) {
+            form.querySelectorAll('input[name="selectedProductIds"]').forEach(function(el) { el.remove(); });
+            JSON.parse(rawIds).forEach(function(id) {
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'selectedProductIds';
+                inp.value = id;
+                form.appendChild(inp);
+            });
+        }
+
         form.submit();
     }
 
@@ -407,6 +441,17 @@
             if (!res.ok) throw new Error('회원정보 조회 실패');
 
             const user = await res.json();
+
+            // 실제 보유 포인트 세팅
+            userPoints = user.points || 0;
+
+            // 장바구니에서 사용하기로 한 포인트 복원
+            var ptInput = document.getElementById('ptIn');
+            var storedPt = parseInt(sessionStorage.getItem('usedPoints') || '0');
+            if (storedPt > 0 && ptInput) {
+                ptInput.value = storedPt;
+                applyPt();
+            }
 
             // 필드에 값 세팅 (이미 사용자가 입력한 값이 있으면 덮어쓰지 않음)
             const nameEl  = document.getElementById('receiverName');
