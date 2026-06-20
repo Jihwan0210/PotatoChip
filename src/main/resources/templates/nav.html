@@ -99,6 +99,10 @@
             if (dd) dd.classList.remove('open');
         });
 
+        function getNavUserId() {
+            return localStorage.getItem('currentUserId') || sessionStorage.getItem('currentUserId');
+        }
+
         function goRolePage() {
             var token = localStorage.getItem('token') || sessionStorage.getItem('token');
             var role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
@@ -164,13 +168,17 @@
             if (!token || !badge) return;
 
             try {
-                const response = await fetch('/api/notifications/unread-count', {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                const response = await fetch('/api/notifications/unread-count?userId=' + encodeURIComponent(userId), {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
 
                 if (!response.ok) return;
 
-                const count = await response.json();
+                const data = await response.json();
+                const count = data.count || 0;
 
                 if (count > 0) {
                     badge.textContent = count > 99 ? '99+' : count;
@@ -207,7 +215,10 @@
             }
 
             try {
-                const response = await fetch('/api/notifications', {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                const response = await fetch('/api/notifications?userId=' + encodeURIComponent(userId), {
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
 
@@ -225,10 +236,14 @@
 
                 list.innerHTML = data.map(function(item) {
                     return ''
-                        + '<div onclick="readNotification(' + item.id + ', \'' + escapeNotificationAttr(item.targetUrl || '') + '\')" style="padding:13px 15px;border-bottom:1px solid var(--sand);cursor:pointer;background:' + (item.read ? '#fff' : 'var(--gp)') + '">'
-                        + '  <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">' + escapeNotificationHtml(item.title) + '</div>'
-                        + '  <div style="font-size:.74rem;color:var(--mid);line-height:1.5">' + escapeNotificationHtml(item.message) + '</div>'
-                        + '  <div style="font-size:.66rem;color:var(--muted);margin-top:5px">' + formatNotificationDate(item.createdAt) + '</div>'
+                        + '<div style="position:relative;padding:13px 15px;border-bottom:1px solid var(--sand);background:' + (item.isRead ? '#fff' : 'var(--gp)') + '">'
+                        + '  <button onclick="deleteNotification(' + item.id + ', event)" '
+                        + '          style="position:absolute;top:8px;right:10px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">✕</button>'
+                        + '  <div onclick="readNotification(' + item.id + ', \'' + escapeNotificationAttr(item.targetUrl || '') + '\')" style="cursor:pointer">'
+                        + '      <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">' + escapeNotificationHtml(item.title) + '</div>'
+                        + '      <div style="font-size:.74rem;color:var(--mid);line-height:1.5">' + escapeNotificationHtml(item.message) + '</div>'
+                        + '      <div style="font-size:.66rem;color:var(--muted);margin-top:5px">' + formatNotificationDate(item.createdAt) + '</div>'
+                        + '  </div>'
                         + '</div>';
                 }).join('');
             } catch (e) {
@@ -240,7 +255,10 @@
             const token = getNavToken();
 
             if (token) {
-                await fetch('/api/notifications/' + id + '/read', {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                await fetch('/api/notifications/' + id + '/read?userId=' + encodeURIComponent(userId), {
                     method: 'PATCH',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -250,6 +268,40 @@
 
             if (targetUrl && targetUrl !== 'null') {
                 location.href = targetUrl;
+            }
+        }
+
+        async function deleteNotification(id, event) {
+            event.stopPropagation();
+
+            const token = getNavToken();
+            const userId = getNavUserId();
+
+            if (!token || !userId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    '/api/notifications/' + id + '?userId=' + encodeURIComponent(userId),
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    alert('알림 삭제 실패');
+                    return;
+                }
+
+                await loadNotificationCount();
+                await loadNotifications();
+
+            } catch (e) {
+                console.error(e);
             }
         }
 
@@ -296,6 +348,7 @@
                 }
             });
         });
+
     </script>
 </nav>
 </body>

@@ -139,7 +139,7 @@
 </div>
 
 <div class="fab">
-  <div class="fab-bubble">AI 문의 도우미<small>궁금한 내용을 물어보세요</small></div>
+  <div id="chatFabBubble" class="fab-bubble">AI 문의 도우미<small>궁금한 내용을 물어보세요</small></div>
   <button class="fab-btn" type="button" onclick="toggleChatbot()">🤖<span class="fab-badge">AI</span></button>
 </div>
 
@@ -323,13 +323,19 @@
 
   function toggleChatbot(){
     var chatWindow=document.getElementById('chatWindow');
+    var bubble=document.getElementById('chatFabBubble');
 
     if(!chatWindow){
       return;
     }
 
     var isOpen=chatWindow.style.display==='flex';
+
     chatWindow.style.display=isOpen?'none':'flex';
+
+    if(bubble){
+      bubble.style.display=isOpen?'block':'none';
+    }
 
     if(!isOpen){
       setTimeout(function(){
@@ -339,75 +345,6 @@
           input.focus();
         }
       },100);
-    }
-  }
-
-  function closeChatbot(){
-    var chatWindow=document.getElementById('chatWindow');
-
-    if(chatWindow){
-      chatWindow.style.display='none';
-    }
-  }
-
-  function handleChatEnter(event){
-    if(event.key==='Enter'){
-      sendChatMessage();
-    }
-  }
-
-  function sendQuickQuestion(question){
-    var input=document.getElementById('chatInput');
-
-    if(input){
-      input.value=question;
-    }
-
-    sendChatMessage();
-  }
-
-  async function sendChatMessage(){
-    var input=document.getElementById('chatInput');
-    var body=document.getElementById('chatBody');
-
-    if(!input||!body){
-      return;
-    }
-
-    var question=input.value.trim();
-
-    if(!question){
-      return;
-    }
-
-    appendChatMessage('user',question);
-    input.value='';
-    appendChatMessage('bot','답변을 찾는 중이에요...');
-
-    try{
-      var currentUserId=localStorage.getItem('currentUserId')?Number(localStorage.getItem('currentUserId')):null;
-      var response=await fetch('/api/ai/chatbot/ask',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          userId:currentUserId,
-          question:question
-        })
-      });
-
-      var data=await response.json();
-
-      removeLastBotLoadingMessage();
-
-      if(!response.ok){
-        appendChatMessage('bot',data.message||'답변을 불러오지 못했어요.');
-        return;
-      }
-
-      appendChatMessage('bot',data.answer||'답변을 찾지 못했어요.');
-    }catch(error){
-      removeLastBotLoadingMessage();
-      appendChatMessage('bot','서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
@@ -470,6 +407,19 @@
     }
 
     location.href = '/my';
+  }
+
+  function closeChatbot(){
+    var chatWindow=document.getElementById('chatWindow');
+    var bubble=document.getElementById('chatFabBubble');
+
+    if(chatWindow){
+      chatWindow.style.display='none';
+    }
+
+    if(bubble){
+      bubble.style.display='block';
+    }
   }
 </script>
 </body>
