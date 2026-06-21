@@ -28,7 +28,7 @@ public class AuthService {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElse(null);
 
-        if (user == null) return false;
+        if (user == null || !Boolean.TRUE.equals(user.getIsActive())) return false;
 
         return passwordEncoder.matches(dto.getPassword(), user.getPassword());
     }
