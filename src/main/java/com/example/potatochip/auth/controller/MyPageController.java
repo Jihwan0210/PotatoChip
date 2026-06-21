@@ -5,6 +5,8 @@ import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.auth.util.JwtUtil;
 import com.example.potatochip.product.repository.WishRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -139,10 +142,12 @@ public class MyPageController {
     }
 
     // 회원 탈퇴
+    @Transactional
     @PostMapping("/mypage/withdraw")
     @ResponseBody
     public ResponseEntity<?> withdraw(@RequestHeader("Authorization") String authHeader,
-                                      @RequestBody java.util.Map<String, String> body) {
+                                      @RequestBody java.util.Map<String, String> body,
+                                      HttpServletResponse response) {
         String token = authHeader.replace("Bearer ", "");
         if (!jwtUtil.validateToken(token)) {
             return ResponseEntity.status(401).body("인증이 필요합니다.");
@@ -155,10 +160,16 @@ public class MyPageController {
             return ResponseEntity.badRequest().body(java.util.Map.of("error", "비밀번호가 틀렸어요."));
         }
 
+        // 소프트 삭제: 계정 비활성화 + 탈퇴 일시 기록
         user.setIsActive(false);
-        user.setDeletedAt(java.time.LocalDateTime.now());
-        user.setWithdrawalReason(body.getOrDefault("reason", ""));
+        user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
+
+        // JWT 쿠키 즉시 만료
+        Cookie jwtCookie = new Cookie("jwt", null);
+        jwtCookie.setMaxAge(0);
+        jwtCookie.setPath("/");
+        response.addCookie(jwtCookie);
 
         return ResponseEntity.ok(java.util.Map.of("message", "탈퇴가 완료되었어요."));
     }

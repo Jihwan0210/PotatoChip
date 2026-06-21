@@ -398,3 +398,16 @@ VALUES
     (10, 28, NULL, 4, '상품 설명과 비슷했고 상태도 안정적이었습니다. 크게 불편한 점은 없었습니다.', NULL, 1, 0, 1, '2026-05-21 14:06:00', '2026-05-21 14:06:00', 0),
     (10, 29, NULL, 4, '대부분 신선했고 포장도 깔끔했습니다. 조금 더 저렴하면 더 자주 살 것 같습니다.', NULL, 1, 0, 1, '2026-05-20 14:03:00', '2026-05-20 14:03:00', 0),
     (10, 30, NULL, 4, '전반적으로 신선하고 만족스러웠습니다. 다만 크기가 조금 더 균일했으면 좋겠습니다.', NULL, 0, 0, 1, '2026-05-19 14:00:00', '2026-05-19 14:00:00', 0);
+
+
+-- 상품 썸네일 이미지 설정 (재고관리 화면 표시용)
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200&h=200&fit=crop' WHERE id = 1;  -- 못난이 사과
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200&h=200&fit=crop' WHERE id = 2;  -- 못난이 감자
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=200&h=200&fit=crop' WHERE id = 3;  -- 못난이 배
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1508747703725-719777637510?w=200&h=200&fit=crop' WHERE id = 4;  -- 못난이 양파
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=200&h=200&fit=crop' WHERE id = 5;  -- 못난이 복숭아
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1447175008436-054170c2e979?w=200&h=200&fit=crop' WHERE id = 6;  -- 못난이 당근
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1547514701-42782101795e?w=200&h=200&fit=crop' WHERE id = 7;  -- 못난이 귤
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1593504049358-74330189eb06?w=200&h=200&fit=crop' WHERE id = 8;  -- 못난이 무
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=200&h=200&fit=crop' WHERE id = 9;  -- 못난이 포도
+UPDATE products SET thumbnail_url = 'https://images.unsplash.com/photo-1596097635121-14b63b7a0c19?w=200&h=200&fit=crop' WHERE id = 10; -- 못난이 고구마
