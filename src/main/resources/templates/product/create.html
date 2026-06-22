@@ -468,8 +468,8 @@
                         <div class="pv-origin">강원 홍천 · 감자 농가</div>
                         <div class="pv-name">못난이 감자 3kg</div>
                         <div class="pv-price">
-                            <div class="pv-rate">-30%</div>
-                            <div class="pv-main">7,000원</div>
+                            <div class="pv-rate"></div>
+                            <div class="pv-main">가격 미입력</div>
                         </div>
                         <div class="pv-desc">크기는 조금 달라도 맛과 신선함은 그대로인 친환경 못난이 감자 상품입니다.</div>
                         <div class="pv-chips" id="pvChips">
@@ -490,21 +490,32 @@
     function updateDiscountPreview() {
         var price = Number(document.querySelector('[name=price]').value);
         var rate  = Number(document.getElementById('discountRateInput').value);
+        var hasDiscount = rate > 0 && rate <= 99;
+
+        var startAt = document.querySelector('[name=discountStartAt]');
+        var endAt   = document.querySelector('[name=discountEndAt]');
+        startAt.disabled = !hasDiscount;
+        endAt.disabled   = !hasDiscount;
+        startAt.style.opacity = hasDiscount ? '1' : '0.4';
+        endAt.style.opacity   = hasDiscount ? '1' : '0.4';
+        if (!hasDiscount) { startAt.value = ''; endAt.value = ''; }
+
+        if (!price) return;
         var pvMain = document.querySelector('.pv-main');
         var pvRate = document.querySelector('.pv-rate');
         var hidden = document.getElementById('discountPriceHidden');
-        if (!price) return;
-        if (rate > 0 && rate <= 99) {
+        if (hasDiscount) {
             var discounted = Math.round(price * (1 - rate / 100));
             pvRate.textContent = '-' + rate + '%';
             pvMain.textContent = discounted.toLocaleString() + '원';
             hidden.value = discounted;
         } else {
-            pvRate.textContent = '-30%';
+            pvRate.textContent = '';
             pvMain.textContent = price.toLocaleString() + '원';
             hidden.value = '';
         }
     }
+    updateDiscountPreview();
 
     // 미리보기 칩 업데이트
     var catEmoji = { '채소':'🥬','과일':'🍎','곡류':'🌾','버섯':'🍄' };
