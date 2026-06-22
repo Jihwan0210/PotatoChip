@@ -1205,29 +1205,66 @@
     }
 
     function appendChatMessage(msg) {
-        var myId = Number(localStorage.getItem('currentUserId'));
-        var isMe = msg.senderId === myId;
+        var token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        var myEmail = JSON.parse(atob(token.split('.')[1])).sub;
+        var isMe = msg.senderEmail === myEmail;
         var list = document.getElementById('chatMsgList');
+
         var wrap = document.createElement('div');
+        wrap.dataset.msgId = msg.id;
         wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (isMe ? 'flex-end' : 'flex-start') + ';margin-bottom:10px';
+
         if (!isMe) {
             var nameEl = document.createElement('div');
             nameEl.style.cssText = 'font-size:.65rem;color:var(--muted);margin-bottom:3px;padding-left:2px';
             nameEl.textContent = msg.senderName;
             wrap.appendChild(nameEl);
         }
+
         var row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:flex-end;gap:5px;' + (isMe ? 'flex-direction:row-reverse' : '');
+
         var bubble = document.createElement('div');
-        bubble.style.cssText = 'max-width:72%;padding:9px 13px;border-radius:' + (isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px') + ';background:' + (isMe ? 'var(--green)' : '#fff') + ';color:' + (isMe ? '#fff' : 'var(--dark)') + ';font-size:.83rem;line-height:1.55;word-break:keep-all;border:1.5px solid ' + (isMe ? 'transparent' : 'var(--sand)');
+        bubble.style.cssText = 'max-width:72%;padding:9px 13px;border-radius:' + (isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px')
+            + ';background:' + (isMe ? '#FEE500' : '#fff')
+            + ';color:' + (isMe ? '#3C1E1E' : 'var(--dark)')
+            + ';font-size:.83rem;line-height:1.55;word-break:keep-all;box-shadow:0 1px 2px rgba(0,0,0,.08);border:1.5px solid ' + (isMe ? 'transparent' : 'var(--sand)');
         bubble.textContent = msg.content;
+
         var time = document.createElement('div');
         time.style.cssText = 'font-size:.6rem;color:var(--muted);flex-shrink:0;padding-bottom:2px';
         time.textContent = msg.sentAt ? msg.sentAt.substring(11, 16) : '';
+
         row.appendChild(bubble);
         row.appendChild(time);
+
+        if (isMe && msg.id) {
+            var delBtn = document.createElement('button');
+            delBtn.textContent = '삭제';
+            delBtn.style.cssText = 'border:none;background:transparent;font-size:.58rem;color:#bbb;cursor:pointer;padding:0 2px 2px;flex-shrink:0;font-family:inherit;opacity:0;transition:opacity .15s';
+            delBtn.onclick = function() { deleteChatMessage(msg.id, wrap); };
+            row.appendChild(delBtn);
+            row.addEventListener('mouseenter', function() { delBtn.style.opacity = '1'; });
+            row.addEventListener('mouseleave', function() { delBtn.style.opacity = '0'; });
+        }
+
         wrap.appendChild(row);
         list.appendChild(wrap);
+    }
+
+    function deleteChatMessage(messageId, wrapEl) {
+        if (!confirm('이 메시지를 삭제할까요?')) return;
+        var token = sessionStorage.getItem('token') || localStorage.getItem('token');
+        fetch('/chat/messages/' + messageId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(function(res) {
+            if (res.ok) {
+                wrapEl.remove();
+            } else {
+                res.json().then(function(data) { showToast(data.message || '삭제에 실패했어요.'); });
+            }
+        }).catch(function() { showToast('오류가 발생했어요.'); });
     }
 
     function closeChatModal() {
