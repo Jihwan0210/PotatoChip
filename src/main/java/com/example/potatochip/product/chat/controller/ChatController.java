@@ -78,6 +78,19 @@ public class ChatController {
         return ResponseEntity.ok(Map.of("count", count));
     }
 
+    // 메시지 삭제 (본인 메시지만)
+    @DeleteMapping("/messages/{messageId}")
+    @ResponseBody
+    public ResponseEntity<?> deleteMessage(@PathVariable Long messageId) {
+        User me = getLoginUser();
+        try {
+            chatService.deleteMessage(messageId, me.getId());
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     // WebSocket: 메시지 수신 → 저장 → 브로드캐스트
     @MessageMapping("/chat/{roomId}")
     public void handleMessage(@DestinationVariable Long roomId,
