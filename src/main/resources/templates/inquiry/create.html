@@ -99,6 +99,8 @@
 <div th:replace="~{footer :: footer}"></div>
 
 <script>
+    var selectedInquiryRole=null;
+
     document.addEventListener('DOMContentLoaded',function(){
         if(!isInquiryLoggedIn()){
             showInquiryToast('로그인 후 문의를 작성할 수 있어요.');
@@ -113,13 +115,6 @@
             imageInput.addEventListener('change',previewInquiryImage);
         }
     });
-
-    function getInquiryAuthOnlyHeaders(){
-        return {
-            'Authorization':'Bearer '+getInquiryAuthToken()
-        };
-    }
-
     async function loadInquiryTargetOptions(){
         try{
             var infoResponse=await fetch('/mypage/info',{
@@ -340,19 +335,55 @@
         return text.substring(0,length)+'...';
     }
 
-    function getInquiryAuthToken(){
-        return localStorage.getItem('token')||sessionStorage.getItem('token');
-    }
 
     function isInquiryLoggedIn(){
         return !!getInquiryAuthToken();
     }
 
+    function getInquiryCookieValue(name){
+        var cookies=document.cookie?document.cookie.split('; '):[];
+
+        for(var i=0;i<cookies.length;i++){
+            var parts=cookies[i].split('=');
+            var key=decodeURIComponent(parts.shift());
+
+            if(key===name){
+                return decodeURIComponent(parts.join('='));
+            }
+        }
+
+        return null;
+    }
+
+    function getInquiryAuthToken(){
+        return localStorage.getItem('token')
+            || sessionStorage.getItem('token')
+            || getInquiryCookieValue('jwt');
+    }
+
+    function getInquiryAuthOnlyHeaders(){
+        var token=getInquiryAuthToken();
+        var headers={};
+
+        if(token){
+            headers.Authorization='Bearer '+token;
+        }
+
+        return headers;
+    }
+
     function getInquiryAuthJsonHeaders(){
-        return {
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+getInquiryAuthToken()
+        var headers={
+            'Content-Type':'application/json'
         };
+
+        var token=getInquiryAuthToken();
+
+        if(token){
+            headers.Authorization='Bearer '+token;
+        }
+
+        return headers;
     }
 
     function handleInquiryUnauthorized(){
@@ -377,8 +408,7 @@
 
         var category=document.getElementById('inquiryCategory').value;
         var title=document.getElementById('inquiryTitle').value.trim();
-        var content=document.getElementById('inquiryContent').value.trim()
-        var selectedInquiryRole=null;
+        var content=document.getElementById('inquiryContent').value.trim();
 
         if(!title){
             showInquiryToast('문의 제목을 입력해주세요.');
