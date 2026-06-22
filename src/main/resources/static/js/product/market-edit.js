@@ -105,28 +105,58 @@ document.getElementById('thumbFile').addEventListener('change', function (e) {
     reader.readAsDataURL(file);
 });
 
-// 새 상세 이미지 미리보기 (그리드 통합)
+// 새 상세 이미지 미리보기 (누적 추가)
+var newDetailFiles = [];
+
 document.getElementById('newImageFiles').addEventListener('change', function () {
-    document.querySelectorAll('.img-new-preview').forEach(function (el) { el.remove(); });
     var addBtn = document.querySelector('.img-add-btn');
     var grid   = document.getElementById('imageGrid');
+    var input  = this;
+
     Array.from(this.files).forEach(function (file) {
+        var idx = newDetailFiles.length;
+        newDetailFiles.push(file);
         var reader = new FileReader();
         reader.onload = function (e) {
             var div = document.createElement('div');
             div.className = 'img-new-preview';
-            var img = document.createElement('img');
-            img.src = e.target.result;
-            div.appendChild(img);
+            div.dataset.newIdx = idx;
+            div.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1.5px solid var(--beige);';
+            div.innerHTML =
+                '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">' +
+                '<button type="button" onclick="removeNewDetail(this,' + idx + ')"' +
+                ' style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);' +
+                'color:#fff;border:none;border-radius:50%;width:20px;height:20px;' +
+                'font-size:.7rem;cursor:pointer;">✕</button>';
             grid.insertBefore(div, addBtn);
         };
         reader.readAsDataURL(file);
     });
+
+    var dt = new DataTransfer();
+    newDetailFiles.filter(function (f) { return f !== null; })
+                  .forEach(function (f) { dt.items.add(f); });
+    input.files = dt.files;
 });
+
+function removeNewDetail(btn, idx) {
+    newDetailFiles[idx] = null;
+    btn.closest('.img-new-preview').remove();
+    var dt = new DataTransfer();
+    newDetailFiles.filter(function (f) { return f !== null; })
+                  .forEach(function (f) { dt.items.add(f); });
+    document.getElementById('newImageFiles').files = dt.files;
+}
 
 // 즉시 실행
 updateDiscountPreview();
 togglePickup();
+
+// 오늘 이전 날짜 입력 방지
+var _today = new Date().toISOString().split('T')[0];
+document.querySelector('[name=expiryDate]').min        = _today;
+document.getElementById('discountStartAtInput').min    = _today;
+document.getElementById('discountEndAtInput').min      = _today;
 
 // 기존 좌표가 있으면 지도 바로 초기화
 if (typeof initLat !== 'undefined' && initLat && initLng) {
