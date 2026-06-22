@@ -118,7 +118,18 @@ public class ChatServiceImpl implements ChatService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void deleteMessage(Long messageId, Long userId) {
+        ChatMessage msg = chatMessageRepository.findById(messageId).orElseThrow();
+        if (!msg.getSenderId().equals(userId)) {
+            throw new RuntimeException("본인이 보낸 메시지만 삭제할 수 있습니다.");
+        }
+        chatMessageRepository.delete(msg);
+    }
+
     private ChatMessageDTO toMessageDTO(ChatMessage msg) {
+        User sender = userRepository.findById(msg.getSenderId()).orElse(null);
         return ChatMessageDTO.builder()
                 .id(msg.getId())
                 .roomId(msg.getChatRoom().getId())
@@ -127,6 +138,7 @@ public class ChatServiceImpl implements ChatService {
                 .content(msg.getContent())
                 .isRead(msg.getIsRead())
                 .sentAt(msg.getSentAt() != null ? msg.getSentAt().toString() : "")
+                .senderEmail(sender != null ? sender.getEmail() : null)
                 .build();
     }
 }
