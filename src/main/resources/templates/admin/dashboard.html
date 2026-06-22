@@ -13,7 +13,7 @@
         .admin-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
         .admin-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
         .admin-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:680px}
-        .admin-wrap{max-width:1180px;margin:0 auto;padding:30px 6% 80px}
+        .admin-wrap{max-width:1480px;margin:0 auto;padding:30px 3% 80px}
         .admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
         .admin-tab{border:1.5px solid var(--beige);background:#fff;color:var(--mid);border-radius:100px;padding:9px 15px;font-family:inherit;font-size:.76rem;font-weight:700;cursor:pointer}
         .admin-tab.on{background:var(--green);border-color:var(--green);color:#fff}
@@ -27,11 +27,14 @@
         .admin-card-title{font-family:'Gaegu',cursive;font-size:1.25rem;font-weight:700;color:var(--dark);margin-bottom:12px}
         .admin-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
         .admin-search{border:1.5px solid var(--beige);border-radius:100px;background:#fff;padding:9px 14px;font-family:inherit;font-size:.76rem;min-width:220px;outline:none;color:var(--dark)}
+        .admin-search-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .admin-select{border:1.5px solid var(--beige);border-radius:100px;background:#fff;padding:9px 12px;font-family:inherit;font-size:.76rem;font-weight:700;outline:none;color:var(--mid);cursor:pointer}
+        .admin-select:focus{border-color:var(--green)}
         .admin-search:focus{border-color:var(--green)}
-        .admin-table-wrap{overflow-x:auto;padding-bottom:6px}
-        .admin-table{width:100%;border-collapse:collapse;min-width:900px;table-layout:auto}
+        .admin-table-wrap{overflow-x:visible;padding-bottom:6px}
+        .admin-table{width:100%;border-collapse:collapse;min-width:0;table-layout:fixed}
         .admin-table th{background:var(--beige3);color:var(--mid);font-size:.72rem;text-align:left;padding:11px;border-bottom:1px solid var(--beige);white-space:nowrap}
-        .admin-table td{font-size:.76rem;color:var(--dark);padding:11px;border-bottom:1px solid var(--beige);vertical-align:top;word-break:keep-all}
+        .admin-table td{font-size:.76rem;color:var(--dark);padding:10px;border-bottom:1px solid var(--beige);vertical-align:top;word-break:keep-all;overflow-wrap:anywhere}
         .admin-table tr:hover td{background:#fffaf0}
         .sort-th{cursor:pointer;user-select:none}
         .sort-th:hover{color:var(--green)}
@@ -45,13 +48,26 @@
         .status-chip.hidden{background:#eee;color:#777}
         .empty{padding:24px;text-align:center;color:var(--muted);font-size:.82rem}
         .detail-box{display:none;background:var(--beige3);border:1.5px solid var(--beige);border-radius:18px;padding:18px;margin-top:14px}
-        .detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
-        .mini-card{background:#fff;border:1px solid var(--beige);border-radius:14px;padding:13px;height:150px;display:flex;flex-direction:column;min-width:0}
-        .mini-title{font-weight:700;color:var(--dark);font-size:.82rem;margin-bottom:6px}
-        .mini-text{font-size:.74rem;color:var(--mid);line-height:1.6;flex:1;min-height:0;overflow-y:auto;padding-right:6px;white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
-        .review-table{min-width:1120px}
-        .review-table th:nth-child(5),.review-table td:nth-child(5){width:360px;line-height:1.7}
-        .review-content-cell{white-space:normal;word-break:keep-all;overflow-wrap:anywhere}
+        .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;align-items:stretch}
+        .seller-detail-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+        .seller-detail-grid .mini-card{min-width:0}
+        .mini-card{background:#fff;border:1px solid var(--beige);border-radius:14px;padding:12px;height:200px;max-height:200px;display:flex;flex-direction:column;min-width:0;overflow:hidden;box-sizing:border-box}
+        .mini-title{font-weight:700;color:var(--dark);font-size:.8rem;margin-bottom:6px;flex-shrink:0}
+        .mini-text{font-size:.72rem;color:var(--mid);line-height:1.45;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:5px;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}
+        .review-table{min-width:0}
+        .review-table th,.review-table td{padding:9px 8px}
+        .review-table th:nth-child(1),.review-table td:nth-child(1){width:48px}
+        .review-table th:nth-child(2),.review-table td:nth-child(2){width:150px}
+        .review-table th:nth-child(3),.review-table td:nth-child(3){width:105px}
+        .review-table th:nth-child(4),.review-table td:nth-child(4){width:88px}
+        .review-table th:nth-child(5),.review-table td:nth-child(5){width:230px;line-height:1.6}
+        .review-table th:nth-child(6),.review-table td:nth-child(6){width:66px}
+        .review-table th:nth-child(7),.review-table td:nth-child(7){width:70px}
+        .review-table th:nth-child(8),.review-table td:nth-child(8){width:84px}
+        .review-table th:nth-child(9),.review-table td:nth-child(9){width:78px}
+        .review-content-cell{white-space:normal;word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+        .review-thumb{width:42px;height:42px;object-fit:cover;border-radius:10px;border:1px solid var(--beige);background:var(--beige3)}
+        .admin-click-row{cursor:pointer}
         .review-action-group{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
         .review-hidden-row td{background:#f7f1e8!important;color:#999}
         .cell-main{display:block;line-height:1.55;color:var(--dark);font-weight:600}
@@ -63,16 +79,91 @@
 
         .top-detail{margin-top:0;margin-bottom:14px}
         .detail-close-row{display:flex;justify-content:flex-end;margin-bottom:8px}
-        .mini-scroll{max-height:none;overflow-y:auto}
+        .mini-scroll{max-height:100%;overflow-y:auto!important;overflow-x:hidden!important}
         .mini-text::-webkit-scrollbar{width:7px}
         .mini-text::-webkit-scrollbar-thumb{background:var(--beige);border-radius:100px}
-        .mini-list{display:flex;flex-direction:column;gap:8px}
-        .mini-list-item{padding:8px 0;border-bottom:1px dashed var(--beige);line-height:1.65}
+        .mini-list{display:flex;flex-direction:column;gap:6px}
+        .mini-list-item{padding:6px 0;border-bottom:1px dashed var(--beige);line-height:1.35}
         .mini-list-item:last-child{border-bottom:none}
-        .mini-list-title{display:block;color:var(--dark);font-weight:700;margin-bottom:2px}
-        .mini-list-sub{display:block;color:var(--muted);font-size:.68rem;line-height:1.45}
-        @media(max-width:1100px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-        @media(max-width:720px){.admin-head{padding:28px 6% 22px}.admin-table{min-width:760px}.admin-search{width:100%}.detail-grid{grid-template-columns:1fr}}
+        .mini-list-title{display:block;color:var(--dark);font-weight:700;margin-bottom:0}
+        .mini-list-sub{display:block;color:var(--muted);font-size:.67rem;line-height:1.35}
+        .mini-list{max-width:100%;overflow-x:hidden}
+        .mini-list-item{min-height:34px;box-sizing:border-box;max-width:100%;overflow:hidden}
+        .mini-list-title,.mini-list-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+        .mini-text::-webkit-scrollbar:horizontal{height:0}
+        .mini-text{scrollbar-width:thin}
+
+        .summary-dashboard{display:block}
+        .summary-hero-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+        .summary-hero-card{background:#fff;border:1.5px solid var(--beige);border-radius:20px;padding:18px;box-shadow:0 8px 24px rgba(90,74,58,.06)}
+        .summary-hero-icon{font-size:1.35rem;margin-bottom:8px}
+        .summary-hero-label{font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:6px}
+        .summary-hero-value{font-family:'Gaegu',cursive;font-size:2rem;font-weight:700;color:var(--dark)}
+        .summary-hero-sub{margin-top:6px;font-size:.68rem;color:var(--muted);line-height:1.45}
+        .summary-group-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .summary-group-card{background:#fff;border:1.5px solid var(--beige);border-radius:20px;padding:18px;box-shadow:0 8px 26px rgba(90,74,58,.07)}
+        .summary-group-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+        .summary-group-title strong{font-family:'Gaegu',cursive;font-size:1.25rem;color:var(--dark)}
+        .summary-group-title span{font-size:.68rem;color:var(--muted)}
+        .summary-row{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--beige);padding:10px 0;font-size:.8rem}
+        .summary-row:first-of-type{border-top:none}
+        .summary-row-label{color:var(--mid);font-weight:700}
+        .summary-row-value{color:var(--dark);font-weight:800}
+        .summary-row-value.warn{color:#b47a00}
+        
+        .admin-filter-switch{display:inline-flex;background:var(--beige3);border:1.5px solid var(--beige);border-radius:100px;padding:3px;gap:3px}
+        .admin-filter-switch button{border:none;background:transparent;color:var(--mid);border-radius:100px;padding:7px 12px;font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer}
+        .admin-filter-switch button.on{background:var(--green);color:#fff}
+        .admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:100000;align-items:center;justify-content:center;padding:20px}
+        .admin-modal-card{width:100%;max-width:1080px;max-height:92vh;overflow-y:auto;overflow-x:hidden;background:#fff;border-radius:22px;padding:24px;box-shadow:0 18px 54px rgba(0,0,0,.22);box-sizing:border-box}
+        #adminUserModal .admin-modal-card{max-width:1240px}
+        #adminInquiryImageModal{z-index:100002}
+        .admin-modal-card *{box-sizing:border-box;max-width:100%}
+        .admin-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+        .admin-modal-title{font-family:'Gaegu',cursive;font-size:1.45rem;font-weight:700;color:var(--dark);margin:0}
+        .admin-modal-close{border:none;background:transparent;font-size:1.25rem;cursor:pointer;color:var(--muted)}
+        .admin-modal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+        .admin-modal-info-card{background:var(--beige3);border:1.5px solid var(--beige);border-radius:14px;padding:12px;min-width:0}
+        .admin-modal-info-label{font-size:.67rem;color:var(--muted);font-weight:700;margin-bottom:5px}
+        .admin-modal-info-value{font-size:.8rem;color:var(--dark);font-weight:700;word-break:keep-all;overflow-wrap:anywhere;line-height:1.55}
+        .admin-modal-section{background:#fff;border:1.5px solid var(--beige);border-radius:16px;padding:14px;margin-top:10px}
+        .admin-modal-section-title{font-size:.82rem;color:var(--dark);font-weight:800;margin-bottom:8px}
+        .admin-modal-text{font-size:.82rem;color:var(--mid);line-height:1.8;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+        .admin-review-modal-image{max-width:100%;max-height:360px;object-fit:contain;border-radius:14px;border:1.5px solid var(--beige);background:#fff}
+        .user-table th,.user-table td{padding:9px 8px;vertical-align:middle}
+        .user-table th:nth-child(1),.user-table td:nth-child(1){width:46px}
+        .user-table th:nth-child(2),.user-table td:nth-child(2){width:84px}
+        .user-table th:nth-child(3),.user-table td:nth-child(3){width:220px}
+        .user-table th:nth-child(4),.user-table td:nth-child(4){width:120px}
+        .user-table th:nth-child(5),.user-table td:nth-child(5){width:112px}
+        .user-table th:nth-child(6),.user-table td:nth-child(6),.user-table th:nth-child(7),.user-table td:nth-child(7),.user-table th:nth-child(8),.user-table td:nth-child(8){width:62px;text-align:center}
+        .user-table th:nth-child(9),.user-table td:nth-child(9){width:90px}
+        .user-table th:nth-child(10),.user-table td:nth-child(10){width:78px;text-align:center}
+        .admin-ellipsis{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mini-list-item.clickable{cursor:pointer;border-radius:10px;padding:7px 8px;margin:0 -4px;transition:background .15s}
+        .mini-list-item.clickable:hover{background:#fffaf0}
+        .mini-list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.45}
+        .mini-list-row .mini-list-title{margin-bottom:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .mini-list-row .mini-list-sub{margin-top:0;white-space:nowrap;flex-shrink:0}
+        .mini-list-row.compact{min-height:20px}
+        #adminUserModal{z-index:100000}
+        #adminReviewModal,#adminInquiryModal,#adminOrderModal,#adminProductModal{z-index:100001}
+        .admin-inquiry-table th:nth-child(1),.admin-inquiry-table td:nth-child(1){width:64px}
+        .admin-inquiry-table th:nth-child(2),.admin-inquiry-table td:nth-child(2){width:108px}
+        .admin-inquiry-table th:nth-child(3),.admin-inquiry-table td:nth-child(3){width:78px}
+        .admin-inquiry-table th:nth-child(4),.admin-inquiry-table td:nth-child(4){width:92px}
+        .admin-inquiry-table th:nth-child(5),.admin-inquiry-table td:nth-child(5){width:210px}
+        .admin-inquiry-table th:nth-child(6),.admin-inquiry-table td:nth-child(6){width:110px}
+        .admin-inquiry-table th:nth-child(7),.admin-inquiry-table td:nth-child(7){width:132px}
+        .admin-inquiry-table th:nth-child(8),.admin-inquiry-table td:nth-child(8){width:132px}
+        .admin-inquiry-table th:nth-child(9),.admin-inquiry-table td:nth-child(9){width:82px}
+        .admin-inquiry-table th:nth-child(10),.admin-inquiry-table td:nth-child(10){width:88px}
+        .admin-inquiry-title-cell{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media(max-width:900px){.summary-hero-grid,.summary-group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:560px){.summary-hero-grid,.summary-group-grid,.admin-modal-grid{grid-template-columns:1fr}}
+        @media(max-width:1100px){.seller-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:860px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:720px){.admin-head{padding:28px 6% 22px}.admin-search{width:100%}.detail-grid,.seller-detail-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
@@ -107,7 +198,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">구매자 관리</div>
                 <div class="admin-tools">
-                    <input id="buyersSearch" class="admin-search" type="text" placeholder="이름, 이메일, 닉네임 검색">
+                    <div class="admin-search-group"><select id="buyersSearchField" class="admin-select"><option value="all">전체</option><option value="name">이름</option><option value="email">이메일</option><option value="nickname">닉네임</option><option value="phone">전화번호</option><option value="address">주소</option></select><input id="buyersSearch" class="admin-search" type="text" placeholder="검색어 입력"></div>
                 </div>
                 <div id="buyersTable" class="admin-table-wrap"></div>
             </div>
@@ -118,7 +209,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">판매자 관리</div>
                 <div class="admin-tools">
-                    <input id="sellersSearch" class="admin-search" type="text" placeholder="이름, 이메일, 닉네임 검색">
+                    <div class="admin-search-group"><select id="sellersSearchField" class="admin-select"><option value="all">전체</option><option value="name">이름</option><option value="email">이메일</option><option value="nickname">닉네임</option><option value="phone">전화번호</option><option value="address">주소</option></select><input id="sellersSearch" class="admin-search" type="text" placeholder="검색어 입력"></div>
                 </div>
                 <div id="sellersTable" class="admin-table-wrap"></div>
             </div>
@@ -128,7 +219,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">상품 관리</div>
                 <div class="admin-tools">
-                    <input id="productsSearch" class="admin-search" type="text" placeholder="상품명, 판매자, 카테고리, 상태 검색">
+                    <div class="admin-search-group"><select id="productsSearchField" class="admin-select"><option value="all">전체</option><option value="name">상품명</option><option value="sellerName">판매자</option><option value="category">카테고리</option><option value="statusText">상태</option><option value="origin">원산지</option></select><input id="productsSearch" class="admin-search" type="text" placeholder="검색어 입력"></div>
                 </div>
                 <div id="productsTable" class="admin-table-wrap"></div>
             </div>
@@ -138,7 +229,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">주문 관리</div>
                 <div class="admin-tools">
-                    <input id="ordersSearch" class="admin-search" type="text" placeholder="주문번호, 구매자, 주문상태, 배송방식 검색">
+                    <div class="admin-search-group"><select id="ordersSearchField" class="admin-select"><option value="all">전체</option><option value="orderNumber">주문번호</option><option value="buyerName">구매자</option><option value="status">주문상태</option><option value="deliveryType">배송방식</option><option value="paymentMethod">결제수단</option></select><input id="ordersSearch" class="admin-search" type="text" placeholder="검색어 입력"></div>
                 </div>
                 <div id="ordersTable" class="admin-table-wrap"></div>
             </div>
@@ -148,7 +239,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">리뷰 관리</div>
                 <div class="admin-tools">
-                    <input id="reviewsSearch" class="admin-search" type="text" placeholder="상품명, 작성자, 리뷰 내용, 상태 검색">
+                    <div class="admin-search-group"><select id="reviewsSearchField" class="admin-select"><option value="all">전체</option><option value="productName">상품명</option><option value="userName">작성자</option><option value="content">리뷰 내용</option><option value="statusText">상태</option><option value="rating">평점</option></select><input id="reviewsSearch" class="admin-search" type="text" placeholder="검색어 입력"></div>
                 </div>
                 <div id="reviewsTable" class="admin-table-wrap"></div>
             </div>
@@ -158,8 +249,7 @@
             <div class="admin-card">
                 <div class="admin-card-title">문의 관리</div>
                 <div class="admin-tools">
-                    <input id="inquiriesSearch" class="admin-search" type="text" placeholder="제목, 내용, 작성자, 상태, 카테고리 검색">
-                    <button class="admin-btn amber" type="button" onclick="location.href='/admin/inquiries'">문의 답변 페이지 →</button>
+                    <div class="admin-search-group"><select id="inquiriesSearchField" class="admin-select"><option value="all">전체</option><option value="title">제목</option><option value="content">내용</option><option value="userName">작성자</option><option value="userRoleText">문의자 구분</option><option value="status">상태</option><option value="category">카테고리</option></select><input id="inquiriesSearch" class="admin-search" type="text" placeholder="검색어 입력"></div><div class="admin-filter-switch"><button type="button" class="on" onclick="setInquiryStatusFilter('all', this)">전체</button><button type="button" onclick="setInquiryStatusFilter('pending', this)">답변 대기</button><button type="button" onclick="setInquiryStatusFilter('answered', this)">답변 완료</button></div><button class="admin-btn amber" type="button" onclick="location.href='/admin/inquiries'">문의 답변 페이지 →</button>
                 </div>
                 <div id="inquiriesTable" class="admin-table-wrap"></div>
             </div>
@@ -167,6 +257,68 @@
     </section>
 </main>
 
+
+
+<div id="adminUserModal" class="admin-modal" onclick="closeAdminModal('adminUserModal')">
+    <div class="admin-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title" id="adminUserModalTitle">회원 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal('adminUserModal')">✕</button>
+        </div>
+        <div id="adminUserModalBody"></div>
+    </div>
+</div>
+
+<div id="adminReviewModal" class="admin-modal" onclick="closeAdminModal('adminReviewModal')">
+    <div class="admin-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">리뷰 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal('adminReviewModal')">✕</button>
+        </div>
+        <div id="adminReviewModalBody"></div>
+    </div>
+</div>
+
+<div id="adminInquiryModal" class="admin-modal" onclick="closeAdminModal('adminInquiryModal')">
+    <div class="admin-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">문의 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal('adminInquiryModal')">✕</button>
+        </div>
+        <div id="adminInquiryModalBody"></div>
+    </div>
+</div>
+
+
+
+<div id="adminOrderModal" class="admin-modal" onclick="closeAdminModal('adminOrderModal')">
+    <div class="admin-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">주문 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal('adminOrderModal')">✕</button>
+        </div>
+        <div id="adminOrderModalBody"></div>
+    </div>
+</div>
+
+<div id="adminProductModal" class="admin-modal" onclick="closeAdminModal('adminProductModal')">
+    <div class="admin-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">상품 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal('adminProductModal')">✕</button>
+        </div>
+        <div id="adminProductModalBody"></div>
+    </div>
+</div>
+<div id="adminInquiryImageModal" class="admin-modal" onclick="closeAdminInquiryImageModal()">
+    <div class="admin-modal-card" style="max-width:900px;text-align:center" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">첨부 이미지 보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAdminInquiryImageModal()">✕</button>
+        </div>
+        <img id="adminInquiryImageModalImg" src="" alt="문의 첨부 이미지" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:14px">
+    </div>
+</div>
 <div th:replace="~{footer :: footer}"></div>
 
 <script>
@@ -178,14 +330,15 @@
         reviews:[],
         inquiries:[]
     };
+    var adminCurrentUserDetail=null;
 
     var adminState={
-        buyers:{keyword:'',sortKey:'createdAt',sortDir:'desc'},
-        sellers:{keyword:'',sortKey:'createdAt',sortDir:'desc'},
-        products:{keyword:'',sortKey:'createdAt',sortDir:'desc'},
-        orders:{keyword:'',sortKey:'createdAt',sortDir:'desc'},
-        reviews:{keyword:'',sortKey:'createdAt',sortDir:'desc'},
-        inquiries:{keyword:'',sortKey:'createdAt',sortDir:'desc'}
+        buyers:{keyword:'',searchField:'all',sortKey:'createdAt',sortDir:'desc'},
+        sellers:{keyword:'',searchField:'all',sortKey:'createdAt',sortDir:'desc'},
+        products:{keyword:'',searchField:'all',sortKey:'createdAt',sortDir:'desc'},
+        orders:{keyword:'',searchField:'all',sortKey:'createdAt',sortDir:'desc'},
+        reviews:{keyword:'',searchField:'all',sortKey:'createdAt',sortDir:'desc'},
+        inquiries:{keyword:'',searchField:'all',statusFilter:'all',sortKey:'createdAt',sortDir:'desc'}
     };
 
     const adminPaging = {
@@ -198,7 +351,9 @@
     };
 
     document.addEventListener('DOMContentLoaded',function(){
-        loadSummary();
+        var initialTab=new URLSearchParams(location.search).get('tab')||'summary';
+        var button=findAdminTabButton(initialTab);
+        switchAdminTab(initialTab,button,true);
     });
 
     document.addEventListener('input',function(event){
@@ -239,15 +394,43 @@
         }
     });
 
+    document.addEventListener('change',function(event){
+        var map={
+            buyersSearchField:'buyers',
+            sellersSearchField:'sellers',
+            productsSearchField:'products',
+            ordersSearchField:'orders',
+            reviewsSearchField:'reviews',
+            inquiriesSearchField:'inquiries'
+        };
+
+        var type=map[event.target.id];
+        if(!type) return;
+
+        adminState[type].searchField=event.target.value;
+        resetAdminPage(type);
+
+        if(type==='buyers')renderBuyers();
+        if(type==='sellers')renderSellers();
+        if(type==='products')renderProducts();
+        if(type==='orders')renderOrders();
+        if(type==='reviews')renderReviews();
+        if(type==='inquiries')renderInquiries();
+    });
+
     async function adminFetch(url,options){
         options=options||{};
         return await fetch(url,options);
     }
 
-    function switchAdminTab(tab,element){
+    function switchAdminTab(tab,element,skipUrl){
         document.querySelectorAll('.admin-tab').forEach(function(button){
             button.classList.remove('on');
         });
+
+        if(!element){
+            element=findAdminTabButton(tab);
+        }
 
         if(element){
             element.classList.add('on');
@@ -263,6 +446,10 @@
             target.classList.add('on');
         }
 
+        if(!skipUrl){
+            setAdminTabUrl(tab);
+        }
+
         if(tab==='summary')loadSummary();
         if(tab==='buyers')loadBuyers();
         if(tab==='sellers')loadSellers();
@@ -272,24 +459,60 @@
         if(tab==='inquiries')loadInquiries();
     }
 
+    function findAdminTabButton(tab){
+        var buttons=document.querySelectorAll('.admin-tab');
+        for(var i=0;i<buttons.length;i++){
+            var onclick=buttons[i].getAttribute('onclick')||'';
+            if(onclick.indexOf("'"+tab+"'")>=0 || onclick.indexOf('"'+tab+'"')>=0){
+                return buttons[i];
+            }
+        }
+        return null;
+    }
+
+    function setAdminTabUrl(tab){
+        var url=new URL(location.href);
+        url.searchParams.set('tab',tab);
+        history.replaceState(null,'',url.pathname+url.search+url.hash);
+    }
+
     async function loadSummary(){
         var grid=document.getElementById('summaryGrid');
+        grid.className='summary-dashboard';
         grid.innerHTML='<div class="empty">전체 현황을 불러오는 중입니다.</div>';
 
         try{
             var response=await adminFetch('/api/admin/dashboard/summary');
             var data=await response.json();
+            var recentReviewCount=Number(data.recentReviewCount||0);
 
-            grid.innerHTML=[
-                statCard('전체 회원 수',data.totalUserCount),
-                statCard('구매자 수',data.buyerCount),
-                statCard('판매자 수',data.sellerCount),
-                statCard('등록 상품 수',data.productCount),
-                statCard('전체 주문 수',data.orderCount),
-                statCard('답변 대기 문의',data.pendingInquiryCount),
-                statCard('전체 리뷰 수',data.reviewCount),
-                statCard('최근 7일 리뷰',data.recentReviewCount)
-            ].join('');
+            grid.innerHTML=
+                '<div class="summary-hero-grid">'
+                +summaryHeroCard('👥','전체 회원',data.totalUserCount,'관리자를 제외한 구매자와 판매자 수')
+                +summaryHeroCard('🥬','등록 상품',data.productCount,'마켓에 등록된 전체 상품 수')
+                +summaryHeroCard('📦','전체 주문',data.orderCount,'지금까지 발생한 전체 주문 수')
+                +summaryHeroCard('✍️','전체 리뷰',data.reviewCount,'사용자가 작성한 전체 리뷰 수')
+                +'</div>'
+                +'<div class="summary-group-grid">'
+                +summaryGroupCard('👥 회원 현황','관리자 제외 집계',[
+                    ['전체 회원',data.totalUserCount,'명',false],
+                    ['구매자',data.buyerCount,'명',false],
+                    ['판매자',data.sellerCount,'명',false]
+                ])
+                +summaryGroupCard('🥬 상품 / 마켓 현황','상품 운영 규모',[
+                    ['등록 상품',data.productCount,'개',false],
+                    ['상품 관리','상품 관리 탭에서 상세 확인','',false]
+                ])
+                +summaryGroupCard('📦 주문 / 운영 현황','주문 흐름',[
+                    ['전체 주문',data.orderCount,'건',false],
+                    ['주문 상세','주문 관리 탭에서 확인','',false]
+                ])
+                +summaryGroupCard('✍️ 고객 활동 현황','리뷰와 문의 활동',[
+                    ['전체 리뷰',data.reviewCount,'개',false],
+                    ['최근 7일 리뷰',recentReviewCount,'개',false],
+                    ['문의 관리','문의 관리 탭에서 확인','',false]
+                ])
+                +'</div>';
         }catch(error){
             grid.innerHTML='<div class="empty">전체 현황을 불러오지 못했습니다.</div>';
         }
@@ -376,9 +599,10 @@
     function renderBuyers(){
         var box=document.getElementById('buyersTable');
         var keyword=adminState.buyers.keyword;
+        var fields=getSearchFields('buyers',['name','email','nickname','phone','address']);
 
         var data=adminData.buyers.filter(function(item){
-            return includesKeyword(item,keyword,['name','email','nickname','phone','address']);
+            return includesKeyword(item,keyword,fields);
         });
 
         data=applySort('buyers',data);
@@ -391,9 +615,10 @@
     function renderSellers(){
         var box=document.getElementById('sellersTable');
         var keyword=adminState.sellers.keyword;
+        var fields=getSearchFields('sellers',['name','email','nickname','phone','address']);
 
         var data=adminData.sellers.filter(function(item){
-            return includesKeyword(item,keyword,['name','email','nickname','phone','address']);
+            return includesKeyword(item,keyword,fields);
         });
 
         data=applySort('sellers',data);
@@ -406,9 +631,10 @@
     function renderProducts(){
         var box=document.getElementById('productsTable');
         var keyword=adminState.products.keyword;
+        var fields=getSearchFields('products',['name','sellerName','category','statusText','origin']);
 
         var data=adminData.products.filter(function(item){
-            return includesKeyword(item,keyword,['name','sellerName','category','statusText','origin']);
+            return includesKeyword(item,keyword,fields);
         });
 
         data=applySort('products',data);
@@ -427,23 +653,22 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'category\')">카테고리 '+sortIcon('products','category')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'displayPrice\')">가격 '+sortIcon('products','displayPrice')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'stockQuantity\')">재고 '+sortIcon('products','stockQuantity')+'</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'pickupAvailable\')">픽업 '+sortIcon('products','pickupAvailable')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'statusText\')">상태 '+sortIcon('products','statusText')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'createdAt\')">등록일 '+sortIcon('products','createdAt')+'</th>'
+            +'<th>상세</th>'
             +'</tr></thead><tbody>'
             +pagedData.map(function(item){
                 item.displayPrice=item.discountPrice||item.price;
-
                 return '<tr>'
                     +'<td>'+escapeHtml(item.id)+'</td>'
-                    +'<td>'+escapeHtml(item.name)+'</td>'
+                    +'<td><span class="cell-main">'+escapeHtml(item.name)+'</span><span class="cell-sub">'+escapeHtml(item.origin||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.sellerName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.sellerId||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.category)+'</td>'
                     +'<td>'+formatMoney(item.discountPrice||item.price)+'</td>'
                     +'<td>'+escapeHtml(item.stockQuantity)+'</td>'
-                    +'<td>'+boolText(item.pickupAvailable)+'</td>'
                     +'<td><span class="status-chip">'+escapeHtml(item.statusText)+'</span></td>'
                     +'<td>'+formatDate(item.createdAt)+'</td>'
+                    +'<td><button type="button" class="admin-btn green" onclick="openAdminProductModal('+item.id+')">상세</button></td>'
                     +'</tr>';
             }).join('')
             +'</tbody></table>'
@@ -453,9 +678,10 @@
     function renderOrders(){
         var box=document.getElementById('ordersTable');
         var keyword=adminState.orders.keyword;
+        var fields=getSearchFields('orders',['orderNumber','buyerName','status','deliveryType','paymentMethod']);
 
         var data=adminData.orders.filter(function(item){
-            return includesKeyword(item,keyword,['orderNumber','buyerName','status','deliveryType','paymentMethod']);
+            return includesKeyword(item,keyword,fields);
         });
 
         data=applySort('orders',data);
@@ -473,20 +699,20 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'buyerName\')">구매자 '+sortIcon('orders','buyerName')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'itemCount\')">상품수 '+sortIcon('orders','itemCount')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'totalAmount\')">금액 '+sortIcon('orders','totalAmount')+'</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'deliveryType\')">방식 '+sortIcon('orders','deliveryType')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'status\')">상태 '+sortIcon('orders','status')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'orders\',\'createdAt\')">주문일 '+sortIcon('orders','createdAt')+'</th>'
+            +'<th>상세</th>'
             +'</tr></thead><tbody>'
             +pagedData.map(function(item){
                 return '<tr>'
                     +'<td>'+escapeHtml(item.id)+'</td>'
-                    +'<td>'+escapeHtml(item.orderNumber||'-')+'</td>'
+                    +'<td><span class="cell-main">'+escapeHtml(item.orderNumber||'-')+'</span><span class="cell-sub">'+escapeHtml(item.deliveryType||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.buyerName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.buyerId||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.itemCount||0)+'개<br>'+renderOrderItems(item.items)+'</td>'
                     +'<td>'+formatMoney(item.totalAmount)+'</td>'
-                    +'<td>'+escapeHtml(item.deliveryType||'-')+'</td>'
                     +'<td><span class="status-chip">'+escapeHtml(item.status||'-')+'</span></td>'
                     +'<td>'+formatDate(item.createdAt)+'</td>'
+                    +'<td><button type="button" class="admin-btn green" onclick="openAdminOrderModal('+item.id+')">상세</button></td>'
                     +'</tr>';
             }).join('')
             +'</tbody></table>'
@@ -496,12 +722,11 @@
     function renderReviews(){
         var box=document.getElementById('reviewsTable');
         var keyword=adminState.reviews.keyword;
+        var fields=getSearchFields('reviews',['productName','userName','content','statusText','rating']);
 
         var data=adminData.reviews.filter(function(item){
-            var statusText=item.hidden?'숨김':'노출';
-            item.statusText=statusText;
-
-            return includesKeyword(item,keyword,['productName','userName','content','statusText']);
+            item.statusText=item.hidden?'숨김':'노출';
+            return includesKeyword(item,keyword,fields);
         });
 
         data=applySort('reviews',data);
@@ -525,18 +750,23 @@
             +'<th>관리</th>'
             +'</tr></thead><tbody>'
             +pagedData.map(function(item){
-                return '<tr id="review-row-'+item.reviewId+'" class="'+(item.hidden?'review-hidden-row':'')+'">'
+
+                var imageHtml=item.imageUrl
+                    ? '<img class="review-thumb" src="'+escapeHtml(item.imageUrl)+'" alt="리뷰 이미지" onerror="this.style.display=\'none\'">'
+                    : '<span class="cell-sub">없음</span>';
+
+                return '<tr id="review-row-'+item.reviewId+'" class="admin-click-row '+(item.hidden?'review-hidden-row':'')+'" onclick="openAdminReviewModal('+item.reviewId+')">'
                     +'<td>'+escapeHtml(item.reviewId)+'</td>'
                     +'<td><span class="cell-main">'+escapeHtml(item.productName||'-')+'</span><span class="cell-sub">ID '+escapeHtml(item.productId||'-')+'</span></td>'
                     +'<td><span class="cell-main">'+escapeHtml(item.userName||'-')+'</span><span class="cell-sub">ID '+escapeHtml(item.userId||'-')+'</span></td>'
                     +'<td>'+renderStars(item.rating)+'</td>'
-                    +'<td class="review-content-cell">'+escapeHtml(item.content||'-')+'</td>'
-                    +'<td>'+boolText(item.hasImage)+'</td>'
+                    +'<td><div class="review-content-cell">'+escapeHtml(item.content||'-')+'</div></td>'
+                    +'<td>'+imageHtml+'</td>'
                     +'<td><span class="status-chip '+(item.hidden?'hidden':'')+'">'+(item.hidden?'숨김':'노출')+'</span></td>'
                     +'<td>'+formatDate(item.createdAt)+'</td>'
                     +'<td><div class="review-action-group">'
-                    +'<button type="button" class="admin-btn gray" onclick="hideReview('+item.reviewId+')">숨김</button>'
-                    +'<button type="button" class="admin-btn red" onclick="deleteReview('+item.reviewId+')">삭제</button>'
+                    +'<button type="button" class="admin-btn gray" onclick="event.stopPropagation(); hideReview('+item.reviewId+')">숨김</button>'
+                    +'<button type="button" class="admin-btn red" onclick="event.stopPropagation(); deleteReview('+item.reviewId+')">삭제</button>'
                     +'</div></td>'
                     +'</tr>';
             }).join('')
@@ -547,12 +777,44 @@
     function renderInquiries(){
         var box=document.getElementById('inquiriesTable');
         var keyword=adminState.inquiries.keyword;
+        var fields=getSearchFields('inquiries',['title','content','userName','userRoleText','status','category','categoryText']);
+        var statusFilter=adminState.inquiries.statusFilter||'all';
 
         var data=adminData.inquiries.filter(function(item){
-            return includesKeyword(item,keyword,['title','content','userName','status','category']);
+            item.userRoleText=item.userRoleText||getRoleText(item.userRole);
+            item.categoryText=getInquiryCategoryText(item);
+            var status=String(item.status||'').toLowerCase();
+
+            if(statusFilter!=='all' && status!==statusFilter){
+                return false;
+            }
+
+            return includesKeyword(item,keyword,fields);
         });
 
-        data=applySort('inquiries',data);
+        if(adminState.inquiries.sortKey==='createdAt'){
+            data=data.slice().sort(function(a,b){
+                var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
+                var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
+
+                if(aPending!==bPending){
+                    return aPending-bPending;
+                }
+
+                var aTime=getTimeValue(a.createdAt);
+                var bTime=getTimeValue(b.createdAt);
+
+                return adminState.inquiries.sortDir==='asc'
+                    ? aTime-bTime
+                    : bTime-aTime;
+            });
+        }else{
+            data=sortInquiryList(data);
+
+            if(adminState.inquiries.sortKey){
+                data=applySort('inquiries',data);
+            }
+        }
 
         if(!data.length){
             box.innerHTML='<div class="empty">등록된 문의가 없습니다.</div>';
@@ -561,36 +823,41 @@
 
         var pagedData=getPagedData('inquiries',data);
 
-        box.innerHTML='<table class="admin-table"><thead><tr>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'id\')">ID '+sortIcon('inquiries','id')+'</th>'
+        box.innerHTML='<table class="admin-table admin-inquiry-table"><thead><tr>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'id\')">문의 ID '+sortIcon('inquiries','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'userName\')">작성자 '+sortIcon('inquiries','userName')+'</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'category\')">카테고리 '+sortIcon('inquiries','category')+'</th>'
+            +'<th>구분</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'categoryText\')">카테고리 '+sortIcon('inquiries','categoryText')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'title\')">제목 '+sortIcon('inquiries','title')+'</th>'
-            +'<th>내용</th>'
-            +'<th>답변</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'status\')">상태 '+sortIcon('inquiries','status')+'</th>'
+            +'<th>주문/상품</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'createdAt\')">작성일 '+sortIcon('inquiries','createdAt')+'</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'answeredAt\')">답변일 '+sortIcon('inquiries','answeredAt')+'</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'status\')">상태 '+sortIcon('inquiries','status')+'</th>'
             +'<th>관리</th>'
             +'</tr></thead><tbody>'
             +pagedData.map(function(item){
                 var status=String(item.status||'-').toLowerCase();
                 var isAnswered=status==='answered';
                 var statusClass=status==='pending'?'warn':'';
-                var answerText=item.answer?shortText(item.answer,50):'미답변';
+                var targetLabel=getInquiryTargetLabel(item);
+                var targetValue=getInquiryTargetValue(item);
                 var actionButton=isAnswered
                     ? '<button type="button" class="admin-btn gray" disabled>답변완료</button>'
-                    : '<button type="button" class="admin-btn amber" onclick="goInquiryAnswer('+item.id+')">답변하기</button>';
+                    : '<button type="button" class="admin-btn amber" onclick="event.stopPropagation(); goInquiryAnswer('+item.id+')">답변하기</button>';
 
-                return '<tr>'
+                return '<tr class="admin-click-row" onclick="openAdminInquiryModal('+item.id+')">'
                     +'<td>'+escapeHtml(item.id)+'</td>'
                     +'<td>'+escapeHtml(item.userName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.userId||'-')+'</span></td>'
-                    +'<td>'+escapeHtml(item.category||'-')+'</td>'
-                    +'<td>'+escapeHtml(shortText(item.title||'-',50))+'</td>'
-                    +'<td>'+escapeHtml(shortText(item.content||'-',70))+'</td>'
-                    +'<td>'+escapeHtml(answerText)+'</td>'
-                    +'<td><span class="status-chip '+statusClass+'">'+escapeHtml(item.status||'-')+'</span></td>'
-                    +'<td>'+formatDate(item.createdAt)+'</td>'
-                    +'<td>'+actionButton+'</td>'
+                    +'<td>'+escapeHtml(item.userRoleText||getRoleText(item.userRole))+'</td>'
+                    +'<td>'+escapeHtml(getInquiryCategoryText(item))+'</td>'
+                    +'<td><span class="cell-main admin-inquiry-title-cell">'+escapeHtml(item.title||'-')+'</span></td>'
+                    +'<td><span class="cell-main">'+escapeHtml(targetLabel)+'</span><span class="cell-sub">'+escapeHtml(targetValue)+'</span></td>'
+                    +'<td>'+formatDateTimeMinute(item.createdAt)+'</td>'
+                    +'<td>'+getInquiryAnsweredDate(item)+'</td>'
+                    +'<td><span class="status-chip '+statusClass+'">'+escapeHtml(getInquiryStatusText(item.status))+'</span></td>'
+                    +'<td><div class="review-action-group">'
+                    +actionButton
+                    +'</div></td>'
                     +'</tr>';
             }).join('')
             +'</tbody></table>'
@@ -602,16 +869,13 @@
             return '<div class="empty">회원 목록이 없습니다.</div>';
         }
 
-        var stateKey=type+'s';
-
         if(type==='buyer'){
-            return '<table class="admin-table"><thead><tr>'
+            return '<table class="admin-table user-table"><thead><tr>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'id\')">ID '+sortIcon('buyers','id')+'</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'name\')">이름 '+sortIcon('buyers','name')+'</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'email\')">이메일 '+sortIcon('buyers','email')+'</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'nickname\')">닉네임 '+sortIcon('buyers','nickname')+'</th>'
                 +'<th>전화번호</th>'
-                +'<th>주소</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'orderCount\')">주문 '+sortIcon('buyers','orderCount')+'</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'reviewCount\')">리뷰 '+sortIcon('buyers','reviewCount')+'</th>'
                 +'<th class="sort-th" onclick="sortAdminTable(\'buyers\',\'inquiryCount\')">문의 '+sortIcon('buyers','inquiryCount')+'</th>'
@@ -621,31 +885,28 @@
                 +data.map(function(user){
                     return '<tr>'
                         +'<td>'+escapeHtml(user.id)+'</td>'
-                        +'<td>'+escapeHtml(user.name||'-')+'</td>'
-                        +'<td>'+escapeHtml(user.email||'-')+'</td>'
-                        +'<td>'+escapeHtml(user.nickname||'-')+'</td>'
-                        +'<td>'+escapeHtml(user.phone||'-')+'</td>'
-                        +'<td>'+escapeHtml(user.address||'-')+'</td>'
+                        +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.name||'-')+'">'+escapeHtml(user.name||'-')+'</span></td>'
+                        +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.email||'-')+'">'+escapeHtml(user.email||'-')+'</span></td>'
+                        +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.nickname||'-')+'">'+escapeHtml(user.nickname||'-')+'</span></td>'
+                        +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.phone||'-')+'">'+escapeHtml(user.phone||'-')+'</span></td>'
                         +'<td>'+escapeHtml(user.orderCount||0)+'</td>'
                         +'<td>'+escapeHtml(user.reviewCount||0)+'</td>'
                         +'<td>'+escapeHtml(user.inquiryCount||0)+'</td>'
                         +'<td>'+formatDate(user.createdAt)+'</td>'
-                        +'<td><button type="button" class="admin-btn green" onclick="loadUserDetail('+user.id+',\'buyer\')">상세보기</button></td>'
+                        +'<td><button type="button" class="admin-btn green" onclick="loadUserDetail('+user.id+',\'buyer\')">상세</button></td>'
                         +'</tr>';
                 }).join('')
                 +'</tbody></table>';
         }
 
-        return '<table class="admin-table"><thead><tr>'
+        return '<table class="admin-table user-table"><thead><tr>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'id\')">ID '+sortIcon('sellers','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'name\')">이름 '+sortIcon('sellers','name')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'email\')">이메일 '+sortIcon('sellers','email')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'nickname\')">닉네임 '+sortIcon('sellers','nickname')+'</th>'
             +'<th>전화번호</th>'
-            +'<th>주소</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'productCount\')">상품 '+sortIcon('sellers','productCount')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'writtenReviewCount\')">작성리뷰 '+sortIcon('sellers','writtenReviewCount')+'</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'productReviewCount\')">상품리뷰 '+sortIcon('sellers','productReviewCount')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'inquiryCount\')">문의 '+sortIcon('sellers','inquiryCount')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'sellers\',\'createdAt\')">가입일 '+sortIcon('sellers','createdAt')+'</th>'
             +'<th>상세</th>'
@@ -653,55 +914,69 @@
             +data.map(function(user){
                 return '<tr>'
                     +'<td>'+escapeHtml(user.id)+'</td>'
-                    +'<td>'+escapeHtml(user.name||'-')+'</td>'
-                    +'<td>'+escapeHtml(user.email||'-')+'</td>'
-                    +'<td>'+escapeHtml(user.nickname||'-')+'</td>'
-                    +'<td>'+escapeHtml(user.phone||'-')+'</td>'
-                    +'<td>'+escapeHtml(user.address||'-')+'</td>'
+                    +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.name||'-')+'">'+escapeHtml(user.name||'-')+'</span></td>'
+                    +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.email||'-')+'">'+escapeHtml(user.email||'-')+'</span></td>'
+                    +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.nickname||'-')+'">'+escapeHtml(user.nickname||'-')+'</span></td>'
+                    +'<td><span class="admin-ellipsis" title="'+escapeHtml(user.phone||'-')+'">'+escapeHtml(user.phone||'-')+'</span></td>'
                     +'<td>'+escapeHtml(user.productCount||0)+'</td>'
                     +'<td>'+escapeHtml(user.writtenReviewCount||0)+'</td>'
-                    +'<td>'+escapeHtml(user.productReviewCount||0)+'</td>'
                     +'<td>'+escapeHtml(user.inquiryCount||0)+'</td>'
                     +'<td>'+formatDate(user.createdAt)+'</td>'
-                    +'<td><button type="button" class="admin-btn green" onclick="loadUserDetail('+user.id+',\'seller\')">상세보기</button></td>'
+                    +'<td><button type="button" class="admin-btn green" onclick="loadUserDetail('+user.id+',\'seller\')">상세</button></td>'
                     +'</tr>';
             }).join('')
             +'</tbody></table>';
     }
 
     async function loadUserDetail(userId,type){
-        var detailBox=document.getElementById(type==='buyer'?'buyerDetail':'sellerDetail');
-        detailBox.style.display='block';
-        detailBox.innerHTML='<div class="empty">회원 상세 정보를 불러오는 중입니다.</div>';
+        var modal=document.getElementById('adminUserModal');
+        var title=document.getElementById('adminUserModalTitle');
+        var body=document.getElementById('adminUserModalBody');
+
+        adminCurrentUserDetail=null;
+        if(title) title.textContent=type==='buyer'?'구매자 상세보기':'판매자 상세보기';
+        body.innerHTML='<div class="empty">회원 상세 정보를 불러오는 중입니다.</div>';
+        modal.style.display='flex';
 
         try{
             var response=await adminFetch('/api/admin/dashboard/users/'+userId);
             var data=await response.json();
-            detailBox.innerHTML=renderUserDetail(data,type);
+            adminCurrentUserDetail=data;
+            body.innerHTML=renderUserDetail(data,type);
         }catch(error){
-            detailBox.innerHTML='<div class="empty">회원 상세 정보를 불러오지 못했습니다.</div>';
+            body.innerHTML='<div class="empty">회원 상세 정보를 불러오지 못했습니다.</div>';
         }
     }
 
     function renderUserDetail(data,type){
         var user=data.user||{};
+        var detailHtml='<div class="admin-modal-grid">'
+            +modalInfoCard('회원 ID',user.id)
+            +modalInfoCard('이름',user.name||'-')
+            +modalInfoCard('역할',type==='buyer'?'구매자':'판매자')
+            +modalInfoCard('이메일',user.email||'-')
+            +modalInfoCard('닉네임',user.nickname||'-')
+            +modalInfoCard('전화번호',user.phone||'-')
+            +modalInfoCard('주소',user.address||'-')
+            +modalInfoCard('가입일',formatDate(user.createdAt))
+            +modalInfoCard('최근수정일',formatDate(user.updatedAt))
+            +'</div>';
 
-        return '<div class="admin-card-title">'+escapeHtml(user.name||'-')+' 님의 상세 정보</div>'
-            +'<div class="detail-grid">'
-            +miniCard(
-                '회원정보',
-                '회원 ID: '+safe(user.id)
-                +'<br>이메일: '+safe(user.email)
-                +'<br>전화번호: '+safe(user.phone)
-                +'<br>주소: '+safe(user.address)
-                +'<br>가입일: '+formatDate(user.createdAt),
-                false
-            )
-            +miniCard('구매내역',renderSimpleList(data.orders,'order'),true)
+        if(type==='buyer'){
+            return detailHtml
+                +'<div class="detail-grid">'
+                +miniCard('구매내역',renderSimpleList(data.orders,'order'),true)
+                +miniCard('작성 리뷰',renderSimpleList(data.writtenReviews,'review'),true)
+                +miniCard('작성 문의',renderSimpleList(data.inquiries,'inquiry'),true)
+                +'</div>';
+        }
+
+        return detailHtml
+            +'<div class="detail-grid seller-detail-grid">'
+            +miniCard('등록 상품',renderSimpleList(data.products,'product'),true)
+            +miniCard('판매 상품 리뷰',renderSimpleList(data.productReviews,'review'),true)
             +miniCard('작성 리뷰',renderSimpleList(data.writtenReviews,'review'),true)
             +miniCard('작성 문의',renderSimpleList(data.inquiries,'inquiry'),true)
-            +(type==='seller'?miniCard('등록 상품',renderSimpleList(data.products,'product'),true):'')
-            +(type==='seller'?miniCard('판매 상품 리뷰',renderSimpleList(data.productReviews,'review'),true):'')
             +'</div>';
     }
 
@@ -837,7 +1112,312 @@
         return String(value).toLowerCase();
     }
 
-    function includesKeyword(item,keyword,fields){
+function getSearchFields(type, defaultFields){
+        var selected=(adminState[type]&&adminState[type].searchField)||'all';
+        return selected==='all'?defaultFields:[selected];
+    }
+
+    function setInquiryStatusFilter(filter, element){
+        adminState.inquiries.statusFilter=filter;
+        resetAdminPage('inquiries');
+
+        document.querySelectorAll('#section-inquiries .admin-filter-switch button').forEach(function(button){
+            button.classList.remove('on');
+        });
+        if(element) element.classList.add('on');
+
+        renderInquiries();
+    }
+
+    function getRoleText(role){
+        var value=String(role||'').toUpperCase();
+        if(value==='BUYER') return '구매자';
+        if(value==='SELLER') return '판매자';
+        if(value==='ADMIN') return '관리자';
+        return role||'-';
+    }
+
+    function getOrderStatusText(status){
+        var value=String(status||'').toUpperCase();
+
+        if(value==='PAYMENT_COMPLETE') return '결제 완료';
+        if(value==='PREPARING') return '배송 준비';
+        if(value==='SHIPPING') return '배송 중';
+        if(value==='DELIVERED') return '배송 완료';
+        if(value==='CANCELLED') return '취소';
+        if(value==='REFUNDED') return '환불';
+
+        return status||'-';
+    }
+
+    function getInquiryStatusText(status){
+        var value=String(status||'').toLowerCase();
+        if(value==='pending') return '답변 대기';
+        if(value==='answered') return '답변 완료';
+        return status||'-';
+    }
+
+    function closeAdminModal(modalId){
+        var modal=document.getElementById(modalId);
+        if(modal) modal.style.display='none';
+    }
+
+    function modalInfoCard(label,value){
+        return '<div class="admin-modal-info-card">'
+            +'<div class="admin-modal-info-label">'+escapeHtml(label)+'</div>'
+            +'<div class="admin-modal-info-value">'+escapeHtml((value===null||value===undefined||value==='')?'-':value)+'</div>'
+            +'</div>';
+    }
+
+    function openAdminReviewModal(reviewId){
+        var review=findAdminReview(reviewId);
+        if(!review){ alert('리뷰 정보를 찾을 수 없습니다.'); return; }
+        renderAdminReviewModal(review);
+    }
+
+    function openAdminReviewModalFromDetail(reviewId){
+        openAdminReviewModal(reviewId);
+    }
+
+    function renderAdminReviewModal(review){
+        var body=document.getElementById('adminReviewModalBody');
+        var imageHtml=review.imageUrl
+            ? '<div class="admin-modal-section" style="text-align:center"><img class="admin-review-modal-image" src="'+escapeHtml(review.imageUrl)+'" alt="리뷰 이미지" onerror="this.parentElement.style.display=\'none\'"></div>'
+            : '<div class="admin-modal-section"><div class="admin-modal-text">등록된 리뷰 이미지가 없습니다.</div></div>';
+
+        body.innerHTML='<div class="admin-modal-grid">'
+            +modalInfoCard('리뷰 ID',review.reviewId)
+            +modalInfoCard('상품',review.productName||'-')
+            +modalInfoCard('상품 ID',review.productId||'-')
+            +modalInfoCard('작성자',review.userName||'-')
+            +modalInfoCard('작성자 ID',review.userId||'-')
+            +modalInfoCard('판매자',review.sellerName||'-')
+            +modalInfoCard('평점',String(review.rating||'-')+'점')
+            +modalInfoCard('상태',review.hidden?'숨김':'노출')
+            +modalInfoCard('작성일',formatDate(review.createdAt))
+            +'</div>'
+            +imageHtml
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">리뷰 내용</div><div class="admin-modal-text">'+escapeHtml(review.content||'-')+'</div></div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">추가 정보</div><div class="admin-modal-text">'
+            +'재구매 의향: '+(review.repurchaseIntent?'있음':'없음')+'\n'
+            +'익명 여부: '+(review.anonymous?'익명':'공개')+'\n'
+            +'수정일: '+formatDate(review.updatedAt)
+            +'</div></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+            +'<button type="button" class="admin-btn gray" onclick="hideReview('+review.reviewId+')">숨김</button>'
+            +'<button type="button" class="admin-btn red" onclick="deleteReview('+review.reviewId+')">삭제</button>'
+            +'<button type="button" class="admin-btn gray" onclick="closeAdminModal(\'adminReviewModal\')">닫기</button>'
+            +'</div>';
+
+        document.getElementById('adminReviewModal').style.display='flex';
+    }
+
+    function openAdminInquiryModal(inquiryId){
+        var inquiry=findAdminInquiry(inquiryId);
+        if(!inquiry){ alert('문의 정보를 찾을 수 없습니다.'); return; }
+        renderAdminInquiryModal(inquiry);
+    }
+
+    function openAdminInquiryModalFromDetail(inquiryId){
+        openAdminInquiryModal(inquiryId);
+    }
+
+    function renderAdminInquiryModal(inquiry){
+        var isAnswered=String(inquiry.status||'').toLowerCase()==='answered';
+
+        var answerButton=isAnswered
+            ? '<button type="button" class="admin-btn gray" disabled>답변완료</button>'
+            : '<button type="button" class="admin-btn amber" onclick="goInquiryAnswer('+inquiry.id+')">답변하기</button>';
+
+        var imageHtml=inquiry.imageUrl
+            ? '<div class="admin-modal-section" style="text-align:center">'
+            + '<div class="admin-modal-section-title" style="text-align:left">첨부 이미지</div>'
+            + '<img class="admin-review-modal-image" src="'+escapeHtml(inquiry.imageUrl)+'" alt="문의 첨부 이미지" '
+            + 'onclick="openAdminInquiryImageModal(\''+escapeJsString(inquiry.imageUrl)+'\')" '
+            + 'style="cursor:pointer" '
+            + 'onerror="this.parentElement.style.display=\'none\'">'
+            + '</div>'
+            : '';
+
+        var body=document.getElementById('adminInquiryModalBody');
+
+        body.innerHTML='<div class="admin-modal-grid">'
+            +modalInfoCard('문의 ID',inquiry.id)
+            +modalInfoCard('작성자',inquiry.userName||'-')
+            +modalInfoCard('작성자 ID',inquiry.userId||'-')
+            +modalInfoCard('주문 ID',inquiry.orderId||'-')
+            +modalInfoCard('상품 ID',inquiry.productId||'-')
+            +modalInfoCard('카테고리',getInquiryCategoryText(inquiry))
+            +modalInfoCard('상태',getInquiryStatusText(inquiry.status))
+            +modalInfoCard('작성일',formatDateTimeMinute(inquiry.createdAt))
+            +modalInfoCard('답변일',getInquiryAnsweredDate(inquiry))
+            +'</div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">문의 제목</div><div class="admin-modal-text">'+escapeHtml(inquiry.title||'-')+'</div></div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">문의 내용</div><div class="admin-modal-text">'+escapeHtml(inquiry.content||'-')+'</div></div>'
+            +imageHtml
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">관리자 답변</div><div class="admin-modal-text">'+escapeHtml(inquiry.answer||'아직 답변이 등록되지 않았습니다.')+'</div></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+            +answerButton
+            +'<button type="button" class="admin-btn gray" onclick="closeAdminModal(\'adminInquiryModal\')">닫기</button>'
+            +'</div>';
+
+        document.getElementById('adminInquiryModal').style.display='flex';
+    }
+
+    function openAdminOrderModal(orderId){
+        var order=findAdminOrder(orderId);
+        if(!order){ alert('주문 정보를 찾을 수 없습니다.'); return; }
+        renderAdminOrderModal(order);
+    }
+
+    function openAdminOrderModalFromDetail(orderId){
+        openAdminOrderModal(orderId);
+    }
+
+    function renderAdminOrderModal(order){
+        var body=document.getElementById('adminOrderModalBody');
+        var itemsHtml='등록된 주문 상품이 없습니다.';
+        if(order.items&&order.items.length){
+            itemsHtml='<div class="mini-list">'+order.items.map(function(item){
+                return '<div class="mini-list-item">'
+                    +'<span class="mini-list-title">'+safe(item.productName||('상품 '+item.productId))+'</span>'
+                    +'<span class="mini-list-sub">수량 '+safe(item.quantity)+'개 / 가격 '+formatMoney(item.price)+' / 상태 '+safe(item.status)+'</span>'
+                    +'<span class="mini-list-sub">판매자 '+safe(item.sellerName||'-')+' / 상품 ID '+safe(item.productId||'-')+'</span>'
+                    +'</div>';
+            }).join('')+'</div>';
+        }
+
+        body.innerHTML='<div class="admin-modal-grid">'
+            +modalInfoCard('주문 ID',order.id)
+            +modalInfoCard('주문번호',order.orderNumber||'-')
+            +modalInfoCard('구매자',order.buyerName||'-')
+            +modalInfoCard('구매자 ID',order.buyerId||'-')
+            +modalInfoCard('주문 상태',order.status||'-')
+            +modalInfoCard('결제수단',order.paymentMethod||'-')
+            +modalInfoCard('배송방식',order.deliveryType||'-')
+            +modalInfoCard('상품 수',order.itemCount||0)
+            +modalInfoCard('주문일',formatDate(order.createdAt))
+            +modalInfoCard('상품 금액',formatMoney(order.totalAmount))
+            +modalInfoCard('배송비',formatMoney(order.totalShippingFee))
+            +modalInfoCard('총액',formatMoney(Number(order.totalAmount||0)+Number(order.totalShippingFee||0)))
+            +'</div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">배송지</div><div class="admin-modal-text">'+escapeHtml(order.shippingAddress||'-')+'</div></div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">주문 상품</div><div class="admin-modal-text">'+itemsHtml+'</div></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+            +'<button type="button" class="admin-btn gray" onclick="closeAdminModal(\'adminOrderModal\')">닫기</button>'
+            +'</div>';
+
+        document.getElementById('adminOrderModal').style.display='flex';
+    }
+
+    function findAdminOrder(orderId){
+        var id=Number(orderId);
+        var sources=[];
+        if(adminCurrentUserDetail&&adminCurrentUserDetail.orders) sources=sources.concat(adminCurrentUserDetail.orders);
+        sources=sources.concat(adminData.orders||[]);
+        return sources.find(function(item){ return Number(item.id)===id; });
+    }
+
+    function findAdminReview(reviewId){
+        var id=Number(reviewId);
+        var sources=[];
+        if(adminCurrentUserDetail){
+            sources=sources.concat(adminCurrentUserDetail.writtenReviews||[]);
+            sources=sources.concat(adminCurrentUserDetail.productReviews||[]);
+        }
+        sources=sources.concat(adminData.reviews||[]);
+        return sources.find(function(item){ return Number(item.reviewId)===id; });
+    }
+
+    function findAdminInquiry(inquiryId){
+        var id=Number(inquiryId);
+        var sources=[];
+        if(adminCurrentUserDetail&&adminCurrentUserDetail.inquiries) sources=sources.concat(adminCurrentUserDetail.inquiries);
+        sources=sources.concat(adminData.inquiries||[]);
+        return sources.find(function(item){ return Number(item.id)===id; });
+    }
+
+    function openAdminProductModal(productId){
+        var product=findAdminProduct(productId);
+        if(!product){ alert('상품 정보를 찾을 수 없습니다.'); return; }
+        renderAdminProductModal(product);
+    }
+
+    function openAdminProductModalFromDetail(productId){
+        openAdminProductModal(productId);
+    }
+
+    function renderAdminProductModal(product){
+        var body=document.getElementById('adminProductModalBody');
+        if(!body) return;
+
+        body.innerHTML='<div class="admin-modal-grid">'
+            +modalInfoCard('상품 ID',product.id)
+            +modalInfoCard('상품명',product.name||'-')
+            +modalInfoCard('판매자',product.sellerName||'-')
+            +modalInfoCard('판매자 ID',product.sellerId||'-')
+            +modalInfoCard('카테고리',product.category||'-')
+            +modalInfoCard('상태',product.statusText||'-')
+            +modalInfoCard('가격',formatMoney(product.price))
+            +modalInfoCard('할인가',product.discountPrice?formatMoney(product.discountPrice):'-')
+            +modalInfoCard('재고',product.stockQuantity==null?'-':String(product.stockQuantity)+'개')
+            +modalInfoCard('원산지',product.origin||'-')
+            +modalInfoCard('픽업 가능',product.pickupAvailable?'가능':'불가')
+            +modalInfoCard('소비기한',product.expiryDate||'-')
+            +modalInfoCard('등록일',formatDate(product.createdAt))
+            +'</div>'
+            +'<div class="admin-modal-section"><div class="admin-modal-section-title">상품 요약</div>'
+            +'<div class="admin-modal-text">'
+            +'상품명: '+escapeHtml(product.name||'-')+'\n'
+            +'카테고리: '+escapeHtml(product.category||'-')+'\n'
+            +'판매자: '+escapeHtml(product.sellerName||'-')+'\n'
+            +'상태: '+escapeHtml(product.statusText||'-')
+            +'</div></div>'
+            +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">'
+            +'<button type="button" class="admin-btn gray" onclick="closeAdminModal(\'adminProductModal\')">닫기</button>'
+            +'</div>';
+
+        document.getElementById('adminProductModal').style.display='flex';
+    }
+
+    function findAdminProduct(productId){
+        var id=Number(productId);
+        var sources=[];
+        if(adminCurrentUserDetail&&adminCurrentUserDetail.products) sources=sources.concat(adminCurrentUserDetail.products);
+        sources=sources.concat(adminData.products||[]);
+        return sources.find(function(item){ return Number(item.id)===id; });
+    }
+
+    function summaryHeroCard(icon,label,value,subText){
+        return '<div class="summary-hero-card">'
+            +'<div class="summary-hero-icon">'+icon+'</div>'
+            +'<div class="summary-hero-label">'+escapeHtml(label)+'</div>'
+            +'<div class="summary-hero-value">'+summaryValue(value)+'</div>'
+            +'<div class="summary-hero-sub">'+escapeHtml(subText||'')+'</div>'
+            +'</div>';
+    }
+
+    function summaryGroupCard(title,desc,rows){
+        return '<div class="summary-group-card">'
+            +'<div class="summary-group-title"><strong>'+escapeHtml(title)+'</strong><span>'+escapeHtml(desc||'')+'</span></div>'
+            +rows.map(function(row){ return summaryRow(row[0],row[1],row[2],row[3]); }).join('')
+            +'</div>';
+    }
+
+    function summaryRow(label,value,suffix,warn){
+        return '<div class="summary-row">'
+            +'<span class="summary-row-label">'+escapeHtml(label)+'</span>'
+            +'<span class="summary-row-value '+(warn?'warn':'')+'">'+summaryValue(value)+escapeHtml(suffix||'')+'</span>'
+            +'</div>';
+    }
+
+    function summaryValue(value){
+        if(typeof value==='number') return value.toLocaleString('ko-KR');
+        if(!isNaN(Number(value))&&value!==null&&value!=='') return Number(value).toLocaleString('ko-KR');
+        return escapeHtml(value||'-');
+    }
+
+        function includesKeyword(item,keyword,fields){
         if(!keyword){
             return true;
         }
@@ -873,31 +1453,38 @@
 
         return '<div class="mini-list">'+items.map(function(item){
             if(type==='order'){
-                return '<div class="mini-list-item">'
+                return '<div class="mini-list-item clickable" onclick="openAdminOrderModalFromDetail('+Number(item.id||0)+')">'
+                    + '<div class="mini-list-row compact">'
                     + '<span class="mini-list-title">주문 '+safe(item.orderNumber||item.id)+'</span>'
-                    + '<span class="mini-list-sub">금액 '+formatMoney(item.totalAmount)+' / 상태 '+safe(item.status)+'</span>'
+                    + '<span class="mini-list-sub">'+safe(getOrderStatusText(item.status))+'</span>'
+                    + '</div>'
                     + '</div>';
             }
 
             if(type==='review'){
-                return '<div class="mini-list-item">'
+                return '<div class="mini-list-item clickable" onclick="openAdminReviewModalFromDetail('+Number(item.reviewId||0)+')">'
+                    + '<div class="mini-list-row compact">'
                     + '<span class="mini-list-title">'+safe(item.productName)+'</span>'
-                    + '<span class="mini-list-sub">'+safe(item.rating)+'점</span>'
-                    + '<div>'+safe(item.content)+'</div>'
+                    + '<span class="mini-list-sub">상품 ID '+safe(item.productId||'-')+'</span>'
+                    + '</div>'
                     + '</div>';
             }
 
             if(type==='inquiry'){
-                return '<div class="mini-list-item">'
-                    + '<span class="mini-list-title">['+safe(item.status)+'] '+safe(item.title)+'</span>'
-                    + '<div>'+safe(item.content||'')+'</div>'
+                return '<div class="mini-list-item clickable" onclick="openAdminInquiryModalFromDetail('+Number(item.id||0)+')">'
+                    + '<div class="mini-list-row compact">'
+                    + '<span class="mini-list-title">'+safe(item.title||'-')+'</span>'
+                    + '<span class="mini-list-sub">'+safe(getInquiryStatusText(item.status))+'</span>'
+                    + '</div>'
                     + '</div>';
             }
 
             if(type==='product'){
-                return '<div class="mini-list-item">'
+                return '<div class="mini-list-item clickable" onclick="openAdminProductModalFromDetail('+Number(item.id||0)+')">'
+                    + '<div class="mini-list-row compact">'
                     + '<span class="mini-list-title">'+safe(item.name)+'</span>'
-                    + '<span class="mini-list-sub">재고 '+safe(item.stockQuantity)+' / '+safe(item.statusText)+'</span>'
+                    + '<span class="mini-list-sub">상품 ID '+safe(item.id||'-')+'</span>'
+                    + '</div>'
                     + '</div>';
             }
 
@@ -932,6 +1519,90 @@
         }
 
         return Number(value).toLocaleString('ko-KR')+'원';
+    }
+
+
+    function sortInquiryList(list){
+        return list.slice().sort(function(a,b){
+            var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
+            var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
+
+            if(aPending!==bPending){
+                return aPending-bPending;
+            }
+
+            return getTimeValue(b.createdAt)-getTimeValue(a.createdAt);
+        });
+    }
+
+    function getInquiryCategoryText(item){
+        var categoryText=item.categoryText;
+
+        if(categoryText){
+            return categoryText;
+        }
+
+        switch(String(item.category||'').toLowerCase()){
+            case 'delivery':return '배송 문의';
+            case 'refund':return '환불/교환 문의';
+            case 'product':return '상품 문의';
+            case 'order':return '주문/결제 문의';
+            case 'etc':return '기타 문의';
+            default:return item.category||'기타 문의';
+        }
+    }
+
+    function getInquiryTargetLabel(item){
+        var role=String(item.userRole||item.userRoleText||'').toUpperCase();
+
+        if(role.indexOf('SELLER')>=0||role.indexOf('판매자')>=0){
+            return '상품 ID';
+        }
+
+        if(role.indexOf('BUYER')>=0||role.indexOf('구매자')>=0){
+            return '주문 ID';
+        }
+
+        if(item.productId){
+            return '상품 ID';
+        }
+
+        return '주문 ID';
+    }
+
+    function getInquiryTargetValue(item){
+        return getInquiryTargetLabel(item)==='상품 ID'
+            ? (item.productId||'-')
+            : (item.orderId||'-');
+    }
+
+    function getInquiryAnsweredDate(item){
+        return String(item.status||'').toLowerCase()==='answered'
+            ? formatDateTimeMinute(item.answeredAt)
+            : '-';
+    }
+
+    function formatDateTimeMinute(value){
+        if(!value){
+            return '-';
+        }
+
+        var text=String(value).replace('T',' ');
+
+        if(text.length>=16){
+            return text.substring(0,16);
+        }
+
+        return text;
+    }
+
+    function getTimeValue(value){
+        if(!value){
+            return 0;
+        }
+
+        var time=new Date(value).getTime();
+        return isNaN(time)?0:time;
     }
 
     function formatDate(value){
@@ -1007,33 +1678,23 @@
             return '';
         }
 
-        let html = `
-        <div class="admin-pagination">
-            <button type="button"
-                    onclick="changeAdminPage('${type}', ${paging.page - 1}, '${renderFunctionName}')"
-                    ${paging.page <= 1 ? 'disabled' : ''}>
-                이전
-            </button>
-    `;
+        const blockSize = 10;
+        const currentBlock = Math.floor((paging.page - 1) / blockSize);
+        const startPage = currentBlock * blockSize + 1;
+        const endPage = Math.min(startPage + blockSize - 1, totalPage);
 
-        for (let i = 1; i <= totalPage; i++) {
-            html += `
-            <button type="button"
-                    class="${paging.page === i ? 'on' : ''}"
-                    onclick="changeAdminPage('${type}', ${i}, '${renderFunctionName}')">
-                ${i}
-            </button>
-        `;
+        let html = '<div class="admin-pagination">';
+
+        html += '<button type="button" onclick="changeAdminPage(\'' + type + '\', ' + (startPage - 1) + ', \'' + renderFunctionName + '\')" ' + (startPage <= 1 ? 'disabled' : '') + '>이전 10</button>';
+        html += '<button type="button" onclick="changeAdminPage(\'' + type + '\', ' + (paging.page - 1) + ', \'' + renderFunctionName + '\')" ' + (paging.page <= 1 ? 'disabled' : '') + '>이전</button>';
+
+        for (let i = startPage; i <= endPage; i++) {
+            html += '<button type="button" class="' + (paging.page === i ? 'on' : '') + '" onclick="changeAdminPage(\'' + type + '\', ' + i + ', \'' + renderFunctionName + '\')">' + i + '</button>';
         }
 
-        html += `
-            <button type="button"
-                    onclick="changeAdminPage('${type}', ${paging.page + 1}, '${renderFunctionName}')"
-                    ${paging.page >= totalPage ? 'disabled' : ''}>
-                다음
-            </button>
-        </div>
-    `;
+        html += '<button type="button" onclick="changeAdminPage(\'' + type + '\', ' + (paging.page + 1) + ', \'' + renderFunctionName + '\')" ' + (paging.page >= totalPage ? 'disabled' : '') + '>다음</button>';
+        html += '<button type="button" onclick="changeAdminPage(\'' + type + '\', ' + (endPage + 1) + ', \'' + renderFunctionName + '\')" ' + (endPage >= totalPage ? 'disabled' : '') + '>다음 10</button>';
+        html += '</div>';
 
         return html;
     }
@@ -1045,7 +1706,9 @@
             return;
         }
 
-        paging.page = page;
+        var totalCount = Array.isArray(adminData[type]) ? adminData[type].length : 0;
+        var totalPage = Math.max(1, Math.ceil(totalCount / paging.size));
+        paging.page = Math.min(Math.max(1, page), totalPage);
 
         if (typeof window[renderFunctionName] === 'function') {
             window[renderFunctionName]();
@@ -1056,6 +1719,43 @@
         if (adminPaging[type]) {
             adminPaging[type].page = 1;
         }
+    }
+    function openAdminInquiryImageModal(imageUrl){
+        var modal=document.getElementById('adminInquiryImageModal');
+        var image=document.getElementById('adminInquiryImageModalImg');
+
+        if(!modal||!image){
+            return;
+        }
+
+        image.src=imageUrl;
+        modal.style.display='flex';
+    }
+
+    function closeAdminInquiryImageModal(){
+        var modal=document.getElementById('adminInquiryImageModal');
+        var image=document.getElementById('adminInquiryImageModalImg');
+
+        if(image){
+            image.src='';
+        }
+
+        if(modal){
+            modal.style.display='none';
+        }
+    }
+
+    function escapeJsString(value){
+        if(value===null||value===undefined){
+            return '';
+        }
+
+        return String(value)
+            .replaceAll('\\','\\\\')
+            .replaceAll("'","\\'")
+            .replaceAll('"','&quot;')
+            .replaceAll('\n',' ')
+            .replaceAll('\r',' ');
     }
 </script>
 </body>

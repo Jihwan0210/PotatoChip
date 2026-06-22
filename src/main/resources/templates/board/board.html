@@ -125,7 +125,154 @@
         .board-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 24px; border-radius: 100px; font-size: .83rem; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.22); z-index: 99999; opacity: 0; transition: opacity .2s; pointer-events: none; }
         .board-toast.show { opacity: 1; }
 
+        .board-sort-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .board-sort-tab {
+            border: 1.5px solid var(--beige);
+            background: var(--white);
+            color: var(--light);
+            border-radius: 100px;
+            padding: 7px 13px;
+            font-family: inherit;
+            font-size: .76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .15s;
+        }
+
+        .board-sort-tab:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .board-sort-tab.on {
+            background: var(--green);
+            border-color: var(--green);
+            color: #fff;
+        }
+
+        @media (max-width: 540px) {
+            .board-toolbar {
+                align-items: flex-start;
+                gap: 10px;
+                flex-direction: column;
+            }
+
+            .board-sort-tabs {
+                width: 100%;
+            }
+        }
+
+        .board-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .board-filter-select {
+            height: 43px;
+            padding: 0 12px;
+            border: 1.5px solid var(--beige);
+            border-radius: 12px;
+            background: var(--beige3);
+            color: var(--mid);
+            font-family: inherit;
+            font-size: .82rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .board-filter-select:focus {
+            border-color: var(--green);
+            background: #fff;
+        }
+
+        .board-search-box {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .board-image-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.78);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .board-image-modal.open {
+            display: flex;
+        }
+
+        .board-image-modal img {
+            max-width: min(92vw, 1000px);
+            max-height: 86vh;
+            object-fit: contain;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 14px 40px rgba(0,0,0,.35);
+        }
+
+        .board-image-modal-close {
+            position: absolute;
+            top: 22px;
+            right: 24px;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,.92);
+            color: #222;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 540px) {
+            .board-filter-row {
+                flex-wrap: wrap;
+            }
+
+            .board-filter-select {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .board-search-box {
+                width: 100%;
+                flex-basis: 100%;
+                order: 3;
+            }
+        }
+        .board-sort-select {
+            height: 36px;
+            min-width: 110px;
+            padding: 0 10px;
+            font-size: .78rem;
+            background: var(--white);
+        }
         /* ── RESPONSIVE ── */
+        @media (max-width: 540px) {
+            .board-toolbar {
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .board-sort-select {
+                margin-left: auto;
+            }
+        }
         @media (max-width: 820px) {
             .board-layout { grid-template-columns: 1fr; }
             .sidebar { order: -1; }
@@ -193,9 +340,18 @@
 
         <div>
             <div class="board-search-card">
-                <div class="board-search-box">
-                    <i class="ti ti-search" style="color:var(--muted);font-size:15px"></i>
-                    <input id="boardSearchInput" type="text" placeholder="제목, 내용, 작성자 검색…" oninput="onSearch()"/>
+                <div class="board-filter-row">
+                    <select id="boardSearchType" class="board-filter-select" onchange="onSearchOptionChange()">
+                        <option value="all">전체</option>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="author">작성자</option>
+                    </select>
+
+                    <div class="board-search-box">
+                        <i class="ti ti-search" style="color:var(--muted);font-size:15px"></i>
+                        <input id="boardSearchInput" type="text" placeholder="검색어를 입력하세요…" oninput="onSearch()"/>
+                    </div>
                 </div>
             </div>
 
@@ -210,6 +366,15 @@
 
             <div class="board-toolbar">
                 <div class="board-count">총 <strong id="boardCountNum">0</strong>개 게시글</div>
+
+                <div class="board-sort-tabs">
+                    <button type="button" class="board-sort-tab on" data-sort="latest" onclick="setSort(this)">최신순</button>
+                    <button type="button" class="board-sort-tab" data-sort="oldest" onclick="setSort(this)">오래된순</button>
+                    <button type="button" class="board-sort-tab" data-sort="like" onclick="setSort(this)">좋아요순</button>
+                    <button type="button" class="board-sort-tab" data-sort="comment" onclick="setSort(this)">댓글순</button>
+                    <button type="button" class="board-sort-tab" data-sort="view" onclick="setSort(this)">조회순</button>
+
+                </div>
             </div>
 
             <div class="post-list" id="postList">
@@ -246,7 +411,7 @@
         <div class="board-form-group">
             <label for="boardCategory">카테고리</label>
             <select id="boardCategory">
-                <option value="notice">📌 공지사항</option>
+                <option id="noticeOption" value="notice">📌 공지사항</option>
                 <option value="free">✨ 자유게시판</option>
                 <option value="farmer">🌾 농가 이야기</option>
                 <option value="event">🎁 이벤트</option>
@@ -308,7 +473,12 @@
         <div id="detailActions" class="board-detail-actions"></div>
     </div>
 </div>
-
+<div id="boardImageModal" class="board-image-modal">
+    <button type="button" class="board-image-modal-close" onclick="closeBoardImageModal()">
+        <i class="ti ti-x"></i>
+    </button>
+    <img id="boardImageModalImg" src="" alt="게시글 이미지 확대">
+</div>
 <div id="boardToast" class="board-toast"></div>
 
 <footer>
@@ -353,12 +523,14 @@
     var POSTS_PER_PAGE = 10;
     var isEditMode     = false;
     var editPostId     = null;
+    var currentSortType = 'latest';
 
     // 💡 수정 시 기존 이미지 경로를 기억 및 유지할 변수 탑재
     var currentExistingImageUrl = null;
 
     // 로그인한 유저의 정보 안전하게 로드
-    var currentUserId   = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
+    var currentUserIdValue = localStorage.getItem('currentUserId') || sessionStorage.getItem('currentUserId');
+    var currentUserId = currentUserIdValue ? Number(currentUserIdValue) : null;
     var currentUserEmail = localStorage.getItem('email') || sessionStorage.getItem('email');
     var currentUserRole  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
 
@@ -367,12 +539,45 @@
     ════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', function () {
         setupBoardCategoryByRole();
+        setupBoardModalCloseEvents();
         loadPosts();
     });
 
     /* ════════════════════════════════════════
        DATA
     ════════════════════════════════════════ */
+    function getCookieValue(name) {
+        var cookies = document.cookie ? document.cookie.split('; ') : [];
+
+        for (var i = 0; i < cookies.length; i++) {
+            var parts = cookies[i].split('=');
+            var key = decodeURIComponent(parts.shift());
+
+            if (key === name) {
+                return decodeURIComponent(parts.join('='));
+            }
+        }
+
+        return null;
+    }
+
+    function getBoardAuthToken() {
+        return localStorage.getItem('token')
+            || sessionStorage.getItem('token')
+            || getCookieValue('jwt');
+    }
+
+    function buildAuthHeaders(extraHeaders) {
+        var headers = extraHeaders || {};
+        var token = getBoardAuthToken();
+
+        if (token) {
+            headers.Authorization = 'Bearer ' + token;
+        }
+
+        return headers;
+    }
+
     async function loadPosts() {
         try {
             var res  = await fetch('/api/board');
@@ -392,14 +597,89 @@
     ════════════════════════════════════════ */
     function getFilteredPosts() {
         var keyword = document.getElementById('boardSearchInput').value.trim().toLowerCase();
-        return allPosts.filter(function (p) {
+        var searchTypeEl = document.getElementById('boardSearchType');
+        var searchType = searchTypeEl ? searchTypeEl.value : 'all';
+
+        var filtered = allPosts.filter(function (p) {
             var catOk = currentCat === 'all' || p.category === currentCat;
-            var kwOk  = !keyword
-                || String(p.title  || '').toLowerCase().includes(keyword)
-                || String(p.content|| '').toLowerCase().includes(keyword)
-                || String(p.author || '').toLowerCase().includes(keyword);
+            var kwOk = matchesSearchKeyword(p, keyword, searchType);
             return catOk && kwOk;
         });
+
+        return sortPosts(filtered);
+    }
+
+    function matchesSearchKeyword(p, keyword, searchType) {
+        if (!keyword) return true;
+
+        var title = String(p.title || '').toLowerCase();
+        var content = String(p.content || '').toLowerCase();
+        var author = String(displayAuthor(p) || '').toLowerCase();
+
+        if (searchType === 'title') {
+            return title.includes(keyword);
+        }
+
+        if (searchType === 'content') {
+            return content.includes(keyword);
+        }
+
+        if (searchType === 'author') {
+            return author.includes(keyword);
+        }
+
+        return title.includes(keyword)
+            || content.includes(keyword)
+            || author.includes(keyword);
+    }
+
+    function sortPosts(posts) {
+        var sortType = currentSortType || 'latest';
+
+        return posts.slice().sort(function (a, b) {
+            var dateA = getDateValue(a.createdAt);
+            var dateB = getDateValue(b.createdAt);
+
+            if (sortType === 'oldest') {
+                return dateA - dateB;
+            }
+
+            if (sortType === 'like') {
+                return ((b.likeCount || 0) - (a.likeCount || 0)) || (dateB - dateA);
+            }
+
+            if (sortType === 'comment') {
+                return ((b.commentCount || 0) - (a.commentCount || 0)) || (dateB - dateA);
+            }
+
+            if (sortType === 'view') {
+                return ((b.viewCount || 0) - (a.viewCount || 0)) || (dateB - dateA);
+            }
+
+            return dateB - dateA;
+        });
+    }
+
+    function getDateValue(date) {
+        if (!date) return 0;
+        var time = new Date(date).getTime();
+        return isNaN(time) ? 0 : time;
+    }
+
+    function onSearchOptionChange() {
+        currentPage = 1;
+        renderPosts();
+    }
+
+    function setSort(btn) {
+        document.querySelectorAll('.board-sort-tab').forEach(function (el) {
+            el.classList.remove('on');
+        });
+
+        btn.classList.add('on');
+        currentSortType = btn.dataset.sort || 'latest';
+        currentPage = 1;
+        renderPosts();
     }
 
     function setTab(el) {
@@ -564,6 +844,7 @@
         if (!post) return;
 
         currentBoardIdForLike = id;
+        clearCommentInput();
 
         post.viewCount = (post.viewCount || 0) + 1;
         fetch('/api/board/' + id + '/view', { method: 'POST' }).catch(function(){});
@@ -580,17 +861,16 @@
 
         var imageHtml = '';
         if (post.imageUrl) {
-            imageHtml = '<div style="text-align:center; margin-bottom:20px;">' +
-                '<img src="' + post.imageUrl + '" style="display:block; width:100%; max-width:500px; height:auto; margin:0 auto; border-radius:12px; object-fit:contain;">' +
-                '</div>';
+            imageHtml = '<div style="text-align:center; margin-bottom:20px;">'
+                + '<img src="' + escAttr(post.imageUrl) + '" onclick="openBoardImageModal(\'' + escJs(post.imageUrl) + '\')" style="display:block; width:100%; max-width:500px; height:auto; margin:0 auto; border-radius:12px; object-fit:contain; cursor:zoom-in;" alt="게시글 이미지">'
+                + '</div>';
         }
 
         document.getElementById('detailContent').innerHTML = imageHtml + '<div style="white-space:pre-line;">' + esc(post.content || '') + '</div>';
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        var headers = {};
-        if (token) headers['Authorization'] = 'Bearer ' + token;
-
-        fetch('/api/board/' + id + '/like/status', { headers: headers })
+        fetch('/api/board/' + id + '/like/status', {
+            headers: buildAuthHeaders(),
+            credentials: 'same-origin'
+        })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 var actions = '';
@@ -626,6 +906,9 @@
 
     function closeDetailModal() {
         document.getElementById('detailModal').classList.remove('open');
+        clearCommentInput();
+        currentBoardIdForLike = null;
+        currentBoardIdForComment = null;
     }
 
     /* ════════════════════════════════════════
@@ -682,13 +965,10 @@
 
         if (!confirm('게시글을 삭제할까요?')) return;
 
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
         fetch('/api/board/' + id, {
             method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
+            headers: buildAuthHeaders(),
+            credentials: 'same-origin'
         })
             .then(function (res) {
                 if (res.ok) {
@@ -716,7 +996,7 @@
        🔄 업그레이드된 WRITE MODAL OPEN (초기화 로직 보강)
     ════════════════════════════════════════ */
     function openWriteModal() {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getBoardAuthToken();
 
         // 1. 로그인 체크
         if (!token) {
@@ -785,7 +1065,15 @@
         if (!title)   { showToast('제목을 입력해주세요.');  return; }
         if (!content) { showToast('내용을 입력해주세요.');  return; }
 
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const token = getBoardAuthToken();
+
+        if (!token) {
+            showToast('로그인 후 게시글을 작성할 수 있어요.');
+            setTimeout(function () {
+                location.href = '/login';
+            }, 900);
+            return;
+        }
 
         if (category === 'notice' && !isCurrentUserAdmin()) {
             showToast('공지사항은 관리자만 작성할 수 있어요.');
@@ -822,8 +1110,9 @@
 
         fetch(url, {
             method: method,
-            headers: { 'Authorization': 'Bearer ' + token },
-            body: formData // 💡 JSON 텍스트 대신 Multipart FormData Body 바인딩 고정
+            headers: buildAuthHeaders(),
+            credentials: 'same-origin',
+            body: formData
         })
             .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
             .then(function (updatedPost) {
@@ -894,7 +1183,7 @@
         var content = inputEl.value.trim();
         if (!content) { showToast('댓글 내용을 입력해주세요. 🌱'); return; }
 
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        var token = getBoardAuthToken();
         if (!token) { showToast('로그인 후 댓글을 작성할 수 있어요.'); return; }
         if (!currentBoardIdForComment) { showToast('게시글 정보를 찾을 수 없습니다.'); return; }
 
@@ -902,10 +1191,10 @@
 
         fetch('/api/board/' + currentBoardIdForComment + '/comments', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
+            headers: buildAuthHeaders({
+                'Content-Type': 'application/json'
+            }),
+            credentials: 'same-origin',
             body: JSON.stringify({ content: content })
         })
             .then(function (res) { if (!res.ok) throw new Error(); return res.json(); })
@@ -937,11 +1226,10 @@
 
     function deleteComment(commentId) {
         if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
         fetch('/api/board/' + currentBoardIdForComment + '/comments/' + commentId, {
             method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: buildAuthHeaders(),
+            credentials: 'same-origin'
         })
             .then(function (res) {
                 if (!res.ok) throw new Error();
@@ -1124,9 +1412,7 @@
     }
 
     function clickLike() {
-        const token =
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
+        const token = getBoardAuthToken();
 
         if (!token) {
             alert('로그인 후 좋아요를 누를 수 있습니다. ❤️');
@@ -1139,9 +1425,8 @@
 
         fetch(`/api/board/${currentBoardIdForLike}/like`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: buildAuthHeaders(),
+            credentials: 'same-origin'
         })
             .then(function (res) {
                 if (res.status === 401) {
@@ -1179,6 +1464,75 @@
                 console.error(err);
                 alert('좋아요 처리 중 오류가 발생했습니다.');
             });
+    }
+    function clearCommentInput() {
+        var input = document.getElementById('commentInput');
+        if (input) {
+            input.value = '';
+        }
+    }
+
+    function openBoardImageModal(imageUrl) {
+        var modal = document.getElementById('boardImageModal');
+        var img = document.getElementById('boardImageModalImg');
+
+        if (!modal || !img || !imageUrl) return;
+
+        img.src = imageUrl;
+        modal.classList.add('open');
+    }
+
+    function closeBoardImageModal() {
+        var modal = document.getElementById('boardImageModal');
+        var img = document.getElementById('boardImageModalImg');
+
+        if (img) {
+            img.src = '';
+        }
+
+        if (modal) {
+            modal.classList.remove('open');
+        }
+    }
+
+    function setupBoardModalCloseEvents() {
+        var detailModal = document.getElementById('detailModal');
+        var imageModal = document.getElementById('boardImageModal');
+
+        if (detailModal) {
+            detailModal.addEventListener('click', function (e) {
+                if (e.target === detailModal) {
+                    closeDetailModal();
+                }
+            });
+        }
+
+        if (imageModal) {
+            imageModal.addEventListener('click', function (e) {
+                if (e.target === imageModal) {
+                    closeBoardImageModal();
+                }
+            });
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeBoardImageModal();
+                closeDetailModal();
+            }
+        });
+    }
+
+    function escAttr(s) {
+        return esc(s).replace(/'/g, '&#39;');
+    }
+
+    function escJs(s) {
+        return String(s || '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\r/g, '')
+            .replace(/\n/g, '\\n');
     }
 </script>
 </body>

@@ -36,6 +36,7 @@ public class InquiryServiceImpl implements InquiryService {
                 .category(inquiryDTO.getCategory())
                 .title(inquiryDTO.getTitle())
                 .content(inquiryDTO.getContent())
+                .imageUrl(normalizeImageUrl(inquiryDTO.getImageUrl()))
                 .build();
 
         Inquiry savedInquiry = inquiryRepository.save(inquiry);
@@ -89,7 +90,8 @@ public class InquiryServiceImpl implements InquiryService {
                 inquiryDTO.getTitle(),
                 inquiryDTO.getContent(),
                 inquiryDTO.getProductId(),
-                inquiryDTO.getOrderId()
+                inquiryDTO.getOrderId(),
+                normalizeImageUrl(inquiryDTO.getImageUrl())
         );
 
         return InquiryDTO.fromEntity(inquiry);
@@ -150,6 +152,14 @@ public class InquiryServiceImpl implements InquiryService {
         );
 
         return InquiryDTO.fromEntity(inquiry);
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return null;
+        }
+
+        return imageUrl.trim();
     }
 
     private Inquiry findActiveInquiry(Long inquiryId) {

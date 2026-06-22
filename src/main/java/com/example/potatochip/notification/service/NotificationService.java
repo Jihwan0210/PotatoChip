@@ -82,7 +82,7 @@ public class NotificationService {
                 NotificationType.INQUIRY_ANSWERED,
                 "문의 답변이 등록됐어요",
                 title + " 문의에 답변이 등록됐어요.",
-                "/mypage",
+                "/my?inquiryId=" + inquiryId,
                 "INQUIRY",
                 inquiryId
         );
@@ -154,6 +154,16 @@ public class NotificationService {
         }
     }
 
+    @Transactional
+    public void deleteNotification(Long notificationId, Long userId) {
+        validateUserId(userId);
 
+        Notification notification = notificationRepository
+                .findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+        notificationRepository.delete(notification);
+    }
 
 }

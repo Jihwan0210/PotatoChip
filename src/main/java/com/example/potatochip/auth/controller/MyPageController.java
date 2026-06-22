@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import com.example.potatochip.order.repository.OrderRepository;
+import com.example.potatochip.product.repository.ProductRepository;
+import com.example.potatochip.review.repository.ReviewRepository;
 
 @RequiredArgsConstructor
 @Controller
@@ -28,6 +31,9 @@ public class MyPageController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final WishRepository wishRepository;
+    private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
 
     // 마이페이지 뷰 반환
     @GetMapping("/mypage")
@@ -49,6 +55,7 @@ public class MyPageController {
         User user = userRepository.findByEmail(email).orElseThrow();
 
         return ResponseEntity.ok(java.util.Map.of(
+                "id",     user.getId(),
                 "name",    user.getName(),
                 "email",   user.getEmail(),
                 "nickname", user.getNickname() != null ? user.getNickname() : "",
@@ -134,6 +141,96 @@ public class MyPageController {
                     item.put("price",        p.getPrice());
                     item.put("discountPrice",p.getDiscountPrice());
                     item.put("thumbnailUrl", p.getThumbnailUrl());
+                    return item;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+    // 주문내역 API
+    @Transactional(readOnly = true)
+    @GetMapping("/mypage/orders")
+    @ResponseBody
+    public ResponseEntity<?> getMyOrders(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(401).body("인증이 필요합니다.");
+        }
+
+        String email = jwtUtil.getEmail(token);
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        List<Map<String, Object>> result = orderRepository.findByBuyerIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(order -> {
+                    Map<String, Object> orderMap = new HashMap<>();
+                    orderMap.put("id", order.getId());
+                    orderMap.put("orderNumber", order.getOrderNumber());
+                    orderMap.put("status", order.getStatus());
+                    orderMap.put("totalAmount", order.getTotalAmount());
+                    orderMap.put("createdAt", order.getCreatedAt());
+
+                    List<Map<String, Object>> items = order.getOrderItems().stream()
+                            .map(orderItem -> {
+                                Map<String, Object> itemMap = new HashMap<>();
+                                var product = productRepository.findById(orderItem.getProductId()).orElse(null);
+
+                                itemMap.put("orderItemId", orderItem.getId());
+                                itemMap.put("productId", orderItem.getProductId());
+                                itemMap.put("productName", product != null ? product.getName() : "삭제된 상품");
+                                itemMap.put("thumbnailUrl", product != null ? product.getThumbnailUrl() : null);
+                                itemMap.put("quantity", orderItem.getQuantity());
+                                itemMap.put("price", orderItem.getPrice());
+                                itemMap.put("status", orderItem.getStatus());
+                                itemMap.put("reviewed", reviewRepository.existsByOrderItemIdAndUserIdAndIsActiveTrue(
+                                        orderItem.getId(),
+                                        user.getId()
+                                ));
+
+                                return itemMap;
+                            })
+                            .collect(Collectors.toList());
+
+                    orderMap.put("items", items);
+                    return orderMap;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
+
+
+    // 내 리뷰 API
+    @Transactional(readOnly = true)
+    @GetMapping("/mypage/reviews")
+    @ResponseBody
+    public ResponseEntity<?> getMyReviews(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(401).body("인증이 필요합니다.");
+        }
+
+        String email = jwtUtil.getEmail(token);
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        List<Map<String, Object>> result = reviewRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(review -> {
+                    Map<String, Object> item = new HashMap<>();
+                    var product = productRepository.findById(review.getProductId()).orElse(null);
+
+                    item.put("reviewId", review.getReviewId());
+                    item.put("productId", review.getProductId());
+                    item.put("productName", product != null ? product.getName() : "삭제된 상품");
+                    item.put("thumbnailUrl", product != null ? product.getThumbnailUrl() : null);
+                    item.put("rating", review.getRating());
+                    item.put("content", review.getContent());
+                    item.put("imageUrl", review.getImageUrl());
+                    item.put("repurchaseIntent", review.getRepurchaseIntent());
+                    item.put("isAnonymous", review.getIsAnonymous());
+                    item.put("createdAt", review.getCreatedAt());
+
                     return item;
                 })
                 .collect(Collectors.toList());

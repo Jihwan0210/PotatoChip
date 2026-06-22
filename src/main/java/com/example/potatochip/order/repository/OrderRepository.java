@@ -10,6 +10,7 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByBuyerId(Long buyerId);
+
     List<Order> findByBuyerIdOrderByCreatedAtDesc(Long buyerId);
 
     @Query("SELECT DISTINCT o FROM Order o JOIN o.orderItems i WHERE i.productId IN :productIds ORDER BY o.createdAt DESC")
