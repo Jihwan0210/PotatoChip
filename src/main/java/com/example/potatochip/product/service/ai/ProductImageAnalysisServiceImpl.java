@@ -46,7 +46,7 @@ public class ProductImageAnalysisServiceImpl implements ProductImageAnalysisServ
           * 2~3문장, 너무 길지 않게
           * AI 느낌 나는 단어 금지 (최상급, 신선도, 영양, 친환경 같은 딱딱한 단어 쓰지 마)
         
-        예시 description:
+        예시
         "저희 밭에서 직접 캔 감자인데 모양이 좀 삐뚤어졌어요 ㅎㅎ 그래도 쪄먹으면 진짜 맛있습니다. 모양만 못났지 맛은 자신있어요!"
         "올해 사과가 좀 작고 울퉁불퉁하게 자랐는데 당도는 오히려 더 좋아요. 직접 먹어보고 올리는 거라 믿고 드셔도 됩니다~"
         """;
