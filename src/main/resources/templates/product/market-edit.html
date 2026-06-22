@@ -344,16 +344,16 @@
                         <div class="frow" style="margin-top:4px">
                             <div class="fg">
                                 <label>할인 시작일</label>
-                                <input type="date" name="discountStartAt" class="fi"
+                                <input type="date" name="discountStartAt" id="discountStartAtInput" class="fi"
                                        th:value="${product.discountStartAt}">
                             </div>
                             <div class="fg">
                                 <label>할인 종료일</label>
-                                <input type="date" name="discountEndAt" class="fi"
+                                <input type="date" name="discountEndAt" id="discountEndAtInput" class="fi"
                                        th:value="${product.discountEndAt}">
                             </div>
                         </div>
-                        <div class="hint">💡 할인율 입력 시 기간을 함께 설정해주세요.</div>
+                        <div class="hint">💡 할인율이 1% 이상일 때만 기간을 설정할 수 있습니다.</div>
                     </div>
                 </div>
 
@@ -523,13 +523,29 @@
 <script>
     // 할인 미리보기
     function updateDiscountPreview() {
-        var price  = Number(document.getElementById('priceInput').value);
-        var rate   = Number(document.getElementById('discountRateInput').value);
-        var pvMain = document.querySelector('.pv-main');
-        var pvRate = document.querySelector('.pv-rate');
-        var hidden = document.getElementById('discountPriceHidden');
+        var price     = Number(document.getElementById('priceInput').value);
+        var rate      = Number(document.getElementById('discountRateInput').value);
+        var pvMain    = document.querySelector('.pv-main');
+        var pvRate    = document.querySelector('.pv-rate');
+        var hidden    = document.getElementById('discountPriceHidden');
+        var startInput = document.getElementById('discountStartAtInput');
+        var endInput   = document.getElementById('discountEndAtInput');
+        var hasDiscount = rate > 0 && rate <= 99;
+
+        // 날짜 필드 활성/비활성
+        startInput.disabled = !hasDiscount;
+        endInput.disabled   = !hasDiscount;
+        var disabledStyle = 'opacity:.4;cursor:not-allowed;background:var(--beige2)';
+        var enabledStyle  = '';
+        startInput.style.cssText = hasDiscount ? enabledStyle : disabledStyle;
+        endInput.style.cssText   = hasDiscount ? enabledStyle : disabledStyle;
+        if (!hasDiscount) {
+            startInput.value = '';
+            endInput.value   = '';
+        }
+
         if (!price) return;
-        if (rate > 0 && rate <= 99) {
+        if (hasDiscount) {
             var discounted = Math.round(price * (1 - rate / 100));
             pvRate.textContent = '-' + rate + '%';
             pvMain.textContent = discounted.toLocaleString() + '원';
