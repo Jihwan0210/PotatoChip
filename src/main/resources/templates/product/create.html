@@ -281,6 +281,7 @@
                                 <option value="과일">과일</option>
                                 <option value="곡류">곡류</option>
                                 <option value="버섯">버섯</option>
+                                <option value="뿌리채소">뿌리채소</option>
                             </select>
                         </div>
                         <div class="fg">
@@ -486,6 +487,12 @@
 </div>
 
 <script>
+    // 오늘 이전 날짜 입력 방지
+    var _today = new Date().toISOString().split('T')[0];
+    document.querySelector('[name=expiryDate]').min      = _today;
+    document.querySelector('[name=discountStartAt]').min = _today;
+    document.querySelector('[name=discountEndAt]').min   = _today;
+
     // 할인 미리보기
     function updateDiscountPreview() {
         var price = Number(document.querySelector('[name=price]').value);
@@ -603,7 +610,10 @@
             };
             reader.readAsDataURL(file);
         });
-        this.value = '';
+        var dt = new DataTransfer();
+        detailFiles.filter(function (f) { return f !== null; })
+                   .forEach(function (f) { dt.items.add(f); });
+        this.files = dt.files;
     });
 
     function removeDetail(btn, idx) {
