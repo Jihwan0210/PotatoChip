@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13,7 +13,8 @@
 
 <div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 20px;display:flex;align-items:center;justify-content:space-between;margin-top:60px">
     <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)">장바구니 🛒</div>
-    <span style="font-size:.8rem;color:var(--muted)" id="itemCount">0개 상품</span>
+    <span style="font-size:.8rem;color:var(--muted)" id="itemCount"
+          th:text="${(pickupItems.size() + deliveryItems.size()) + '개 상품'}">0개 상품</span>
 </div>
 
 <div style="padding:28px 5%" id="cartData">
@@ -23,7 +24,8 @@
         <div id="cartList">
 
             <!-- 비로그인 안내 -->
-            <div id="loginGuide" style="text-align:center;padding:60px 20px;color:var(--muted)">
+            <div th:if="${!isLoggedIn}"
+                 style="text-align:center;padding:60px 20px;color:var(--muted)">
                 <div style="font-size:3rem;margin-bottom:12px">🔒</div>
                 <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">로그인이 필요한 서비스예요</div>
                 <div style="font-size:.8rem;margin-bottom:20px">장바구니를 이용하시려면 로그인 해주세요.</div>
@@ -34,22 +36,19 @@
             </div>
 
             <!-- 판매자 계정 안내 -->
-            <div id="sellerGuide" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+            <div th:if="${isLoggedIn and isSeller}"
+                 style="text-align:center;padding:60px 20px;color:var(--muted)">
                 <div style="font-size:3rem;margin-bottom:12px">🚫</div>
-                <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">
-                    판매자 계정으로는 구매가 불가능합니다
-                </div>
-                <div style="font-size:.8rem;margin-bottom:20px">
-                    구매를 원하시면 구매자 계정을 이용해주세요.
-                </div>
+                <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">판매자 계정으로는 구매가 불가능합니다</div>
+                <div style="font-size:.8rem;margin-bottom:20px">구매를 원하시면 구매자 계정을 이용해주세요.</div>
             </div>
 
-
-            <!-- 로그인 시 노출 -->
-            <div id="cartItems" style="display:none">
+            <!-- 구매자 로그인 -->
+            <div th:if="${isLoggedIn and !isSeller}">
 
                 <!-- 장바구니 비었을 때 -->
-                <div id="emptyCart" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+                <div th:if="${pickupItems.empty and deliveryItems.empty}"
+                     style="text-align:center;padding:60px 20px;color:var(--muted)">
                     <div style="font-size:3rem;margin-bottom:12px">🛒</div>
                     <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">장바구니가 비어있어요</div>
                     <div style="font-size:.8rem;margin-bottom:20px">마켓에서 마음에 드는 상품을 담아보세요!</div>
@@ -60,24 +59,84 @@
                 </div>
 
                 <!-- 픽업 가능 섹션 -->
-                <div id="pickupSection" style="display:none;margin-bottom:8px">
+                <div id="pickupSection" th:if="${!pickupItems.empty}" style="margin-bottom:8px">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
                         <span style="font-size:.78rem;font-weight:700;color:var(--green)">📍 픽업 가능 상품</span>
                         <div style="flex:1;height:1px;background:var(--gl)"></div>
                     </div>
-                    <div id="pickupList"></div>
+                    <div id="pickupList">
+                        <div th:each="item : ${pickupItems}"
+                             th:attr="data-product-id=${item.productId}, data-unit-price=${item.price}, data-pickup=true"
+                             style="display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px">
+                            <input type="checkbox" th:id="|check-${item.productId}|" checked onchange="onCheckChange()"
+                                   style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+                            <img th:src="${#strings.isEmpty(item.thumbnailUrl) ? 'https://placehold.co/64x64' : item.thumbnailUrl}"
+                                 alt="" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0">
+                            <div style="flex:1;min-width:0">
+                                <div th:text="${item.productName}"
+                                     style="font-size:.85rem;font-weight:700;color:var(--dark);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+                                <div th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT') + '원 / 개'}"
+                                     style="font-size:.78rem;color:var(--muted);margin-bottom:8px"></div>
+                                <div style="display:flex;align-items:center;gap:8px">
+                                    <button th:onclick="|decreaseQty(${item.productId})|"
+                                            style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;background:#fff;cursor:pointer;font-size:.9rem;line-height:1">−</button>
+                                    <span th:id="|qty-${item.productId}|" th:text="${item.quantity}"
+                                          style="min-width:20px;text-align:center;font-size:.85rem;font-weight:700"></span>
+                                    <button th:onclick="|increaseQty(${item.productId})|"
+                                            style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;background:#fff;cursor:pointer;font-size:.9rem;line-height:1">+</button>
+                                </div>
+                            </div>
+                            <div style="text-align:right;flex-shrink:0">
+                                <div th:id="|subtotal-${item.productId}|"
+                                     th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 0, 'POINT') + '원'}"
+                                     style="font-size:.9rem;font-weight:700;color:var(--dark);margin-bottom:8px"></div>
+                                <button th:onclick="|removeItem(${item.productId})|"
+                                        style="font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline">삭제</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 배송 전용 섹션 -->
-                <div id="deliverySection" style="display:none;margin-bottom:8px">
+                <div id="deliverySection" th:if="${!deliveryItems.empty}" style="margin-bottom:8px">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:16px">
                         <span style="font-size:.78rem;font-weight:700;color:var(--muted)">🚚 배송 전용 상품 (픽업 불가)</span>
                         <div style="flex:1;height:1px;background:var(--sand)"></div>
                     </div>
-                    <div id="deliveryList"></div>
+                    <div id="deliveryList">
+                        <div th:each="item : ${deliveryItems}"
+                             th:attr="data-product-id=${item.productId}, data-unit-price=${item.price}, data-pickup=false"
+                             style="display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px">
+                            <input type="checkbox" th:id="|check-${item.productId}|" checked onchange="onCheckChange()"
+                                   style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+                            <img th:src="${#strings.isEmpty(item.thumbnailUrl) ? 'https://placehold.co/64x64' : item.thumbnailUrl}"
+                                 alt="" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0">
+                            <div style="flex:1;min-width:0">
+                                <div th:text="${item.productName}"
+                                     style="font-size:.85rem;font-weight:700;color:var(--dark);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+                                <div th:text="${#numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT') + '원 / 개'}"
+                                     style="font-size:.78rem;color:var(--muted);margin-bottom:8px"></div>
+                                <div style="display:flex;align-items:center;gap:8px">
+                                    <button th:onclick="|decreaseQty(${item.productId})|"
+                                            style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;background:#fff;cursor:pointer;font-size:.9rem;line-height:1">−</button>
+                                    <span th:id="|qty-${item.productId}|" th:text="${item.quantity}"
+                                          style="min-width:20px;text-align:center;font-size:.85rem;font-weight:700"></span>
+                                    <button th:onclick="|increaseQty(${item.productId})|"
+                                            style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;background:#fff;cursor:pointer;font-size:.9rem;line-height:1">+</button>
+                                </div>
+                            </div>
+                            <div style="text-align:right;flex-shrink:0">
+                                <div th:id="|subtotal-${item.productId}|"
+                                     th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 0, 'POINT') + '원'}"
+                                     style="font-size:.9rem;font-weight:700;color:var(--dark);margin-bottom:8px"></div>
+                                <button th:onclick="|removeItem(${item.productId})|"
+                                        style="font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline">삭제</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <input type="hidden" id="cartTotal" value="0"/>
+                <input type="hidden" id="cartTotal" th:value="${pickupItems.size() + deliveryItems.size()}"/>
             </div>
         </div>
 
@@ -119,10 +178,17 @@
                 <span class="v" id="cs-ship">무료</span>
             </div>
 
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="font-size:.72rem;font-weight:500;color:var(--mid)">포인트</span>
+                <span id="pt-balance" style="font-size:.78rem;font-weight:700;color:var(--green)"
+                      th:text="|🌿 보유 ${#numbers.formatDecimal(userPoints, 1, 'COMMA', 0, 'POINT')}P|">🌿 보유 0P</span>
+            </div>
             <div class="pt-row">
-                <input class="pt-in" id="ptIn" max="2000" min="0"
-                       placeholder="포인트 사용 (보유: 2,000P)" type="number"/>
-                <button class="btn-pt" onclick="applyPt()">사용</button>
+                <input class="pt-in" id="ptIn" type="number" min="0" value="0"
+                       th:max="${userPoints}"
+                       placeholder="사용할 포인트 입력"
+                       oninput="applyPt()"/>
+                <button class="btn-pt" onclick="useAllPoints()">전부 사용</button>
             </div>
 
             <div class="cs-row">
@@ -144,130 +210,15 @@
 
 <div th:replace="footer :: footer"></div>
 <script src="js/app.js"></script>
-<script>
+<script th:inline="none">
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-    const role = localStorage.getItem('role') || sessionStorage.getItem('role');
     var sf = 0, pd = 0;
-    var selectedDeliveryType = 'delivery';      // 현재 선택된 배송 타입
-    var selectedDeliveryFee  = 0;               // 현재 선택된 배송비
-    var selectedDeliveryLabel = '🚚 일반 배송'; // 현재 선택된 배송 라벨
+    var selectedDeliveryType  = 'delivery';
+    var selectedDeliveryFee   = 0;
+    var selectedDeliveryLabel = '🚚 일반 배송';
 
-    if (!token || !role) {
-        document.getElementById('loginGuide').style.display = 'block';
-        document.getElementById('cartItems').style.display = 'none';
-    } else if (role === 'SELLER') {
-        document.getElementById('loginGuide').style.display = 'none';
-        document.getElementById('sellerGuide').style.display = 'block';
-        document.getElementById('cartItems').style.display = 'none';
-    } else {
-        document.getElementById('loginGuide').style.display = 'none';
-        document.getElementById('cartItems').style.display = 'block';
-
-        fetch('/cart/data', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        })
-            .then(res => {
-                if (res.status === 401) {
-                    document.getElementById('loginGuide').style.display = 'block';
-                    document.getElementById('cartItems').style.display = 'none';
-                    return null;
-                }
-                return res.json();
-            })
-            .then(cart => {
-                if (!cart) return;
-                renderCart(cart);
-                recalcTotal();
-            });
-    }
-
-    function renderCart(cart) {
-        if (!cart.items || cart.items.length === 0) {
-            document.getElementById('emptyCart').style.display = 'block';
-            document.getElementById('itemCount').textContent = '0개 상품';
-            return;
-        }
-
-        cart.items.forEach(item => {
-            cItems[item.productId] = {
-                up: Number(item.price),
-                qty: item.quantity,
-                ogPrice: Number(item.price)
-            };
-        });
-
-
-        document.getElementById('itemCount').textContent = cart.items.length + '개 상품';
-        document.getElementById('cartTotal').value = cart.items.length;
-
-        const pickupItems = cart.items.filter(i => i.isPickupAvailable);
-        const deliveryItems = cart.items.filter(i => !i.isPickupAvailable);
-
-        if (pickupItems.length > 0) {
-            document.getElementById('pickupSection').style.display = 'block';
-            pickupItems.forEach(item => {
-                document.getElementById('pickupList').appendChild(createItemRow(item, true));
-            });
-        }
-
-        if (deliveryItems.length > 0) {
-            document.getElementById('deliverySection').style.display = 'block';
-            deliveryItems.forEach(item => {
-                document.getElementById('deliveryList').appendChild(createItemRow(item, false));
-            });
-        }
-    }
-
-    function createItemRow(item, isPickup) {
-        const div = document.createElement('div');
-        div.setAttribute('data-product-id', item.productId);
-        div.setAttribute('data-unit-price', Number(item.price));
-        div.setAttribute('data-pickup', isPickup);
-        div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:16px;background:#fff;border:1.5px solid var(--sand);border-radius:12px;margin-bottom:10px';
-
-        div.innerHTML = `
-  <input type="checkbox" id="check-${item.productId}" checked onchange="onCheckChange()"
-    style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
-
-  <img src="${item.thumbnailUrl || 'https://placehold.co/64x64?text=🥔'}" alt=""
-    style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0">
-
-  <div style="flex:1;min-width:0">
-    <div style="font-size:.85rem;font-weight:700;color:var(--dark);margin-bottom:2px;
-                white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-      ${item.productName}
-    </div>
-    <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">
-      ${Number(item.price).toLocaleString()}원 / 개
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <button onclick="decreaseQty(${item.productId})"
-        style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;
-               background:#fff;cursor:pointer;font-size:.9rem;line-height:1">−</button>
-      <span id="qty-${item.productId}"
-        style="min-width:20px;text-align:center;font-size:.85rem;font-weight:700">
-        ${item.quantity}
-      </span>
-      <button onclick="increaseQty(${item.productId})"
-        style="width:24px;height:24px;border:1px solid var(--sand);border-radius:6px;
-               background:#fff;cursor:pointer;font-size:.9rem;line-height:1">+</button>
-    </div>
-  </div>
-
-  <div style="text-align:right;flex-shrink:0">
-    <div id="subtotal-${item.productId}"
-      style="font-size:.9rem;font-weight:700;color:var(--dark);margin-bottom:8px">
-      ${(Number(item.price) * item.quantity).toLocaleString()}원
-    </div>
-    <button onclick="removeItem(${item.productId})"
-      style="font-size:.72rem;color:var(--muted);background:none;border:none;
-             cursor:pointer;text-decoration:underline">
-      삭제
-    </button>
-  </div>
-`;
-        return div;
-    }
+    // 페이지 로드 시 합계 계산
+    recalcTotal();
 
     function recalcTotal() {
         var tot = 0;
@@ -289,10 +240,29 @@
         if (pts) pts.textContent = '🌿 이번 구매로 ' + Math.floor(fin / 100) + 'P 적립 예정!';
     }
 
+    function useAllPoints() {
+        var input = document.getElementById('ptIn');
+        input.value = parseInt(input.max) || 0;
+        applyPt();
+    }
+
+    function applyPt() {
+        var input = document.getElementById('ptIn');
+        var max = parseInt(input.max) || 0;
+        var val = parseInt(input.value) || 0;
+        if (val < 0) { val = 0; input.value = 0; }
+        if (val > max) { val = max; input.value = max; }
+        pd = val;
+        var remaining = max - val;
+        var balanceEl = document.getElementById('pt-balance');
+        if (balanceEl) balanceEl.textContent = '🌿 보유 ' + remaining.toLocaleString() + 'P';
+        var el = document.getElementById('cs-pt');
+        if (el) el.textContent = val > 0 ? '-' + val.toLocaleString() + '원' : '-0원';
+        recalcTotal();
+    }
+
     function onCheckChange() { recalcTotal(); }
 
-    // ── 배송 선택 시 로컬 변수도 함께 갱신 ──────────────────────────────
-    // app.js의 selD/selPickup을 페이지별로 덮어씌웁니다.
     function selD(el, fee) {
         document.querySelectorAll('.del-opt').forEach(function(d) {
             d.classList.remove('on');
@@ -302,11 +272,8 @@
         el.querySelector('input').checked = true;
         sf = fee;
         selectedDeliveryFee = fee;
-
         var tiEl = el.querySelector('.del-ti');
         selectedDeliveryLabel = tiEl ? tiEl.textContent.trim() : '🚚 일반 배송';
-
-        // 픽업이면 pickup, 당일이면 express, 나머지는 delivery
         if (selectedDeliveryLabel.includes('픽업')) {
             selectedDeliveryType = 'pickup';
         } else if (selectedDeliveryLabel.includes('당일')) {
@@ -314,7 +281,6 @@
         } else {
             selectedDeliveryType = 'delivery';
         }
-
         var es = document.getElementById('cs-ship');
         if (es) es.textContent = fee ? fee.toLocaleString() + '원' : '무료';
         recalcTotal();
@@ -335,7 +301,6 @@
         selD(el, 0);
     }
 
-    // ── 결제하기: 배송 선택 정보를 sessionStorage에 저장 후 이동 ─────────
     function goToOrder() {
         var checkedIds = [];
         document.querySelectorAll('[data-product-id]').forEach(function(row) {
@@ -352,11 +317,10 @@
         sessionStorage.setItem('selectedDeliveryType',  selectedDeliveryType);
         sessionStorage.setItem('selectedDeliveryFee',   selectedDeliveryFee);
         sessionStorage.setItem('selectedDeliveryLabel', selectedDeliveryLabel);
-
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        location.href = '/orders?token=' + (token || '');
+        sessionStorage.setItem('usedPoints', pd);
+        var t = localStorage.getItem('token') || sessionStorage.getItem('token');
+        location.href = '/orders?token=' + (t || '');
     }
-
 
     function increaseQty(productId) {
         var qtyEl = document.getElementById('qty-' + productId);
@@ -376,7 +340,7 @@
         if (newQty < 1 || updateLock) return;
         updateLock = true;
         try {
-            const res = await fetch(`/cart/items/${productId}?quantity=${newQty}`, {
+            const res = await fetch('/cart/items/' + productId + '?quantity=' + newQty, {
                 method: 'PATCH',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -398,7 +362,7 @@
 
     async function removeItem(productId) {
         try {
-            const res = await fetch(`/cart/items/${productId}`, {
+            const res = await fetch('/cart/items/' + productId, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -406,16 +370,22 @@
                 var row = document.querySelector('[data-product-id="' + productId + '"]');
                 if (row) row.remove();
 
-                // 섹션 비었으면 숨기기
-                if (document.getElementById('pickupList').children.length === 0)
-                    document.getElementById('pickupSection').style.display = 'none';
-                if (document.getElementById('deliveryList').children.length === 0)
-                    document.getElementById('deliverySection').style.display = 'none';
+                var pickupList = document.getElementById('pickupList');
+                var pickupSection = document.getElementById('pickupSection');
+                if (pickupList && pickupSection && pickupList.children.length === 0)
+                    pickupSection.style.display = 'none';
 
-                // 둘 다 비었으면 빈 메시지
-                if (document.querySelectorAll('[data-product-id]').length === 0)
-                    document.getElementById('emptyCart').style.display = 'block';
+                var deliveryList = document.getElementById('deliveryList');
+                var deliverySection = document.getElementById('deliverySection');
+                if (deliveryList && deliverySection && deliveryList.children.length === 0)
+                    deliverySection.style.display = 'none';
 
+                if (document.querySelectorAll('[data-product-id]').length === 0) {
+                    var emptyEl = document.createElement('div');
+                    emptyEl.style.cssText = 'text-align:center;padding:60px 20px;color:var(--muted)';
+                    emptyEl.innerHTML = '<div style="font-size:3rem;margin-bottom:12px">🛒</div><div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--mid);margin-bottom:8px">장바구니가 비어있어요</div><div style="font-size:.8rem;margin-bottom:20px">마켓에서 마음에 드는 상품을 담아보세요!</div><button onclick="location.href=\'/market\'" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:.9rem;cursor:pointer">마켓 가기 →</button>';
+                    document.getElementById('cartList').appendChild(emptyEl);
+                }
                 recalcTotal();
             }
         } catch (e) {

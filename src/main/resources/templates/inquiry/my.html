@@ -160,6 +160,9 @@
 
         list.innerHTML=inquiries.map(function(item){
             var statusClass=item.status==='answered'?'answered':'pending';
+            var imageHtml=item.imageUrl
+                ? '<div style="margin-top:12px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:10px;text-align:center"><img src="'+escapeHtml(item.imageUrl)+'" alt="문의 첨부 이미지" style="max-width:100%;max-height:260px;object-fit:contain;border-radius:10px" onerror="this.parentElement.style.display=\'none\'"></div>'
+                : '';
             var answerHtml=item.answer
                 ? '<div class="inquiry-answer"><strong>관리자 답변</strong><br>'+escapeHtml(item.answer)+'</div>'
                 : '<div class="inquiry-answer">아직 답변이 등록되지 않았습니다.</div>';
@@ -176,6 +179,7 @@
                 +'</div>'
                 +'<div class="inquiry-date">'+formatInquiryDate(item.createdAt)+'</div>'
                 +'</div>'
+                +imageHtml
                 +answerHtml
                 +'<div class="inquiry-actions">'
                 +'<button type="button" class="inquiry-small-btn delete" onclick="deleteInquiry('+item.id+')">삭제</button>'

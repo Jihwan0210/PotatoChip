@@ -1,9 +1,12 @@
 package com.example.potatochip.auth.entity;
 
+import com.example.potatochip.product.entity.Wishlist;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,6 +47,9 @@ public class User {
     @Column(nullable = false)
     private Boolean isActive; // 계정 활성화 여부
 
+    @Column(name = "points", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer points = 0;
+
     private LocalDateTime deletedAt; // 탈퇴 일시
 
     private String withdrawalReason; // 탈퇴 사유
@@ -57,6 +63,12 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt; // 최종 수정 일시
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Wishlist> wishlists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<com.example.potatochip.auth.entity.ResetPw> resetPws = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

@@ -18,4 +18,5 @@ public class OrderRequestDTO {
     private LocalDateTime pickuptime; // 픽업 시간 (픽업일 경우만)
     private BigDecimal shippingFee; // 배송비
     private List<Long> selectedProductIds; // 상품
+    private Integer pointUsed;      // 사용한 포인트
 }
