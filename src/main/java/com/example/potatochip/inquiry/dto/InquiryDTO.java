@@ -20,6 +20,7 @@ public class InquiryDTO {
     private String categoryText;
     private String title;
     private String content;
+    private String imageUrl;
     private String answer;
     private String status;
     private String statusText;
@@ -39,6 +40,7 @@ public class InquiryDTO {
                 getCategoryText(inquiry.getCategory()),
                 inquiry.getTitle(),
                 inquiry.getContent(),
+                inquiry.getImageUrl(),
                 inquiry.getAnswer(),
                 inquiry.getStatus(),
                 getStatusText(inquiry.getStatus()),

@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
 
                         // 3. 문의사항(Inquiry) 관련 권한 인증 설정 (develop 변경사항 반영)
-                        .requestMatchers("/api/inquires/**").authenticated() // 로그인시 문의 허용
+                        .requestMatchers("/api/inquiries/**").authenticated() // 로그인시 문의 허용
 
                         // 4. 게시판(Board) 관련 권한 인증 설정 (feature/Operations 변경사항 반영)
                         .requestMatchers(HttpMethod.POST, "/api/board").authenticated()     // 게시글 생성 시 로그인 필수
@@ -53,14 +53,17 @@ public class SecurityConfig {
                         // 6. 채팅 API 인증 필요
                         .requestMatchers("/chat/**").authenticated()
 
-                        // 6. 그 외 나머지 요청은 우선 허용
+                        // 7. faq curd 관리자권한
+                        .requestMatchers(HttpMethod.POST, "/api/ai/chatbot/faqs").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/ai/chatbot/faqs/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/ai/chatbot/faqs/**").hasRole("ADMIN")
+
+                        // 8. 그 외 나머지 요청은 우선 허용
                         .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/order-items/**").authenticated()
 
-                        // 7. 그 외 나머지 요청은 우선 허용
+                        // 9. 그 외 나머지 요청은 우선 허용
                         .anyRequest().permitAll()
-
-
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
 

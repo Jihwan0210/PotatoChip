@@ -1,7 +1,5 @@
-package com.example.potatochip.admin.service.impl;
-
+package com.example.potatochip.admin.service;
 import com.example.potatochip.admin.dto.*;
-import com.example.potatochip.admin.service.AdminDashboardService;
 import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.inquiry.entity.Inquiry;
@@ -40,10 +38,19 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         List<Review> reviews = reviewRepository.findByIsActiveTrueOrderByCreatedAtDesc();
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
+        long buyerCount = users.stream()
+                .filter(user -> hasRole(user, "BUYER"))
+                .count();
+
+        long sellerCount = users.stream()
+                .filter(user -> hasRole(user, "SELLER"))
+                .count();
+
         return AdminSummaryDTO.builder()
-                .totalUserCount(users.size())
-                .buyerCount(users.stream().filter(user -> hasRole(user, "BUYER")).count())
-                .sellerCount(users.stream().filter(user -> hasRole(user, "SELLER")).count())
+                // 관리자 ADMIN은 전체 회원 수에서 제외
+                .totalUserCount(buyerCount + sellerCount)
+                .buyerCount(buyerCount)
+                .sellerCount(sellerCount)
                 .productCount(productRepository.count())
                 .orderCount(orderRepository.count())
                 .pendingInquiryCount(inquiryRepository.countByStatusAndIsActiveTrue("pending"))
@@ -54,6 +61,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                         .count())
                 .build();
     }
+
 
     @Override
     public List<AdminUserDTO> getBuyers() {
@@ -174,9 +182,20 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public List<AdminInquiryDTO> getInquiries() {
         return inquiryRepository.findByIsActiveTrueOrderByCreatedAtDesc()
                 .stream()
+                .sorted((a, b) -> {
+                    boolean aPending = "pending".equalsIgnoreCase(a.getStatus());
+                    boolean bPending = "pending".equalsIgnoreCase(b.getStatus());
+
+                    if (aPending != bPending) {
+                        return aPending ? -1 : 1;
+                    }
+
+                    return dateOrMin(b.getCreatedAt()).compareTo(dateOrMin(a.getCreatedAt()));
+                })
                 .map(this::toInquiryDTO)
                 .toList();
     }
+
 
     @Override
     @Transactional
@@ -244,11 +263,16 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     }
 
     private AdminInquiryDTO toInquiryDTO(Inquiry inquiry) {
+        String role = getUserRole(inquiry.getUserId());
+
         return AdminInquiryDTO.fromEntity(
                 inquiry,
-                getUserName(inquiry.getUserId())
+                getUserName(inquiry.getUserId()),
+                role,
+                getUserRoleText(role)
         );
     }
+
 
     private String getUserName(Long userId) {
         if (userId == null) {
@@ -275,6 +299,31 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 && user.getRole() != null
                 && user.getRole().name().equalsIgnoreCase(role);
     }
+
+    private String getUserRole(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+
+        return userRepository.findById(userId)
+                .map(User::getRole)
+                .map(Enum::name)
+                .orElse(null);
+    }
+
+    private String getUserRoleText(String role) {
+        if (role == null) {
+            return "-";
+        }
+
+        return switch (role.toUpperCase()) {
+            case "BUYER" -> "구매자";
+            case "SELLER" -> "판매자";
+            case "ADMIN" -> "관리자";
+            default -> role;
+        };
+    }
+
 
     private LocalDateTime dateOrMin(LocalDateTime dateTime) {
         return dateTime == null ? LocalDateTime.MIN : dateTime;

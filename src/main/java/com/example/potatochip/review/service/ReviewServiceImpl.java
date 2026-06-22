@@ -52,6 +52,14 @@ public class ReviewServiceImpl implements ReviewService {
 
         Product product = findProduct(reviewDTO.getProductId());
 
+        if (reviewDTO.getOrderItemId() != null &&
+                reviewRepository.existsByOrderItemIdAndUserIdAndIsActiveTrue(
+                        reviewDTO.getOrderItemId(),
+                        reviewDTO.getUserId()
+                )) {
+            throw new IllegalArgumentException("이미 리뷰를 작성한 주문 상품입니다.");
+        }
+
         Review review = Review.builder()
                 .product(product)
                 .userId(reviewDTO.getUserId())

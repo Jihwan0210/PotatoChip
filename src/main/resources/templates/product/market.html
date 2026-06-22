@@ -236,9 +236,9 @@
 
     function getLoginUserId() {
         var storedUserId = localStorage.getItem('userId')
-                || sessionStorage.getItem('userId')
-                || localStorage.getItem('id')
-                || sessionStorage.getItem('id');
+            || sessionStorage.getItem('userId')
+            || localStorage.getItem('id')
+            || sessionStorage.getItem('id');
 
         if (storedUserId && !isNaN(Number(storedUserId))) {
             return Number(storedUserId);
@@ -264,7 +264,7 @@
 
     function getOrCreateRecommendationSessionId() {
         var sessionId = localStorage.getItem('recommendationSessionId')
-                || sessionStorage.getItem('recommendationSessionId');
+            || sessionStorage.getItem('recommendationSessionId');
 
         if (!sessionId) {
             sessionId = 'mkt-' + Date.now() + '-' + Math.random().toString(36).substring(2, 10);
@@ -310,11 +310,11 @@
 
     function escapeHtml(value) {
         return String(value == null ? '' : value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     function getRecommendationEmoji(category) {
@@ -401,8 +401,8 @@
         list.innerHTML = visibleItems.map(function(item, index) {
             var detailUrl = '/market/detail?id=' + encodeURIComponent(item.productId);
             var image = item.thumbnailUrl
-                    ? '<img src="' + escapeHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;border-radius:10px"/>'
-                    : getRecommendationEmoji(item.productCategory);
+                ? '<img src="' + escapeHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:100%;height:100%;object-fit:cover;border-radius:10px"/>'
+                : getRecommendationEmoji(item.productCategory);
             var border = index === visibleItems.length - 1 ? '' : 'border-bottom:1px solid var(--sand);';
 
             return ''
@@ -448,21 +448,21 @@
         var target = buildRecommendationTarget();
 
         fetchRecommendationJson('/api/ai/recommendations/ai' + target.query)
-                .then(function(items) {
-                    if (items && items.length > 0) return items;
+            .then(function(items) {
+                if (items && items.length > 0) return items;
 
-                    return fetchRecommendationJson('/api/ai/recommendations/generate/ai', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(target.body)
-                    });
-                })
-                .then(renderAiRecommendations)
-                .catch(function(error) {
-                    aiRecommendationsLoaded = false;
-                    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천을 불러오지 못했습니다.</div>';
-                    console.error(error);
+                return fetchRecommendationJson('/api/ai/recommendations/generate/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(target.body)
                 });
+            })
+            .then(renderAiRecommendations)
+            .catch(function(error) {
+                aiRecommendationsLoaded = false;
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천을 불러오지 못했습니다.</div>';
+                console.error(error);
+            });
     }
 
     function loadPopularRecommendations() {
@@ -474,19 +474,19 @@
         list.innerHTML = '<div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오는 중...</div>';
 
         fetchRecommendationJson('/api/ai/recommendations/popular')
-                .then(function(items) {
-                    if (items && items.length > 0) return items;
+            .then(function(items) {
+                if (items && items.length > 0) return items;
 
-                    return fetchRecommendationJson('/api/ai/recommendations/generate/popular', {
-                        method: 'POST'
-                    });
-                })
-                .then(renderPopularRecommendations)
-                .catch(function(error) {
-                    popularRecommendationsLoaded = false;
-                    list.innerHTML = '<div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오지 못했습니다.</div>';
-                    console.error(error);
+                return fetchRecommendationJson('/api/ai/recommendations/generate/popular', {
+                    method: 'POST'
                 });
+            })
+            .then(renderPopularRecommendations)
+            .catch(function(error) {
+                popularRecommendationsLoaded = false;
+                list.innerHTML = '<div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오지 못했습니다.</div>';
+                console.error(error);
+            });
     }
 
     // ===== 탭 전환 =====

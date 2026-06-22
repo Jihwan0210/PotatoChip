@@ -1,3 +1,6 @@
+var myPageUserId = null;
+var selectedReviewTarget = null;
+var cachedMyReviews = [];
 
 function getToken() {
     return localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -45,6 +48,7 @@ function loadMyInfo() {
         })
         .then(data => {
             if (!data) return;
+            myPageUserId = data.id;
             document.getElementById('mp-name').value     = data.name     || '';
             document.getElementById('mp-nickname').value = data.nickname || '';
             document.getElementById('mp-email').value    = data.email    || '';
@@ -174,9 +178,10 @@ function switchMyTab(name) {
         }
     });
 
+    if (name === 'orders') loadMyOrders();
     if (name === 'profile') loadMyInfo();
-    if (name === 'orders') loadMyOrders()
     if (name === 'wishlist') loadWishlist();
+    if (name === 'myreview') loadMyReviews();
 }
 
 // 찜 목록 조회
@@ -323,77 +328,415 @@ function withdrawAccount() {
         })
         .catch(function() { showToast('오류가 발생했습니다.'); });
 }
-var STATUS_LABELS = {
-    PAYMENT_COMPLETE: '결제완료',
-    PREPARING: '상품준비중',
-    SHIPPING: '배송중',
-    DELIVERED: '배송완료',
-    CANCELLED: '주문취소',
-    REFUNDED: '환불완료'
-};
+    function loadMyOrders() {
+    var token = getToken();
+    var container = document.getElementById('orders-container');
 
-var DELIVERY_LABELS = {
-    delivery: '일반 택배',
-    express: '당일 배송',
-    pickup: '농장 픽업'
-};
+    if (!token || !container) return;
 
-function loadMyOrders() {
-    const token = getToken();
-    fetch('/orders/my', {
-        method: 'GET',
+    container.innerHTML = '<div class="mp-empty">주문 내역을 불러오는 중...</div>';
+
+    fetch('/mypage/orders', {
         headers: { 'Authorization': 'Bearer ' + token }
     })
-        .then(function (res) {
-            if (res.status === 401) { location.href = '/login'; return null; }
+        .then(function(res) {
+            if (res.status === 401) {
+                location.href = '/login';
+                return null;
+            }
+            if (!res.ok) throw new Error('status ' + res.status);
             return res.json();
         })
-        .then(function (orders) {
+        .then(function(orders) {
             if (!orders) return;
-            renderMyOrders(orders);
+
+            if (!Array.isArray(orders) || orders.length === 0) {
+                container.innerHTML = '<div class="mp-empty">주문 내역이 없어요 🌿</div>';
+                return;
+            }
+
+            var html = '';
+
+            orders.forEach(function(order) {
+                html += '<div style="border:1px solid var(--sand);border-radius:14px;padding:16px;margin-bottom:14px;background:#fff">'
+                    + '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px">'
+                    + '<div>'
+                    + '<div style="font-weight:800;color:var(--dark);font-size:.9rem">주문번호 ' + escapeMpHtml(order.orderNumber || '') + '</div>'
+                    + '<div style="font-size:.72rem;color:var(--muted);margin-top:4px">' + formatMpDate(order.createdAt) + '</div>'
+                    + '</div>'
+                    + '<div style="font-size:.78rem;font-weight:700;color:var(--green)">' + getOrderStatusText(order.status) + '</div>'
+                    + '</div>';
+
+                if (Array.isArray(order.items)) {
+                    order.items.forEach(function(item) {
+                        var thumb = item.thumbnailUrl
+                            ? '<img src="' + escapeMpHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:58px;height:58px;object-fit:cover;border-radius:12px">'
+                            : '<div style="width:58px;height:58px;border-radius:12px;background:var(--beige2);display:flex;align-items:center;justify-content:center">🥬</div>';
+
+                        var buttonHtml = '';
+
+                        if (item.reviewed) {
+                            buttonHtml = '<button type="button" disabled style="width:86px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">리뷰 완료</button>';
+                        } else if (item.status === 'DELIVERED') {
+                            buttonHtml = '<button type="button" style="width:74px;height:28px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:.66rem;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0;font-family:inherit" onclick="openReviewModal('
+                                + item.productId + ', '
+                                + item.orderItemId + ', \''
+                                + escapeMpAttr(item.productName || '') + '\')">리뷰 작성</button>';
+                        } else {
+                            buttonHtml = '<button type="button" disabled style="width:96px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">작성 불가</button>';
+                        }
+
+                        html += '<div style="display:flex;gap:12px;align-items:center;border-top:1px dashed var(--sand);padding-top:12px;margin-top:12px;width:100%">'
+                            + thumb
+                            + '<div style="flex:1;min-width:0">'
+                            + '<div style="font-weight:700;color:var(--dark);font-size:.86rem">' + escapeMpHtml(item.productName || '') + '</div>'
+                            + '<div style="font-size:.74rem;color:var(--muted);margin-top:4px">'
+                            + Number(item.price || 0).toLocaleString() + '원 · ' + item.quantity + '개 · ' + getOrderStatusText(item.status)
+                            + '</div>'
+                            + '</div>'
+                            + buttonHtml
+                            + '</div>';
+                    });
+                }
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
         })
-        .catch(function (err) { console.error('주문 내역 조회 실패:', err); });
+        .catch(function() {
+            container.innerHTML = '<div class="mp-empty">주문 내역을 불러오지 못했어요 ㅠㅠ</div>';
+        });
 }
 
-function renderMyOrders(orders) {
-    const token = getToken();
-    const box = document.getElementById('mycontent-orders');
-    if (!box) return;
+function loadMyReviews() {
+    var token = getToken();
+    var container = document.getElementById('myreview-container');
 
-    if (!orders.length) {
-        box.innerHTML =
-            '<div class="mp-card">' +
-            '<div class="mp-section-title">📦 주문 내역</div>' +
-            '<div style="text-align:center;color:var(--muted);font-size:.84rem;padding:32px 0">주문 내역이 없어요 🌿</div>' +
-            '</div>';
+    if (!token || !container) return;
+
+    container.innerHTML = '<div class="mp-empty">작성한 리뷰를 불러오는 중...</div>';
+
+    fetch('/mypage/reviews', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(function(res) {
+            if (res.status === 401) {
+                location.href = '/login';
+                return null;
+            }
+            if (!res.ok) throw new Error('status ' + res.status);
+            return res.json();
+        })
+        .then(function(reviews) {
+            if (!reviews) return;
+
+            cachedMyReviews = reviews;
+
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+                container.innerHTML = '<div class="mp-empty">작성한 리뷰가 없어요 🌿</div>';
+                return;
+            }
+
+            var html = '';
+
+            reviews.forEach(function(review) {
+                var thumb = review.thumbnailUrl
+                    ? '<img src="' + escapeMpHtml(review.thumbnailUrl) + '" alt="상품 이미지" style="width:58px;height:58px;object-fit:cover;border-radius:12px">'
+                    : '<div style="width:58px;height:58px;border-radius:12px;background:var(--beige2);display:flex;align-items:center;justify-content:center">🥬</div>';
+
+                html += '<div style="border:1px solid var(--sand);border-radius:14px;padding:16px;margin-bottom:14px;background:#fff">'
+                    + '<div style="display:flex;gap:12px;align-items:flex-start">'
+                    + thumb
+                    + '<div style="flex:1;min-width:0">'
+                    + '<div onclick="location.href=\'/market/detail?id=' + review.productId + '\'" style="font-weight:800;color:var(--dark);font-size:.9rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px">' + escapeMpHtml(review.productName || '') + '</div>'
+                    + '<div style="font-size:.78rem;color:#f5a400;margin:5px 0">' + renderMpStars(review.rating) + '</div>'
+                    + '<div style="font-size:.8rem;color:var(--mid);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + escapeMpHtml(review.content || '') + '</div>'
+                    + '<div style="font-size:.68rem;color:var(--muted);margin-top:8px">' + formatMpDate(review.createdAt) + '</div>'
+                    + '</div>'
+                    + '<button type="button" class="mp-btn outline" style="height:30px;font-size:.68rem;padding:0 10px;white-space:nowrap" onclick="openMyReviewDetail(' + review.reviewId + ')">상세보기</button>'
+                    + '</div>'
+                    + '</div>';
+            });
+
+            container.innerHTML = html;
+        })
+        .catch(function() {
+            container.innerHTML = '<div class="mp-empty">리뷰를 불러오지 못했어요 ㅠㅠ</div>';
+        });
+}
+
+function openReviewModal(productId, orderItemId, productName) {
+    selectedReviewTarget = {
+        productId: productId,
+        orderItemId: orderItemId,
+        productName: productName
+    };
+
+    document.getElementById('review-product-name').textContent = productName;
+    document.getElementById('review-rating').value = '5';
+    document.getElementById('review-content').value = '';
+    document.getElementById('review-repurchase').checked = false;
+    document.getElementById('review-anonymous').checked = false;
+
+    setMyReviewRating(5);
+
+    var fileInput = document.getElementById('review-image-file');
+    if (fileInput) fileInput.value = '';
+
+    var preview = document.getElementById('review-image-preview');
+    if (preview) {
+        preview.style.display = 'none';
+        preview.innerHTML = '';
+    }
+
+    var modal = document.getElementById('review-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeReviewModal() {
+    selectedReviewTarget = null;
+
+    var modal = document.getElementById('review-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function submitMyReview() {
+    var token = getToken();
+
+    if (!token) {
+        location.href = '/login';
         return;
     }
 
-    var html = '<div class="mp-card"><div class="mp-section-title">📦 주문 내역</div>';
+    if (!selectedReviewTarget) {
+        showMpMessage('리뷰 작성 대상이 없습니다.');
+        return;
+    }
 
-    orders.forEach(function (order) {
-        var itemCount = (order.orderItems || []).length;
-        var finalAmount = (order.totalAmount || 0) + (order.totalShippingFee || 0);
-        var dateStr = order.createdAt ? order.createdAt.replace('T', ' ').slice(0, 16) : '';
+    if (!myPageUserId) {
+        showMpMessage('사용자 정보를 불러오지 못했어요.');
+        return;
+    }
 
-        html +=
-            '<div style="border:1.5px solid var(--sand);border-radius:12px;padding:16px;margin-bottom:12px">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-            '<span style="font-weight:700;font-size:.88rem;color:var(--dark)">' + order.orderNumber + '</span>' +
-            '<span style="font-size:.74rem;font-weight:700;color:var(--green);background:#eef7e6;border-radius:20px;padding:2px 10px">' +
-            (STATUS_LABELS[order.status] || order.status) +
-            '</span>' +
-            '</div>' +
-            '<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">' +
-            dateStr + ' · ' + (DELIVERY_LABELS[order.deliveryType] || order.deliveryType) + ' · 상품 ' + itemCount + '건' +
-            '</div>' +
-            '<div style="display:flex;justify-content:space-between;align-items:center">' +
-            '<span style="font-weight:700;color:#F39C12">' + finalAmount.toLocaleString() + '원</span>' +
-            '<a href="/orders/complete/' + order.id + '?token=' + token + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>' +
-            '</div>' +
-            '</div>';
+    var content = document.getElementById('review-content').value.trim();
+
+    if (!content) {
+        showMpMessage('리뷰 내용을 입력해주세요.');
+        return;
+    }
+
+    var imageUrl = null;
+
+    try {
+        imageUrl = await uploadReviewImageIfExists(token);
+    } catch (e) {
+        showMpMessage(e.message || '이미지 업로드에 실패했어요.');
+        return;
+    }
+
+    var body = {
+        productId: selectedReviewTarget.productId,
+        userId: myPageUserId,
+        orderItemId: selectedReviewTarget.orderItemId,
+        rating: Number(document.getElementById('review-rating').value),
+        content: content,
+        imageUrl: imageUrl,
+        repurchaseIntent: document.getElementById('review-repurchase').checked,
+        isAnonymous: document.getElementById('review-anonymous').checked
+    };
+
+    fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(body)
+    })
+        .then(function(res) {
+            return res.json().then(function(data) {
+                return { ok: res.ok, data: data };
+            });
+        })
+        .then(function(result) {
+            if (!result.ok) {
+                showMpMessage(result.data.message || '리뷰 등록에 실패했어요.');
+                return;
+            }
+
+            closeReviewModal();
+            showMpMessage('리뷰가 등록되었어요! ✅');
+            loadMyOrders();
+            loadMyReviews();
+        })
+        .catch(function() {
+            showMpMessage('리뷰 등록 중 오류가 발생했어요.');
+        });
+}
+
+function getOrderStatusText(status) {
+    switch (status) {
+        case 'PAYMENT_COMPLETE': return '결제 완료';
+        case 'PREPARING': return '배송 준비';
+        case 'SHIPPING': return '배송 중';
+        case 'DELIVERED': return '배송 완료';
+        case 'CANCELLED': return '취소';
+        case 'REFUNDED': return '환불';
+        default: return status || '';
+    }
+}
+
+function renderMpStars(rating) {
+    var score = Number(rating || 0);
+    var result = '';
+
+    for (var i = 1; i <= 5; i++) {
+        result += i <= score ? '★' : '☆';
+    }
+
+    return result;
+}
+
+function formatMpDate(value) {
+    if (!value) return '';
+    return String(value).replace('T', ' ').substring(0, 16);
+}
+
+function escapeMpHtml(value) {
+    return String(value == null ? '' : value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function escapeMpAttr(value) {
+    return String(value == null ? '' : value)
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'");
+}
+
+function showMpMessage(message) {
+    if (typeof showToast === 'function') {
+        showToast(message);
+        return;
+    }
+
+    alert(message);
+}
+
+function setMyReviewRating(score) {
+    document.getElementById('review-rating').value = score;
+
+    var stars = document.querySelectorAll('#review-star-box span');
+    stars.forEach(function(star, index) {
+        star.textContent = index < score ? '★' : '☆';
+    });
+}
+
+function openMyReviewDetail(reviewId) {
+    var review = cachedMyReviews.find(function(item) {
+        return Number(item.reviewId) === Number(reviewId);
     });
 
-    html += '</div>';
-    box.innerHTML = html;
+    if (!review) {
+        showMpMessage('리뷰 정보를 찾을 수 없어요.');
+        return;
+    }
+
+    var modal = document.getElementById('my-review-detail-modal');
+    var content = document.getElementById('my-review-detail-content');
+
+    if (!modal || !content) return;
+
+    var imageHtml = review.imageUrl
+        ? '<div style="margin-bottom:14px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:12px;text-align:center"><img src="' + escapeMpHtml(review.imageUrl) + '" alt="리뷰 이미지" style="max-width:100%;max-height:420px;object-fit:contain;border-radius:10px"></div>'
+        : '<div style="margin-bottom:14px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:14px;text-align:center;color:var(--muted);font-size:.78rem">등록된 리뷰 사진이 없습니다.</div>';
+
+    content.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+        + '<div>'
+        + '<div onclick="location.href=\'/market/detail?id=' + review.productId + '\'" style="font-size:.95rem;font-weight:800;color:var(--dark);cursor:pointer;text-decoration:underline;text-underline-offset:3px">' + escapeMpHtml(review.productName || '') + '</div>'
+        + '<div style="font-size:.7rem;color:var(--muted);margin-top:4px">' + formatMpDate(review.createdAt) + '</div>'
+        + '</div>'
+        + '<div style="color:var(--amber);font-size:1rem;font-weight:700">' + renderMpStars(review.rating) + '</div>'
+        + '</div>'
+        + imageHtml
+        + '<div style="background:var(--beige3);border:1.5px solid var(--beige);border-radius:14px;padding:16px;font-size:.84rem;color:var(--mid);line-height:1.85;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin-bottom:14px">' + escapeMpHtml(review.content || '-') + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
+        + '<div style="background:#fff;border:1.5px solid var(--beige);border-radius:12px;padding:12px;text-align:center"><div style="font-size:.67rem;color:var(--muted);margin-bottom:5px">평점</div><div style="font-size:.82rem;color:var(--dark);font-weight:700">' + escapeMpHtml(review.rating || '-') + '점</div></div>'
+        + '<div style="background:#fff;border:1.5px solid var(--beige);border-radius:12px;padding:12px;text-align:center"><div style="font-size:.67rem;color:var(--muted);margin-bottom:5px">재구매 의향</div><div style="font-size:.82rem;color:var(--dark);font-weight:700">' + (review.repurchaseIntent ? '있음' : '없음') + '</div></div>'
+        + '<div style="background:#fff;border:1.5px solid var(--beige);border-radius:12px;padding:12px;text-align:center"><div style="font-size:.67rem;color:var(--muted);margin-bottom:5px">익명 여부</div><div style="font-size:.82rem;color:var(--dark);font-weight:700">' + (review.isAnonymous ? '익명' : '공개') + '</div></div>'
+        + '</div>'
+        + '<div style="display:flex;justify-content:flex-end;gap:8px">'
+        + '<button type="button" class="mp-btn outline" onclick="location.href=\'/market/detail?id=' + review.productId + '\'">상품으로 이동</button>'
+        + '<button type="button" class="mp-btn gray" onclick="closeMyReviewDetail()">닫기</button>'
+        + '</div>';
+
+    modal.style.display = 'flex';
 }
+
+function closeMyReviewDetail() {
+    var modal = document.getElementById('my-review-detail-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function previewReviewImage() {
+    var fileInput = document.getElementById('review-image-file');
+    var preview = document.getElementById('review-image-preview');
+
+    if (!fileInput || !preview) return;
+
+    var file = fileInput.files && fileInput.files[0];
+
+    if (!file) {
+        preview.style.display = 'none';
+        preview.innerHTML = '';
+        return;
+    }
+
+    var url = URL.createObjectURL(file);
+    preview.style.display = 'block';
+    preview.innerHTML = '<img src="' + url + '" alt="리뷰 이미지 미리보기" style="max-width:100%;max-height:160px;object-fit:contain;border:1px solid var(--sand);border-radius:10px">';
+}
+
+async function uploadReviewImageIfExists(token) {
+    var fileInput = document.getElementById('review-image-file');
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        return null;
+    }
+
+    var formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+
+    var response = await fetch('/api/reviews/upload-image', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + token
+        },
+        body: formData
+    });
+
+    var data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || '이미지 업로드 실패');
+    }
+
+    return data.imageUrl;
+}
+
+document.addEventListener('change', function(event) {
+    if (event.target && event.target.id === 'review-image-file') {
+        previewReviewImage();
+    }
+});
