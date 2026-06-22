@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>배송 추적 - 못난이 농작물</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <style>
+        .track-wrap { max-width: 560px; margin: 80px auto; padding: 0 5% 60px; }
+
+        .track-header { text-align: center; margin-bottom: 32px; }
+        .track-header .icon { font-size: 3.5rem; margin-bottom: 10px; }
+        .track-header .title {
+            font-family: 'Gaegu', cursive; font-size: 1.9rem;
+            font-weight: 700; color: #1A1A1A; margin-bottom: 4px;
+        }
+        .track-header .order-no {
+            font-size: .82rem; color: #888;
+            background: #f6f2ec; border: 1.5px solid #E8DCC8;
+            border-radius: 20px; display: inline-block; padding: 3px 14px;
+        }
+
+        /* 현재 상태 배지 */
+        .status-badge {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; padding: 18px 20px; border-radius: 14px;
+            margin-bottom: 24px; font-weight: 700; font-size: 1rem;
+        }
+        .status-badge.preparing  { background: #fff8e6; border: 1.5px solid #f0d060; color: #7a6000; }
+        .status-badge.shipping   { background: #e6f4ff; border: 1.5px solid #90c8f0; color: #005a9a; }
+        .status-badge.delivered  { background: #f0f9e6; border: 1.5px solid #90c870; color: #2a6a00; }
+        .status-badge.cancelled  { background: #fff0f0; border: 1.5px solid #f0a0a0; color: #9a0000; }
+
+        /* 타임라인 */
+        .timeline { position: relative; padding: 0; list-style: none; margin-bottom: 24px; }
+        .timeline::before {
+            content: ''; position: absolute; left: 20px; top: 8px;
+            bottom: 8px; width: 2px; background: var(--sand);
+        }
+        .tl-item {
+            display: flex; align-items: flex-start; gap: 16px;
+            padding: 14px 0; position: relative;
+        }
+        .tl-dot {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0; z-index: 1;
+            border: 2px solid var(--sand); background: #fff;
+        }
+        .tl-item.done .tl-dot  { background: var(--green); border-color: var(--green); }
+        .tl-item.active .tl-dot { background: #fff; border-color: var(--green); box-shadow: 0 0 0 4px rgba(90,154,48,.15); }
+        .tl-item.pending .tl-dot { background: #f6f2ec; border-color: var(--sand); }
+
+        .tl-body { flex: 1; padding-top: 8px; }
+        .tl-label { font-size: .9rem; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+        .tl-item.pending .tl-label { color: var(--muted); font-weight: 500; }
+        .tl-desc { font-size: .76rem; color: var(--muted); }
+        .tl-time { font-size: .72rem; color: var(--green); margin-top: 2px; font-weight: 600; }
+
+        /* 배송 기사 정보 */
+        .driver-card {
+            background: #fff; border: 1.5px solid var(--sand); border-radius: 12px;
+            padding: 16px 20px; margin-bottom: 24px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .driver-icon { font-size: 2rem; }
+        .driver-info { flex: 1; }
+        .driver-name { font-size: .9rem; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+        .driver-phone { font-size: .78rem; color: var(--muted); }
+        .driver-call {
+            background: var(--green); color: #fff; border: none; border-radius: 8px;
+            padding: 8px 14px; font-size: .78rem; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+        }
+
+        /* 주문 요약 */
+        .info-card {
+            background: #fff; border: 1.5px solid var(--sand); border-radius: 12px;
+            padding: 16px 20px; margin-bottom: 16px;
+        }
+        .info-card-title {
+            font-family: 'Gaegu', cursive; font-size: .95rem; font-weight: 700;
+            color: var(--dark); margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; font-size: .84rem;
+        }
+        .info-label { color: var(--muted); }
+        .info-value { font-weight: 600; color: var(--dark); }
+
+        .btn-back {
+            width: 100%; padding: 14px; background: var(--green); color: #fff;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+            font-size: .9rem; font-family: inherit; margin-top: 8px;
+        }
+        .btn-back:hover { background: #4a8428; }
+
+        /* 로딩 */
+        #loadingBox { text-align: center; padding: 60px 20px; color: var(--muted); }
+        #errorBox   { display: none; text-align: center; padding: 60px 20px; }
+        #trackingContent { display: none; }
+    </style>
+</head>
+<body>
+<div th:replace="nav :: nav"></div>
+
+<div class="track-wrap">
+
+    <!-- 로딩 중 -->
+    <div id="loadingBox">
+        <div style="font-size:2.5rem;margin-bottom:12px">🔍</div>
+        <div style="font-family:Gaegu,cursive;font-size:1.1rem">배송 정보를 불러오는 중이에요...</div>
+    </div>
+
+    <!-- 에러 -->
+    <div id="errorBox">
+        <div style="font-size:2.5rem;margin-bottom:12px">😢</div>
+        <div style="font-family:Gaegu,cursive;font-size:1.1rem;color:var(--dark);margin-bottom:8px">배송 정보를 불러오지 못했어요</div>
+        <div id="errorMsg" style="font-size:.82rem;color:var(--muted);margin-bottom:20px"></div>
+        <button class="btn-back" style="width:auto;padding:10px 24px" onclick="history.back()">← 돌아가기</button>
+    </div>
+
+    <!-- 배송 추적 본문 -->
+    <div id="trackingContent">
+
+        <div class="track-header">
+            <div class="icon">🚚</div>
+            <div class="title">배송 추적</div>
+            <div class="order-no" id="orderNo">ORD-00000000</div>
+        </div>
+
+        <!-- 현재 상태 배지 -->
+        <div class="status-badge" id="statusBadge">
+            <span id="statusIcon">📦</span>
+            <span id="statusText">상태 불러오는 중</span>
+        </div>
+
+        <!-- 타임라인 -->
+        <ul class="timeline" id="timeline">
+            <li class="tl-item" id="tl-preparing">
+                <div class="tl-dot">📦</div>
+                <div class="tl-body">
+                    <div class="tl-label">상품 준비중</div>
+                    <div class="tl-desc">판매자가 상품을 포장하고 있어요</div>
+                </div>
+            </li>
+            <li class="tl-item" id="tl-shipping">
+                <div class="tl-dot">🚚</div>
+                <div class="tl-body">
+                    <div class="tl-label">배송 출발</div>
+                    <div class="tl-desc">배송 기사님이 픽업 후 이동 중이에요</div>
+                    <div class="tl-time" id="tl-shipping-time" style="display:none"></div>
+                </div>
+            </li>
+            <li class="tl-item" id="tl-delivered">
+                <div class="tl-dot">✅</div>
+                <div class="tl-body">
+                    <div class="tl-label">배송 완료</div>
+                    <div class="tl-desc">상품이 도착했어요!</div>
+                </div>
+            </li>
+        </ul>
+
+        <!-- 배송 기사 정보 (배송 중일 때만 표시) -->
+        <div class="driver-card" id="driverCard" style="display:none">
+            <div class="driver-icon">👷</div>
+            <div class="driver-info">
+                <div class="driver-name" id="driverName">배송 기사</div>
+                <div class="driver-phone" id="driverPhone"></div>
+            </div>
+            <button class="driver-call" id="driverCallBtn">📞 연락하기</button>
+        </div>
+
+        <!-- 도착 예정 시각 -->
+        <div class="info-card" id="arrivalCard" style="display:none">
+            <div class="info-card-title">⏰ 도착 예정</div>
+            <div class="info-row">
+                <span class="info-label">예상 도착 시각</span>
+                <span class="info-value" id="arrivalTime">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">마지막 위치 갱신</span>
+                <span class="info-value" id="lastUpdated">-</span>
+            </div>
+        </div>
+
+        <!-- 주문 정보 요약 -->
+        <div class="info-card">
+            <div class="info-card-title">📋 주문 정보</div>
+            <div class="info-row">
+                <span class="info-label">배송지</span>
+                <span class="info-value" id="shippingAddress">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">배송 방법</span>
+                <span class="info-value" id="deliveryType">-</span>
+            </div>
+        </div>
+
+        <button class="btn-back" onclick="history.back()">← 돌아가기</button>
+    </div>
+</div>
+
+<div th:replace="footer :: footer"></div>
+<script th:src="@{/js/app.js}"></script>
+<script>
+    /* ══ 배송 추적 페이지 ══ */
+
+    // URL에서 orderId 파싱: /delivery/tracking/{orderId}
+    var pathParts = location.pathname.split('/');
+    var orderId   = pathParts[pathParts.length - 1];
+    var token     = new URLSearchParams(location.search).get('token')
+        || localStorage.getItem('token')
+        || sessionStorage.getItem('token');
+
+    var POLL_INTERVAL = 15000; // 15초마다 자동 갱신
+    var pollTimer = null;
+
+    /* ── 상태 → 한국어/아이콘/CSS클래스 매핑 ── */
+    var STATUS_MAP = {
+        PAYMENT_COMPLETE: { text: '결제 완료',   icon: '✅', cls: 'preparing' },
+        PREPARING:        { text: '상품 준비중',  icon: '📦', cls: 'preparing' },
+        SHIPPING:         { text: '배송 중',      icon: '🚚', cls: 'shipping'  },
+        DELIVERED:        { text: '배송 완료',    icon: '🎉', cls: 'delivered' },
+        CANCELLED:        { text: '주문 취소',    icon: '❌', cls: 'cancelled' },
+        REFUNDED:         { text: '환불 완료',    icon: '💸', cls: 'cancelled' },
+    };
+
+    /* ── API 호출 ── */
+    async function fetchTracking() {
+        if (!token) {
+            showError('로그인이 필요해요. 다시 로그인해주세요.');
+            return;
+        }
+        try {
+            var res = await fetch('/delivery/' + orderId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            // token이 URL 파라미터로만 있을 경우 재시도
+            if (res.status === 401) {
+                res = await fetch('/delivery/' + orderId + '?token=' + token);
+            }
+
+            if (!res.ok) {
+                showError('배송 정보를 찾을 수 없어요. (주문번호: ' + orderId + ')');
+                return;
+            }
+
+            var data = await res.json();
+            renderTracking(data);
+
+        } catch (e) {
+            showError('네트워크 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+        }
+    }
+
+    /* ── 화면 렌더링 ── */
+    function renderTracking(data) {
+        document.getElementById('loadingBox').style.display    = 'none';
+        document.getElementById('trackingContent').style.display = 'block';
+
+        var status = data.status || 'PREPARING';
+        var info   = STATUS_MAP[status] || { text: status, icon: '📦', cls: 'preparing' };
+        if (data.orderNumber) {
+            document.getElementById('orderNo').textContent = data.orderNumber;
+        }
+        // 상태 배지
+        var badge = document.getElementById('statusBadge');
+        badge.className = 'status-badge ' + info.cls;
+        document.getElementById('statusIcon').textContent = info.icon;
+        document.getElementById('statusText').textContent = info.text;
+
+        // 타임라인 단계 처리
+        updateTimeline(status);
+
+        // 배송 기사 정보
+        if (status === 'SHIPPING' && data.driverName) {
+            document.getElementById('driverCard').style.display = 'flex';
+            document.getElementById('driverName').textContent   = data.driverName + ' 기사님';
+            var phoneEl = document.getElementById('driverPhone');
+            if (data.driverPhone) {
+                phoneEl.textContent = data.driverPhone;
+                document.getElementById('driverCallBtn').onclick = function () {
+                    location.href = 'tel:' + data.driverPhone;
+                };
+            }
+        }
+
+        // 도착 예정 / 갱신 시각
+        if (data.estimatedArrival || data.updatedAt) {
+            document.getElementById('arrivalCard').style.display = 'block';
+            if (data.estimatedArrival) {
+                document.getElementById('arrivalTime').textContent = formatDateTime(data.estimatedArrival);
+            }
+            if (data.updatedAt) {
+                document.getElementById('lastUpdated').textContent = formatDateTime(data.updatedAt);
+            }
+        }
+
+        // 주문 정보
+        if (data.shippingAddress) {
+            document.getElementById('shippingAddress').textContent = data.shippingAddress;
+        }
+        var deliveryLabels = { delivery: '일반 택배', express: '당일 배송', pickup: '농장 픽업' };
+        if (data.deliveryType) {
+            document.getElementById('deliveryType').textContent =
+                deliveryLabels[data.deliveryType] || data.deliveryType;
+        }
+    }
+
+    /* ── 타임라인 단계 강조 ── */
+    function updateTimeline(status) {
+        var steps = ['tl-preparing', 'tl-shipping', 'tl-delivered'];
+        var activeIndex = {
+            PAYMENT_COMPLETE: 0,
+            PREPARING:        0,
+            SHIPPING:         1,
+            DELIVERED:        2,
+            CANCELLED:        -1,
+            REFUNDED:         -1,
+        }[status] ?? 0;
+
+        steps.forEach(function (id, i) {
+            var el = document.getElementById(id);
+            el.className = 'tl-item ' + (i < activeIndex ? 'done' : i === activeIndex ? 'active' : 'pending');
+        });
+    }
+
+    /* ── 날짜 포맷 ── */
+    function formatDateTime(iso) {
+        var d = new Date(iso);
+        if (isNaN(d)) return iso;
+        return d.getFullYear() + '-'
+            + String(d.getMonth() + 1).padStart(2, '0') + '-'
+            + String(d.getDate()).padStart(2, '0') + ' '
+            + String(d.getHours()).padStart(2, '0') + ':'
+            + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    function showError(msg) {
+        document.getElementById('loadingBox').style.display = 'none';
+        document.getElementById('errorBox').style.display   = 'block';
+        document.getElementById('errorMsg').textContent     = msg;
+        if (pollTimer) clearInterval(pollTimer);
+    }
+
+    /* ── 초기 실행 + 15초 polling ── */
+    fetchTracking();
+    pollTimer = setInterval(fetchTracking, POLL_INTERVAL);
+</script>
+</body>
+</html>

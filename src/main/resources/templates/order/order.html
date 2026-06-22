@@ -53,6 +53,21 @@
 
         .pickup-tag { display:inline-block; font-size:.68rem; font-weight:700; color:var(--green); background:#eef7e6; border-radius:5px; padding:1px 6px; margin-left:6px; }
         .empty-box { color: var(--muted); font-size: .85rem; padding: 30px 0; text-align: center; }
+
+        /* ── 결제 수단 카드 ── */
+        .pay-opt {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 6px; padding: 14px 10px; border: 1.5px solid var(--sand); border-radius: 10px;
+            cursor: pointer; transition: all .18s; background: #fff; user-select: none;
+        }
+        .pay-opt:hover { border-color: var(--green); background: #f7fbf2; }
+        .pay-opt.on {
+            border-color: var(--green); background: #f0f9e6;
+            box-shadow: 0 0 0 2px rgba(90,154,48,.18);
+        }
+        .pay-ico { font-size: 1.5rem; }
+        .pay-label { font-size: .78rem; font-weight: 600; color: var(--dark); text-align: center; }
+        .pay-opt.on .pay-label { color: var(--green); }
     </style>
 </head>
 <body>
@@ -167,14 +182,52 @@
 
                 <div class="card">
                     <div class="card-ti">결제 수단</div>
-                    <div class="fg" style="margin-bottom:0">
-                        <select id="paymentMethod" name="paymentMethod">
-                            <option value="card">신용/체크카드</option>
-                            <option value="kakaopay">카카오페이</option>
-                            <option value="toss">토스페이</option>
-                            <option value="bank">무통장 입금</option>
-                        </select>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+                        <div class="pay-opt on" onclick="selPay(this,'card')">
+                            <span class="pay-ico">💳</span>
+                            <div class="pay-label">신용/체크카드</div>
+                        </div>
+
+                        <div class="pay-opt" onclick="selPay(this,'kakaopay')">
+                            <span class="pay-ico">💛</span>
+                            <div class="pay-label">카카오페이</div>
+                        </div>
+
+                        <div class="pay-opt" onclick="selPay(this,'tosspay')">
+                            <span class="pay-ico">🔵</span>
+                            <div class="pay-label">토스페이</div>
+                        </div>
+
+                        <div class="pay-opt" onclick="selPay(this,'naverpay')">
+                            <span class="pay-ico">🟢</span>
+                            <div class="pay-label">네이버페이</div>
+                        </div>
+
+                        <div class="pay-opt" onclick="selPay(this,'bank')">
+                            <span class="pay-ico">🏦</span>
+                            <div class="pay-label">무통장 입금</div>
+                        </div>
+
+                        <div class="pay-opt" onclick="selPay(this,'phone')">
+                            <span class="pay-ico">📱</span>
+                            <div class="pay-label">휴대폰 결제</div>
+                        </div>
+
                     </div>
+
+                    <!-- 무통장 입금 선택 시 안내 문구 -->
+                    <div id="bankNotice" style="display:none;margin-top:12px;padding:10px 14px;
+                        background:#fffbea;border:1px solid #f0d060;border-radius:8px;
+                        font-size:.78rem;color:#7a6000;line-height:1.6">
+                        🏦 <strong>무통장 입금 계좌</strong><br>
+                        농협은행 123-456-789012 (예금주: 못난이농작물)<br>
+                        입금 확인 후 주문이 처리됩니다.
+                    </div>
+
+                    <!-- 서버로 전달할 hidden input -->
+                    <input type="hidden" id="paymentMethod" name="paymentMethod" value="card"/>
                 </div>
             </div>
 
@@ -347,6 +400,22 @@
         recalc();
     }
     // 금액 재계산
+    /* ════════════════════════════════════════
+       결제 수단 선택
+    ════════════════════════════════════════ */
+    function selPay(el, value) {
+        document.querySelectorAll('.pay-opt').forEach(function (o) { o.classList.remove('on'); });
+        el.classList.add('on');
+        document.getElementById('paymentMethod').value = value;
+
+        // 무통장 입금 안내 표시/숨김
+        var bankNotice = document.getElementById('bankNotice');
+        if (bankNotice) bankNotice.style.display = value === 'bank' ? 'block' : 'none';
+    }
+
+    /* ════════════════════════════════════════
+       금액 재계산
+    ════════════════════════════════════════ */
     function recalc() {
         const fin = Math.max(0, productTotal + orderShippingFee - orderPointUsed);
         document.getElementById('cs-tot').textContent = productTotal.toLocaleString() + '원';
