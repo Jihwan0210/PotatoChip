@@ -28,6 +28,11 @@
         .inquiry-btn{border:none;border-radius:13px;padding:13px 18px;font-family:'Gaegu',cursive;font-size:1.05rem;font-weight:700;cursor:pointer}
         .inquiry-btn.primary{background:var(--green);color:#fff;flex:1;box-shadow:0 6px 18px rgba(123,191,69,.22)}
         .inquiry-btn.secondary{background:var(--beige);color:var(--mid)}
+        .inquiry-target-box{display:none;background:#fffaf0;border:1.5px solid var(--beige);border-radius:14px;padding:14px;margin-bottom:15px}
+        .inquiry-target-title{font-size:.78rem;color:var(--dark);font-weight:800;margin-bottom:8px}
+        .inquiry-target-desc{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:10px}
+        .inquiry-image-preview{display:none;margin-top:10px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:12px;text-align:center}
+        .inquiry-image-preview img{max-width:100%;max-height:180px;object-fit:contain;border-radius:10px}
         @media(max-width:720px){.inquiry-actions{flex-direction:column}.inquiry-head{padding:28px 6% 22px}}
     </style>
 </head>
@@ -53,6 +58,13 @@
 
             <div class="inquiry-form-group">
                 <label for="inquiryCategory">문의 유형</label>
+                <div id="inquiryTargetBox" class="inquiry-target-box">
+                    <div id="inquiryTargetTitle" class="inquiry-target-title">문의 대상 선택</div>
+                    <div id="inquiryTargetDesc" class="inquiry-target-desc">문의와 관련된 항목을 선택해주세요.</div>
+                    <select id="inquiryTargetSelect">
+                        <option value="">선택하지 않음</option>
+                    </select>
+                </div>
                 <select id="inquiryCategory">
                     <option value="delivery">배송 문의</option>
                     <option value="refund">환불/교환 문의</option>
@@ -71,7 +83,11 @@
                 <label for="inquiryContent">문의 내용</label>
                 <textarea id="inquiryContent" placeholder="문의 내용을 자세히 입력해주세요."></textarea>
             </div>
-
+            <div class="inquiry-form-group">
+                <label for="inquiryImageFile">사진 첨부</label>
+                <input id="inquiryImageFile" type="file" accept="image/*"/>
+                <div id="inquiryImagePreview" class="inquiry-image-preview"></div>
+            </div>
             <div class="inquiry-actions">
                 <button type="button" class="inquiry-btn secondary" onclick="location.href='/faq'">FAQ로 돌아가기</button>
                 <button type="button" class="inquiry-btn primary" onclick="submitInquiry()">문의 등록하기</button>
@@ -83,27 +99,291 @@
 <div th:replace="~{footer :: footer}"></div>
 
 <script>
+    var selectedInquiryRole=null;
+
     document.addEventListener('DOMContentLoaded',function(){
         if(!isInquiryLoggedIn()){
             showInquiryToast('로그인 후 문의를 작성할 수 있어요.');
             setTimeout(function(){location.href='/login'},900);
             return;
         }
-    });
 
-    function getInquiryAuthToken(){
-        return localStorage.getItem('token')||sessionStorage.getItem('token');
+        loadInquiryTargetOptions();
+
+        var imageInput=document.getElementById('inquiryImageFile');
+        if(imageInput){
+            imageInput.addEventListener('change',previewInquiryImage);
+        }
+    });
+    async function loadInquiryTargetOptions(){
+        try{
+            var infoResponse=await fetch('/mypage/info',{
+                headers:getInquiryAuthOnlyHeaders()
+            });
+
+            if(infoResponse.status===401||infoResponse.status===403){
+                handleInquiryUnauthorized();
+                return;
+            }
+
+            var info=await infoResponse.json();
+            selectedInquiryRole=String(info.role||'').toUpperCase();
+
+            if(selectedInquiryRole==='BUYER'){
+                await loadBuyerOrderOptions();
+                return;
+            }
+
+            if(selectedInquiryRole==='SELLER'){
+                await loadSellerProductOptions();
+                return;
+            }
+
+            hideInquiryTargetBox();
+        }catch(error){
+            console.error(error);
+            hideInquiryTargetBox();
+        }
     }
+
+    async function loadBuyerOrderOptions(){
+        var box=document.getElementById('inquiryTargetBox');
+        var title=document.getElementById('inquiryTargetTitle');
+        var desc=document.getElementById('inquiryTargetDesc');
+        var select=document.getElementById('inquiryTargetSelect');
+
+        if(!box||!title||!desc||!select)return;
+
+        title.textContent='관련 구매내역 선택';
+        desc.textContent='배송, 환불, 주문 문의라면 관련 주문을 선택해주세요.';
+        select.innerHTML='<option value="">선택하지 않음</option>';
+
+        var response=await fetch('/mypage/orders',{
+            headers:getInquiryAuthOnlyHeaders()
+        });
+
+        if(response.status===401||response.status===403){
+            handleInquiryUnauthorized();
+            return;
+        }
+
+        var orders=await response.json();
+
+        if(!Array.isArray(orders)||orders.length===0){
+            desc.textContent='선택 가능한 구매내역이 없습니다.';
+            box.style.display='block';
+            return;
+        }
+
+        orders.forEach(function(order){
+            var itemNames='';
+
+            if(Array.isArray(order.items)&&order.items.length>0){
+                itemNames=order.items.map(function(item){
+                    return item.productName;
+                }).join(', ');
+            }
+
+            var option=document.createElement('option');
+            option.value=order.id;
+            option.textContent='주문번호 '+(order.orderNumber||order.id)+' · '+getInquiryOrderStatusText(order.status)+' · '+shortInquiryText(itemNames,40);
+            select.appendChild(option);
+        });
+
+        box.style.display='block';
+    }
+
+    async function loadSellerProductOptions(){
+        var box=document.getElementById('inquiryTargetBox');
+        var title=document.getElementById('inquiryTargetTitle');
+        var desc=document.getElementById('inquiryTargetDesc');
+        var select=document.getElementById('inquiryTargetSelect');
+
+        if(!box||!title||!desc||!select)return;
+
+        title.textContent='관련 등록상품 선택';
+        desc.textContent='상품 문의라면 관련 등록상품을 선택해주세요.';
+        select.innerHTML='<option value="">선택하지 않음</option>';
+
+        var response=await fetch('/api/inquiries/my-products',{
+            headers:getInquiryAuthOnlyHeaders()
+        });
+
+        if(response.status===401||response.status===403){
+            handleInquiryUnauthorized();
+            return;
+        }
+
+        var products=await response.json();
+
+        if(!Array.isArray(products)||products.length===0){
+            desc.textContent='선택 가능한 등록상품이 없습니다.';
+            box.style.display='block';
+            return;
+        }
+
+        products.forEach(function(product){
+            var option=document.createElement('option');
+            option.value=product.id;
+            option.textContent='상품 ID '+product.id+' · '+(product.name||'상품명 없음')+' · '+(product.category||'기타');
+            select.appendChild(option);
+        });
+
+        box.style.display='block';
+    }
+
+    function hideInquiryTargetBox(){
+        var box=document.getElementById('inquiryTargetBox');
+        if(box){
+            box.style.display='none';
+        }
+    }
+
+    function previewInquiryImage(){
+        var fileInput=document.getElementById('inquiryImageFile');
+        var preview=document.getElementById('inquiryImagePreview');
+
+        if(!fileInput||!preview)return;
+
+        var file=fileInput.files&&fileInput.files[0];
+
+        if(!file){
+            preview.style.display='none';
+            preview.innerHTML='';
+            return;
+        }
+
+        var url=URL.createObjectURL(file);
+        preview.style.display='block';
+        preview.innerHTML='<img src="'+url+'" alt="문의 이미지 미리보기">';
+    }
+
+    async function uploadInquiryImageIfExists(){
+        var fileInput=document.getElementById('inquiryImageFile');
+
+        if(!fileInput||!fileInput.files||fileInput.files.length===0){
+            return null;
+        }
+
+        var formData=new FormData();
+        formData.append('image',fileInput.files[0]);
+
+        var response=await fetch('/api/inquiries/upload-image',{
+            method:'POST',
+            headers:getInquiryAuthOnlyHeaders(),
+            body:formData
+        });
+
+        var data=await response.json();
+
+        if(!response.ok){
+            throw new Error(data.message||'이미지 업로드에 실패했습니다.');
+        }
+
+        return data.imageUrl;
+    }
+
+    function getSelectedInquiryTarget(){
+        var select=document.getElementById('inquiryTargetSelect');
+
+        if(!select||!select.value){
+            return {
+                productId:null,
+                orderId:null
+            };
+        }
+
+        if(selectedInquiryRole==='BUYER'){
+            return {
+                productId:null,
+                orderId:Number(select.value)
+            };
+        }
+
+        if(selectedInquiryRole==='SELLER'){
+            return {
+                productId:Number(select.value),
+                orderId:null
+            };
+        }
+
+        return {
+            productId:null,
+            orderId:null
+        };
+    }
+
+    function getInquiryOrderStatusText(status){
+        switch(status){
+            case 'PAYMENT_COMPLETE':return '결제 완료';
+            case 'PREPARING':return '배송 준비';
+            case 'SHIPPING':return '배송 중';
+            case 'DELIVERED':return '배송 완료';
+            case 'CANCELLED':return '취소';
+            case 'REFUNDED':return '환불';
+            default:return status||'-';
+        }
+    }
+
+    function shortInquiryText(value,length){
+        var text=String(value||'');
+
+        if(text.length<=length){
+            return text;
+        }
+
+        return text.substring(0,length)+'...';
+    }
+
 
     function isInquiryLoggedIn(){
         return !!getInquiryAuthToken();
     }
 
+    function getInquiryCookieValue(name){
+        var cookies=document.cookie?document.cookie.split('; '):[];
+
+        for(var i=0;i<cookies.length;i++){
+            var parts=cookies[i].split('=');
+            var key=decodeURIComponent(parts.shift());
+
+            if(key===name){
+                return decodeURIComponent(parts.join('='));
+            }
+        }
+
+        return null;
+    }
+
+    function getInquiryAuthToken(){
+        return localStorage.getItem('token')
+            || sessionStorage.getItem('token')
+            || getInquiryCookieValue('jwt');
+    }
+
+    function getInquiryAuthOnlyHeaders(){
+        var token=getInquiryAuthToken();
+        var headers={};
+
+        if(token){
+            headers.Authorization='Bearer '+token;
+        }
+
+        return headers;
+    }
+
     function getInquiryAuthJsonHeaders(){
-        return {
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+getInquiryAuthToken()
+        var headers={
+            'Content-Type':'application/json'
         };
+
+        var token=getInquiryAuthToken();
+
+        if(token){
+            headers.Authorization='Bearer '+token;
+        }
+
+        return headers;
     }
 
     function handleInquiryUnauthorized(){
@@ -140,12 +420,23 @@
             return;
         }
 
+        var target=getSelectedInquiryTarget();
+        var imageUrl=null;
+
+        try{
+            imageUrl=await uploadInquiryImageIfExists();
+        }catch(error){
+            showInquiryToast(error.message||'이미지 업로드에 실패했습니다.');
+            return;
+        }
+
         var body={
-            productId:null,
-            orderId:null,
+            productId:target.productId,
+            orderId:target.orderId,
             category:category,
             title:title,
-            content:content
+            content:content,
+            imageUrl:imageUrl
         };
 
         try{

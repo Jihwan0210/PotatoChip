@@ -15,6 +15,9 @@ import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
+import com.example.potatochip.product.file.FileService;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final UserRepository userRepository;
+    private final FileService fileService;
 
     @GetMapping("/api/reviews")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProductId(
@@ -115,6 +119,17 @@ public class ReviewController {
             return ResponseEntity.badRequest().body(
                     Map.of("message", e.getMessage())
             );
+        }
+    }
+
+    @PostMapping("/api/reviews/upload-image")
+    @ResponseBody
+    public ResponseEntity<?> uploadReviewImage(@RequestParam("image") MultipartFile image) {
+        try {
+            String imageUrl = fileService.upload(image);
+            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "리뷰 이미지 업로드에 실패했습니다."));
         }
     }
 

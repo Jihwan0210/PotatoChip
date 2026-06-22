@@ -11,4 +11,5 @@ public interface ChatService {
     ChatMessageDTO sendMessage(Long roomId, Long senderId, String senderName, String content);
     void markAsRead(Long roomId, Long userId);
     int getUnreadCount(Long userId);
+    void deleteMessage(Long messageId, Long userId);
 }

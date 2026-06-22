@@ -1,14 +1,18 @@
 package com.example.potatochip.board.controller;
 
+import com.example.potatochip.auth.util.JwtUtil;
 import com.example.potatochip.board.dto.CommentResponse;
 import com.example.potatochip.board.service.BoardService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,40 +22,78 @@ import java.util.Map;
 public class CommentController {
 
     private final BoardService boardService;
+    private final JwtUtil jwtUtil;
 
-    // 댓글 목록 조회
     @GetMapping
     public List<CommentResponse> getComments(@PathVariable Long boardId) {
-        // 🌟 BoardService의 메서드명과 정확히 매칭 (findCommentsByBoardId)
         return boardService.findCommentsByBoardId(boardId);
     }
 
-    // 댓글 등록
     @PostMapping
     public CommentResponse createComment(
             @PathVariable Long boardId,
-            @RequestBody Map<String, String> requestBody,
-            Authentication authentication
+            @RequestBody Map<String, String> body,
+            Authentication authentication,
+            HttpServletRequest request
     ) {
-        String content = requestBody.get("content");
-
-        // 🌟 빈 댓글이 입력되는 것을 방지하는 검증 로직
-        if (content == null || content.trim().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "댓글 내용을 입력해주세요."
-            );
-        }
-        return boardService.saveComment(boardId, content, authentication);
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        return boardService.saveComment(boardId, body.get("content"), resolvedAuthentication);
     }
 
-    // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(
             @PathVariable Long boardId,
             @PathVariable Long commentId,
-            Authentication authentication
+            Authentication authentication,
+            HttpServletRequest request
     ) {
-        boardService.deleteComment(commentId, authentication);
-        return ResponseEntity.ok(Map.of("message", "댓글 삭제 완료"));
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        boardService.deleteComment(commentId, resolvedAuthentication);
+        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+    }
+
+    private Authentication resolveAuthentication(Authentication authentication, HttpServletRequest request) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication;
+        }
+
+        String token = extractToken(request);
+
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return authentication;
+        }
+
+        String email = jwtUtil.getEmail(token);
+        String role = jwtUtil.getRole(token);
+
+        return new UsernamePasswordAuthenticationToken(
+                email,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+
+            if (!token.isBlank() && !"null".equalsIgnoreCase(token)) {
+                return token;
+            }
+        }
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }
