@@ -148,8 +148,18 @@
         .mini-list-row.compact{min-height:20px}
         #adminUserModal{z-index:100000}
         #adminReviewModal,#adminInquiryModal,#adminOrderModal,#adminProductModal{z-index:100001}
-
-        @media(max-width:900px){.summary-hero-grid,.summary-group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        .admin-inquiry-table th:nth-child(1),.admin-inquiry-table td:nth-child(1){width:64px}
+        .admin-inquiry-table th:nth-child(2),.admin-inquiry-table td:nth-child(2){width:108px}
+        .admin-inquiry-table th:nth-child(3),.admin-inquiry-table td:nth-child(3){width:78px}
+        .admin-inquiry-table th:nth-child(4),.admin-inquiry-table td:nth-child(4){width:92px}
+        .admin-inquiry-table th:nth-child(5),.admin-inquiry-table td:nth-child(5){width:210px}
+        .admin-inquiry-table th:nth-child(6),.admin-inquiry-table td:nth-child(6){width:110px}
+        .admin-inquiry-table th:nth-child(7),.admin-inquiry-table td:nth-child(7){width:132px}
+        .admin-inquiry-table th:nth-child(8),.admin-inquiry-table td:nth-child(8){width:132px}
+        .admin-inquiry-table th:nth-child(9),.admin-inquiry-table td:nth-child(9){width:82px}
+        .admin-inquiry-table th:nth-child(10),.admin-inquiry-table td:nth-child(10){width:88px}
+        .admin-inquiry-title-cell{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media(max-width:900px){.summary-hero-grid,.summary-group-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
         @media(max-width:560px){.summary-hero-grid,.summary-group-grid,.admin-modal-grid{grid-template-columns:1fr}}
         @media(max-width:1100px){.seller-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
         @media(max-width:860px){.detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -767,27 +777,43 @@
     function renderInquiries(){
         var box=document.getElementById('inquiriesTable');
         var keyword=adminState.inquiries.keyword;
-        var fields=getSearchFields('inquiries',['title','content','userName','userRoleText','status','category']);
+        var fields=getSearchFields('inquiries',['title','content','userName','userRoleText','status','category','categoryText']);
         var statusFilter=adminState.inquiries.statusFilter||'all';
 
         var data=adminData.inquiries.filter(function(item){
             item.userRoleText=item.userRoleText||getRoleText(item.userRole);
+            item.categoryText=getInquiryCategoryText(item);
             var status=String(item.status||'').toLowerCase();
+
             if(statusFilter!=='all' && status!==statusFilter){
                 return false;
             }
+
             return includesKeyword(item,keyword,fields);
         });
 
-        data=data.slice().sort(function(a,b){
-            var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
-            var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
-            if(aPending!==bPending) return aPending-bPending;
-            return new Date(b.createdAt||0)-new Date(a.createdAt||0);
-        });
+        if(adminState.inquiries.sortKey==='createdAt'){
+            data=data.slice().sort(function(a,b){
+                var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
+                var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
 
-        if(adminState.inquiries.sortKey && adminState.inquiries.sortKey!=='createdAt'){
-            data=applySort('inquiries',data);
+                if(aPending!==bPending){
+                    return aPending-bPending;
+                }
+
+                var aTime=getTimeValue(a.createdAt);
+                var bTime=getTimeValue(b.createdAt);
+
+                return adminState.inquiries.sortDir==='asc'
+                    ? aTime-bTime
+                    : bTime-aTime;
+            });
+        }else{
+            data=sortInquiryList(data);
+
+            if(adminState.inquiries.sortKey){
+                data=applySort('inquiries',data);
+            }
         }
 
         if(!data.length){
@@ -797,14 +823,15 @@
 
         var pagedData=getPagedData('inquiries',data);
 
-        box.innerHTML='<table class="admin-table"><thead><tr>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'id\')">ID '+sortIcon('inquiries','id')+'</th>'
+        box.innerHTML='<table class="admin-table admin-inquiry-table"><thead><tr>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'id\')">문의 ID '+sortIcon('inquiries','id')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'userName\')">작성자 '+sortIcon('inquiries','userName')+'</th>'
             +'<th>구분</th>'
-            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'category\')">카테고리 '+sortIcon('inquiries','category')+'</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'categoryText\')">카테고리 '+sortIcon('inquiries','categoryText')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'title\')">제목 '+sortIcon('inquiries','title')+'</th>'
-            +'<th>내용</th>'
-            +'<th>답변</th>'
+            +'<th>주문/상품</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'createdAt\')">작성일 '+sortIcon('inquiries','createdAt')+'</th>'
+            +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'answeredAt\')">답변일 '+sortIcon('inquiries','answeredAt')+'</th>'
             +'<th class="sort-th" onclick="sortAdminTable(\'inquiries\',\'status\')">상태 '+sortIcon('inquiries','status')+'</th>'
             +'<th>관리</th>'
             +'</tr></thead><tbody>'
@@ -812,7 +839,8 @@
                 var status=String(item.status||'-').toLowerCase();
                 var isAnswered=status==='answered';
                 var statusClass=status==='pending'?'warn':'';
-                var answerText=item.answer?shortText(item.answer,36):'미답변';
+                var targetLabel=getInquiryTargetLabel(item);
+                var targetValue=getInquiryTargetValue(item);
                 var actionButton=isAnswered
                     ? '<button type="button" class="admin-btn gray" disabled>답변완료</button>'
                     : '<button type="button" class="admin-btn amber" onclick="event.stopPropagation(); goInquiryAnswer('+item.id+')">답변하기</button>';
@@ -820,13 +848,16 @@
                 return '<tr class="admin-click-row" onclick="openAdminInquiryModal('+item.id+')">'
                     +'<td>'+escapeHtml(item.id)+'</td>'
                     +'<td>'+escapeHtml(item.userName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.userId||'-')+'</span></td>'
-                    +'<td><span class="status-chip">'+escapeHtml(item.userRoleText||'-')+'</span></td>'
-                    +'<td>'+escapeHtml(item.category||'-')+'</td>'
-                    +'<td>'+escapeHtml(shortText(item.title||'-',36))+'</td>'
-                    +'<td>'+escapeHtml(shortText(item.content||'-',48))+'</td>'
-                    +'<td>'+escapeHtml(answerText)+'</td>'
+                    +'<td>'+escapeHtml(item.userRoleText||getRoleText(item.userRole))+'</td>'
+                    +'<td>'+escapeHtml(getInquiryCategoryText(item))+'</td>'
+                    +'<td><span class="cell-main admin-inquiry-title-cell">'+escapeHtml(item.title||'-')+'</span></td>'
+                    +'<td><span class="cell-main">'+escapeHtml(targetLabel)+'</span><span class="cell-sub">'+escapeHtml(targetValue)+'</span></td>'
+                    +'<td>'+formatDateTimeMinute(item.createdAt)+'</td>'
+                    +'<td>'+getInquiryAnsweredDate(item)+'</td>'
                     +'<td><span class="status-chip '+statusClass+'">'+escapeHtml(getInquiryStatusText(item.status))+'</span></td>'
-                    +'<td>'+actionButton+'</td>'
+                    +'<td><div class="review-action-group">'
+                    +actionButton
+                    +'</div></td>'
                     +'</tr>';
             }).join('')
             +'</tbody></table>'
@@ -1213,13 +1244,13 @@ function getSearchFields(type, defaultFields){
         body.innerHTML='<div class="admin-modal-grid">'
             +modalInfoCard('문의 ID',inquiry.id)
             +modalInfoCard('작성자',inquiry.userName||'-')
-            +modalInfoCard('문의자 구분',inquiry.userRoleText||getRoleText(inquiry.userRole))
             +modalInfoCard('작성자 ID',inquiry.userId||'-')
-            +modalInfoCard('상품 ID',inquiry.productId||'-')
             +modalInfoCard('주문 ID',inquiry.orderId||'-')
-            +modalInfoCard('카테고리',inquiry.category||'-')
+            +modalInfoCard('상품 ID',inquiry.productId||'-')
+            +modalInfoCard('카테고리',getInquiryCategoryText(inquiry))
             +modalInfoCard('상태',getInquiryStatusText(inquiry.status))
-            +modalInfoCard('작성일',formatDate(inquiry.createdAt))
+            +modalInfoCard('작성일',formatDateTimeMinute(inquiry.createdAt))
+            +modalInfoCard('답변일',getInquiryAnsweredDate(inquiry))
             +'</div>'
             +'<div class="admin-modal-section"><div class="admin-modal-section-title">문의 제목</div><div class="admin-modal-text">'+escapeHtml(inquiry.title||'-')+'</div></div>'
             +'<div class="admin-modal-section"><div class="admin-modal-section-title">문의 내용</div><div class="admin-modal-text">'+escapeHtml(inquiry.content||'-')+'</div></div>'
@@ -1488,6 +1519,90 @@ function getSearchFields(type, defaultFields){
         }
 
         return Number(value).toLocaleString('ko-KR')+'원';
+    }
+
+
+    function sortInquiryList(list){
+        return list.slice().sort(function(a,b){
+            var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
+            var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
+
+            if(aPending!==bPending){
+                return aPending-bPending;
+            }
+
+            return getTimeValue(b.createdAt)-getTimeValue(a.createdAt);
+        });
+    }
+
+    function getInquiryCategoryText(item){
+        var categoryText=item.categoryText;
+
+        if(categoryText){
+            return categoryText;
+        }
+
+        switch(String(item.category||'').toLowerCase()){
+            case 'delivery':return '배송 문의';
+            case 'refund':return '환불/교환 문의';
+            case 'product':return '상품 문의';
+            case 'order':return '주문/결제 문의';
+            case 'etc':return '기타 문의';
+            default:return item.category||'기타 문의';
+        }
+    }
+
+    function getInquiryTargetLabel(item){
+        var role=String(item.userRole||item.userRoleText||'').toUpperCase();
+
+        if(role.indexOf('SELLER')>=0||role.indexOf('판매자')>=0){
+            return '상품 ID';
+        }
+
+        if(role.indexOf('BUYER')>=0||role.indexOf('구매자')>=0){
+            return '주문 ID';
+        }
+
+        if(item.productId){
+            return '상품 ID';
+        }
+
+        return '주문 ID';
+    }
+
+    function getInquiryTargetValue(item){
+        return getInquiryTargetLabel(item)==='상품 ID'
+            ? (item.productId||'-')
+            : (item.orderId||'-');
+    }
+
+    function getInquiryAnsweredDate(item){
+        return String(item.status||'').toLowerCase()==='answered'
+            ? formatDateTimeMinute(item.answeredAt)
+            : '-';
+    }
+
+    function formatDateTimeMinute(value){
+        if(!value){
+            return '-';
+        }
+
+        var text=String(value).replace('T',' ');
+
+        if(text.length>=16){
+            return text.substring(0,16);
+        }
+
+        return text;
+    }
+
+    function getTimeValue(value){
+        if(!value){
+            return 0;
+        }
+
+        var time=new Date(value).getTime();
+        return isNaN(time)?0:time;
     }
 
     function formatDate(value){
