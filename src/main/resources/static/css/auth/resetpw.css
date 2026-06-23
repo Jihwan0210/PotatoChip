@@ -1,0 +1,23 @@
+/* ── FORM FIELDS ── */
+.fg { margin-bottom: 14px; }
+.fg label { display: block; font-size: .72rem; font-weight: 600; color: var(--mid); margin-bottom: 5px; }
+.fg input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: .84rem; font-family: inherit; color: var(--dark); background: var(--cream); outline: none; transition: border-color .2s; }
+.fg input:focus { border-color: var(--green); background: #fff; }
+.fg input::placeholder { color: var(--muted); }
+.fg.error input { border-color: #e74c3c; }
+.fg-err { color: #e74c3c; font-size: .76rem; margin-top: 4px; display: none; }
+.fg.error .fg-err { display: block; }
+
+/* ── PASSWORD TOGGLE ── */
+.pw-wrap { position: relative; }
+.pw-wrap input { width: 100%; padding-right: 38px !important; }
+.pw-eye { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 0; line-height: 1; }
+.pw-eye:hover { color: var(--mid); }
+
+/* ── LAYOUT ── */
+.login-bg { min-height: calc(100vh - 64px); background: linear-gradient(160deg, var(--gp) 0%, var(--beige3) 50%, var(--apricot-lt, #FEF2E8) 100%); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+.login-box { background: #fff; border-radius: 22px; padding: 40px 36px; width: 100%; max-width: 420px; box-shadow: 0 8px 36px rgba(42,30,6,.09); }
+
+/* ── SUBMIT BUTTON ── */
+.btn-submit { width: 100%; padding: 13px; background: var(--amber); color: #fff; border: none; border-radius: 11px; font-size: .95rem; font-weight: 600; cursor: pointer; transition: all .2s; margin-bottom: 10px; }
+.btn-submit:hover { background: #3A2808; transform: translateY(-1px); }
