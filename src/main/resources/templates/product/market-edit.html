@@ -3,335 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상품 수정</title>
-    <link rel="stylesheet" href="/css/product/create.css">
-    <style>
-        .image-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 6px;
-        }
-        .existing-image-label {
-            position: relative;
-            display: block;
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid var(--beige);
-            cursor: pointer;
-            transition: border-color .2s;
-            flex-shrink: 0;
-        }
-        .existing-image-label:has(.delete-checkbox:checked) {
-            border-color: #D05018;
-        }
-        .existing-image-thumb {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .delete-checkbox { display: none; }
-        .delete-mark {
-            position: absolute;
-            inset: 0;
-            background: rgba(200, 30, 20, .6);
-            color: #fff;
-            font-size: .72rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity .2s;
-        }
-        .existing-image-label:hover .delete-mark { opacity: 1; }
-        .delete-checkbox:checked ~ .delete-mark {
-            opacity: 1;
-            background: rgba(200, 30, 20, .82);
-        }
-        .new-preview-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid var(--gl);
-            flex-shrink: 0;
-        }
-        .new-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .image-add-btn {
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
-            border: 2px dashed var(--gl);
-            background: var(--gp);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            gap: 5px;
-            flex-shrink: 0;
-            transition: border-color .2s, background .2s;
-        }
-        .image-add-btn:hover {
-            border-color: var(--green);
-            background: #f5fbe9;
-        }
-        .image-add-btn span:first-child { font-size: 1.6rem; }
-        .image-add-btn span:last-child  { font-size: .7rem; color: var(--muted); }
-    </style>
+    <title>상품 수정 | 못난이 농작물</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" href="/css/product/market-edit.css">
 </head>
 <body>
 
-<div class="create-wrap">
+<div th:replace="nav :: nav"></div>
 
-    <div class="create-top">
-        <div class="create-badge">🌾 판매자 전용</div>
-        <div class="create-title">못난이 농산물 상품 수정</div>
-        <div class="create-sub">상품 정보를 수정하세요.</div>
+<div class="cr-page">
+
+    <!-- ── 히어로 배너 ── -->
+    <div class="cr-hero">
+        <div class="cr-hero-ring1"></div>
+        <div class="cr-hero-ring2"></div>
+        <div class="cr-hero-deco">✏️</div>
+        <div class="cr-hero-inner">
+            <div class="cr-hero-badge">✏️ 상품 수정</div>
+            <h1 class="cr-hero-title">못난이 농산물<br>상품 수정</h1>
+            <p class="cr-hero-sub">등록된 상품 정보를 수정하세요.</p>
+        </div>
     </div>
 
-    <div class="create-grid">
-        <div class="create-card">
+    <!-- ── 본문 ── -->
+    <div class="cr-content">
+        <div class="cr-grid">
 
+            <!-- ══ 왼쪽: 수정 폼 ══ -->
             <form th:action="@{/market/edit/{id}(id=${product.id})}"
-                  method="post"
-                  enctype="multipart/form-data">
+                  method="post" enctype="multipart/form-data">
 
-                <div class="form-group">
-                    <label>상품명</label>
-                    <input type="text" name="name" class="form-input"
-                           th:value="${product.name}" required>
-                </div>
-
-                <div class="form-group">
-                    <label>카테고리</label>
-                    <select name="category" class="form-select" required>
-                        <option value="">카테고리 선택</option>
-                        <option value="채소"    th:selected="${product.category == '채소'}">채소</option>
-                        <option value="과일"    th:selected="${product.category == '과일'}">과일</option>
-                        <option value="곡류"    th:selected="${product.category == '곡류'}">곡류</option>
-                        <option value="버섯"    th:selected="${product.category == '버섯'}">버섯</option>
-                        <option value="뿌리채소" th:selected="${product.category == '뿌리채소'}">뿌리채소</option>
-                    </select>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>판매 가격</label>
-                        <input type="number" name="price" id="priceInput" class="form-input"
-                               th:value="${#numbers.formatInteger(product.price, 0)}"
-                               oninput="updateDiscountPreview()" required>
+                <!-- ① 기본 정보 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">1</div>
+                        <div class="cr-step-ttl">기본 정보</div>
                     </div>
-                    <div class="form-group">
-                        <label>할인율 (%)</label>
-                        <input type="number" id="discountRateInput" class="form-input"
-                               min="0" max="99" placeholder="예: 20"
-                               th:value="${discountRate}"
-                               oninput="this.value = Math.min(Math.max(this.value, 0), 99); updateDiscountPreview()">
-                        <input type="hidden" name="discountPrice" id="discountPriceHidden"
-                               th:value="${product.discountPrice != null} ? ${#numbers.formatInteger(product.discountPrice, 0)} : ''">
-                        <div style="font-size:.72rem;color:var(--muted);margin-top:4px">※ 할인율은 99%까지 적용됩니다</div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>할인 시작일</label>
-                            <input type="date" name="discountStartAt" class="form-input"
-                                   th:value="${product.discountStartAt}">
+                    <div class="cr-step-bd">
+                        <div class="fg">
+                            <label>상품명</label>
+                            <input type="text" name="name" class="fi"
+                                   th:value="${product.name}" required
+                                   oninput="document.querySelector('.pv-name').textContent = this.value || '상품명'">
                         </div>
-                        <div class="form-group">
-                            <label>할인 종료일</label>
-                            <input type="date" name="discountEndAt" class="form-input"
-                                   th:value="${product.discountEndAt}">
+                        <div class="fg">
+                            <label>카테고리</label>
+                            <select name="category" class="fs" required onchange="updateChips()">
+                                <option value="">카테고리 선택</option>
+                                <option value="채소"     th:selected="${product.category == '채소'}">채소</option>
+                                <option value="과일"     th:selected="${product.category == '과일'}">과일</option>
+                                <option value="곡류"     th:selected="${product.category == '곡류'}">곡류</option>
+                                <option value="버섯"     th:selected="${product.category == '버섯'}">버섯</option>
+                                <option value="뿌리채소"  th:selected="${product.category == '뿌리채소'}">뿌리채소</option>
+                            </select>
+                        </div>
+                        <div class="fg">
+                            <label>상품 설명</label>
+                            <textarea name="description" class="fta"
+                                      th:text="${product.description}"
+                                      oninput="document.querySelector('.pv-desc').textContent = this.value"></textarea>
                         </div>
                     </div>
-                    <div id="discountDateHint" style="font-size:.75rem;color:var(--muted);margin-top:4px;display:block">
-                        💡 할인율 입력 시 날짜를 설정할 수 있습니다.
+                </div>
+
+                <!-- ② 가격 정보 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">2</div>
+                        <div class="cr-step-ttl">가격 정보</div>
+                    </div>
+                    <div class="cr-step-bd">
+                        <div class="frow">
+                            <div class="fg">
+                                <label>판매 가격 (원)</label>
+                                <input type="number" name="price" id="priceInput" class="fi"
+                                       th:value="${#numbers.formatInteger(product.price, 0)}"
+                                       oninput="updateDiscountPreview()" required>
+                            </div>
+                            <div class="fg">
+                                <label>할인율 (%)</label>
+                                <input type="number" id="discountRateInput" class="fi"
+                                       min="0" max="99" placeholder="예: 20"
+                                       th:value="${discountRate}"
+                                       oninput="this.value=Math.min(Math.max(this.value,0),99); updateDiscountPreview()">
+                                <input type="hidden" name="discountPrice" id="discountPriceHidden"
+                                       th:value="${product.discountPrice != null} ? ${#numbers.formatInteger(product.discountPrice, 0)} : ''">
+                                <div class="hint">최대 99%까지 적용됩니다</div>
+                            </div>
+                        </div>
+                        <div class="frow" style="margin-top:4px">
+                            <div class="fg">
+                                <label>할인 시작일</label>
+                                <input type="date" name="discountStartAt" id="discountStartAtInput" class="fi"
+                                       th:value="${product.discountStartAt}">
+                            </div>
+                            <div class="fg">
+                                <label>할인 종료일</label>
+                                <input type="date" name="discountEndAt" id="discountEndAtInput" class="fi"
+                                       th:value="${product.discountEndAt}">
+                            </div>
+                        </div>
+                        <div class="hint">💡 할인율이 1% 이상일 때만 기간을 설정할 수 있습니다.</div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>원산지</label>
-                        <input type="text" name="origin" class="form-input"
-                               th:value="${product.origin}" required>
+                <!-- ③ 상품 세부 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">3</div>
+                        <div class="cr-step-ttl">상품 세부</div>
                     </div>
-                    <div class="form-group">
-                        <label>재고 수량</label>
-                        <input type="number" name="stockQuantity" class="form-input"
-                               th:value="${product.stockQuantity}" required>
-                    </div>
-                </div>
+                    <div class="cr-step-bd">
+                        <div class="frow">
+                            <div class="fg">
+                                <label>원산지</label>
+                                <input type="text" name="origin" class="fi"
+                                       th:value="${product.origin}" required
+                                       oninput="document.querySelector('.pv-origin').textContent = this.value">
+                            </div>
+                            <div class="fg">
+                                <label>재고 수량 (개)</label>
+                                <input type="number" name="stockQuantity" class="fi"
+                                       th:value="${product.stockQuantity}" required
+                                       oninput="updateChips()">
+                            </div>
+                        </div>
+                        <div class="frow">
+                            <div class="fg">
+                                <label>유통기한</label>
+                                <input type="date" name="expiryDate" class="fi"
+                                       th:value="${product.expiryDate}" required>
+                            </div>
+                            <div class="fg">
+                                <label>픽업 가능 여부</label>
+                                <select name="isPickupAvailable" class="fs"
+                                        id="pickupSelect"
+                                        onchange="togglePickup(); updateChips()">
+                                    <option value="true"  th:selected="${product.isPickupAvailable == true}">가능</option>
+                                    <option value="false" th:selected="${product.isPickupAvailable == false}">불가능</option>
+                                </select>
+                            </div>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>유통기한</label>
-                        <input type="date" name="expiryDate" class="form-input"
-                               th:value="${product.expiryDate}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>픽업 가능 여부</label>
-                        <select name="isPickupAvailable" class="form-select" id="pickupSelect">
-                            <option value="true"  th:selected="${product.isPickupAvailable == true}">가능</option>
-                            <option value="false" th:selected="${product.isPickupAvailable == false}">불가능</option>
-                        </select>
-                    </div>
-                </div>
+                        <!-- 픽업 상세 -->
+                        <div id="pickupDetail" style="display:none;" class="pickup-box">
+                            <div class="fg">
+                                <label>픽업 주소</label>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="text" id="pickupAddressInput" name="address" class="fi"
+                                           th:value="${product.address}" readonly
+                                           placeholder="주소 검색 버튼을 눌러주세요">
+                                    <button type="button" class="btn-addr" onclick="searchAddress()">주소 검색</button>
+                                </div>
+                            </div>
 
-                <div id="pickupDetail" style="display:none;">
-                    <div class="form-group">
-                        <label>픽업 주소</label>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" id="pickupAddressInput" name="address" class="form-input"
-                                   th:value="${product.address}" readonly>
-                            <button type="button" class="btn-cancel" onclick="searchAddress()">주소 검색</button>
+                            <!-- 맵 플레이스홀더 / 실제 지도 -->
+                            <div id="mapPlaceholder"
+                                 style="width:100%;height:220px;border-radius:12px;margin-bottom:12px;
+                                        background:var(--beige3);border:2px dashed var(--beige);
+                                        display:flex;flex-direction:column;align-items:center;
+                                        justify-content:center;gap:10px;text-align:center;">
+                                <div style="font-size:3rem;opacity:.6">🗺️</div>
+                                <div style="font-size:.88rem;font-weight:700;color:var(--mid)">주소를 입력해주세요</div>
+                                <div style="font-size:.74rem;color:var(--muted)">위 주소 검색 버튼을 눌러주세요</div>
+                            </div>
+                            <div id="kakaoMap"
+                                 style="width:100%;height:220px;border-radius:12px;margin-bottom:12px;display:none;"></div>
+
+                            <input type="hidden" id="latitudeInput"  name="latitude"  th:value="${product.latitude}">
+                            <input type="hidden" id="longitudeInput" name="longitude" th:value="${product.longitude}">
+                            <div class="fg">
+                                <label>운영 시간</label>
+                                <input type="text" name="operatingHours" class="fi"
+                                       th:value="${product.operatingHours}"
+                                       placeholder="예: 평일 09:00 ~ 18:00">
+                            </div>
                         </div>
                     </div>
-                    <div id="kakaoMap" style="width:100%;height:250px;border-radius:12px;margin-bottom:12px;"></div>
-                    <input type="hidden" id="latitudeInput" name="latitude" th:value="${product.latitude}">
-                    <input type="hidden" id="longitudeInput" name="longitude" th:value="${product.longitude}">
-                    <div class="form-group">
-                        <label>운영 시간</label>
-                        <input type="text" name="operatingHours" class="form-input"
-                               th:value="${product.operatingHours}">
+                </div>
+
+                <!-- ④ 이미지 관리 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">4</div>
+                        <div class="cr-step-ttl">이미지 관리</div>
+                    </div>
+                    <div class="cr-step-bd">
+
+                        <!-- 대표 이미지 -->
+                        <div class="fg">
+                            <label>대표 이미지 (변경 시에만 업로드)</label>
+                            <label class="img-upload" for="thumbFile">
+                                <div class="img-upload-icon">📦</div>
+                                <div class="img-upload-ttl">새 대표 이미지 업로드</div>
+                                <div class="img-upload-sub">업로드 시에만 교체됩니다 · JPG, PNG 가능</div>
+                                <input type="file" id="thumbFile" name="thumbnailFile" accept="image/*" hidden>
+                            </label>
+                        </div>
+
+                        <!-- 상세 이미지 (기존 + 추가 통합 그리드) -->
+                        <div class="fg">
+                            <label>상세 이미지 <span style="font-weight:400;color:var(--muted)">(올리면 삭제 / ➕으로 추가)</span></label>
+                            <div class="img-grid" id="imageGrid">
+                                <!-- 기존 이미지 -->
+                                <label class="img-exist" th:each="image : ${product.images}">
+                                    <img th:src="${image.uuid}" alt="상세 이미지">
+                                    <input type="checkbox" class="del-chk" name="deleteImageIds" th:value="${image.id}">
+                                    <div class="del-mark">🗑️ 삭제</div>
+                                </label>
+                                <!-- 추가 버튼 -->
+                                <label class="img-add-btn" for="newImageFiles">
+                                    <span class="add-ico">➕</span>
+                                    <span class="add-lbl">이미지 추가</span>
+                                </label>
+                            </div>
+                            <input type="file" id="newImageFiles" name="imageFiles" accept="image/*" multiple hidden>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>상품 설명</label>
-                    <textarea name="description" class="form-textarea"
-                              th:text="${product.description}"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>대표 이미지 (변경 시에만 업로드)</label>
-                    <label class="thumb-upload">
-                        <div class="thumb-icon">📦</div>
-                        <div class="thumb-title">이미지 업로드</div>
-                        <div class="thumb-sub">JPG, PNG 파일 업로드 가능</div>
-                        <input type="file" name="thumbnailFile" accept="image/*" hidden>
-                    </label>
-                </div>
-
-                <!-- 상세 이미지 (기존 + 추가 통합) -->
-                <div class="form-group">
-                    <label>상세 이미지 (마우스 올리면 삭제 선택 / ➕ 버튼으로 추가)</label>
-                    <div class="image-grid" id="imageGrid">
-                        <label class="existing-image-label" th:each="image : ${product.images}">
-                            <img th:src="${image.uuid}" class="existing-image-thumb" alt="상세 이미지">
-                            <input type="checkbox" class="delete-checkbox" name="deleteImageIds" th:value="${image.id}">
-                            <div class="delete-mark">🗑️ 삭제</div>
-                        </label>
-                        <label class="image-add-btn" for="newImageFiles">
-                            <span>➕</span>
-                            <span>이미지 추가</span>
-                        </label>
-                    </div>
-                    <input type="file" id="newImageFiles" name="imageFiles" accept="image/*" multiple hidden>
-                </div>
-
-                <div class="submit-row">
-                    <button type="button" class="btn-cancel" onclick="history.back()">취소</button>
-                    <button type="submit" class="btn-submit2">상품 수정하기</button>
+                <!-- ── 버튼 ── -->
+                <div class="btn-row">
+                    <button type="button" class="btn-back" onclick="history.back()">취소</button>
+                    <button type="submit" class="btn-reg">✏️ 상품 수정하기</button>
                 </div>
 
             </form>
-        </div>
 
-        <!-- 오른쪽 미리보기 -->
-        <div class="create-card preview-card">
-            <div class="preview-top">
-                <img id="thumbPreview"
-                     th:if="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
-                     th:src="${product.thumbnailUrl}"
-                     style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:0"/>
-                <img id="thumbPreview"
-                     th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}"
-                     style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:0"/>
-                🥔
-                <div class="preview-badge">미리보기</div>
-            </div>
-            <div class="preview-body">
-                <div class="preview-origin" th:text="${product.origin}">원산지</div>
-                <div class="preview-name" th:text="${product.name}">상품명</div>
-                <div class="preview-price">
-                    <div class="preview-discount"></div>
-                    <div class="preview-main" th:text="${#numbers.formatInteger(product.price, 0)} + '원'">가격</div>
+            <!-- ══ 오른쪽: 미리보기 ══ -->
+            <div class="cr-preview-wrap">
+                <div class="cr-preview-lbl">실시간 미리보기</div>
+                <div class="cr-preview-card">
+                    <div class="pv-img">
+                        <img id="thumbPreview"
+                             th:src="${product.thumbnailUrl}"
+                             th:style="${product.thumbnailUrl != null} ? 'display:block;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:0' : 'display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:0'"/>
+                        🥔
+                        <div class="pv-live-tag">미리보기</div>
+                    </div>
+                    <div class="pv-body">
+                        <div class="pv-origin" th:text="${product.origin}">원산지</div>
+                        <div class="pv-name" th:text="${product.name}">상품명</div>
+                        <div class="pv-price">
+                            <div class="pv-rate"></div>
+                            <div class="pv-main" th:text="${#numbers.formatInteger(product.price, 0)} + '원'">가격</div>
+                        </div>
+                        <div class="pv-desc" th:text="${product.description}">설명</div>
+                        <div class="pv-chips" id="pvChips">
+                            <div class="pv-chip" th:text="'🥬 ' + ${product.category}">카테고리</div>
+                            <div class="pv-chip" th:text="'📦 재고 ' + ${product.stockQuantity} + '개'">재고</div>
+                            <div class="pv-chip" th:text="${product.isPickupAvailable} ? '🚚 픽업 가능' : '픽업 불가'">픽업</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="preview-desc" th:text="${product.description}">설명</div>
-                <div class="preview-meta">
-                    <div class="preview-chip" th:text="'🥔 ' + ${product.category}">카테고리</div>
-                    <div class="preview-chip" th:text="'📦 재고 ' + ${product.stockQuantity} + '개'">재고</div>
-                    <div class="preview-chip" th:text="${product.isPickupAvailable} ? '🚚 픽업 가능' : '🚚 픽업 불가'">픽업</div>
-                </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
 
+<!-- Thymeleaf inline: 기존 좌표 JS 변수로 전달 -->
+<script th:inline="javascript">
+    var initLat = [[${product.latitude}]];
+    var initLng = [[${product.longitude}]];
+</script>
+
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4&libraries=services"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script>
-    window.addEventListener('DOMContentLoaded', function () {
-        updateDiscountPreview();
-        if (typeof toggleDiscountDates === 'function') toggleDiscountDates();
-    });
+<script src="/js/product/market-edit.js"></script>
 
-    function updateDiscountPreview() {
-        const price  = Number(document.getElementById('priceInput').value);
-        const rate   = Number(document.getElementById('discountRateInput').value);
-
-        const previewMain     = document.querySelector('.preview-main');
-        const previewDiscount = document.querySelector('.preview-discount');
-        const hiddenDiscount  = document.getElementById('discountPriceHidden');
-
-        if (!price) return;
-
-        if (rate > 0 && rate < 99) {
-            const discounted = Math.round(price * (1 - rate / 100));
-            previewDiscount.textContent = `-${rate}%`;
-            previewMain.textContent     = discounted.toLocaleString() + '원';
-            hiddenDiscount.value        = discounted;
-        } else {
-            previewDiscount.textContent = '';
-            previewMain.textContent     = price.toLocaleString() + '원';
-            hiddenDiscount.value        = '';
-        }
-    }
-</script>
-<script src="/js/product/create.js"></script>
-<script>
-    document.getElementById('newImageFiles').addEventListener('change', function () {
-        // 이전 미리보기 제거
-        document.querySelectorAll('.new-preview-item').forEach(function (el) { el.remove(); });
-
-        const addBtn = document.querySelector('.image-add-btn');
-        const grid   = document.getElementById('imageGrid');
-
-        Array.from(this.files).forEach(function (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const div = document.createElement('div');
-                div.className = 'new-preview-item';
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                div.appendChild(img);
-                grid.insertBefore(div, addBtn);
-            };
-            reader.readAsDataURL(file);
-        });
-    });
-</script>
 </body>
 </html>

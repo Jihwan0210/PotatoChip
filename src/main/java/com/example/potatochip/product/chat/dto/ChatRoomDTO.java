@@ -2,7 +2,11 @@ package com.example.potatochip.product.chat.dto;
 
 import lombok.*;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatRoomDTO {
     private Long id;
     private Long buyerId;

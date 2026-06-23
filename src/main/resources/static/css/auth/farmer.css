@@ -30,6 +30,8 @@
 .ft-btn-group    { display: flex; gap: 8px; }
 .ft-btn-secondary { background: var(--beige2); color: var(--mid); border: 1.5px solid var(--sand); border-radius: 8px; padding: 7px 14px; font-size: .76rem; font-weight: 500; cursor: pointer; font-family: inherit; }
 .ft-btn-primary   { background: var(--green); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: .76rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.ft-btn-excel     { background: #1D6F42; color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: .76rem; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.ft-btn-excel:hover { background: #185c37; }
 
 /* Table */
 .ft-table      { background: #fff; border: 1.5px solid var(--sand); border-radius: 14px; overflow: hidden; }
