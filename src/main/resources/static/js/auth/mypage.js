@@ -61,6 +61,7 @@ function loadMyInfo() {
             var emailEl = document.getElementById('mp-display-email');
             if (emailEl) emailEl.textContent = data.email || '';
 
+            // Doc1에만 있던 포인트 표시
             var pointEl = document.getElementById('mp-display-points');
             if (pointEl) pointEl.textContent = Number(data.points || data.point || 0).toLocaleString();
         })
@@ -153,14 +154,14 @@ function saveMyProfile() {
         return;
     }
 
-    var addrMain = document.getElementById('mp-address').value.trim();
+    var addrMain   = document.getElementById('mp-address').value.trim();
     var addrDetail = document.getElementById('mp-address-detail').value.trim();
 
     const body = {
-        name: document.getElementById('mp-name').value,
+        name:     document.getElementById('mp-name').value,
         nickname: document.getElementById('mp-nickname').value,
-        phone: document.getElementById('mp-phone').value,
-        address: addrDetail ? addrMain + ' ' + addrDetail : addrMain
+        phone:    document.getElementById('mp-phone').value,
+        address:  addrDetail ? addrMain + ' ' + addrDetail : addrMain
     };
 
     fetch('/mypage/info', {
@@ -185,24 +186,21 @@ function saveMyProfile() {
 
 // 마이페이지 탭 전환
 function switchMyTab(name) {
-    var tabs = ['orders', 'wishlist', 'coupon', 'myreview', 'profile'];
-    var tabIds = ['orders', 'wishlist', 'coupon', 'review', 'profile'];
+    var tabs   = ['orders', 'wishlist', 'coupon', 'myreview', 'profile'];
+    var tabIds = ['orders', 'wishlist', 'coupon', 'review',   'profile'];
 
     tabs.forEach(function (t, i) {
-        var c = document.getElementById('mycontent-' + t);
+        var c   = document.getElementById('mycontent-' + t);
         var tab = document.getElementById('my-tab-' + tabIds[i]);
 
         if (c) c.style.display = (t === name ? 'block' : 'none');
-
-        if (tab) {
-            tab.classList.toggle('on', t === name);
-        }
+        if (tab) tab.classList.toggle('on', t === name);
     });
 
-    if (name === 'orders') loadMyOrders();
-    if (name === 'profile') loadMyInfo();
-    if (name === 'wishlist') loadWishlist();
-    if (name === 'myreview') loadMyReviews();
+    if (name === 'orders')    loadMyOrders();
+    if (name === 'profile')   loadMyInfo();
+    if (name === 'wishlist')  loadWishlist();
+    if (name === 'myreview')  loadMyReviews();
     if (name === 'coupon') loadMyCoupons();
 }
 
@@ -229,46 +227,47 @@ function loadMyCoupons() {
             }
 
             container.innerHTML = coupons.map(function(c) {
-                var discountText = '';
-                if (c.discountType === 'PERCENTAGE') {
-                    discountText = c.discountValue + '% 할인';
-                    if (c.maxDiscountAmount) discountText += ' (최대 ' + Number(c.maxDiscountAmount).toLocaleString() + '원)';
-                } else if (c.discountType === 'FIXED_AMOUNT') {
-                    discountText = Number(c.discountValue).toLocaleString() + '원 할인';
-                } else {
-                    discountText = '무료 배송';
-                }
+                    var discountText = '';
+                    if (c.discountType === 'PERCENTAGE') {
+                        discountText = c.discountValue + '% 할인';
+                        if (c.maxDiscountAmount) discountText += ' (최대 ' + Number(c.maxDiscountAmount).toLocaleString() + '원)';
+                    } else if (c.discountType === 'FIXED_AMOUNT') {
+                        discountText = Number(c.discountValue).toLocaleString() + '원 할인';
+                    } else {
+                        discountText = '무료 배송';
+                    }
 
-                var minText = c.minOrderAmount ? Number(c.minOrderAmount).toLocaleString() + '원 이상 주문 시' : '';
-                var endText = c.endDate ? c.endDate.substring(0, 10) + ' 까지' : '';
-                var productBadge = c.targetProductName
-                    ? '<span style="display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:5px">📦 ' + c.targetProductName + ' 전용</span><br>'
-                    : '';
-                var subInfo = [minText, endText].filter(Boolean).join(' · ');
+                    var minText = c.minOrderAmount ? Number(c.minOrderAmount).toLocaleString() + '원 이상 주문 시' : '';
+                    var endText = c.endDate ? c.endDate.substring(0, 10) + ' 까지' : '';
+                    var productBadge = c.targetProductName
+                        ? '<span style="display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:5px">📦 ' + c.targetProductName + ' 전용</span><br>'
+                        : '';
+                    var subInfo = [minText, endText].filter(Boolean).join(' · ');
 
-                return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--sand)">' +
-                    '<div style="flex:1;min-width:0">' +
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--sand)">' +
+                        '<div style="flex:1;min-width:0">' +
                         productBadge +
                         '<div style="font-size:.88rem;font-weight:700;color:var(--dark);margin-bottom:3px">' + c.name + '</div>' +
                         (subInfo ? '<div style="font-size:.73rem;color:var(--muted)">' + subInfo + '</div>' : '') +
-                    '</div>' +
-                    '<div style="font-size:1rem;font-weight:800;color:var(--green);white-space:nowrap">' + discountText + '</div>' +
-                '</div>';
-            }).join('') +
-            '<div style="text-align:center;margin-top:16px;font-size:.76rem;color:var(--muted)">총 ' + coupons.length + '개의 쿠폰을 보유 중이에요 🎟️</div>';
+                        '</div>' +
+                        '<div style="font-size:1rem;font-weight:800;color:var(--green);white-space:nowrap">' + discountText + '</div>' +
+                        '</div>';
+                }).join('') +
+                '<div style="text-align:center;margin-top:16px;font-size:.76rem;color:var(--muted)">총 ' + coupons.length + '개의 쿠폰을 보유 중이에요 🎟️</div>';
         })
         .catch(function() {
             container.innerHTML = '<div class="mp-empty">불러오기 실패. 다시 시도해주세요.</div>';
         });
 }
 
-// 상품 상세 이동
+
+// 상품 상세 이동 (Doc1)
 function goProductDetail(productId) {
     if (!productId) return;
     location.href = '/market/detail?id=' + encodeURIComponent(productId);
 }
 
-// 주문 내역 조회
+// 주문 내역 조회 (Doc2 UI + Doc1 goProductDetail)
 function loadMyOrders() {
     var token = getToken();
     var container = document.getElementById('orders-container');
@@ -281,10 +280,7 @@ function loadMyOrders() {
         headers: { 'Authorization': 'Bearer ' + token }
     })
         .then(function(res) {
-            if (res.status === 401) {
-                location.href = '/login';
-                return null;
-            }
+            if (res.status === 401) { location.href = '/login'; return null; }
             if (!res.ok) throw new Error('status ' + res.status);
             return res.json();
         })
@@ -296,51 +292,70 @@ function loadMyOrders() {
                 return;
             }
 
+            var STATUS_LABELS = {
+                PAYMENT_COMPLETE: '결제 완료', PREPARING: '배송 준비',
+                SHIPPING: '배송 중', DELIVERED: '배송 완료',
+                CANCELLED: '취소', REFUNDED: '환불'
+            };
+            var DELIVERY_LABELS = { delivery: '일반 택배', express: '당일 배송', pickup: '농장 픽업' };
+
             var html = '';
 
             orders.forEach(function(order) {
-                html += '<div style="border:1px solid var(--sand);border-radius:14px;padding:16px;margin-bottom:14px;background:#fff">'
-                    + '<div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px">'
-                    + '<div>'
-                    + '<div style="font-weight:800;color:var(--dark);font-size:.9rem">주문번호 ' + escapeMpHtml(order.orderNumber || '') + '</div>'
-                    + '<div style="font-size:.72rem;color:var(--muted);margin-top:4px">' + formatMpDate(order.createdAt) + '</div>'
+                var items = order.orderItems || order.items || [];
+                var firstItem = items[0] || {};
+                var thumbnail = firstItem.thumbnailUrl || 'https://placehold.co/56x56?text=🥔';
+                var firstName = firstItem.productName || '상품 정보 없음';
+                var displayName = items.length > 1 ? firstName + ' 외 ' + (items.length - 1) + '개' : firstName;
+                var finalAmount = (order.totalAmount || 0) + (order.totalShippingFee || 0);
+                var dateStr = order.createdAt ? order.createdAt.replace('T', ' ').slice(0, 16) : '';
+
+                html += '<div style="border:1.5px solid #e8dcc8;border-radius:14px;padding:16px;margin-bottom:14px;background:#fff">';
+
+                // 주문 헤더
+                html += '<div style="display:flex;gap:14px;padding-bottom:12px;align-items:flex-start;border-bottom:1.5px solid #f6f2ec">'
+                    + '<img src="' + escapeMpHtml(thumbnail) + '" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0" onerror="this.src=\'https://placehold.co/56x56?text=🥔\'"/>'
+                    + '<div style="flex:1;min-width:0">'
+                    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px">'
+                    + '<span style="font-weight:700;font-size:.92rem;color:var(--dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeMpHtml(displayName) + '</span>'
+                    + '<span style="font-size:.74rem;font-weight:700;color:var(--green);background:#eef7e6;border-radius:20px;padding:2px 10px;flex-shrink:0">' + (STATUS_LABELS[order.status] || order.status) + '</span>'
                     + '</div>'
-                    + '<div style="font-size:.78rem;font-weight:700;color:var(--green)">' + getOrderStatusText(order.status) + '</div>'
+                    + '<div style="font-size:.74rem;color:var(--muted);margin-bottom:4px">' + escapeMpHtml(order.orderNumber || '') + '</div>'
+                    + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">' + escapeMpHtml(dateStr) + ' · ' + escapeMpHtml(DELIVERY_LABELS[order.deliveryType] || order.deliveryType || '') + '</div>'
+                    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+                    + '<span style="font-weight:700;color:#F39C12">' + Number(finalAmount).toLocaleString() + '원</span>'
+                    + '<a href="/orders/complete/' + order.id + '?token=' + token + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>'
+                    + '</div>'
+                    + '</div>'
                     + '</div>';
 
-                if (Array.isArray(order.items)) {
-                    order.items.forEach(function(item) {
-                        var productId = item.productId;
+                // 상품별 리뷰 버튼
+                items.forEach(function(item) {
+                    var productId = item.productId;
 
-                        var thumb = item.thumbnailUrl
-                            ? '<img src="' + escapeMpHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:58px;height:58px;object-fit:cover;border-radius:12px">'
-                            : '<div style="width:58px;height:58px;border-radius:12px;background:var(--beige2);display:flex;align-items:center;justify-content:center">🥬</div>';
+                    var thumb = item.thumbnailUrl
+                        ? '<img src="' + escapeMpHtml(item.thumbnailUrl) + '" alt="상품 이미지" style="width:48px;height:48px;object-fit:cover;border-radius:10px">'
+                        : '<div style="width:48px;height:48px;border-radius:10px;background:var(--beige2);display:flex;align-items:center;justify-content:center">🥬</div>';
 
-                        var buttonHtml = '';
+                    var buttonHtml = '';
+                    if (item.reviewed) {
+                        buttonHtml = '<button type="button" disabled style="width:86px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">리뷰 완료</button>';
+                    } else if (item.status === 'DELIVERED') {
+                        buttonHtml = '<button type="button" style="width:74px;height:28px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:.66rem;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0;font-family:inherit"'
+                            + ' onclick="event.stopPropagation();openReviewModal(' + productId + ',' + item.orderItemId + ',\'' + escapeMpAttr(item.productName || '') + '\')">리뷰 작성</button>';
+                    } else {
+                        buttonHtml = '<button type="button" disabled style="width:96px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">작성 불가</button>';
+                    }
 
-                        if (item.reviewed) {
-                            buttonHtml = '<button type="button" disabled style="width:86px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">리뷰 완료</button>';
-                        } else if (item.status === 'DELIVERED') {
-                            buttonHtml = '<button type="button" style="width:74px;height:28px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:.66rem;font-weight:700;cursor:pointer;margin-left:auto;flex-shrink:0;font-family:inherit" onclick="event.stopPropagation();openReviewModal('
-                                + productId + ', '
-                                + item.orderItemId + ', \''
-                                + escapeMpAttr(item.productName || '') + '\')">리뷰 작성</button>';
-                        } else {
-                            buttonHtml = '<button type="button" disabled style="width:96px;height:28px;border:none;border-radius:8px;background:#ddd;color:#777;font-size:.66rem;font-weight:700;margin-left:auto;flex-shrink:0;font-family:inherit">작성 불가</button>';
-                        }
-
-                        html += '<div onclick="goProductDetail(' + productId + ')" title="상품 상세보기" style="display:flex;gap:12px;align-items:center;border-top:1px dashed var(--sand);padding-top:12px;margin-top:12px;width:100%;cursor:pointer">'
-                            + thumb
-                            + '<div style="flex:1;min-width:0">'
-                            + '<div style="font-weight:700;color:var(--dark);font-size:.86rem;text-decoration:underline;text-underline-offset:3px">' + escapeMpHtml(item.productName || '') + '</div>'
-                            + '<div style="font-size:.74rem;color:var(--muted);margin-top:4px">'
-                            + Number(item.price || 0).toLocaleString() + '원 · ' + escapeMpHtml(item.quantity || 0) + '개 · ' + getOrderStatusText(item.status)
-                            + '</div>'
-                            + '</div>'
-                            + buttonHtml
-                            + '</div>';
-                    });
-                }
+                    html += '<div onclick="goProductDetail(' + productId + ')" title="상품 상세보기" style="display:flex;gap:12px;align-items:center;padding-top:10px;margin-top:4px;cursor:pointer">'
+                        + thumb
+                        + '<div style="flex:1;min-width:0">'
+                        + '<div style="font-weight:700;color:var(--dark);font-size:.84rem;text-decoration:underline;text-underline-offset:3px">' + escapeMpHtml(item.productName || '') + '</div>'
+                        + '<div style="font-size:.72rem;color:var(--muted);margin-top:3px">' + Number(item.price || 0).toLocaleString() + '원 · ' + escapeMpHtml(item.quantity || 0) + '개 · ' + getOrderStatusText(item.status) + '</div>'
+                        + '</div>'
+                        + buttonHtml
+                        + '</div>';
+                });
 
                 html += '</div>';
             });
@@ -352,7 +367,7 @@ function loadMyOrders() {
         });
 }
 
-// 찜 목록 조회
+// 찜 목록 조회 (Doc1 XSS 방어 + goProductDetail)
 function loadWishlist() {
     var token = getToken();
     if (!token) return;
@@ -435,7 +450,7 @@ function removeWish(productId) {
         });
 }
 
-// 내 리뷰 조회
+// 내 리뷰 조회 (Doc2 상세보기 버튼 레이아웃 + Doc1 클릭 이벤트)
 function loadMyReviews() {
     var token = getToken();
     var container = document.getElementById('myreview-container');
@@ -448,10 +463,7 @@ function loadMyReviews() {
         headers: { 'Authorization': 'Bearer ' + token }
     })
         .then(function(res) {
-            if (res.status === 401) {
-                location.href = '/login';
-                return null;
-            }
+            if (res.status === 401) { location.href = '/login'; return null; }
             if (!res.ok) throw new Error('status ' + res.status);
             return res.json();
         })
@@ -474,7 +486,7 @@ function loadMyReviews() {
                     ? '<img onclick="event.stopPropagation();goProductDetail(' + productId + ')" src="' + escapeMpHtml(review.thumbnailUrl) + '" alt="상품 이미지" title="상품 상세보기" style="width:58px;height:58px;object-fit:cover;border-radius:12px;cursor:pointer">'
                     : '<div onclick="event.stopPropagation();goProductDetail(' + productId + ')" title="상품 상세보기" style="width:58px;height:58px;border-radius:12px;background:var(--beige2);display:flex;align-items:center;justify-content:center;cursor:pointer">🥬</div>';
 
-                html += '<div onclick="openMyReviewDetail(' + review.reviewId + ')" title="리뷰 상세보기" style="border:1px solid var(--sand);border-radius:14px;padding:16px;margin-bottom:14px;background:#fff;cursor:pointer">'
+                html += '<div style="border:1px solid var(--sand);border-radius:14px;padding:16px;margin-bottom:14px;background:#fff">'
                     + '<div style="display:flex;gap:12px;align-items:flex-start">'
                     + thumb
                     + '<div style="flex:1;min-width:0">'
@@ -483,6 +495,7 @@ function loadMyReviews() {
                     + '<div style="font-size:.8rem;color:var(--mid);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + escapeMpHtml(review.content || '') + '</div>'
                     + '<div style="font-size:.68rem;color:var(--muted);margin-top:8px">' + formatMpDate(review.createdAt) + '</div>'
                     + '</div>'
+                    + '<button type="button" class="mp-btn outline" style="height:30px;font-size:.68rem;padding:0 10px;white-space:nowrap" onclick="openMyReviewDetail(' + review.reviewId + ')">상세보기</button>'
                     + '</div>'
                     + '</div>';
             });
@@ -520,27 +533,20 @@ function openReviewModal(productId, orderItemId, productName) {
     }
 
     var modal = document.getElementById('review-modal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeReviewModal() {
     selectedReviewTarget = null;
 
     var modal = document.getElementById('review-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 }
 
 async function submitMyReview() {
     var token = getToken();
 
-    if (!token) {
-        location.href = '/login';
-        return;
-    }
+    if (!token) { location.href = '/login'; return; }
 
     if (!selectedReviewTarget) {
         showMpMessage('리뷰 작성 대상이 없습니다.');
@@ -569,14 +575,14 @@ async function submitMyReview() {
     }
 
     var body = {
-        productId: selectedReviewTarget.productId,
-        userId: myPageUserId,
-        orderItemId: selectedReviewTarget.orderItemId,
-        rating: Number(document.getElementById('review-rating').value),
-        content: content,
-        imageUrl: imageUrl,
+        productId:       selectedReviewTarget.productId,
+        userId:          myPageUserId,
+        orderItemId:     selectedReviewTarget.orderItemId,
+        rating:          Number(document.getElementById('review-rating').value),
+        content:         content,
+        imageUrl:        imageUrl,
         repurchaseIntent: document.getElementById('review-repurchase').checked,
-        isAnonymous: document.getElementById('review-anonymous').checked
+        isAnonymous:     document.getElementById('review-anonymous').checked
     };
 
     fetch('/api/reviews', {
@@ -608,7 +614,7 @@ async function submitMyReview() {
         });
 }
 
-// 리뷰 상세보기
+// 리뷰 상세보기 (Doc1 goProductDetail 방식)
 function openMyReviewDetail(reviewId) {
     var review = cachedMyReviews.find(function(item) {
         return Number(item.reviewId) === Number(reviewId);
@@ -653,23 +659,17 @@ function openMyReviewDetail(reviewId) {
 
 function closeMyReviewDetail() {
     var modal = document.getElementById('my-review-detail-modal');
-
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    if (modal) modal.style.display = 'none';
 }
 
 // 비밀번호 변경
 function changePassword() {
     var token = getToken();
 
-    if (!token) {
-        location.href = '/login';
-        return;
-    }
+    if (!token) { location.href = '/login'; return; }
 
     var currentPw = document.getElementById('cp-current').value;
-    var newPw = document.getElementById('cp-new').value;
+    var newPw     = document.getElementById('cp-new').value;
     var confirmPw = document.getElementById('cp-confirm').value;
 
     if (!currentPw || !newPw || !confirmPw) {
@@ -692,13 +692,11 @@ function changePassword() {
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({
             currentPassword: currentPw,
-            newPassword: newPw,
+            newPassword:     newPw,
             confirmPassword: confirmPw
         })
     })
-        .then(function(res) {
-            return res.json();
-        })
+        .then(function(res) { return res.json(); })
         .then(function(data) {
             if (data.message) {
                 document.getElementById('cp-current').value = '';
@@ -709,21 +707,16 @@ function changePassword() {
                 showToast(data.error);
             }
         })
-        .catch(function() {
-            showToast('오류가 발생했습니다.');
-        });
+        .catch(function() { showToast('오류가 발생했습니다.'); });
 }
 
 // 회원 탈퇴
 function withdrawAccount() {
     var token = getToken();
 
-    if (!token) {
-        location.href = '/login';
-        return;
-    }
+    if (!token) { location.href = '/login'; return; }
 
-    var pw = document.getElementById('wd-pw').value;
+    var pw     = document.getElementById('wd-pw').value;
     var reason = document.getElementById('wd-reason').value;
 
     if (!pw) {
@@ -736,59 +729,42 @@ function withdrawAccount() {
     fetch('/mypage/withdraw', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({
-            password: pw,
-            reason: reason
-        })
+        body: JSON.stringify({ password: pw, reason: reason })
     })
-        .then(function(res) {
-            return res.json();
-        })
+        .then(function(res) { return res.json(); })
         .then(function(data) {
             if (data.message) {
                 localStorage.clear();
                 sessionStorage.clear();
                 showToast('탈퇴가 완료되었어요. 이용해주셔서 감사합니다 🌿');
-
-                setTimeout(function() {
-                    location.href = '/';
-                }, 2000);
+                setTimeout(function() { location.href = '/'; }, 2000);
             } else {
                 showToast(data.error);
             }
         })
-        .catch(function() {
-            showToast('오류가 발생했습니다.');
-        });
+        .catch(function() { showToast('오류가 발생했습니다.'); });
 }
+
+// ── 공통 유틸 ──────────────────────────────────────────────
 
 function getOrderStatusText(status) {
     switch (status) {
-        case 'PAYMENT_COMPLETE':
-            return '결제 완료';
-        case 'PREPARING':
-            return '배송 준비';
-        case 'SHIPPING':
-            return '배송 중';
-        case 'DELIVERED':
-            return '배송 완료';
-        case 'CANCELLED':
-            return '취소';
-        case 'REFUNDED':
-            return '환불';
-        default:
-            return status || '';
+        case 'PAYMENT_COMPLETE': return '결제 완료';
+        case 'PREPARING':        return '배송 준비';
+        case 'SHIPPING':         return '배송 중';
+        case 'DELIVERED':        return '배송 완료';
+        case 'CANCELLED':        return '취소';
+        case 'REFUNDED':         return '환불';
+        default:                 return status || '';
     }
 }
 
 function renderMpStars(rating) {
     var score = Number(rating || 0);
     var result = '';
-
     for (var i = 1; i <= 5; i++) {
         result += i <= score ? '★' : '☆';
     }
-
     return result;
 }
 
@@ -799,17 +775,17 @@ function formatMpDate(value) {
 
 function escapeMpHtml(value) {
     return String(value == null ? '' : value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
+        .replaceAll('&',  '&amp;')
+        .replaceAll('<',  '&lt;')
+        .replaceAll('>',  '&gt;')
+        .replaceAll('"',  '&quot;')
+        .replaceAll("'",  '&#039;');
 }
 
 function escapeMpAttr(value) {
     return String(value == null ? '' : value)
         .replaceAll('\\', '\\\\')
-        .replaceAll("'", "\\'");
+        .replaceAll("'",  "\\'");
 }
 
 function showMpMessage(message) {
@@ -817,7 +793,6 @@ function showMpMessage(message) {
         showToast(message);
         return;
     }
-
     alert(message);
 }
 
@@ -825,7 +800,6 @@ function setMyReviewRating(score) {
     document.getElementById('review-rating').value = score;
 
     var stars = document.querySelectorAll('#review-star-box span');
-
     stars.forEach(function(star, index) {
         star.textContent = index < score ? '★' : '☆';
     });
@@ -833,7 +807,7 @@ function setMyReviewRating(score) {
 
 function previewReviewImage() {
     var fileInput = document.getElementById('review-image-file');
-    var preview = document.getElementById('review-image-preview');
+    var preview   = document.getElementById('review-image-preview');
 
     if (!fileInput || !preview) return;
 
@@ -846,7 +820,6 @@ function previewReviewImage() {
     }
 
     var url = URL.createObjectURL(file);
-
     preview.style.display = 'block';
     preview.innerHTML = '<img src="' + url + '" alt="리뷰 이미지 미리보기" style="max-width:100%;max-height:160px;object-fit:contain;border:1px solid var(--sand);border-radius:10px">';
 }
@@ -863,9 +836,7 @@ async function uploadReviewImageIfExists(token) {
 
     var response = await fetch('/api/reviews/upload-image', {
         method: 'POST',
-        headers: {
-            'Authorization': 'Bearer ' + token
-        },
+        headers: { 'Authorization': 'Bearer ' + token },
         body: formData
     });
 
