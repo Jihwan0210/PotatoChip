@@ -36,4 +36,17 @@ public class NotificationController {
         notificationService.markAllAsRead(userId);
         return Map.of("message", "전체 읽음 처리되었습니다.");
     }
+
+    @DeleteMapping("/{notificationId}")
+    public Map<String, String> deleteNotification(
+            @PathVariable Long notificationId,
+            @RequestParam Long userId
+    ) {
+        notificationService.deleteNotification(notificationId, userId);
+
+        return Map.of(
+                "message",
+                "알림이 삭제되었습니다."
+        );
+    }
 }

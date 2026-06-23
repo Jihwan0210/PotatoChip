@@ -9,7 +9,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
+import com.example.potatochip.auth.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +24,7 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/board")
     public String boardPage() {
@@ -41,7 +48,8 @@ public class BoardController {
     public BoardResponse createBoard(
             @RequestPart("board") Board board,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            Authentication authentication
+            Authentication authentication,
+            HttpServletRequest request
     ) {
         if (image != null && !image.isEmpty()) {
             try {
@@ -67,7 +75,8 @@ public class BoardController {
             }
         }
 
-        return boardService.createBoard(board, authentication);
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        return boardService.createBoard(board, resolvedAuthentication);
     }
 
     @PostMapping("/api/board/{id}/view")
@@ -80,9 +89,11 @@ public class BoardController {
     @ResponseBody
     public ResponseEntity<?> deleteBoard(
             @PathVariable Long id,
-            Authentication authentication
+            Authentication authentication,
+            HttpServletRequest request
     ) {
-        boardService.deleteBoard(id, authentication);
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        boardService.deleteBoard(id, resolvedAuthentication);
         return ResponseEntity.ok(Map.of("message", "삭제 완료"));
     }
 
@@ -92,7 +103,8 @@ public class BoardController {
             @PathVariable Long id,
             @RequestPart("board") Board updatedBoard,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            Authentication authentication
+            Authentication authentication,
+            HttpServletRequest request
     ) {
 
         if (image != null && !image.isEmpty()) {
@@ -118,19 +130,26 @@ public class BoardController {
             e.printStackTrace();
         }
     }
-        return boardService.updateBoard(id, updatedBoard, authentication);
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        return boardService.updateBoard(id, updatedBoard, resolvedAuthentication);
     }
 
     @PostMapping("/api/board/{id}/like")
     @ResponseBody
-    public ResponseEntity<?> toggleLike(@PathVariable Long id, Authentication authentication) {
-        if (authentication == null) {
+    public ResponseEntity<?> toggleLike(
+            @PathVariable Long id,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+
+        if (resolvedAuthentication == null || !resolvedAuthentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(Map.of("message", "로그인이 필요합니다."));
         }
-        String userEmail = authentication.getName(); // Spring Security에서 로그인한 유저 이메일 추출
+
+        String userEmail = resolvedAuthentication.getName();
         int updatedLikeCount = boardService.toggleLike(id, userEmail);
 
-        // 좋아요 카운트와 현재 유저의 하트 온/오프 상태를 같이 프론트에 응답
         return ResponseEntity.ok(Map.of(
                 "likeCount", updatedLikeCount,
                 "isLiked", boardService.isLikedByUser(id, userEmail)
@@ -139,9 +158,15 @@ public class BoardController {
 
     @GetMapping("/api/board/{id}/like/status")
     @ResponseBody
-    public ResponseEntity<?> getLikeStatus(@PathVariable Long id, Authentication authentication) {
-        String userEmail = (authentication != null && authentication.isAuthenticated()) ? authentication.getName() : null;
-
+    public ResponseEntity<?> getLikeStatus(
+            @PathVariable Long id,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Authentication resolvedAuthentication = resolveAuthentication(authentication, request);
+        String userEmail = (resolvedAuthentication != null && resolvedAuthentication.isAuthenticated())
+                ? resolvedAuthentication.getName()
+                : null;
         // 1. DB에서 실시간으로 해당 게시글 정보를 안전하게 가져옵니다.
         com.example.potatochip.board.entity.Board board = boardService.findById(id);
 
@@ -157,5 +182,48 @@ public class BoardController {
         responseMap.put("isLiked", isLiked);
 
         return ResponseEntity.ok(responseMap);
+    }
+    private Authentication resolveAuthentication(Authentication authentication, HttpServletRequest request) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return authentication;
+        }
+
+        String token = extractToken(request);
+
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return authentication;
+        }
+
+        String email = jwtUtil.getEmail(token);
+        String role = jwtUtil.getRole(token);
+
+        return new UsernamePasswordAuthenticationToken(
+                email,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+            if (!token.isBlank() && !"null".equalsIgnoreCase(token)) {
+                return token;
+            }
+        }
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }

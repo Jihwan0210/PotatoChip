@@ -154,6 +154,16 @@ public class NotificationService {
         }
     }
 
+    @Transactional
+    public void deleteNotification(Long notificationId, Long userId) {
+        validateUserId(userId);
 
+        Notification notification = notificationRepository
+                .findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+        notificationRepository.delete(notification);
+    }
 
 }

@@ -20,7 +20,6 @@
     .faq-search-box{display:flex;align-items:center;gap:10px;background:var(--beige3);border:1.5px solid var(--beige);border-radius:14px;padding:12px 14px}
     .faq-search-box span{color:var(--muted);font-size:1rem}
     .faq-search-box input{flex:1;border:none;outline:none;background:transparent;color:var(--dark);font-size:.86rem;font-family:inherit;min-width:160px}
-    .faq-search-box input::placeholder{color:var(--muted)}
     .faq-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
     .faq-tag{padding:6px 14px;border-radius:100px;border:1.5px solid var(--beige);background:var(--white);color:var(--mid);font-size:.74rem;cursor:pointer;transition:all .2s;white-space:nowrap}
     .faq-tag.on{background:var(--green);color:#fff;border:1px solid var(--green);font-weight:700}
@@ -31,8 +30,8 @@
     .faq-cat-badge{flex-shrink:0;font-size:.65rem;color:var(--green);background:var(--gp);border-radius:100px;padding:4px 9px;font-weight:700}
     .faq-question{color:var(--dark);font-size:.88rem;font-weight:700;line-height:1.6}
     .faq-q span{color:var(--muted);transition:transform .2s;flex-shrink:0}
-    .faq-a{display:none;padding:0 20px 20px 20px;color:var(--mid);font-size:.82rem;line-height:1.85;border-top:1px solid var(--beige);background:var(--beige3)}
-    .faq-a-inner{padding-top:16px}
+    .faq-a{display:none;padding:0 20px 20px;color:var(--mid);font-size:.82rem;line-height:1.85;border-top:1px solid var(--beige);background:var(--beige3)}
+    .faq-a-inner{padding-top:16px;white-space:pre-wrap}
     .faq-empty{display:none;background:var(--white);border:1.5px solid var(--beige);border-radius:14px;padding:26px 22px;text-align:center;color:var(--muted);font-size:.84rem;line-height:1.8}
     .faq-help-card{margin-top:20px;background:linear-gradient(145deg,var(--gp),var(--beige3));border:1.5px solid var(--gl);border-radius:18px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .faq-help-title{font-family:'Gaegu',cursive;font-size:1.18rem;font-weight:700;color:var(--dark)}
@@ -41,7 +40,19 @@
     .faq-inquiry-btn{border:none;border-radius:100px;padding:11px 20px;font-family:'Gaegu',cursive;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
     .faq-inquiry-btn.primary{background:var(--green);color:#fff;box-shadow:0 6px 18px rgba(123,191,69,.24)}
     .faq-inquiry-btn.secondary{background:var(--amber);color:#fff;box-shadow:0 6px 18px rgba(240,168,62,.22)}
-    .faq-inquiry-btn:hover{transform:translateY(-1px)}
+    .faq-inquiry-btn.gray{background:var(--beige);color:var(--mid)}
+    .faq-inquiry-btn.red{background:#f2dddd;color:#b23b3b}
+    .faq-admin-actions{display:flex;gap:8px;padding:0 20px 16px;justify-content:flex-end}
+    .faq-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:100000;align-items:center;justify-content:center;padding:20px}
+    .faq-modal-card{width:100%;max-width:580px;background:#fff;border-radius:22px;padding:24px;box-shadow:0 18px 54px rgba(0,0,0,.2)}
+    .faq-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+    .faq-modal-title{font-family:'Gaegu',cursive;font-size:1.45rem;color:var(--dark);margin:0}
+    .faq-modal-close{border:none;background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer}
+    .faq-form-group{margin-bottom:14px}
+    .faq-form-group label{display:block;font-size:.74rem;color:var(--mid);font-weight:700;margin-bottom:7px}
+    .faq-form-group input,.faq-form-group select,.faq-form-group textarea{width:100%;border:1.5px solid var(--beige);border-radius:12px;background:var(--beige3);padding:12px 13px;font-family:inherit;color:var(--dark);outline:none}
+    .faq-form-group textarea{min-height:150px;resize:none;line-height:1.7}
+    .faq-form-group input:focus,.faq-form-group select:focus,.faq-form-group textarea:focus{border-color:var(--green);background:#fff}
     .chat-window{position:fixed;right:28px;bottom:225px;width:340px;max-width:calc(100vw - 40px);height:470px;background:#fff;border:1.5px solid var(--beige);border-radius:22px;box-shadow:0 14px 46px rgba(42,30,6,.2);z-index:500;display:none;flex-direction:column;overflow:hidden}
     .chat-head{background:linear-gradient(135deg,var(--green),#5E9E30);color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
     .chat-title{font-family:'Gaegu',cursive;font-size:1.15rem;font-weight:700}
@@ -55,7 +66,6 @@
     .chat-quick button{border:1.5px solid var(--gl);background:var(--gp);color:var(--green);border-radius:100px;padding:6px 10px;font-size:.7rem;font-family:inherit;cursor:pointer}
     .chat-input-row{display:flex;gap:8px;padding:12px;border-top:1.5px solid var(--beige);background:#fff}
     .chat-input-row input{flex:1;border:1.5px solid var(--beige);border-radius:100px;padding:10px 13px;outline:none;font-family:inherit;font-size:.78rem;color:var(--dark)}
-    .chat-input-row input:focus{border-color:var(--green)}
     .chat-input-row button{border:none;background:var(--amber);color:#fff;border-radius:100px;padding:0 15px;font-family:'Gaegu',cursive;font-size:.9rem;font-weight:700;cursor:pointer}
     .fab{position:fixed;right:28px;bottom:150px;z-index:700;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
     .fab-bubble{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;background:#fff;border:1.5px solid var(--beige);border-radius:16px 16px 4px 16px;padding:11px 15px;box-shadow:0 6px 24px rgba(42,30,6,.16);font-size:.78rem;font-weight:700;color:var(--dark);line-height:1.55;max-width:180px}
@@ -75,6 +85,7 @@
       <h1 class="faq-title">자주 묻는 질문 ❓</h1>
       <p class="faq-desc">주문, 배송, 상품 품질, 리뷰와 AI 기능까지 자주 들어오는 질문을 한 곳에 정리했어요.</p>
     </div>
+    <button id="faqAdminAddBtn" type="button" class="faq-inquiry-btn primary" onclick="openFaqAdminModal()" style="display:none">FAQ 등록</button>
   </section>
 
   <section class="faq-wrap">
@@ -108,8 +119,8 @@
         <div class="faq-help-desc">1:1 문의를 남기거나, 이미 남긴 문의의 답변 상태를 확인할 수 있어요.</div>
       </div>
       <div class="faq-inquiry-actions">
-        <button type="button" class="faq-inquiry-btn primary"  onclick="goInquiryCreate()">문의하기</button>
-        <button type="button" class="faq-inquiry-btn secondary"  onclick="goMyInquiry()">내 문의보기</button>
+        <button type="button" class="faq-inquiry-btn primary" onclick="goInquiryCreate()">문의하기</button>
+        <button type="button" class="faq-inquiry-btn secondary" onclick="goMyInquiry()">내 문의보기</button>
       </div>
     </div>
   </section>
@@ -139,8 +150,50 @@
 </div>
 
 <div class="fab">
-  <div class="fab-bubble">AI 문의 도우미<small>궁금한 내용을 물어보세요</small></div>
+  <div id="chatFabBubble" class="fab-bubble">AI 문의 도우미<small>궁금한 내용을 물어보세요</small></div>
   <button class="fab-btn" type="button" onclick="toggleChatbot()">🤖<span class="fab-badge">AI</span></button>
+</div>
+
+<div id="faqAdminModal" class="faq-modal" onclick="closeFaqAdminModal()">
+  <div class="faq-modal-card" onclick="event.stopPropagation()">
+    <div class="faq-modal-head">
+      <h2 id="faqModalTitle" class="faq-modal-title">FAQ 등록</h2>
+      <button type="button" class="faq-modal-close" onclick="closeFaqAdminModal()">✕</button>
+    </div>
+
+    <input id="faqEditId" type="hidden"/>
+
+    <div class="faq-form-group">
+      <label for="faqAdminCategory">카테고리</label>
+      <select id="faqAdminCategory">
+        <option value="order">주문·결제</option>
+        <option value="delivery">배송·픽업</option>
+        <option value="refund">교환·환불</option>
+        <option value="quality">상품 품질</option>
+        <option value="ai">AI 기능</option>
+      </select>
+    </div>
+
+    <div class="faq-form-group">
+      <label for="faqAdminQuestion">질문</label>
+      <input id="faqAdminQuestion" type="text" placeholder="FAQ 질문을 입력해주세요"/>
+    </div>
+
+    <div class="faq-form-group">
+      <label for="faqAdminAnswer">답변</label>
+      <textarea id="faqAdminAnswer" placeholder="FAQ 답변을 입력해주세요"></textarea>
+    </div>
+
+    <div class="faq-form-group">
+      <label for="faqAdminKeywords">키워드</label>
+      <input id="faqAdminKeywords" type="text" placeholder="예: 배송, 픽업, 환불"/>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button type="button" class="faq-inquiry-btn gray" onclick="closeFaqAdminModal()">취소</button>
+      <button type="button" class="faq-inquiry-btn primary" onclick="saveFaqAdmin()">저장</button>
+    </div>
+  </div>
 </div>
 
 <div th:replace="~{footer :: footer}"></div>
@@ -151,7 +204,26 @@
 
   document.addEventListener('DOMContentLoaded',function(){
     loadFaqList();
+
+    var role=(localStorage.getItem('role')||sessionStorage.getItem('role')||'').toUpperCase();
+    var addBtn=document.getElementById('faqAdminAddBtn');
+
+    if(role==='ADMIN'&&addBtn){
+      addBtn.style.display='inline-block';
+    }
   });
+
+  function getFaqAdminToken(){
+    return localStorage.getItem('token')||sessionStorage.getItem('token');
+  }
+
+  function getFaqAdminUserId(){
+    return Number(localStorage.getItem('currentUserId')||sessionStorage.getItem('currentUserId')||1);
+  }
+
+  function isFaqAdmin(){
+    return (localStorage.getItem('role')||sessionStorage.getItem('role')||'').toUpperCase()==='ADMIN';
+  }
 
   function loadFaqList(){
     var input=document.getElementById('faqSearchInput');
@@ -208,6 +280,7 @@
   function renderFaqList(faqs){
     var list=document.getElementById('faqList');
     var empty=document.getElementById('faqEmpty');
+    var admin=isFaqAdmin();
 
     if(!list){
       return;
@@ -228,17 +301,142 @@
     }
 
     list.innerHTML=faqs.map(function(faq){
+      var adminButtons=admin
+              ? '<div class="faq-admin-actions">'
+              + '<button type="button" class="faq-inquiry-btn gray" onclick="event.stopPropagation();openFaqAdminModal('+faq.id+')">수정</button>'
+              + '<button type="button" class="faq-inquiry-btn red" onclick="event.stopPropagation();deleteFaqAdmin('+faq.id+')">삭제</button>'
+              + '</div>'
+              : '';
+
       return '<div class="faq-item" data-cat="'+escapeFaqHtml(faq.category)+'">'
-              +'<div class="faq-q" onclick="toggleFaq(this)">'
-              +'<div class="faq-q-left">'
-              +'<div class="faq-cat-badge">'+getFaqCategoryName(faq.category)+'</div>'
-              +'<div class="faq-question">'+escapeFaqHtml(faq.question)+'</div>'
-              +'</div>'
-              +'<span>⌄</span>'
-              +'</div>'
-              +'<div class="faq-a"><div class="faq-a-inner">'+escapeFaqHtml(faq.answer)+'</div></div>'
-              +'</div>';
+              + '<div class="faq-q" onclick="toggleFaq(this)">'
+              + '<div class="faq-q-left">'
+              + '<div class="faq-cat-badge">'+getFaqCategoryName(faq.category)+'</div>'
+              + '<div class="faq-question">'+escapeFaqHtml(faq.question)+'</div>'
+              + '</div>'
+              + '<span>⌄</span>'
+              + '</div>'
+              + '<div class="faq-a"><div class="faq-a-inner">'+escapeFaqHtml(faq.answer)+'</div></div>'
+              + adminButtons
+              + '</div>';
     }).join('');
+  }
+
+  function openFaqAdminModal(id){
+    var modal=document.getElementById('faqAdminModal');
+    var title=document.getElementById('faqModalTitle');
+
+    document.getElementById('faqEditId').value=id||'';
+    document.getElementById('faqAdminCategory').value='order';
+    document.getElementById('faqAdminQuestion').value='';
+    document.getElementById('faqAdminAnswer').value='';
+    document.getElementById('faqAdminKeywords').value='';
+
+    if(title){
+      title.textContent=id?'FAQ 수정':'FAQ 등록';
+    }
+
+    if(id){
+      fetch('/api/ai/chatbot/faqs/'+id)
+              .then(function(res){return res.json();})
+              .then(function(faq){
+                document.getElementById('faqAdminCategory').value=faq.category||'order';
+                document.getElementById('faqAdminQuestion').value=faq.question||'';
+                document.getElementById('faqAdminAnswer').value=faq.answer||'';
+                document.getElementById('faqAdminKeywords').value=faq.keywords||'';
+              });
+    }
+
+    modal.style.display='flex';
+  }
+
+  function closeFaqAdminModal(){
+    var modal=document.getElementById('faqAdminModal');
+
+    if(modal){
+      modal.style.display='none';
+    }
+  }
+
+  function saveFaqAdmin(){
+    var id=document.getElementById('faqEditId').value;
+    var category=document.getElementById('faqAdminCategory').value;
+    var question=document.getElementById('faqAdminQuestion').value.trim();
+    var answer=document.getElementById('faqAdminAnswer').value.trim();
+    var keywords=document.getElementById('faqAdminKeywords').value.trim();
+    var userId=getFaqAdminUserId();
+
+    if(!question){
+      alert('FAQ 질문을 입력해주세요.');
+      return;
+    }
+
+    if(!answer){
+      alert('FAQ 답변을 입력해주세요.');
+      return;
+    }
+
+    var body={
+      category:category,
+      question:question,
+      answer:answer,
+      keywords:keywords,
+      createdBy:userId,
+      updatedBy:userId
+    };
+
+    fetch('/api/ai/chatbot/faqs'+(id?'/'+id:''),{
+      method:id?'PUT':'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+getFaqAdminToken()
+      },
+      body:JSON.stringify(body)
+    })
+            .then(function(res){
+              return res.json().then(function(data){
+                return {
+                  ok:res.ok,
+                  data:data
+                };
+              });
+            })
+            .then(function(result){
+              if(!result.ok){
+                alert(result.data.message||'FAQ 저장에 실패했습니다.');
+                return;
+              }
+
+              closeFaqAdminModal();
+              loadFaqList();
+            })
+            .catch(function(){
+              alert('FAQ 저장 중 오류가 발생했습니다.');
+            });
+  }
+
+  function deleteFaqAdmin(id){
+    if(!confirm('FAQ를 삭제할까요?')){
+      return;
+    }
+
+    fetch('/api/ai/chatbot/faqs/'+id,{
+      method:'DELETE',
+      headers:{
+        'Authorization':'Bearer '+getFaqAdminToken()
+      }
+    })
+            .then(function(res){
+              if(!res.ok){
+                alert('FAQ 삭제에 실패했습니다.');
+                return;
+              }
+
+              loadFaqList();
+            })
+            .catch(function(){
+              alert('FAQ 삭제 중 오류가 발생했습니다.');
+            });
   }
 
   function faqFilter(cat,element){
@@ -323,13 +521,19 @@
 
   function toggleChatbot(){
     var chatWindow=document.getElementById('chatWindow');
+    var bubble=document.getElementById('chatFabBubble');
 
     if(!chatWindow){
       return;
     }
 
     var isOpen=chatWindow.style.display==='flex';
+
     chatWindow.style.display=isOpen?'none':'flex';
+
+    if(풍선껌){
+      bubble.style.display=isOpen?'block':'none';
+    }
 
     if(!isOpen){
       setTimeout(function(){
@@ -339,75 +543,6 @@
           input.focus();
         }
       },100);
-    }
-  }
-
-  function closeChatbot(){
-    var chatWindow=document.getElementById('chatWindow');
-
-    if(chatWindow){
-      chatWindow.style.display='none';
-    }
-  }
-
-  function handleChatEnter(event){
-    if(event.key==='Enter'){
-      sendChatMessage();
-    }
-  }
-
-  function sendQuickQuestion(question){
-    var input=document.getElementById('chatInput');
-
-    if(input){
-      input.value=question;
-    }
-
-    sendChatMessage();
-  }
-
-  async function sendChatMessage(){
-    var input=document.getElementById('chatInput');
-    var body=document.getElementById('chatBody');
-
-    if(!input||!body){
-      return;
-    }
-
-    var question=input.value.trim();
-
-    if(!question){
-      return;
-    }
-
-    appendChatMessage('user',question);
-    input.value='';
-    appendChatMessage('bot','답변을 찾는 중이에요...');
-
-    try{
-      var currentUserId=localStorage.getItem('currentUserId')?Number(localStorage.getItem('currentUserId')):null;
-      var response=await fetch('/api/ai/chatbot/ask',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          userId:currentUserId,
-          question:question
-        })
-      });
-
-      var data=await response.json();
-
-      removeLastBotLoadingMessage();
-
-      if(!response.ok){
-        appendChatMessage('bot',data.message||'답변을 불러오지 못했어요.');
-        return;
-      }
-
-      appendChatMessage('bot',data.answer||'답변을 찾지 못했어요.');
-    }catch(error){
-      removeLastBotLoadingMessage();
-      appendChatMessage('bot','서버 연결에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
@@ -444,32 +579,43 @@
     body.appendChild(messageElement);
     body.scrollTop=body.scrollHeight;
   }
-  function isLoggedIn() {
-    const token =
-            localStorage.getItem('token') ||
-            sessionStorage.getItem('token');
 
+  function isLoggedIn(){
+    var token=localStorage.getItem('token')||sessionStorage.getItem('token');
     return !!token;
   }
 
-  function goInquiryCreate() {
-    if (!isLoggedIn()) {
+  function goInquiryCreate(){
+    if(!isLoggedIn()){
       alert('로그인 후 문의를 작성할 수 있습니다.');
-      location.href = '/login';
+      location.href='/login';
       return;
     }
 
-    location.href = '/create';
+    location.href='/create';
   }
 
-  function goMyInquiry() {
-    if (!isLoggedIn()) {
+  function goMyInquiry(){
+    if(!isLoggedIn()){
       alert('로그인 후 문의 내역을 확인할 수 있습니다.');
-      location.href = '/login';
+      location.href='/login';
       return;
     }
 
-    location.href = '/my';
+    location.href='/my';
+  }
+
+  function closeChatbot(){
+    var chatWindow=document.getElementById('chatWindow');
+    var bubble=document.getElementById('chatFabBubble');
+
+    if(chatWindow){
+      chatWindow.style.display='none';
+    }
+
+    if(풍선껌){
+      bubble.style.display='block';
+    }
   }
 </script>
 </body>

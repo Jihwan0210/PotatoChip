@@ -15,8 +15,8 @@
     </ul>
     <div class="nav-r">
         <!-- 알림 -->
-        <span class="n-ico" id="bellIcon" onclick="toggleNotif()" style="cursor:pointer;position:relative">🔔<span style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></span>
-
+        <div style="position:relative">
+        <span class="n-ico" id="bellIcon" style="cursor:pointer;position:relative">🔔<span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px">0</span></span><div id="notificationDropdown" style="display:none;position:fixed;right:70px;top:64px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 10px 30px rgba(42,30,6,.14);z-index:99999;overflow:hidden"><div style="padding:13px 15px;border-bottom:1px solid var(--sand);font-size:.86rem;font-weight:700;color:var(--dark)">알림</div><div id="notificationList" style="max-height:360px;overflow:auto"><div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오는 중...</div></div></div></div>
         <!-- 로그인 후: 이름 버튼 + 드롭다운 -->
         <div class="nav-user-wrap" id="nav-user-wrap" style="display:none">
             <button type="button" class="btn-nav nav-user-btn" id="nav-user-btn" onclick="toggleUserDropdown(event)">
@@ -37,6 +37,7 @@
                 <div class="nd-item nd-logout" onclick="handleNavLogout()">🚪 로그아웃</div>
             </div>
         </div>
+
 
         <!-- 비로그인 시: 로그인 버튼 -->
         <a th:href="@{/login}" class="btn-nav" id="btn-nav-login">로그인</a>
@@ -98,6 +99,10 @@
             if (dd) dd.classList.remove('open');
         });
 
+        function getNavUserId() {
+            return localStorage.getItem('currentUserId') || sessionStorage.getItem('currentUserId');
+        }
+
         function goRolePage() {
             var token = localStorage.getItem('token') || sessionStorage.getItem('token');
             var role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
@@ -151,6 +156,198 @@
         }
 
         updateCartBadge();
+
+        function getNavToken() {
+            return localStorage.getItem('token') || sessionStorage.getItem('token');
+        }
+
+        async function loadNotificationCount() {
+            const token = getNavToken();
+            const badge = document.getElementById('notificationBadge');
+
+            if (!token || !badge) return;
+
+            try {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                const response = await fetch('/api/notifications/unread-count?userId=' + encodeURIComponent(userId), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                const count = data.count || 0;
+
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (e) {}
+        }
+
+        async function toggleNotificationDropdown() {
+            const dropdown = document.getElementById('notificationDropdown');
+
+            if (!dropdown) return;
+
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            dropdown.style.display = 'block';
+            await loadNotifications();
+        }
+
+        async function loadNotifications() {
+            const token = getNavToken();
+            const list = document.getElementById('notificationList');
+
+            if (!list) return;
+
+            if (!token) {
+                list.innerHTML = '<div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">로그인 후 알림을 확인할 수 있어요.</div>';
+                return;
+            }
+
+            try {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                const response = await fetch('/api/notifications?userId=' + encodeURIComponent(userId), {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !Array.isArray(data)) {
+                    list.innerHTML = '<div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오지 못했습니다.</div>';
+                    return;
+                }
+
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">새 알림이 없습니다.</div>';
+                    return;
+                }
+
+                list.innerHTML = data.map(function(item) {
+                    return ''
+                        + '<div style="position:relative;padding:13px 15px;border-bottom:1px solid var(--sand);background:' + (item.isRead ? '#fff' : 'var(--gp)') + '">'
+                        + '  <button onclick="deleteNotification(' + item.id + ', event)" '
+                        + '          style="position:absolute;top:8px;right:10px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">✕</button>'
+                        + '  <div onclick="readNotification(' + item.id + ', \'' + escapeNotificationAttr(item.targetUrl || '') + '\')" style="cursor:pointer">'
+                        + '      <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">' + escapeNotificationHtml(item.title) + '</div>'
+                        + '      <div style="font-size:.74rem;color:var(--mid);line-height:1.5">' + escapeNotificationHtml(item.message) + '</div>'
+                        + '      <div style="font-size:.66rem;color:var(--muted);margin-top:5px">' + formatNotificationDate(item.createdAt) + '</div>'
+                        + '  </div>'
+                        + '</div>';
+                }).join('');
+            } catch (e) {
+                list.innerHTML = '<div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림 서버 연결 실패</div>';
+            }
+        }
+
+        async function readNotification(id, targetUrl) {
+            const token = getNavToken();
+
+            if (token) {
+                const userId = getNavUserId();
+                if (!userId) return;
+
+                await fetch('/api/notifications/' + id + '/read?userId=' + encodeURIComponent(userId), {
+                    method: 'PATCH',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+            }
+
+            await loadNotificationCount();
+
+            if (targetUrl && targetUrl !== 'null') {
+                location.href = targetUrl;
+            }
+        }
+
+        async function deleteNotification(id, event) {
+            event.stopPropagation();
+
+            const token = getNavToken();
+            const userId = getNavUserId();
+
+            if (!token || !userId) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    '/api/notifications/' + id + '?userId=' + encodeURIComponent(userId),
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    alert('알림 삭제 실패');
+                    return;
+                }
+
+                await loadNotificationCount();
+                await loadNotifications();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function escapeNotificationHtml(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function escapeNotificationAttr(value) {
+            return String(value == null ? '' : value)
+                .replaceAll('\\', '\\\\')
+                .replaceAll("'", "\\'");
+        }
+
+        function formatNotificationDate(value) {
+            if (!value) return '';
+            return String(value).replace('T', ' ').substring(0, 16);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadNotificationCount);
+        document.addEventListener('DOMContentLoaded', function() {
+            const bellIcon = document.getElementById('bellIcon');
+
+            if (bellIcon) {
+                bellIcon.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleNotificationDropdown();
+                });
+            }
+
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('notificationDropdown');
+                const bell = document.getElementById('bellIcon');
+
+                if (!dropdown || !bell) return;
+
+                if (!dropdown.contains(event.target) && !bell.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
 
     </script>
 </nav>

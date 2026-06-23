@@ -286,6 +286,7 @@ function doLogin() {
                 storage.setItem('email', result.email);
                 storage.setItem('role', result.role);
                 storage.setItem('name', result.name || '');
+                storage.setItem('currentUserId', result.id);
                 document.getElementById('lf').style.display = 'none';
                 showSuccessModal(
                     '로그인 성공! 🎉',
@@ -417,7 +418,7 @@ function openAddressSearch() {
 
 /* ══ 로그아웃 ══ */
 function doLogout() {
-    ['token', 'email', 'role', 'name'].forEach(function (k) {
+    ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function (k) {
         localStorage.removeItem(k);
         sessionStorage.removeItem(k);
     });
