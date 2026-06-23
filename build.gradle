@@ -47,7 +47,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    //클로드
+    implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
+
     
     //채팅기능 웹 소켓 추가
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
