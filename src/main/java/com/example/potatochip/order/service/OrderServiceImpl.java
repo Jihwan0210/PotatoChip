@@ -11,6 +11,7 @@ import com.example.potatochip.order.entity.Order;
 import com.example.potatochip.order.entity.OrderItem;
 import com.example.potatochip.order.entity.OrderStatus;
 import com.example.potatochip.order.repository.OrderRepository;
+import com.example.potatochip.product.coupons.service.CouponService;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -30,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CouponService couponService;
 
 
     @Override
@@ -67,6 +69,26 @@ public class OrderServiceImpl implements OrderService {
                 ? requestDTO.getShippingFee()
                 : BigDecimal.ZERO;
 
+        // 쿠폰 할인 적용 (상품 전용 쿠폰은 해당 상품 금액에만 적용)
+        BigDecimal couponDiscount = BigDecimal.ZERO;
+        if (requestDTO.getUserCouponId() != null) {
+            java.util.Map<Long, BigDecimal> amountByProduct = targetItems.stream()
+                    .collect(Collectors.toMap(
+                            CartItem::getProductId,
+                            item -> item.getPriceSnapshot().multiply(BigDecimal.valueOf(item.getQuantity()))));
+
+            List<Long> orderedProductIds = new java.util.ArrayList<>(amountByProduct.keySet());
+
+            Long couponProductId = couponService.getCouponTargetProductId(requestDTO.getUserCouponId());
+            BigDecimal targetProductAmount = (couponProductId != null)
+                    ? amountByProduct.get(couponProductId)
+                    : null;
+
+            couponDiscount = couponService.calculateDiscount(
+                    requestDTO.getUserCouponId(), totalAmount, shippingFee, orderedProductIds, targetProductAmount);
+        }
+        BigDecimal discountedTotal = totalAmount.subtract(couponDiscount).max(BigDecimal.ZERO);
+
         Order newOrder = Order.builder()
                 .buyerId(buyerId)
                 // 🌟 orders.cart_id가 NOT NULL이라 반드시 채워줘야 합니다!
@@ -78,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentMethod(requestDTO.getPaymentMethod())
                 .deliveryType(requestDTO.getDeliveryType() != null ? requestDTO.getDeliveryType() : "delivery")
                 .pickupDatetime(requestDTO.getPickuptime())
-                .totalAmount(totalAmount)
+                .totalAmount(discountedTotal) //쿠폰할인 토탈
                 .totalShippingFee(shippingFee)
                 .status(OrderStatus.PAYMENT_COMPLETE)
                 .build();
@@ -102,9 +124,14 @@ public class OrderServiceImpl implements OrderService {
         // 6. 속이 꽉 찬 영수증을 DB 창고에 영구적으로 저장합니다! (주문 완료)
         Order savedOrder = orderRepository.save(newOrder);
 
-        // 7. 포인트 차감 및 구매 적립 처리
+        // 7. 쿠폰 사용 처리
+        if (requestDTO.getUserCouponId() != null) {
+            couponService.useCoupon(requestDTO.getUserCouponId());
+        }
+
+        // 8. 포인트 차감 및 구매 적립 처리
         int pointUsed = requestDTO.getPointUsed() != null ? requestDTO.getPointUsed() : 0;
-        BigDecimal finalAmount = totalAmount.subtract(BigDecimal.valueOf(pointUsed)).max(BigDecimal.ZERO);
+        BigDecimal finalAmount = discountedTotal.subtract(BigDecimal.valueOf(pointUsed)).max(BigDecimal.ZERO);
         int earnedPoints = finalAmount.divide(BigDecimal.valueOf(100), 0, RoundingMode.FLOOR).intValue();
 
         userRepository.findById(buyerId).ifPresent(user -> {
