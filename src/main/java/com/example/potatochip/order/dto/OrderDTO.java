@@ -25,10 +25,12 @@ public class OrderDTO {
     @Setter
     @Builder
     public static class OrderItemDTO {
+        private Long orderItemId;
         private Long productId;
         private int quantity;
         private BigDecimal price;
         private String productName;
         private String thumbnailUrl;
+        private String status;
     }
 }

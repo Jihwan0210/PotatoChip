@@ -34,7 +34,7 @@
         .inquiry-date{font-size:.68rem;color:var(--muted);white-space:nowrap}
         .inquiry-answer{margin-top:13px;background:var(--beige3);border-radius:14px;padding:13px;font-size:.8rem;color:var(--mid);line-height:1.7}
         .inquiry-answer strong{color:var(--green)}
-        .inquiry-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
+        .inquiry-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;justify-content:flex-end}
         .inquiry-small-btn{border:none;border-radius:100px;padding:7px 12px;font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer}
         .inquiry-small-btn.delete{background:#eee;color:#777}
 
@@ -259,7 +259,7 @@
                 +'<div class="inquiry-card-content">'+escapeHtml(item.content)+'</div>'
                 +'<div class="inquiry-meta-line">'
                 +'<span class="inquiry-meta-chip">문의 ID '+escapeHtml(item.id)+'</span>'
-                +'<span class="inquiry-meta-chip">'+escapeHtml(targetLabel)+' '+escapeHtml(targetValue)+'</span>'
+                +'<span class="inquiry-meta-chip">'+escapeHtml(formatMyInquiryListTarget(item))+'</span>'
                 +'<span class="inquiry-meta-chip">작성일 '+escapeHtml(formatInquiryDateTime(item.createdAt))+'</span>'
                 +'<span class="inquiry-meta-chip">답변일 '+escapeHtml(getInquiryAnsweredDate(item))+'</span>'
                 +'</div>'
@@ -473,15 +473,39 @@
         });
     }
 
+
+    function formatMyInquiryListTarget(item){
+        var orderId=item&&item.orderId;
+        var productId=item&&item.productId;
+
+        if(orderId&&productId){
+            return '주문 ID '+orderId+' / 상품 ID '+productId;
+        }
+
+        if(orderId){
+            return '주문 ID '+orderId;
+        }
+
+        if(productId){
+            return '상품 ID '+productId;
+        }
+
+        return '문의 대상 -';
+    }
+
     function getInquiryTargetLabel(item){
         var role=String(item.userRole||item.userRoleText||'').toUpperCase();
 
         if(role.indexOf('SELLER')>=0||role.indexOf('판매자')>=0){
-            return '상품 ID';
+            return '문의 대상';
         }
 
         if(role.indexOf('BUYER')>=0||role.indexOf('구매자')>=0){
-            return '주문 ID';
+            return item.productId ? '주문/상품' : '주문 ID';
+        }
+
+        if(item.orderId&&item.productId){
+            return '주문/상품';
         }
 
         if(item.productId){
@@ -492,9 +516,11 @@
     }
 
     function getInquiryTargetValue(item){
-        return getInquiryTargetLabel(item)==='상품 ID'
-            ? (item.productId||'-')
-            : (item.orderId||'-');
+        var label=getInquiryTargetLabel(item);
+        if(label==='문의 대상')return '-';
+        if(label==='주문/상품')return '주문 ID '+(item.orderId||'-')+' / 상품 ID '+(item.productId||'-');
+        if(label==='상품 ID')return item.productId||'-';
+        return item.orderId||'-';
     }
 
     function getInquiryAnsweredDate(item){
