@@ -84,24 +84,18 @@ public class OrderController {
 
     @PostMapping("/checkout")
     public String checkoutOrder(OrderRequestDTO requestDTO,
+                                @RequestParam(required = false) String token,
                                 HttpServletRequest request) {
         Long buyerId;
-        String token = null;
         try {
-            String header = request.getHeader("Authorization");
-            if (header != null && header.startsWith("Bearer ")) {
-                token = header.substring(7);
-            }
-            if (token == null) {
-                token = request.getParameter("token");
-            }
             buyerId = getLoginUserId(request);
         } catch (IllegalStateException e) {
             return "redirect:/login";
         }
 
         Long newOrderId = orderService.OrderFromCart(buyerId, requestDTO);
-        return "redirect:/orders/complete/" + newOrderId + "?token=" + token;
+        String safeToken = (token != null && !token.isEmpty()) ? token : "";
+        return "redirect:/orders/complete/" + newOrderId + "?token=" + safeToken;
     }
 
     @GetMapping("/complete/{orderId}")

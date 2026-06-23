@@ -21,7 +21,6 @@ public class OrderDTO {
     private LocalDateTime createdAt;
     private String status;
     private List<OrderItemDTO> orderItems;
-
     @Getter
     @Setter
     @Builder
