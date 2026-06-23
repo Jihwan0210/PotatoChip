@@ -286,7 +286,7 @@ function doLogin() {
                 storage.setItem('email', result.email);
                 storage.setItem('role', result.role);
                 storage.setItem('name', result.name || '');
-                storage.setItem('currentUserId', result.id);
+                document.cookie = 'jwt=' + result.token + '; path=/; SameSite=Lax';
                 document.getElementById('lf').style.display = 'none';
                 showSuccessModal(
                     '로그인 성공! 🎉',
@@ -407,6 +407,7 @@ function openAddressSearch() {
     localStorage.setItem('name',  decodeURIComponent(params.get('oauth_name')  || ''));
     localStorage.setItem('email', decodeURIComponent(params.get('oauth_email') || ''));
     localStorage.setItem('role',  params.get('oauth_role') || 'BUYER');
+    document.cookie = 'jwt=' + token + '; path=/; SameSite=Lax';
 
     var name = localStorage.getItem('name') || '고객';
     showSuccessModal(
@@ -418,9 +419,10 @@ function openAddressSearch() {
 
 /* ══ 로그아웃 ══ */
 function doLogout() {
-    ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function (k) {
+    ['token', 'email', 'role', 'name'].forEach(function (k) {
         localStorage.removeItem(k);
         sessionStorage.removeItem(k);
     });
+    document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
     location.href = '/login';
 }

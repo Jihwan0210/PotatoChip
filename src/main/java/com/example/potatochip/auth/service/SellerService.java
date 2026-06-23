@@ -44,13 +44,12 @@ public class SellerService {
 
         long todayOrders = sellerOrders.stream()
                 .filter(o -> o.getCreatedAt() != null &&
-                             o.getCreatedAt().toLocalDate().equals(today))
+                        o.getCreatedAt().toLocalDate().equals(today))
                 .count();
 
-        // sellerId 하드코딩 문제 우회: 상품 ID 목록으로 필터
         BigDecimal monthlyRevenue = sellerOrders.stream()
                 .filter(o -> o.getCreatedAt() != null &&
-                             !o.getCreatedAt().toLocalDate().isBefore(startOfMonth))
+                        !o.getCreatedAt().toLocalDate().isBefore(startOfMonth))
                 .flatMap(o -> o.getOrderItems().stream())
                 .filter(i -> myProductIds.contains(i.getProductId()) && i.getPrice() != null)
                 .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
@@ -121,6 +120,7 @@ public class SellerService {
             m.put("discountPrice", p.getDiscountPrice());
             m.put("stockQuantity", stock);
             m.put("expiryDate",    p.getExpiryDate() != null ? p.getExpiryDate().toString() : null);
+            m.put("thumbnailUrl",  p.getThumbnailUrl());
             result.add(m);
         }
         return result;
@@ -140,19 +140,17 @@ public class SellerService {
 
         OrderStatus newStatus = OrderStatus.valueOf(statusStr);
 
-        // order_items 테이블 직접 UPDATE (dirty checking 우회)
         entityManager.createQuery(
-                "UPDATE OrderItem i SET i.status = :status, i.updatedAt = :now" +
-                " WHERE i.order.id = :orderId AND i.productId IN :productIds")
+                        "UPDATE OrderItem i SET i.status = :status, i.updatedAt = :now" +
+                                " WHERE i.order.id = :orderId AND i.productId IN :productIds")
                 .setParameter("status", newStatus)
                 .setParameter("now", java.time.LocalDateTime.now())
                 .setParameter("orderId", orderId)
                 .setParameter("productIds", myProductIds)
                 .executeUpdate();
 
-        // orders 테이블 직접 UPDATE
         entityManager.createQuery(
-                "UPDATE Order o SET o.status = :status, o.updatedAt = :now WHERE o.id = :orderId")
+                        "UPDATE Order o SET o.status = :status, o.updatedAt = :now WHERE o.id = :orderId")
                 .setParameter("status", newStatus)
                 .setParameter("now", java.time.LocalDateTime.now())
                 .setParameter("orderId", orderId)
@@ -165,7 +163,6 @@ public class SellerService {
         List<Order> sellerOrders = getSellerOrders(sellerId);
         LocalDate now = LocalDate.now();
 
-        // ── 최근 6개월 월별 매출 ──────────────────────────────
         LinkedHashMap<String, BigDecimal> monthRevMap = new LinkedHashMap<>();
         for (int i = 5; i >= 0; i--) {
             LocalDate m = now.minusMonths(i);
@@ -200,7 +197,6 @@ public class SellerService {
             monthlyStats.add(m);
         }
 
-        // ── 요일별 주문 패턴 ──────────────────────────────────
         long[] wdCounts = new long[7];
         for (Order o : sellerOrders) {
             if (o.getCreatedAt() == null) continue;
@@ -238,7 +234,6 @@ public class SellerService {
         List<Order> sellerOrders = getSellerOrders(sellerId);
         LocalDate now = LocalDate.now();
 
-        // 최근 12개월 초기화
         LinkedHashMap<String, BigDecimal> monthRevMap = new LinkedHashMap<>();
         for (int i = 11; i >= 0; i--) {
             LocalDate m = now.minusMonths(i);
@@ -288,8 +283,8 @@ public class SellerService {
     @Transactional
     public void updateStock(Long productId, Long sellerId, int quantity) {
         int updated = entityManager.createQuery(
-                "UPDATE Product p SET p.stockQuantity = :quantity, p.updatedAt = :now" +
-                " WHERE p.id = :productId AND p.seller.id = :sellerId")
+                        "UPDATE Product p SET p.stockQuantity = :quantity, p.updatedAt = :now" +
+                                " WHERE p.id = :productId AND p.seller.id = :sellerId")
                 .setParameter("quantity", quantity)
                 .setParameter("now", java.time.LocalDateTime.now())
                 .setParameter("productId", productId)
@@ -301,13 +296,8 @@ public class SellerService {
     private List<Order> getSellerOrders(Long sellerId) {
         List<Long> myProductIds = productRepository.findBySellerId(sellerId)
                 .stream().map(Product::getId).toList();
-
-        return orderRepository.findAll().stream()
-                .filter(o -> o.getOrderItems() != null &&
-                             o.getOrderItems().stream().anyMatch(i -> myProductIds.contains(i.getProductId())))
-                .sorted(Comparator.comparing(o -> o.getCreatedAt() == null ? "" : o.getCreatedAt().toString(),
-                        Comparator.reverseOrder()))
-                .toList();
+        if (myProductIds.isEmpty()) return List.of();
+        return orderRepository.findByProductIdIn(myProductIds);
     }
 
     public User findByEmail(String email) {
