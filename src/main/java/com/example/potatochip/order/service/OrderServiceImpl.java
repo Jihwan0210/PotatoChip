@@ -140,7 +140,7 @@ public class OrderServiceImpl implements OrderService {
             userRepository.save(user);
         });
 
-        // 8. 장바구니 정리
+        // 9. 장바구니 정리
         if (selectedIds != null && !selectedIds.isEmpty()) {
             // 선택한 상품만 제거, 나머지는 장바구니에 남김
             cart.getCartItems().removeIf(item -> selectedIds.contains(item.getProductId()));
