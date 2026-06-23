@@ -68,6 +68,18 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 })();
 
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(location.search);
+    var chatRoomId = params.get('chatRoomId');
+    if (chatRoomId) {
+        setTimeout(function() {
+            openChatRoomById(Number(chatRoomId));
+        }, 500);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) return;
@@ -673,6 +685,20 @@ function openChatListModal() {
         .catch(function() { showToast('채팅 목록을 불러올 수 없어요.'); });
 }
 
+
+function openChatRoomById(roomId) {
+    var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token || !roomId) return;
+    currentRoomId = roomId;
+    var listModal = document.getElementById('chatListModal');
+    if (listModal) listModal.style.display = 'none';
+    document.getElementById('chatMsgList').innerHTML = '';
+    document.getElementById('chatRoomLabel').textContent = '채팅방';
+    document.getElementById('chatModal').style.display = 'flex';
+    loadChatHistory(roomId, token);
+    connectStomp(roomId, token);
+}
+
 function openChatFromList(roomId) {
     var token = localStorage.getItem('token') || sessionStorage.getItem('token');
     currentRoomId = roomId;
@@ -697,6 +723,8 @@ function loadChatHistory(roomId, token) {
             fetch('/chat/rooms/' + roomId + '/read', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token }
+            }).then(function(){
+                if (typeof loadNotificationCount === 'function') loadNotificationCount();
             });
         });
 }
