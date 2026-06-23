@@ -8,9 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.math.BigDecimal;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -21,10 +18,8 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-
     public List<NotificationDTO> getNotifications(Long userId) {
         validateUserId(userId);
-
         return notificationRepository.findTop20ByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(NotificationDTO::fromEntity)
@@ -39,17 +34,14 @@ public class NotificationService {
     @Transactional
     public void markAsRead(Long notificationId, Long userId) {
         validateUserId(userId);
-
         Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
-
         notification.markAsRead();
     }
 
     @Transactional
     public void markAllAsRead(Long userId) {
         validateUserId(userId);
-
         notificationRepository.findTop20ByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .filter(notification -> !Boolean.TRUE.equals(notification.getIsRead()))
@@ -77,56 +69,40 @@ public class NotificationService {
 
     @Transactional
     public void createInquiryAnsweredNotification(Long userId, Long inquiryId, String title) {
-        create(
-                userId,
-                NotificationType.INQUIRY_ANSWERED,
-                "문의 답변이 등록됐어요",
-                title + " 문의에 답변이 등록됐어요.",
-                "/my?inquiryId=" + inquiryId,
-                "INQUIRY",
-                inquiryId
-        );
+        create(userId, NotificationType.INQUIRY_ANSWERED, "문의 답변이 등록됐어요", title + " 문의에 답변이 등록됐어요.", "/my?inquiryId=" + inquiryId, "INQUIRY", inquiryId);
     }
 
     @Transactional
     public void createReviewReminderNotification(Long userId, Long orderItemId, String productName) {
-        if (notificationRepository.existsByUserIdAndTypeAndReferenceTypeAndReferenceId(
-                userId,
-                NotificationType.REVIEW_REMINDER,
-                "ORDER_ITEM",
-                orderItemId
-        )) {
+        if (notificationRepository.existsByUserIdAndTypeAndReferenceTypeAndReferenceId(userId, NotificationType.REVIEW_REMINDER, "ORDER_ITEM", orderItemId)) {
             return;
         }
-
-        create(
-                userId,
-                NotificationType.REVIEW_REMINDER,
-                "리뷰를 남겨주세요",
-                productName + " 상품은 어떠셨나요? 리뷰를 남겨주세요.",
-                "/mypage",
-                "ORDER_ITEM",
-                orderItemId
-        );
+        create(userId, NotificationType.REVIEW_REMINDER, "리뷰를 남겨주세요", productName + " 상품은 어떠셨나요? 리뷰를 남겨주세요.", "/mypage", "ORDER_ITEM", orderItemId);
     }
 
     @Transactional
     public void createPriceChangedNotification(Long userId, Long productId, String productName, BigDecimal oldPrice, BigDecimal newPrice) {
-        create(
-                userId,
-                NotificationType.PRICE_CHANGED,
-                "찜한 상품 가격이 바뀌었어요",
-                productName + " 가격이 " + formatPrice(oldPrice) + "원에서 " + formatPrice(newPrice) + "원으로 변경됐어요.",
-                "/market/detail?id=" + productId,
-                "PRODUCT",
-                productId
-        );
+        create(userId, NotificationType.PRICE_CHANGED, "찜한 상품 가격이 바뀌었어요", productName + " 가격이 " + formatPrice(oldPrice) + "원에서 " + formatPrice(newPrice) + "원으로 변경됐어요.", "/market/detail?id=" + productId, "PRODUCT", productId);
+    }
+
+    @Transactional
+    public void createChatMessageNotification(Long userId, Long roomId, Long productId, String senderName) {
+        create(userId, NotificationType.CHAT_MESSAGE, "새 채팅 메시지가 도착했어요", senderName + "님이 메시지를 보냈어요.", "/market/detail?id=" + productId + "&chatRoomId=" + roomId, "CHAT_ROOM", roomId);
+    }
+
+    @Transactional
+    public void createBoardHiddenNotification(Long userId, Long boardId, String boardTitle) {
+        create(userId, NotificationType.BOARD_HIDDEN, "게시글이 숨김 처리됐어요", "작성한 글 '" + boardTitle + "'이 관리자에 의해 숨김 처리됐어요.", "/board", "BOARD", boardId);
+    }
+
+    @Transactional
+    public void createBoardDeletedNotification(Long userId, Long boardId, String boardTitle) {
+        create(userId, NotificationType.BOARD_DELETED, "게시글이 삭제 처리됐어요", "작성한 글 '" + boardTitle + "'이 관리자에 의해 삭제 처리됐어요.", "/board", "BOARD", boardId);
     }
 
     @Transactional
     public void create(Long userId, NotificationType type, String title, String message, String targetUrl, String referenceType, Long referenceId) {
         validateUserId(userId);
-
         Notification notification = Notification.builder()
                 .userId(userId)
                 .type(type)
@@ -136,34 +112,23 @@ public class NotificationService {
                 .referenceType(referenceType)
                 .referenceId(referenceId)
                 .build();
-
         notificationRepository.save(notification);
-    }
-
-    private String formatPrice(BigDecimal price) {
-        if (price == null) {
-            return "-";
-        }
-
-        return String.format("%,d", price.longValue());
-    }
-
-    private void validateUserId(Long userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("사용자 ID가 필요합니다.");
-        }
     }
 
     @Transactional
     public void deleteNotification(Long notificationId, Long userId) {
         validateUserId(userId);
-
-        Notification notification = notificationRepository
-                .findByIdAndUserId(notificationId, userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("알림을 찾을 수 없습니다."));
-
+        Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
         notificationRepository.delete(notification);
     }
 
+    private String formatPrice(BigDecimal price) {
+        if (price == null) return "-";
+        return String.format("%,d", price.longValue());
+    }
+
+    private void validateUserId(Long userId) {
+        if (userId == null) throw new IllegalArgumentException("사용자 ID가 필요합니다.");
+    }
 }
