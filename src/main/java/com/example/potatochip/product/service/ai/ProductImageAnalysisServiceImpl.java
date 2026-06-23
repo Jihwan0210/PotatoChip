@@ -10,7 +10,6 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
-import org.springframework.ai.ollama.api.OllamaModel;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class ProductImageAnalysisServiceImpl implements ProductImageAnalysisServ
           * 자기 농장 자랑, 직접 키웠다는 느낌
           * 못생겼지만 맛은 보장한다는 내용 자연스럽게 포함
           * 2~3문장, 너무 길지 않게
-          * AI 느낌 나는 단어 금지 (최상급, 신선도, 영양, 친환경 같은 딱딱한 단어 쓰지 마)
+          * AI 느낌 나는 단어 금지
         
         예시
         "저희 밭에서 직접 캔 감자인데 모양이 좀 삐뚤어졌어요 ㅎㅎ 그래도 쪄먹으면 진짜 맛있습니다. 모양만 못났지 맛은 자신있어요!"
@@ -56,7 +55,7 @@ public class ProductImageAnalysisServiceImpl implements ProductImageAnalysisServ
                 .build();
 
         ChatResponse response = chatModel.call(new Prompt(userMessage,
-                ChatOptions.builder().model(String.valueOf(OllamaModel.LLAVA)).build()));
+                ChatOptions.builder().model("claude-opus-4-6").build()));
 
         String raw = response.getResult().getOutput().getText();
         String cleaned = raw.replaceAll("```json", "").replaceAll("```", "").trim();
