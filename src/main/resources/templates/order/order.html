@@ -218,8 +218,13 @@
                                 padding:10px 14px;background:var(--bg);border:1.5px solid var(--sand);
                                 border-radius:8px;margin-bottom:8px">
                         <span style="font-size:.82rem;color:var(--muted)">🎟️ 쿠폰</span>
-                        <span style="font-size:.78rem;color:var(--muted)">적용 없음</span>
+                        <span id="couponDisplay" style="font-size:.78rem;color:var(--muted)">적용 없음</span>
                     </div>
+                    <div class="cs-row" id="couponDiscountRow" style="display:none">
+                        <span style="color:var(--muted)">쿠폰 할인</span>
+                        <span id="cs-coupon" style="color:var(--green)">-0원</span>
+                    </div>
+                    <input type="hidden" id="userCouponIdHidden" name="userCouponId"/>
                     <div style="display:flex;justify-content:space-between;align-items:center;
                                 padding:10px 14px;background:var(--bg);border:1.5px solid var(--sand);
                                 border-radius:8px;margin-bottom:8px">
@@ -255,7 +260,8 @@
     let productTotal = 0;
     let orderShippingFee = 0;
     let orderPointUsed = 0;
-    let userPoints = 0;        // 실제 보유 포인트 (서버에서 로드)
+    let orderCouponDiscount = 0;
+    let userPoints = 0;
     let hasPickupUnavailable = false;
 
     // ── 로그인 체크 (cart.html과 동일 패턴) ──
@@ -352,9 +358,26 @@
         document.getElementById('cs-pt').textContent = val > 0 ? '-' + val.toLocaleString() + '원' : '-0원';
         recalc();
     }
+    function restoreCouponFromCart() {
+        const couponName = sessionStorage.getItem('selectedCouponName') || '';
+        const couponId   = sessionStorage.getItem('selectedUserCouponId') || '';
+        const discount   = parseInt(sessionStorage.getItem('couponDiscount') || '0');
+
+        if (couponId && couponName) {
+            orderCouponDiscount = discount;
+            document.getElementById('couponDisplay').textContent = couponName;
+            document.getElementById('couponDisplay').style.color = 'var(--green)';
+            document.getElementById('couponDisplay').style.fontWeight = '700';
+            document.getElementById('couponDiscountRow').style.display = 'flex';
+            document.getElementById('cs-coupon').textContent = '-' + discount.toLocaleString() + '원';
+            document.getElementById('userCouponIdHidden').value = couponId;
+        }
+        recalc();
+    }
+
     // 금액 재계산
     function recalc() {
-        const fin = Math.max(0, productTotal + orderShippingFee - orderPointUsed);
+        const fin = Math.max(0, productTotal + orderShippingFee - orderCouponDiscount - orderPointUsed);
         document.getElementById('cs-tot').textContent = productTotal.toLocaleString() + '원';
         document.getElementById('cs-fin').textContent = fin.toLocaleString() + '원';
         document.getElementById('orderPoints').textContent =
@@ -493,6 +516,7 @@
 
         initOrderSummary();
         restoreDeliveryFromCart(); // 장바구니 배송 선택 복원
+        restoreCouponFromCart();   // 쿠폰 복원
         autofillMemberInfo();      // 회원정보 자동 입력
 
         const phoneInput = document.getElementById('receiverPhone');
