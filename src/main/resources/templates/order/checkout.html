@@ -82,6 +82,13 @@
         }
         .btn-home:hover { background: #ddd0bb; }
         .btn-mypage:hover { background: #4a8428; }
+        .btn-track {
+            width: 100%; padding: 15px; background: #fff;
+            border: 1.5px solid #5A9A30; border-radius: 10px;
+            font-weight: 700; cursor: pointer; font-size: .9rem;
+            font-family: inherit; color: #5A9A30; margin-top: 10px;
+        }
+        .btn-track:hover { background: #f0f9e6; }
     </style>
 </head>
 <body>
@@ -145,8 +152,9 @@
             <span class="r-label">결제 수단</span>
             <span class="r-value"
                   th:text="${order.paymentMethod == 'card' ? '신용/체크카드' :
-                             (order.paymentMethod == 'kakaopay' ? '카카오페이' :
-                             (order.paymentMethod == 'toss' ? '토스페이' : '무통장 입금'))}">신용카드</span>
+                            (order.paymentMethod == 'kakaopay' ? '카카오페이' :
+                            (order.paymentMethod == 'toss' ? '토스페이' :
+                            (order.paymentMethod == 'naverpay' ? '네이버페이' : '무통장 입금')))}">신용카드</span>
         </div>
         <div class="r-row">
             <span class="r-label">배송비</span>
@@ -165,6 +173,21 @@
         <button class="btn-home" onclick="location.href='/'">홈으로 가기</button>
         <button class="btn-mypage" onclick="location.href='/mypage'">주문 내역 보기</button>
     </div>
+    <!-- 배송 추적 버튼 (픽업/당일배송이 아닐 때만 의미 있지만 일단 항상 표시) -->
+    <button class="btn-track"
+            th:data-order-id="${order.id}"
+            id="btnTrack"
+            onclick="goTracking()">
+        🚚 배송 추적하기
+    </button>
+
+    <script th:inline="javascript">
+        function goTracking() {
+            var orderId = /*[[${order.id}]]*/ 0;
+            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            location.href = '/delivery/tracking/' + orderId + '?token=' + (token || '');
+        }
+    </script>
 </div>
 
 <div th:replace="footer :: footer"></div>
