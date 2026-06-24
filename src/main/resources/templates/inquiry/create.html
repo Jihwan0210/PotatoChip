@@ -14,14 +14,12 @@
         .inquiry-head-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
         .inquiry-head-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:620px}
         .inquiry-head-btn{background:var(--amber);color:#fff;border:none;border-radius:100px;padding:12px 24px;font-family:'Gaegu',cursive;font-size:1.08rem;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(240,168,62,.25);transition:all .2s}
-        .inquiry-head-btn:hover{transform:translateY(-1px)}
         .inquiry-layout{max-width:760px;margin:0 auto;padding:34px 6% 80px}
         .inquiry-card{background:var(--white);border:1.5px solid var(--beige);border-radius:20px;padding:26px;box-shadow:0 8px 28px rgba(90,74,58,.08)}
         .inquiry-form-group{margin-bottom:15px}
         .inquiry-form-group label{display:block;font-size:.73rem;color:var(--mid);font-weight:700;margin-bottom:7px}
         .inquiry-form-group input,.inquiry-form-group select,.inquiry-form-group textarea{width:100%;padding:12px 13px;border:1.5px solid var(--beige);border-radius:12px;font-family:inherit;color:var(--dark);outline:none;background:var(--beige3)}
         .inquiry-form-group textarea{resize:none;min-height:190px}
-        .inquiry-form-group input:focus,.inquiry-form-group select:focus,.inquiry-form-group textarea:focus{border-color:var(--green);background:#fff}
         .inquiry-guide{background:var(--gp);border:1.5px solid rgba(123,191,69,.18);border-radius:16px;padding:15px 16px;color:var(--mid);font-size:.8rem;line-height:1.7;margin-bottom:18px}
         .inquiry-guide strong{color:var(--green)}
         .inquiry-actions{display:flex;gap:10px;margin-top:20px}
@@ -31,6 +29,9 @@
         .inquiry-target-box{display:none;background:#fffaf0;border:1.5px solid var(--beige);border-radius:14px;padding:14px;margin-bottom:15px}
         .inquiry-target-title{font-size:.78rem;color:var(--dark);font-weight:800;margin-bottom:8px}
         .inquiry-target-desc{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:10px}
+
+        .inquiry-target-box select{width:100%;height:44px;padding:0 13px;border:1.5px solid var(--beige);border-radius:12px;font-family:inherit;font-size:.82rem;color:var(--dark);outline:none;background:#fff;box-sizing:border-box;appearance:auto}
+        .inquiry-target-box select:focus{border-color:var(--green);background:#fff}
         .inquiry-image-preview{display:none;margin-top:10px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:12px;text-align:center}
         .inquiry-image-preview img{max-width:100%;max-height:180px;object-fit:contain;border-radius:10px}
         @media(max-width:720px){.inquiry-actions{flex-direction:column}.inquiry-head{padding:28px 6% 22px}}
@@ -44,33 +45,43 @@
         <div>
             <div class="inquiry-kicker">Customer Inquiry</div>
             <h1 class="inquiry-head-title">문의하기 💬</h1>
-            <p class="inquiry-head-desc">FAQ와 챗봇으로 해결되지 않은 내용을 남겨주세요. 관리자가 확인 후 답변을 등록하면 내 문의보기에서 확인할 수 있어요.</p>
+            <p class="inquiry-head-desc">구매자는 주문을 먼저 선택한 뒤 그 주문에 포함된 상품을 골라 문의할 수 있고, 판매자는 기타 문의만 작성할 수 있습니다.</p>
         </div>
         <button class="inquiry-head-btn" type="button" onclick="goMyInquiry()">내 문의보기 →</button>
     </section>
 
     <section class="inquiry-layout">
         <div class="inquiry-card">
-            <div class="inquiry-guide">
+            <div class="inquiry-guide" id="inquiryGuide">
                 <strong>문의 전 확인해주세요.</strong><br/>
-                배송, 환불, 상품 품질, 주문·결제 관련 문의를 남길 수 있습니다.<br/>답변이 등록되면 내 문의보기에서 확인할 수 있습니다.
+                구매자는 주문 관련 문의를 남길 수 있습니다. 상품 문의는 주문 선택 후 해당 주문의 상품을 선택해주세요.<br/>
+                판매자는 관리자에게 전달할 기타 문의만 작성할 수 있습니다.
             </div>
 
             <div class="inquiry-form-group">
                 <label for="inquiryCategory">문의 유형</label>
-                <div id="inquiryTargetBox" class="inquiry-target-box">
-                    <div id="inquiryTargetTitle" class="inquiry-target-title">문의 대상 선택</div>
-                    <div id="inquiryTargetDesc" class="inquiry-target-desc">문의와 관련된 항목을 선택해주세요.</div>
-                    <select id="inquiryTargetSelect">
-                        <option value="">선택하지 않음</option>
-                    </select>
-                </div>
-                <select id="inquiryCategory">
+                <select id="inquiryCategory" onchange="onInquiryCategoryChange()">
                     <option value="delivery">배송 문의</option>
                     <option value="refund">환불/교환 문의</option>
                     <option value="product">상품 문의</option>
                     <option value="order">주문/결제 문의</option>
                     <option value="etc">기타 문의</option>
+                </select>
+            </div>
+
+            <div id="buyerOrderBox" class="inquiry-target-box">
+                <div class="inquiry-target-title">관련 주문 선택</div>
+                <div class="inquiry-target-desc">문의와 관련된 주문을 먼저 선택해주세요.</div>
+                <select id="inquiryOrderSelect" onchange="onInquiryOrderChange()">
+                    <option value="">선택 안 함</option>
+                </select>
+            </div>
+
+            <div id="buyerProductBox" class="inquiry-target-box">
+                <div class="inquiry-target-title">주문 상품 선택</div>
+                <div class="inquiry-target-desc">선택한 주문에 포함된 상품만 고를 수 있습니다.</div>
+                <select id="inquiryProductSelect">
+                    <option value="">상품을 선택해주세요</option>
                 </select>
             </div>
 
@@ -83,11 +94,13 @@
                 <label for="inquiryContent">문의 내용</label>
                 <textarea id="inquiryContent" placeholder="문의 내용을 자세히 입력해주세요."></textarea>
             </div>
+
             <div class="inquiry-form-group">
                 <label for="inquiryImageFile">사진 첨부</label>
                 <input id="inquiryImageFile" type="file" accept="image/*"/>
                 <div id="inquiryImagePreview" class="inquiry-image-preview"></div>
             </div>
+
             <div class="inquiry-actions">
                 <button type="button" class="inquiry-btn secondary" onclick="location.href='/faq'">FAQ로 돌아가기</button>
                 <button type="button" class="inquiry-btn primary" onclick="submitInquiry()">문의 등록하기</button>
@@ -100,6 +113,7 @@
 
 <script>
     var selectedInquiryRole=null;
+    var cachedBuyerOrders=[];
 
     document.addEventListener('DOMContentLoaded',function(){
         if(!isInquiryLoggedIn()){
@@ -107,152 +121,142 @@
             setTimeout(function(){location.href='/login'},900);
             return;
         }
-
-        loadInquiryTargetOptions();
-
+        loadInquiryUserRole();
         var imageInput=document.getElementById('inquiryImageFile');
-        if(imageInput){
-            imageInput.addEventListener('change',previewInquiryImage);
-        }
+        if(imageInput) imageInput.addEventListener('change',previewInquiryImage);
     });
-    async function loadInquiryTargetOptions(){
+
+    async function loadInquiryUserRole(){
         try{
-            var infoResponse=await fetch('/mypage/info',{
-                headers:getInquiryAuthOnlyHeaders()
-            });
-
-            if(infoResponse.status===401||infoResponse.status===403){
-                handleInquiryUnauthorized();
-                return;
-            }
-
-            var info=await infoResponse.json();
+            var response=await fetch('/mypage/info',{headers:getInquiryAuthOnlyHeaders()});
+            if(response.status===401||response.status===403){handleInquiryUnauthorized();return;}
+            var info=await response.json();
             selectedInquiryRole=String(info.role||'').toUpperCase();
-
-            if(selectedInquiryRole==='BUYER'){
-                await loadBuyerOrderOptions();
-                return;
-            }
-
-            if(selectedInquiryRole==='SELLER'){
-                await loadSellerProductOptions();
-                return;
-            }
-
-            hideInquiryTargetBox();
+            setupInquiryFormByRole();
         }catch(error){
-            console.error(error);
-            hideInquiryTargetBox();
+            selectedInquiryRole='';
+            setupInquiryFormByRole();
         }
     }
 
-    async function loadBuyerOrderOptions(){
-        var box=document.getElementById('inquiryTargetBox');
-        var title=document.getElementById('inquiryTargetTitle');
-        var desc=document.getElementById('inquiryTargetDesc');
-        var select=document.getElementById('inquiryTargetSelect');
+    async function setupInquiryFormByRole(){
+        var category=document.getElementById('inquiryCategory');
+        var guide=document.getElementById('inquiryGuide');
 
-        if(!box||!title||!desc||!select)return;
-
-        title.textContent='관련 구매내역 선택';
-        desc.textContent='배송, 환불, 주문 문의라면 관련 주문을 선택해주세요.';
-        select.innerHTML='<option value="">선택하지 않음</option>';
-
-        var response=await fetch('/mypage/orders',{
-            headers:getInquiryAuthOnlyHeaders()
-        });
-
-        if(response.status===401||response.status===403){
-            handleInquiryUnauthorized();
+        if(selectedInquiryRole==='SELLER'){
+            category.innerHTML='<option value="etc">기타 문의</option>';
+            category.value='etc';
+            guide.innerHTML='<strong>판매자 문의 안내</strong><br/>판매자는 상품, 배송, 환불 문의가 아닌 관리자에게 전달할 기타 문의만 작성할 수 있습니다.';
+            hideBuyerTargetBoxes();
             return;
         }
 
-        var orders=await response.json();
+        category.innerHTML=''
+            +'<option value="delivery">배송 문의</option>'
+            +'<option value="refund">환불/교환 문의</option>'
+            +'<option value="product">상품 문의</option>'
+            +'<option value="order">주문/결제 문의</option>'
+            +'<option value="etc">기타 문의</option>';
 
-        if(!Array.isArray(orders)||orders.length===0){
-            desc.textContent='선택 가능한 구매내역이 없습니다.';
-            box.style.display='block';
-            return;
-        }
+        await loadBuyerOrders();
+        onInquiryCategoryChange();
+    }
 
-        orders.forEach(function(order){
-            var itemNames='';
+    async function loadBuyerOrders(){
+        var orderSelect=document.getElementById('inquiryOrderSelect');
+        if(!orderSelect)return;
+        orderSelect.innerHTML='<option value="">주문을 불러오는 중입니다.</option>';
 
-            if(Array.isArray(order.items)&&order.items.length>0){
-                itemNames=order.items.map(function(item){
-                    return item.productName;
-                }).join(', ');
+        try{
+            var response=await fetch('/api/inquiries/my-orders',{headers:getInquiryAuthOnlyHeaders()});
+            if(response.status===401||response.status===403){handleInquiryUnauthorized();return;}
+            var orders=await response.json();
+            cachedBuyerOrders=Array.isArray(orders)?orders:[];
+
+            if(cachedBuyerOrders.length===0){
+                orderSelect.innerHTML='<option value="">선택 가능한 주문이 없습니다</option>';
+                return;
             }
 
-            var option=document.createElement('option');
-            option.value=order.id;
-            option.textContent='주문번호 '+(order.orderNumber||order.id)+' · '+getInquiryOrderStatusText(order.status)+' · '+shortInquiryText(itemNames,40);
-            select.appendChild(option);
-        });
-
-        box.style.display='block';
+            orderSelect.innerHTML='<option value="">선택 안 함</option>';
+            cachedBuyerOrders.forEach(function(order){
+                var items=getOrderItems(order);
+                var itemNames=items.map(function(item){return item.productName||('상품 '+item.productId)}).join(', ');
+                var option=document.createElement('option');
+                option.value=order.id;
+                option.textContent='주문번호 '+(order.orderNumber||order.id)+' · '+getInquiryOrderStatusText(order.status)+' · '+shortInquiryText(itemNames,42);
+                orderSelect.appendChild(option);
+            });
+        }catch(error){
+            orderSelect.innerHTML='<option value="">주문을 불러오지 못했습니다</option>';
+        }
     }
 
-    async function loadSellerProductOptions(){
-        var box=document.getElementById('inquiryTargetBox');
-        var title=document.getElementById('inquiryTargetTitle');
-        var desc=document.getElementById('inquiryTargetDesc');
-        var select=document.getElementById('inquiryTargetSelect');
+    function onInquiryCategoryChange(){
+        if(selectedInquiryRole==='SELLER'){hideBuyerTargetBoxes();return;}
 
-        if(!box||!title||!desc||!select)return;
+        var category=document.getElementById('inquiryCategory').value;
+        var needsOrder=category==='delivery'||category==='refund'||category==='product'||category==='order';
+        var needsProduct=category==='delivery'||category==='refund'||category==='product';
 
-        title.textContent='관련 등록상품 선택';
-        desc.textContent='상품 문의라면 관련 등록상품을 선택해주세요.';
-        select.innerHTML='<option value="">선택하지 않음</option>';
+        document.getElementById('buyerOrderBox').style.display=needsOrder?'block':'none';
+        document.getElementById('buyerProductBox').style.display=needsProduct?'block':'none';
 
-        var response=await fetch('/api/inquiries/my-products',{
-            headers:getInquiryAuthOnlyHeaders()
-        });
+        if(!needsOrder){
+            document.getElementById('inquiryOrderSelect').value='';
+            resetProductSelect();
+            return;
+        }
+        onInquiryOrderChange();
+    }
 
-        if(response.status===401||response.status===403){
-            handleInquiryUnauthorized();
+    function onInquiryOrderChange(){
+        var category=document.getElementById('inquiryCategory').value;
+        var needsProduct=category==='delivery'||category==='refund'||category==='product';
+        var orderId=Number(document.getElementById('inquiryOrderSelect').value||0);
+        resetProductSelect();
+        if(!needsProduct||!orderId)return;
+
+        var order=cachedBuyerOrders.find(function(item){return Number(item.id)===orderId});
+        var items=getOrderItems(order);
+        var select=document.getElementById('inquiryProductSelect');
+
+        if(items.length===0){
+            select.innerHTML='<option value="">이 주문에 상품 정보가 없습니다</option>';
             return;
         }
 
-        var products=await response.json();
-
-        if(!Array.isArray(products)||products.length===0){
-            desc.textContent='선택 가능한 등록상품이 없습니다.';
-            box.style.display='block';
-            return;
-        }
-
-        products.forEach(function(product){
+        select.innerHTML='<option value="">선택 안 함</option>';
+        items.forEach(function(item){
             var option=document.createElement('option');
-            option.value=product.id;
-            option.textContent='상품 ID '+product.id+' · '+(product.name||'상품명 없음')+' · '+(product.category||'기타');
+            option.value=String(item.productId||'');
+            option.dataset.orderItemId=item.orderItemId||'';
+            option.textContent=(item.productName||('상품 '+item.productId))+' · '+(item.quantity||0)+'개';
             select.appendChild(option);
         });
-
-        box.style.display='block';
     }
 
-    function hideInquiryTargetBox(){
-        var box=document.getElementById('inquiryTargetBox');
-        if(box){
-            box.style.display='none';
-        }
+    function resetProductSelect(){
+        var select=document.getElementById('inquiryProductSelect');
+        if(select) select.innerHTML='<option value="">선택 안 함</option>';
+    }
+
+    function hideBuyerTargetBoxes(){
+        document.getElementById('buyerOrderBox').style.display='none';
+        document.getElementById('buyerProductBox').style.display='none';
+    }
+
+    function getOrderItems(order){
+        if(!order)return[];
+        return Array.isArray(order.orderItems)?order.orderItems:(Array.isArray(order.items)?order.items:[]);
     }
 
     function previewInquiryImage(){
         var fileInput=document.getElementById('inquiryImageFile');
         var preview=document.getElementById('inquiryImagePreview');
-
         if(!fileInput||!preview)return;
-
         var file=fileInput.files&&fileInput.files[0];
-
-        if(!file){
-            preview.style.display='none';
-            preview.innerHTML='';
-            return;
-        }
-
+        if(!file){preview.style.display='none';preview.innerHTML='';return;}
         var url=URL.createObjectURL(file);
         preview.style.display='block';
         preview.innerHTML='<img src="'+url+'" alt="문의 이미지 미리보기">';
@@ -260,56 +264,34 @@
 
     async function uploadInquiryImageIfExists(){
         var fileInput=document.getElementById('inquiryImageFile');
-
-        if(!fileInput||!fileInput.files||fileInput.files.length===0){
-            return null;
-        }
-
+        if(!fileInput||!fileInput.files||fileInput.files.length===0) return null;
         var formData=new FormData();
         formData.append('image',fileInput.files[0]);
-
-        var response=await fetch('/api/inquiries/upload-image',{
-            method:'POST',
-            headers:getInquiryAuthOnlyHeaders(),
-            body:formData
-        });
-
+        var response=await fetch('/api/inquiries/upload-image',{method:'POST',headers:getInquiryAuthOnlyHeaders(),body:formData});
         var data=await response.json();
-
-        if(!response.ok){
-            throw new Error(data.message||'이미지 업로드에 실패했습니다.');
-        }
-
+        if(!response.ok) throw new Error(data.message||'이미지 업로드에 실패했습니다.');
         return data.imageUrl;
     }
 
     function getSelectedInquiryTarget(){
-        var select=document.getElementById('inquiryTargetSelect');
+        if(selectedInquiryRole==='SELLER') return {productId:null,orderId:null,orderItemId:null};
 
-        if(!select||!select.value){
-            return {
-                productId:null,
-                orderId:null
-            };
-        }
+        var category=document.getElementById('inquiryCategory').value;
+        var needsOrder=category==='delivery'||category==='refund'||category==='product'||category==='order';
+        var needsProduct=category==='delivery'||category==='refund'||category==='product';
+        var orderId=Number(document.getElementById('inquiryOrderSelect').value||0)||null;
+        var productSelect=document.getElementById('inquiryProductSelect');
+        var productId=productSelect&&productSelect.value?Number(productSelect.value):null;
+        var orderItemId=productSelect&&productSelect.selectedOptions[0]?Number(productSelect.selectedOptions[0].dataset.orderItemId||0)||null:null;
 
-        if(selectedInquiryRole==='BUYER'){
-            return {
-                productId:null,
-                orderId:Number(select.value)
-            };
-        }
-
-        if(selectedInquiryRole==='SELLER'){
-            return {
-                productId:Number(select.value),
-                orderId:null
-            };
-        }
-
+        // 주문/상품 선택은 선택사항입니다.
+        // 주문을 선택하지 않으면 일반 문의처럼 저장하고, 상품을 선택하지 않으면 주문 단위 문의로 저장합니다.
+        if(!needsOrder) return {productId:null,orderId:null,orderItemId:null};
+        if(!orderId) return {productId:null,orderId:null,orderItemId:null};
         return {
-            productId:null,
-            orderId:null
+            productId:needsProduct?productId:null,
+            orderId:orderId,
+            orderItemId:(needsProduct&&productId)?orderItemId:null
         };
     }
 
@@ -325,154 +307,41 @@
         }
     }
 
-    function shortInquiryText(value,length){
-        var text=String(value||'');
-
-        if(text.length<=length){
-            return text;
-        }
-
-        return text.substring(0,length)+'...';
-    }
-
-
-    function isInquiryLoggedIn(){
-        return !!getInquiryAuthToken();
-    }
-
-    function getInquiryCookieValue(name){
-        var cookies=document.cookie?document.cookie.split('; '):[];
-
-        for(var i=0;i<cookies.length;i++){
-            var parts=cookies[i].split('=');
-            var key=decodeURIComponent(parts.shift());
-
-            if(key===name){
-                return decodeURIComponent(parts.join('='));
-            }
-        }
-
-        return null;
-    }
-
-    function getInquiryAuthToken(){
-        return localStorage.getItem('token')
-            || sessionStorage.getItem('token')
-            || getInquiryCookieValue('jwt');
-    }
-
-    function getInquiryAuthOnlyHeaders(){
-        var token=getInquiryAuthToken();
-        var headers={};
-
-        if(token){
-            headers.Authorization='Bearer '+token;
-        }
-
-        return headers;
-    }
-
-    function getInquiryAuthJsonHeaders(){
-        var headers={
-            'Content-Type':'application/json'
-        };
-
-        var token=getInquiryAuthToken();
-
-        if(token){
-            headers.Authorization='Bearer '+token;
-        }
-
-        return headers;
-    }
-
-    function handleInquiryUnauthorized(){
-        showInquiryToast('로그인이 필요합니다. 다시 로그인해주세요.');
-        setTimeout(function(){location.href='/login'},900);
-    }
-
-    function goMyInquiry(){
-        if(!isInquiryLoggedIn()){
-            handleInquiryUnauthorized();
-            return;
-        }
-
-        location.href='/my';
-    }
+    function shortInquiryText(value,length){var text=String(value||'');return text.length<=length?text:text.substring(0,length)+'...';}
+    function isInquiryLoggedIn(){return !!getInquiryAuthToken();}
+    function getInquiryCookieValue(name){var cookies=document.cookie?document.cookie.split('; '):[];for(var i=0;i<cookies.length;i++){var parts=cookies[i].split('=');var key=decodeURIComponent(parts.shift());if(key===name)return decodeURIComponent(parts.join('='));}return null;}
+    function getInquiryAuthToken(){return localStorage.getItem('token')||sessionStorage.getItem('token')||getInquiryCookieValue('jwt');}
+    function getInquiryAuthOnlyHeaders(){var token=getInquiryAuthToken();var headers={};if(token)headers.Authorization='Bearer '+token;return headers;}
+    function getInquiryAuthJsonHeaders(){var headers={'Content-Type':'application/json'};var token=getInquiryAuthToken();if(token)headers.Authorization='Bearer '+token;return headers;}
+    function handleInquiryUnauthorized(){showInquiryToast('로그인이 필요합니다. 다시 로그인해주세요.');setTimeout(function(){location.href='/login'},900);}
+    function goMyInquiry(){if(!isInquiryLoggedIn()){handleInquiryUnauthorized();return;}location.href='/my';}
 
     async function submitInquiry(){
-        if(!isInquiryLoggedIn()){
-            handleInquiryUnauthorized();
-            return;
-        }
-
+        if(!isInquiryLoggedIn()){handleInquiryUnauthorized();return;}
         var category=document.getElementById('inquiryCategory').value;
         var title=document.getElementById('inquiryTitle').value.trim();
         var content=document.getElementById('inquiryContent').value.trim();
+        if(!title){showInquiryToast('문의 제목을 입력해주세요.');return;}
+        if(!content){showInquiryToast('문의 내용을 입력해주세요.');return;}
 
-        if(!title){
-            showInquiryToast('문의 제목을 입력해주세요.');
-            return;
-        }
-
-        if(!content){
-            showInquiryToast('문의 내용을 입력해주세요.');
-            return;
-        }
-
-        var target=getSelectedInquiryTarget();
+        var target;
+        try{target=getSelectedInquiryTarget();}catch(error){showInquiryToast(error.message);return;}
         var imageUrl=null;
+        try{imageUrl=await uploadInquiryImageIfExists();}catch(error){showInquiryToast(error.message||'이미지 업로드에 실패했습니다.');return;}
+
+        var body={productId:target.productId,orderId:target.orderId,orderItemId:target.orderItemId,category:category,title:title,content:content,imageUrl:imageUrl};
 
         try{
-            imageUrl=await uploadInquiryImageIfExists();
-        }catch(error){
-            showInquiryToast(error.message||'이미지 업로드에 실패했습니다.');
-            return;
-        }
-
-        var body={
-            productId:target.productId,
-            orderId:target.orderId,
-            category:category,
-            title:title,
-            content:content,
-            imageUrl:imageUrl
-        };
-
-        try{
-            var response=await fetch('/api/inquiries',{
-                method:'POST',
-                headers:getInquiryAuthJsonHeaders(),
-                body:JSON.stringify(body)
-            });
-
-            if(response.status===401||response.status===403){
-                handleInquiryUnauthorized();
-                return;
-            }
-
+            var response=await fetch('/api/inquiries',{method:'POST',headers:getInquiryAuthJsonHeaders(),body:JSON.stringify(body)});
+            if(response.status===401||response.status===403){handleInquiryUnauthorized();return;}
             var data=await response.json();
-
-            if(!response.ok){
-                showInquiryToast(data.message||'문의 등록에 실패했습니다.');
-                return;
-            }
-
+            if(!response.ok){showInquiryToast(data.message||'문의 등록에 실패했습니다.');return;}
             showInquiryToast('문의가 등록되었습니다.');
             setTimeout(function(){location.href='/my'},700);
-        }catch(error){
-            showInquiryToast('서버 연결에 실패했습니다.');
-        }
+        }catch(error){showInquiryToast('서버 연결에 실패했습니다.');}
     }
 
-    function showInquiryToast(message){
-        if(typeof showToast==='function'){
-            showToast(message);
-            return;
-        }
-
-        alert(message);
-    }
+    function showInquiryToast(message){if(typeof showToast==='function'){showToast(message);return;}alert(message);}
 </script>
 </body>
 </html>
