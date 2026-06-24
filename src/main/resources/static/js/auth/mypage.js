@@ -201,7 +201,65 @@ function switchMyTab(name) {
     if (name === 'profile')   loadMyInfo();
     if (name === 'wishlist')  loadWishlist();
     if (name === 'myreview')  loadMyReviews();
+    if (name === 'coupon') loadMyCoupons();
 }
+
+// 쿠폰함 조회
+function loadMyCoupons() {
+    var token = getToken();
+    var container = document.getElementById('coupon-container');
+    if (!token || !container) return;
+
+    container.innerHTML = '<div class="mp-empty">쿠폰 목록을 불러오는 중...</div>';
+
+    fetch('/api/coupons/my', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(function(res) {
+            if (res.status === 401) { location.href = '/login'; return null; }
+            return res.json();
+        })
+        .then(function(coupons) {
+            if (!coupons) return;
+            if (!coupons.length) {
+                container.innerHTML = '<div class="mp-empty">보유한 쿠폰이 없어요 🌿<br><span style="font-size:.74rem;color:var(--muted)">상품 페이지에서 쿠폰을 다운로드해보세요!</span></div>';
+                return;
+            }
+
+            container.innerHTML = coupons.map(function(c) {
+                    var discountText = '';
+                    if (c.discountType === 'PERCENTAGE') {
+                        discountText = c.discountValue + '% 할인';
+                        if (c.maxDiscountAmount) discountText += ' (최대 ' + Number(c.maxDiscountAmount).toLocaleString() + '원)';
+                    } else if (c.discountType === 'FIXED_AMOUNT') {
+                        discountText = Number(c.discountValue).toLocaleString() + '원 할인';
+                    } else {
+                        discountText = '무료 배송';
+                    }
+
+                    var minText = c.minOrderAmount ? Number(c.minOrderAmount).toLocaleString() + '원 이상 주문 시' : '';
+                    var endText = c.endDate ? c.endDate.substring(0, 10) + ' 까지' : '';
+                    var productBadge = c.targetProductName
+                        ? '<span style="display:inline-block;background:#e8f5e9;color:#2e7d32;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:5px">📦 ' + c.targetProductName + ' 전용</span><br>'
+                        : '';
+                    var subInfo = [minText, endText].filter(Boolean).join(' · ');
+
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--sand)">' +
+                        '<div style="flex:1;min-width:0">' +
+                        productBadge +
+                        '<div style="font-size:.88rem;font-weight:700;color:var(--dark);margin-bottom:3px">' + c.name + '</div>' +
+                        (subInfo ? '<div style="font-size:.73rem;color:var(--muted)">' + subInfo + '</div>' : '') +
+                        '</div>' +
+                        '<div style="font-size:1rem;font-weight:800;color:var(--green);white-space:nowrap">' + discountText + '</div>' +
+                        '</div>';
+                }).join('') +
+                '<div style="text-align:center;margin-top:16px;font-size:.76rem;color:var(--muted)">총 ' + coupons.length + '개의 쿠폰을 보유 중이에요 🎟️</div>';
+        })
+        .catch(function() {
+            container.innerHTML = '<div class="mp-empty">불러오기 실패. 다시 시도해주세요.</div>';
+        });
+}
+
 
 // 상품 상세 이동 (Doc1)
 function goProductDetail(productId) {
