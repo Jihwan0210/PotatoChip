@@ -19,4 +19,5 @@ public class OrderRequestDTO {
     private BigDecimal shippingFee; // 배송비
     private List<Long> selectedProductIds; // 상품
     private Integer pointUsed;      // 사용한 포인트
+    private Long userCouponId;      // 사용할 쿠폰 (UserCoupon ID)
 }
