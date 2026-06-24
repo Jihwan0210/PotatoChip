@@ -11,11 +11,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @ToString
 public class InquiryDTO {
-
     private Long id;
     private Long userId;
+    private String userName;
+    private String userRole;
+    private String userRoleText;
     private Long productId;
     private Long orderId;
+    private Long orderItemId;
     private String category;
     private String categoryText;
     private String title;
@@ -34,8 +37,12 @@ public class InquiryDTO {
         return new InquiryDTO(
                 inquiry.getId(),
                 inquiry.getUserId(),
+                null,
+                null,
+                null,
                 inquiry.getProductId(),
                 inquiry.getOrderId(),
+                inquiry.getOrderItemId(),
                 inquiry.getCategory(),
                 getCategoryText(inquiry.getCategory()),
                 inquiry.getTitle(),
@@ -53,9 +60,7 @@ public class InquiryDTO {
     }
 
     private static String getCategoryText(String category) {
-        if (category == null) {
-            return "기타 문의";
-        }
+        if (category == null) return "기타 문의";
 
         return switch (category) {
             case "delivery" -> "배송 문의";
@@ -67,14 +72,8 @@ public class InquiryDTO {
     }
 
     private static String getStatusText(String status) {
-        if ("answered".equals(status)) {
-            return "답변 완료";
-        }
-
-        if ("closed".equals(status)) {
-            return "종료";
-        }
-
+        if ("answered".equals(status)) return "답변 완료";
+        if ("closed".equals(status)) return "종료";
         return "답변 대기";
     }
 }

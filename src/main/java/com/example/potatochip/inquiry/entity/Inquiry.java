@@ -27,6 +27,9 @@ public class Inquiry {
     @Column(name = "order_id")
     private Long orderId;
 
+    @Column(name = "order_item_id")
+    private Long orderItemId;
+
     @Column(nullable = false, length = 50)
     private String category;
 
@@ -63,10 +66,11 @@ public class Inquiry {
     private String imageUrl;
 
     @Builder
-    public Inquiry(Long userId, Long productId, Long orderId, String category, String title, String content, String imageUrl) {
+    public Inquiry(Long userId, Long productId, Long orderId, Long orderItemId, String category, String title, String content, String imageUrl) {
         this.userId = userId;
         this.productId = productId;
         this.orderId = orderId;
+        this.orderItemId = orderItemId;
         this.category = category;
         this.title = title;
         this.content = content;
@@ -81,12 +85,13 @@ public class Inquiry {
         return this.userId.equals(userId);
     }
 
-    public void updateInquiry(String category, String title, String content, Long productId, Long orderId, String imageUrl) {
+    public void updateInquiry(String category, String title, String content, Long productId, Long orderId, Long orderItemId, String imageUrl) {
         this.category = category;
         this.title = title;
         this.content = content;
         this.productId = productId;
         this.orderId = orderId;
+        this.orderItemId = orderItemId;
         this.imageUrl = imageUrl;
         this.updatedAt = LocalDateTime.now();
     }
@@ -106,18 +111,9 @@ public class Inquiry {
 
     @PrePersist
     public void prePersist() {
-        if (this.status == null) {
-            this.status = "pending";
-        }
-
-        if (this.isActive == null) {
-            this.isActive = true;
-        }
-
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-
+        if (this.status == null) this.status = "pending";
+        if (this.isActive == null) this.isActive = true;
+        if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 

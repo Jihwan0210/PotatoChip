@@ -18,12 +18,18 @@ public class BoardResponse {
     private String category;
     private Integer viewCount;
     private Integer commentCount;
-    private Integer likeCount; // 이미 여기에 필드가 선언되어 있습니다!
+    private Integer likeCount;
     private LocalDateTime createdAt;
     private String imageUrl;
+    private Boolean hidden;
+    private Boolean active;
+    private Boolean reportedByCurrentUser;
 
-    // 🌟 [이 구역을 원래 소스코드로 완전히 원상복구 시켜줍니다]
     public static BoardResponse from(Board board, String displayName) {
+        return from(board, displayName, false);
+    }
+
+    public static BoardResponse from(Board board, String displayName, boolean reportedByCurrentUser) {
         return BoardResponse.builder()
                 .id(board.getId())
                 .title(board.getTitle())
@@ -36,6 +42,9 @@ public class BoardResponse {
                 .likeCount(board.getLikeCount())
                 .createdAt(board.getCreatedAt())
                 .imageUrl(board.getImageUrl())
+                .hidden(Boolean.TRUE.equals(board.getHidden()))
+                .active(!Boolean.FALSE.equals(board.getIsActive()))
+                .reportedByCurrentUser(reportedByCurrentUser)
                 .build();
     }
 }
