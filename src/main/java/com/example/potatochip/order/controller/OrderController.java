@@ -62,6 +62,7 @@ public class OrderController {
 
     @GetMapping
     public String showOrderPage(@RequestParam(required = false) String token,
+                                @RequestParam(required = false) String error,
                                 Model model,
                                 HttpServletRequest request) {
         Long buyerId;
@@ -79,6 +80,7 @@ public class OrderController {
                     .build();
         }
         model.addAttribute("cartDTO", cartDTO);
+        if (error != null) model.addAttribute("orderError", error);
         return "order/order";
     }
 
@@ -93,7 +95,15 @@ public class OrderController {
             return "redirect:/login";
         }
 
-        Long newOrderId = orderService.OrderFromCart(buyerId, requestDTO);
+        Long newOrderId;
+        try {
+            newOrderId = orderService.OrderFromCart(buyerId, requestDTO);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            String msg = java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            String tokenParam = (token != null && !token.isEmpty()) ? "&token=" + token : "";
+            return "redirect:/orders?error=" + msg + tokenParam;
+        }
+
         String safeToken = (token != null && !token.isEmpty()) ? token : "";
         return "redirect:/orders/complete/" + newOrderId + "?token=" + safeToken;
     }
