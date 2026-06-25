@@ -3,7 +3,7 @@ package com.example.potatochip.ai.service;
 import com.example.potatochip.ai.dto.ProductRecommendationDTO;
 import com.example.potatochip.ai.entity.ProductRecommendation;
 import com.example.potatochip.ai.entity.ProductRecommendationType;
-import com.example.potatochip.ai.ollama.OllamaClient;
+import com.example.potatochip.ai.claude.ClaudeClient;
 import com.example.potatochip.ai.repository.ProductRecommendationRepository;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
@@ -30,7 +30,7 @@ public class ProductRecommendationServiceImpl implements ProductRecommendationSe
     private final ProductRecommendationRepository productRecommendationRepository;
     private final ProductRepository productRepository;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final OllamaClient ollamaClient;
+    private final ClaudeClient claudeClient;
 
     @Override
     @Transactional
@@ -363,7 +363,7 @@ public class ProductRecommendationServiceImpl implements ProductRecommendationSe
                     priceText
             );
 
-            String reason = ollamaClient.recommendProductReason(prompt);
+            String reason = claudeClient.recommendProductReason(prompt);
             return cleanAiReason(reason, fallbackReason);
 
         } catch (Exception e) {

@@ -1,7 +1,7 @@
 package com.example.potatochip.ai.service;
 
+import com.example.potatochip.ai.claude.ClaudeClient;
 import com.example.potatochip.ai.entity.AiReviewSummary;
-import com.example.potatochip.ai.ollama.OllamaClient;
 import com.example.potatochip.ai.repository.AiReviewSummaryRepository;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
@@ -27,7 +27,7 @@ public class AiReviewSummaryAutoService {
     private final ReviewRepository reviewRepository;
     private final AiReviewSummaryRepository aiReviewSummaryRepository;
     private final ProductRepository productRepository;
-    private final OllamaClient ollamaClient;
+    private final ClaudeClient claudeClient;
 
     @Async
     public void refreshAiReviewSummary(Long productId) {
@@ -162,7 +162,7 @@ public class AiReviewSummaryAutoService {
     }
 
     private String generateKoreanSummary(String prompt) {
-        String summary = cleanSummary(ollamaClient.chat(prompt));
+        String summary = cleanSummary(claudeClient.chat(prompt));
 
         if (containsEnglish(summary)) {
             String retryPrompt = prompt + """
@@ -173,7 +173,7 @@ public class AiReviewSummaryAutoService {
                     자연스러운 쇼핑몰 리뷰 총평 1문장만 출력하세요.
                     """;
 
-            summary = cleanSummary(ollamaClient.chat(retryPrompt));
+            summary = cleanSummary(claudeClient.chat(retryPrompt));
         }
 
         return summary;
