@@ -10,12 +10,10 @@ import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.product.repository.ProductRankingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,21 +40,22 @@ public class ProductRankingsServiceImpl implements ProductRankingsService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void refreshRankings() {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
+        LocalDateTime dayEnd = today.plusDays(1).atStartOfDay();
 
         // 일간 갱신
         productRankingsRepository.deleteByPeriodTypeAndPeriodDate(PeriodType.DAILY, today);
         List<Object[]> dailyResults = orderItemRepository.findSalesCountByProductBetween(
-                today.atStartOfDay(), today.plusDays(1).atStartOfDay());
+                today.atStartOfDay(), dayEnd);
         saveRankings(dailyResults, PeriodType.DAILY, today);
 
         // 주간 갱신
         productRankingsRepository.deleteByPeriodTypeAndPeriodDate(PeriodType.WEEKLY, weekStart);
         List<Object[]> weeklyResults = orderItemRepository.findSalesCountByProductBetween(
-                weekStart.atStartOfDay(), LocalDateTime.now());
+                weekStart.atStartOfDay(), dayEnd);
         saveRankings(weeklyResults, PeriodType.WEEKLY, weekStart);
     }
 
