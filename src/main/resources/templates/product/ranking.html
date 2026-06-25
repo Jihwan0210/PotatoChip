@@ -28,10 +28,10 @@
 <div id="rcontent-0" style="padding:28px 5%;max-width:1000px;margin:0 auto">
 
     <!-- TOP 3 포디움 -->
-    <div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:36px">
+    <div class="rank-podium" style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:36px">
 
         <!-- 2위 -->
-        <div style="flex:1;max-width:210px">
+        <div class="rank-podium-card" style="flex:1;max-width:210px">
             <!-- 데이터 있을 때 -->
             <div th:if="${weeklyRankings != null and weeklyRankings.size() >= 2}"
                  th:with="item=${weeklyRankings[1]}"
@@ -66,7 +66,7 @@
         </div>
 
         <!-- 1위 (가장 높게) -->
-        <div style="flex:1;max-width:240px;margin-bottom:-20px">
+        <div class="rank-podium-card rank-podium-first" style="flex:1;max-width:240px;margin-bottom:-20px">
             <!-- 데이터 있을 때 -->
             <div th:if="${weeklyRankings != null and weeklyRankings.size() >= 1}"
                  th:with="item=${weeklyRankings[0]}"
@@ -101,7 +101,7 @@
         </div>
 
         <!-- 3위 -->
-        <div style="flex:1;max-width:210px">
+        <div class="rank-podium-card" style="flex:1;max-width:210px">
             <!-- 데이터 있을 때 -->
             <div th:if="${weeklyRankings != null and weeklyRankings.size() >= 3}"
                  th:with="item=${weeklyRankings[2]}"
@@ -140,8 +140,8 @@
     <div style="font-size:.88rem;font-weight:600;color:var(--dark);margin-bottom:14px">4위 이하</div>
     <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
         <!-- 헤더 -->
-        <div style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
-            <div>순위</div><div>상품 정보</div><div style="text-align:right">가격</div><div style="text-align:right">판매건수</div>
+        <div class="rank-table-row" style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+            <div>순위</div><div>상품 정보</div><div class="rank-col-price" style="text-align:right">가격</div><div style="text-align:right">판매건수</div>
         </div>
         <!-- 데이터 있을 때 -->
         <div th:if="${weeklyRankings != null and weeklyRankings.size() > 3}">
@@ -150,7 +150,7 @@
                  th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                  onmouseover="this.style.background='var(--beige2)'"
                  onmouseout="this.style.background='#fff'"
-                 style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s">
+                 class="rank-table-row" style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s">
                 <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--mid)"
                      th:text="${stat.index + 1} + '위'"></div>
                 <div style="display:flex;align-items:center;gap:12px">
@@ -165,7 +165,7 @@
                         <div style="font-size:.68rem;color:var(--muted)" th:text="${item.product.origin}"></div>
                     </div>
                 </div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
+                <div class="rank-col-price" style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
                      th:text="${item.product.discountPrice != null ? #numbers.formatInteger(item.product.discountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
                 <div style="text-align:right;font-size:.9rem;font-weight:700;color:var(--green)"
                      th:text="${item.salesCount} + '건'"></div>
@@ -183,10 +183,10 @@
 <div id="rcontent-1" style="display:none;padding:28px 5%;max-width:1000px;margin:0 auto">
 
     <!-- TOP 3 포디움 -->
-    <div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:36px">
+    <div class="rank-podium" style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:36px">
 
         <!-- 2위 -->
-        <div style="flex:1;max-width:210px">
+        <div class="rank-podium-card" style="flex:1;max-width:210px">
             <div th:if="${dailyRankings != null and dailyRankings.size() >= 2}"
                  th:with="item=${dailyRankings[1]}"
                  style="background:#fff;border:1.5px solid var(--sand);border-radius:18px;padding:22px 16px 18px;text-align:center;position:relative">
@@ -217,7 +217,7 @@
         </div>
 
         <!-- 1위 -->
-        <div style="flex:1;max-width:240px;margin-bottom:-20px">
+        <div class="rank-podium-card rank-podium-first" style="flex:1;max-width:240px;margin-bottom:-20px">
             <div th:if="${dailyRankings != null and dailyRankings.size() >= 1}"
                  th:with="item=${dailyRankings[0]}"
                  style="background:linear-gradient(145deg,var(--gp),#f0fadf);border:2px solid var(--green);border-radius:22px;padding:28px 20px 22px;text-align:center;position:relative;box-shadow:0 8px 32px rgba(123,191,69,.18)">
@@ -248,7 +248,7 @@
         </div>
 
         <!-- 3위 -->
-        <div style="flex:1;max-width:210px">
+        <div class="rank-podium-card" style="flex:1;max-width:210px">
             <div th:if="${dailyRankings != null and dailyRankings.size() >= 3}"
                  th:with="item=${dailyRankings[2]}"
                  style="background:#fff;border:1.5px solid var(--sand);border-radius:18px;padding:22px 16px 18px;text-align:center;position:relative">
@@ -282,8 +282,8 @@
     <!-- 4위 이하 리스트 (일간) -->
     <div style="font-size:.88rem;font-weight:600;color:var(--dark);margin-bottom:14px">4위 이하</div>
     <div style="background:#fff;border:1.5px solid var(--sand);border-radius:14px;overflow:hidden">
-        <div style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
-            <div>순위</div><div>상품 정보</div><div style="text-align:right">가격</div><div style="text-align:right">판매건수</div>
+        <div class="rank-table-row" style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:11px 18px;background:var(--beige2);font-size:.72rem;font-weight:500;color:var(--muted);border-bottom:1px solid var(--sand)">
+            <div>순위</div><div>상품 정보</div><div class="rank-col-price" style="text-align:right">가격</div><div style="text-align:right">판매건수</div>
         </div>
         <div th:if="${dailyRankings != null and dailyRankings.size() > 3}">
             <div th:each="item, stat : ${dailyRankings}"
@@ -291,7 +291,7 @@
                  th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                  onmouseover="this.style.background='var(--beige2)'"
                  onmouseout="this.style.background='#fff'"
-                 style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s">
+                 class="rank-table-row" style="display:grid;grid-template-columns:52px 1fr 100px 80px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s">
                 <div style="font-family:Gaegu,cursive;font-size:1.1rem;font-weight:700;color:var(--mid)"
                      th:text="${stat.index + 1} + '위'"></div>
                 <div style="display:flex;align-items:center;gap:12px">
@@ -306,7 +306,7 @@
                         <div style="font-size:.68rem;color:var(--muted)" th:text="${item.product.origin}"></div>
                     </div>
                 </div>
-                <div style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
+                <div class="rank-col-price" style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
                      th:text="${item.product.discountPrice != null ? #numbers.formatInteger(item.product.discountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
                 <div style="text-align:right;font-size:.9rem;font-weight:700;color:var(--green)"
                      th:text="${item.salesCount} + '건'"></div>
