@@ -109,12 +109,23 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.PAYMENT_COMPLETE)
                 .build();
 
-        // 7. OrderItem 생성 (sellerId 동적 조회 - 문서2 방식)
+        // 7. 재고 확인 (주문 전 선제 검증)
+        for (CartItem cartItem : targetItems) {
+            Product product = productRepository.findById(cartItem.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다: " + cartItem.getProductId()));
+            if (product.getStockQuantity() < cartItem.getQuantity()) {
+                throw new IllegalStateException(
+                        "'" + product.getName() + "' 재고가 부족합니다. (남은 재고: " + product.getStockQuantity() + ")");
+            }
+        }
+
+        // 8. OrderItem 생성 + 재고 차감
         targetItems.forEach(cartItem -> {
-            Product product = productRepository.findById(cartItem.getProductId()).orElse(null);
-            Long sellerId = (product != null && product.getSeller() != null)
-                    ? product.getSeller().getId()
-                    : 1L;
+            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow();
+            Long sellerId = product.getSeller() != null ? product.getSeller().getId() : 1L;
+
+            product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
+            productRepository.save(product);
 
             OrderItem orderItem = OrderItem.builder()
                     .productId(cartItem.getProductId())
@@ -138,12 +149,23 @@ public class OrderServiceImpl implements OrderService {
 
         // 10. 포인트 차감 및 구매 적립
         int pointUsed = requestDTO.getPointUsed() != null ? requestDTO.getPointUsed() : 0;
+
+        if (pointUsed > 0) {
+            User buyer = userRepository.findById(buyerId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            int currentPoints = buyer.getPoints() != null ? buyer.getPoints() : 0;
+            if (pointUsed > currentPoints) {
+                throw new IllegalStateException(
+                        "포인트가 부족합니다. (보유: " + currentPoints + "P, 사용 요청: " + pointUsed + "P)");
+            }
+        }
+
         BigDecimal finalAmount = discountedTotal.subtract(BigDecimal.valueOf(pointUsed)).max(BigDecimal.ZERO);
         int earnedPoints = finalAmount.divide(BigDecimal.valueOf(100), 0, RoundingMode.FLOOR).intValue();
 
         userRepository.findById(buyerId).ifPresent(user -> {
             int current = user.getPoints() != null ? user.getPoints() : 0;
-            user.setPoints(Math.max(0, current - pointUsed) + earnedPoints);
+            user.setPoints(current - pointUsed + earnedPoints);
             userRepository.save(user);
         });
 
