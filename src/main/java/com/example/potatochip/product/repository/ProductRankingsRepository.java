@@ -17,4 +17,6 @@ public interface ProductRankingsRepository extends JpaRepository<ProductRankings
     );
 
     Optional<ProductRankings> findTopByPeriodTypeOrderByPeriodDateDesc(PeriodType periodType);
+
+    void deleteByPeriodTypeAndPeriodDate(PeriodType periodType, LocalDate periodDate);
 }
