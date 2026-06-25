@@ -38,6 +38,10 @@ public class AiReviewSummaryAutoService {
         }
     }
 
+    public void refreshAiReviewSummarySync(Long productId) {
+        refreshAiReviewSummaryInternal(productId);
+    }
+
     private void refreshAiReviewSummaryInternal(Long productId) {
         List<Review> reviews = reviewRepository.findByProductIdAndIsActiveTrueOrderByCreatedAtDesc(productId);
         int reviewCount = reviews.size();

@@ -77,4 +77,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findBySellerIdAndIsActiveTrueOrderByCreatedAtDesc(@Param("sellerId") Long sellerId);
     boolean existsByOrderItemIdAndUserIdAndIsActiveTrue(Long orderItemId, Long userId);
 
+    @Query("""
+        select r.product.id
+        from Review r
+        group by r.product.id
+        having count(r.reviewId) >= :minReviewCount
+        """)
+    List<Long> findProductIdsHavingReviewCountAtLeast(@Param("minReviewCount") long minReviewCount);
 }

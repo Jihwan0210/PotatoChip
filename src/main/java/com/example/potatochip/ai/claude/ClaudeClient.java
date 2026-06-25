@@ -47,7 +47,7 @@ public class ClaudeClient {
     public ClaudeClient(
             @Value("${anthropic.base-url:https://api.anthropic.com}") String baseUrl,
             @Value("${anthropic.api-key:}") String apiKey,
-            @Value("${anthropic.model:claude-3-5-haiku-latest}") String model,
+            @Value("${anthropic.model:claude-haiku-4-5}") String model,
             @Value("${anthropic.version:2023-06-01}") String anthropicVersion
     ) {
         this.restClient = RestClient.builder()

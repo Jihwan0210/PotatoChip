@@ -531,7 +531,7 @@
 
     chatWindow.style.display=isOpen?'none':'flex';
 
-    if(풍선껌){
+    if(bubble){
       bubble.style.display=isOpen?'block':'none';
     }
 
@@ -613,9 +613,63 @@
       chatWindow.style.display='none';
     }
 
-    if(풍선껌){
+    if(bubble){
       bubble.style.display='block';
     }
+  }
+  function handleChatEnter(event){
+    if(event.key==='Enter'){
+      sendChatMessage();
+    }
+  }
+
+  function sendQuickQuestion(question){
+    var input=document.getElementById('chatInput');
+
+    if(input){
+      input.value=question;
+    }
+
+    sendChatMessage();
+  }
+
+  function sendChatMessage(){
+    var input=document.getElementById('chatInput');
+    var message=input?input.value.trim():'';
+
+    if(!message){
+      return;
+    }
+
+    appendChatMessage('user',message);
+    input.value='';
+
+    appendChatMessage('bot','답변을 찾는 중이에요...');
+
+    fetch('/api/ai/chatbot/ask',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+       question:message
+      })
+    })
+            .then(function(response){
+              if(!response.ok){
+                throw new Error('챗봇 응답 오류');
+              }
+
+              return response.json();
+            })
+            .then(function(data){
+              removeLastBotLoadingMessage();
+              appendChatMessage('bot',data.answer||data.message||'답변을 찾지 못했어요.');
+            })
+            .catch(function(){
+              removeLastBotLoadingMessage();
+              appendChatMessage('bot','지금은 답변을 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
+            });
   }
 </script>
 </body>
