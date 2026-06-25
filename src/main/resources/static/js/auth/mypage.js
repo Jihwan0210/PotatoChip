@@ -3,12 +3,24 @@ var selectedReviewTarget = null;
 var cachedMyReviews = [];
 
 function getToken() {
-    return localStorage.getItem('token') || sessionStorage.getItem('token');
+    var t = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (t) return t;
+    // nav와 동일하게 쿠키 fallback
+    var cookies = document.cookie ? document.cookie.split('; ') : [];
+    for (var i = 0; i < cookies.length; i++) {
+        var parts = cookies[i].split('=');
+        if (decodeURIComponent(parts[0]) === 'jwt') {
+            return decodeURIComponent(parts.slice(1).join('='));
+        }
+    }
+    return null;
 }
 
 function doLogout() {
     localStorage.clear();
     sessionStorage.clear();
+    document.cookie = 'jwt=; Max-Age=0; path=/';
+    document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
     location.href = '/login';
 }
 
@@ -18,13 +30,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!token) {
         location.href = '/login';
         return;
-    }
-
-    // 로그아웃 버튼 전환
-    const btnNav = document.querySelector('.btn-nav');
-    if (btnNav) {
-        btnNav.textContent = '로그아웃';
-        btnNav.setAttribute('onclick', 'doLogout()');
     }
 
     loadMyInfo();

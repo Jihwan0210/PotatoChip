@@ -14,27 +14,27 @@
 <div th:replace="nav :: nav"></div>
 
 <!-- 마켓 헤더 -->
-<div style="background:#fff;border-bottom:1.5px solid var(--sand);padding:28px 5% 0;margin-top:64px">
-    <div style="font-size:.65rem;color:var(--green);letter-spacing:1px;font-weight:500;margin-bottom:6px">Market</div>
-    <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark);margin-bottom:14px">못난이 마켓 🌿</div>
+<div class="mkt-header">
+    <div class="mkt-header-label">Market</div>
+    <div class="mkt-header-title">못난이 마켓 🌿</div>
 
     <!-- 검색바 -->
-    <div style="display:flex;align-items:center;gap:8px;max-width:600px;margin-bottom:14px">
-        <select id="mktSearchType" style="border:1.5px solid var(--sand);border-radius:8px;padding:9px 10px;font-size:.78rem;color:var(--mid);background:#fff;font-family:inherit;cursor:pointer;outline:none">
+    <div class="mkt-search-wrap">
+        <select id="mktSearchType" class="mkt-search-select">
             <option value="all"    th:selected="${searchType == 'all'}">전체</option>
             <option value="name"   th:selected="${searchType == 'name'}">상품명</option>
             <option value="farm"   th:selected="${searchType == 'farm'}">원산지</option>
             <option value="region" th:selected="${searchType == 'region'}">농장 위치</option>
         </select>
-        <div style="flex:1;display:flex;align-items:center;gap:8px;background:var(--beige2);border:1.5px solid var(--sand);border-radius:10px;padding:9px 14px">
-            <span style="font-size:.85rem;color:var(--muted)">🔍</span>
-            <input id="mktSearch" th:value="${keyword}" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..." style="flex:1;border:none;outline:none;font-size:.82rem;color:var(--dark);background:transparent;font-family:inherit"/>
-            <span id="mktSearchClear" onclick="clearMktSearch()" style="font-size:.85rem;color:var(--muted);cursor:pointer;display:none">×</span>
+        <div class="mkt-search-inner">
+            <span class="mkt-search-icon">🔍</span>
+            <input id="mktSearch" th:value="${keyword}" onkeydown="if(event.key==='Enter')doMktSearch()" placeholder="상품명, 농장명, 지역으로 검색..."/>
+            <span id="mktSearchClear" onclick="clearMktSearch()">×</span>
         </div>
-        <button onclick="doMktSearch()" style="background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.8rem;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap">검색</button>
+        <button onclick="doMktSearch()" class="mkt-search-btn">검색</button>
     </div>
     <!-- 카테고리 탭 (3개) -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:-1.5px">
+    <div class="mkt-tabs">
         <div id="mkt-tab-0" onclick="switchMktTab(0)" style="padding:12px 0;text-align:center;border-bottom:2px solid var(--green);font-size:.8rem;font-weight:500;color:var(--dark);cursor:pointer">전체 상품</div>
         <div id="mkt-tab-1" onclick="switchMktTab(1)" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer">AI 추천</div>
         <div id="mkt-tab-2" onclick="openRecPopup()" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">✨ 맞춤추천</div>
@@ -74,15 +74,15 @@
 
 <!-- ======= 탭 0: 전체 상품 ======= -->
 <div id="mkt-content-0" style="padding:22px 5%">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-        <span class="pgrid-count" style="font-size:.76rem;color:var(--muted)">총 <strong style="color:var(--dark)" th:text="${totalElements}"></strong>개 상품</span>
+    <div class="mkt-list-header">
+        <span class="pgrid-count">총 <strong style="color:var(--dark)" th:text="${totalElements}"></strong>개 상품</span>
         <!-- 정렬 버튼 -->
         <div style="display:flex;align-items:center;gap:8px">
-            <div style="display:flex;gap:0;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">
-                <div id="sort-btn-popular"   onclick="setSort('popular')"   style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);border-radius:6px 0 0 6px;font-weight:700;color:var(--green);background:var(--gp)">인기순</div>
-                <div id="sort-btn-discount"  onclick="setSort('discount')"  style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">할인율순</div>
-                <div id="sort-btn-price"     onclick="setSort('price')"     style="font-size:.74rem;cursor:pointer;padding:5px 11px;border-right:1px solid var(--sand);color:var(--muted)">가격순</div>
-                <div id="sort-btn-newest"    onclick="setSort('newest')"    style="font-size:.74rem;cursor:pointer;padding:5px 11px;color:var(--muted);border-radius:0 6px 6px 0">최신순</div>
+            <div class="mkt-sort-group">
+                <div id="sort-btn-popular"  class="mkt-sort-btn" onclick="setSort('popular')">인기순</div>
+                <div id="sort-btn-discount" class="mkt-sort-btn"        onclick="setSort('discount')">할인율순</div>
+                <div id="sort-btn-price"    class="mkt-sort-btn"        onclick="setSort('price')">가격순</div>
+                <div id="sort-btn-newest"   class="mkt-sort-btn"        onclick="setSort('newest')">최신순</div>
             </div>
             <button id="registerBtn"
                     style="display:none;font-size:.74rem;cursor:pointer;padding:5px 11px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"

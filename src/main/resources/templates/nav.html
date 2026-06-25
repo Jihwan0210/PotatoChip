@@ -44,15 +44,28 @@
     </div>
 
     <!-- 모바일 햄버거 버튼 -->
-    <button class="nav-mobile-btn" id="nav-mobile-btn" onclick="toggleMobileNav()" aria-label="메뉴">☰</button>
+    <button class="nav-mobile-btn" id="nav-mobile-btn" onclick="toggleMobileNav()" aria-label="메뉴">
+        <span class="hbg-line"></span>
+        <span class="hbg-line"></span>
+        <span class="hbg-line"></span>
+    </button>
 
-    <!-- 모바일 풀스크린 메뉴 -->
+    <!-- 모바일 백드롭 -->
+    <div class="nav-mobile-backdrop" id="nav-mobile-backdrop" onclick="closeMobileNav()"></div>
+
+    <!-- 모바일 사이드 패널 -->
     <div class="nav-mobile-overlay" id="nav-mobile-overlay">
-        <a th:href="@{/}" onclick="closeMobileNav()">홈</a>
-        <a th:href="@{/market}" onclick="closeMobileNav()">마켓</a>
-        <a th:href="@{/ranking}" onclick="closeMobileNav()">판매랭킹</a>
-        <a th:href="@{/board}" onclick="closeMobileNav()">게시판</a>
-        <a th:href="@{/faq}" onclick="closeMobileNav()">FAQ</a>
+        <div class="nmo-head" id="nav-mobile-head">
+            <div class="nmo-logo">못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물</div>
+            <button class="nmo-close-btn" onclick="closeMobileNav()" aria-label="닫기"></button>
+        </div>
+        <div class="nmo-nav">
+            <a th:href="@{/}" onclick="closeMobileNav()">홈</a>
+            <a th:href="@{/market}" onclick="closeMobileNav()">마켓</a>
+            <a th:href="@{/ranking}" onclick="closeMobileNav()">판매랭킹</a>
+            <a th:href="@{/board}" onclick="closeMobileNav()">게시판</a>
+            <a th:href="@{/faq}" onclick="closeMobileNav()">FAQ</a>
+        </div>
         <div class="nav-mobile-auth" id="nav-mobile-auth-area"></div>
     </div>
 
@@ -504,46 +517,63 @@
         }
 
         function toggleMobileNav() {
-            var overlay = document.getElementById('nav-mobile-overlay');
-            var btn = document.getElementById('nav-mobile-btn');
-            var isOpen = overlay.classList.toggle('open');
-            btn.textContent = isOpen ? '✕' : '☰';
+            var overlay  = document.getElementById('nav-mobile-overlay');
+            var backdrop = document.getElementById('nav-mobile-backdrop');
+            var btn      = document.getElementById('nav-mobile-btn');
+            var isOpen   = overlay.classList.toggle('open');
+            btn.classList.toggle('open', isOpen);
+            if (backdrop) backdrop.classList.toggle('open', isOpen);
             document.body.style.overflow = isOpen ? 'hidden' : '';
             if (isOpen) refreshMobileAuth();
         }
 
         function closeMobileNav() {
-            var overlay = document.getElementById('nav-mobile-overlay');
-            var btn = document.getElementById('nav-mobile-btn');
+            var overlay  = document.getElementById('nav-mobile-overlay');
+            var backdrop = document.getElementById('nav-mobile-backdrop');
+            var btn      = document.getElementById('nav-mobile-btn');
             overlay.classList.remove('open');
-            btn.textContent = '☰';
+            btn.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('open');
             document.body.style.overflow = '';
         }
 
         function refreshMobileAuth() {
             var area = document.getElementById('nav-mobile-auth-area');
+            var head = document.getElementById('nav-mobile-head');
             if (!area) return;
             var token = getNavToken();
-            var role = getNavRole();
-            var name = getNavUserName();
+            var role  = getNavRole();
+            var name  = getNavUserName();
+
+            var closeBtn = '<button class="nmo-close-btn" onclick="closeMobileNav()" aria-label="닫기"></button>';
+
             if (!token) {
-                area.innerHTML = '<a href="/login" onclick="closeMobileNav()" class="btn-nav" style="text-align:center;margin-top:8px">로그인</a>';
+                // 비로그인: 로고 표시
+                if (head) head.innerHTML = '<div class="nmo-logo">못<span style="color:var(--green)">난이</span> <span style="color:var(--amber)">농</span>작물</div>' + closeBtn;
+                area.innerHTML = '<a href="/login" onclick="closeMobileNav()" class="nmo-login-btn">로그인</a>';
                 return;
             }
-            var rolePage = role === 'SELLER' ? '/farmer' : role === 'ADMIN' ? '/admin/dashboard' : '/mypage';
+
+            // 로그인: 아바타 + 이름을 헤더에 표시
+            var initial   = name ? name.charAt(0) : '?';
+            var roleText  = role === 'SELLER' ? '판매자' : role === 'ADMIN' ? '관리자' : '구매자';
+            if (head) head.innerHTML = '<div class="nmo-user-head"><div class="nmo-avatar">' + initial + '</div><div class="nmo-head-info"><div class="nmo-head-name">' + name + '</div><div class="nmo-head-role">' + roleText + '</div></div></div>' + closeBtn;
+
+            var rolePage  = role === 'SELLER' ? '/farmer' : role === 'ADMIN' ? '/admin/dashboard' : '/mypage';
             var roleLabel = role === 'SELLER' ? '🌾 농가 대시보드' : role === 'ADMIN' ? '🛠️ 관리자 대시보드' : '👤 마이페이지';
-            var cartHtml = (role !== 'SELLER' && role !== 'ADMIN')
-                ? '<a href="/cart" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">🛒 장바구니</a>'
+            var cartHtml  = (role !== 'SELLER' && role !== 'ADMIN')
+                ? '<a href="/cart" onclick="closeMobileNav()" class="nmo-auth-link">🛒 장바구니</a>'
                 : '';
-            area.innerHTML = '<div style="padding:14px 0;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--beige)">' + name + ' 님</div>'
-                + cartHtml
-                + '<a href="' + rolePage + '" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">' + roleLabel + '</a>'
-                + '<button onclick="handleNavLogout();closeMobileNav();" style="width:100%;margin-top:16px;padding:13px;background:#fff;color:#e74c3c;border:1.5px solid #e74c3c;border-radius:12px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit">🚪 로그아웃</button>';
+            area.innerHTML = cartHtml
+                + '<a href="' + rolePage + '" onclick="closeMobileNav()" class="nmo-auth-link">' + roleLabel + '</a>'
+                + '<button onclick="handleNavLogout();closeMobileNav();" class="nmo-logout-btn">🚪 로그아웃</button>';
         }
 
         function initNav() {
-            var mobileOverlay = document.getElementById('nav-mobile-overlay');
-            if (mobileOverlay) document.body.appendChild(mobileOverlay);
+            var mobileOverlay  = document.getElementById('nav-mobile-overlay');
+            var mobileBackdrop = document.getElementById('nav-mobile-backdrop');
+            if (mobileOverlay)  document.body.appendChild(mobileOverlay);
+            if (mobileBackdrop) document.body.appendChild(mobileBackdrop);
             refreshNavUserUI();
             setupNavEvents();
             updateCartBadge();

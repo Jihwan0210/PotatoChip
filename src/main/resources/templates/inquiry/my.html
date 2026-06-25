@@ -62,7 +62,21 @@
         .inquiry-image-modal.open{display:flex}
         .inquiry-image-modal img{max-width:min(92vw,1000px);max-height:86vh;object-fit:contain;border-radius:14px;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.35)}
         .inquiry-image-modal-close{position:absolute;top:22px;right:24px;width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.92);color:#222;cursor:pointer;font-size:1.1rem}
-        @media(max-width:720px){.inquiry-head{padding:28px 6% 22px}.inquiry-card-top{flex-direction:column}.inquiry-detail-info{grid-template-columns:1fr}}
+        @media(max-width:720px){
+          .inquiry-head{padding:28px 6% 22px}
+          .inquiry-card-top{flex-direction:column}
+          .inquiry-detail-info{grid-template-columns:1fr}
+          .inquiry-detail-card{padding:18px;border-radius:16px}
+          .inquiry-layout{padding:20px 4% 60px}
+          .inquiry-toolbar{flex-direction:column;align-items:flex-start;gap:10px}
+          .inquiry-filter-group{width:100%}
+        }
+        @media(max-width:480px){
+          .inquiry-head-title{font-size:1.6rem}
+          .inquiry-write-btn{width:100%;text-align:center}
+          .inquiry-actions{justify-content:flex-start}
+          .inquiry-detail-card{padding:14px;border-radius:12px}
+        }
     </style>
 </head>
 <body>
