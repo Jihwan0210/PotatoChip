@@ -178,6 +178,42 @@
                 <span class="v" id="cs-ship">무료</span>
             </div>
 
+            <!-- 쿠폰 선택 -->
+            <div style="margin:12px 0 6px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <span style="font-size:.72rem;font-weight:500;color:var(--mid)">쿠폰</span>
+                    <span id="couponSelectedName" style="font-size:.72rem;color:var(--green);font-weight:700;display:none"></span>
+                </div>
+                <div style="display:flex;gap:6px">
+                    <button onclick="openCouponModal()"
+                            style="flex:1;background:var(--beige3,#faf7f2);border:1.5px solid var(--sand);border-radius:8px;padding:9px 12px;font-size:.8rem;font-family:inherit;cursor:pointer;color:var(--mid);text-align:left">
+                        🎟️ <span id="couponBtnText">쿠폰 선택하기</span>
+                    </button>
+                    <button id="couponCancelBtn" onclick="cancelCoupon()"
+                            style="display:none;background:#f2dddd;border:none;border-radius:8px;padding:9px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:#b23b3b;white-space:nowrap">취소</button>
+                </div>
+                <div class="cs-row" style="margin-top:6px">
+                    <span style="color:var(--muted)">쿠폰 할인</span>
+                    <span id="cs-coupon" style="color:var(--green)">-0원</span>
+                </div>
+            </div>
+
+            <!-- 쿠폰 선택 모달 -->
+            <div id="couponModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center">
+                <div style="background:#fff;border-radius:16px;width:90%;max-width:420px;max-height:50vh;overflow-y:auto;padding:20px 18px 24px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                        <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark)">🎟️ 쿠폰 선택</div>
+                        <button onclick="closeCouponModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+                    </div>
+
+                    <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px">보유 쿠폰</div>
+                    <div id="couponList" style="display:flex;flex-direction:column;gap:8px">
+                        <div style="text-align:center;color:var(--muted);padding:20px;font-size:.82rem">불러오는 중...</div>
+                    </div>
+                </div>
+            </div>
+
+
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                 <span style="font-size:.72rem;font-weight:500;color:var(--mid)">포인트</span>
                 <span id="pt-balance" style="font-size:.78rem;font-weight:700;color:var(--green)"
@@ -212,10 +248,13 @@
 <script src="js/app.js"></script>
 <script th:inline="none">
     const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-    var sf = 0, pd = 0;
+    var sf = 0, pd = 0, cd = 0;  // sf=배송비, pd=포인트할인, cd=쿠폰할인
     var selectedDeliveryType  = 'delivery';
     var selectedDeliveryFee   = 0;
     var selectedDeliveryLabel = '🚚 일반 배송';
+    var selectedUserCouponId  = null;
+    var selectedCouponName    = '';
+    var selectedCouponType    = '';  // FREE_SHIPPING이면 배송비 할인
 
     // 페이지 로드 시 합계 계산
     recalcTotal();
@@ -231,13 +270,141 @@
             var qty = parseInt(qtyEl ? qtyEl.textContent : 0) || 0;
             tot += unitPrice * qty;
         });
-        var fin = Math.max(0, tot + sf - pd);
+        var fin = Math.max(0, tot + sf - cd - pd);
         var et = document.getElementById('cs-tot');
         var ef = document.getElementById('cs-fin');
         var pts = document.getElementById('cartPoints');
         if (et) et.textContent = tot.toLocaleString() + '원';
         if (ef) ef.textContent = fin.toLocaleString() + '원';
         if (pts) pts.textContent = '🌿 이번 구매로 ' + Math.floor(fin / 100) + 'P 적립 예정!';
+    }
+
+    // ── 쿠폰 모달 ────────────────────────────────────────────────────────────
+    function openCouponModal() {
+        document.getElementById('couponModal').style.display = 'flex';
+        loadMyCoupons();
+    }
+    function closeCouponModal() {
+        document.getElementById('couponModal').style.display = 'none';
+    }
+
+    async function loadMyCoupons() {
+        const listEl = document.getElementById('couponList');
+        try {
+            const res = await fetch('/api/coupons/my', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) { listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:.82rem">로그인이 필요합니다.</div>'; return; }
+            const coupons = await res.json();
+            if (!coupons.length) {
+                listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:.82rem">보유한 쿠폰이 없어요 🎟️<br><span style="font-size:.7rem">쿠폰 코드를 등록해보세요!</span></div>';
+                return;
+            }
+            listEl.innerHTML = coupons.map(c => {
+                const isSelected = selectedUserCouponId == c.userCouponId;
+                const discLabel = c.discountType === 'PERCENTAGE'
+                    ? c.discountValue + '% 할인'
+                    : c.discountType === 'FIXED_AMOUNT'
+                        ? Number(c.discountValue).toLocaleString() + '원 할인'
+                        : '무료 배송';
+                const endLabel = c.endDate ? c.endDate.substring(0,10) + ' 까지' : '';
+                const minLabel = c.minOrderAmount ? Number(c.minOrderAmount).toLocaleString() + '원 이상 주문 시' : '';
+                const productLabel = c.targetProductName ? '📦 ' + c.targetProductName + ' 전용' : '';
+                return `<div onclick="selectCoupon(${c.userCouponId}, '${c.name}', '${c.discountType}', ${c.discountValue || 0}, ${c.targetProductId || 'null'})"
+                    style="padding:14px 16px;border:1.5px solid ${isSelected ? 'var(--green)' : 'var(--sand)'};
+                           border-radius:12px;cursor:pointer;background:${isSelected ? '#f0fae6' : '#fff'};transition:all .15s">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                        <div>
+                            <div style="font-size:.88rem;font-weight:700;color:var(--dark);margin-bottom:3px">${c.name}</div>
+                            <div style="font-size:.72rem;color:var(--muted)">${productLabel}${productLabel && (minLabel||endLabel) ? ' · ' : ''}${minLabel}${minLabel && endLabel ? ' · ' : ''}${endLabel}</div>
+                        </div>
+                        <div style="font-size:.92rem;font-weight:700;color:var(--green);white-space:nowrap">${discLabel}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        } catch(e) {
+            listEl.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px;font-size:.82rem">불러오기 실패</div>';
+        }
+    }
+
+    async function selectCoupon(userCouponId, name, type, value, targetProductId) {
+        // 전체 금액 + 상품별 금액 계산
+        var tot = 0;
+        var productAmounts = {};
+        document.querySelectorAll('[data-product-id]').forEach(function(row) {
+            var pid = row.dataset.productId;
+            var chk = document.getElementById('check-' + pid);
+            if (!chk || !chk.checked) return;
+            var unitPrice = parseInt(row.dataset.unitPrice) || 0;
+            var qtyEl = document.getElementById('qty-' + pid);
+            var qty = parseInt(qtyEl ? qtyEl.textContent : 0) || 0;
+            var sub = unitPrice * qty;
+            tot += sub;
+            productAmounts[pid] = sub;
+        });
+
+        // 상품 전용 쿠폰이면 해당 상품 금액만 할인 기준으로 전달
+        var targetProductAmount = (targetProductId && productAmounts[String(targetProductId)])
+            ? productAmounts[String(targetProductId)] : null;
+
+        try {
+            const res = await fetch('/api/coupons/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ userCouponId, orderAmount: tot, shippingFee: sf, targetProductAmount })
+            });
+            const data = await res.json();
+            if (!res.ok) { alert(data.error || '쿠폰 적용 실패'); return; }
+
+            selectedUserCouponId = userCouponId;
+            selectedCouponName   = name;
+            selectedCouponType   = type;
+            cd = parseInt(data.discount) || 0;
+
+            document.getElementById('cs-coupon').textContent = '-' + cd.toLocaleString() + '원';
+            document.getElementById('couponSelectedName').textContent = name;
+            document.getElementById('couponSelectedName').style.display = 'inline';
+            document.getElementById('couponBtnText').textContent = name;
+            document.getElementById('couponCancelBtn').style.display = 'inline-block';
+            closeCouponModal();
+            recalcTotal();
+        } catch(e) {
+            alert('쿠폰 적용 중 오류가 발생했습니다.');
+        }
+    }
+
+    function cancelCoupon() {
+        selectedUserCouponId = null;
+        selectedCouponName   = '';
+        cd = 0;
+        document.getElementById('cs-coupon').textContent = '-0원';
+        document.getElementById('couponSelectedName').style.display = 'none';
+        document.getElementById('couponBtnText').textContent = '쿠폰 선택하기';
+        document.getElementById('couponCancelBtn').style.display = 'none';
+        recalcTotal();
+    }
+
+    async function registerCoupon() {
+        const code = document.getElementById('couponCodeInput').value.trim().toUpperCase();
+        const msgEl = document.getElementById('registerMsg');
+        if (!code) { msgEl.textContent = '코드를 입력해주세요.'; msgEl.style.color = '#b23b3b'; msgEl.style.display = 'block'; return; }
+
+        const res = await fetch('/api/coupons/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        msgEl.style.display = 'block';
+        if (res.ok) {
+            msgEl.textContent = '✅ ' + (data.message || '쿠폰이 등록되었습니다!');
+            msgEl.style.color = 'var(--green)';
+            document.getElementById('couponCodeInput').value = '';
+            loadMyCoupons();
+        } else {
+            msgEl.textContent = '❌ ' + (data.error || '등록 실패');
+            msgEl.style.color = '#b23b3b';
+        }
     }
 
     function useAllPoints() {
@@ -318,6 +485,9 @@
         sessionStorage.setItem('selectedDeliveryFee',   selectedDeliveryFee);
         sessionStorage.setItem('selectedDeliveryLabel', selectedDeliveryLabel);
         sessionStorage.setItem('usedPoints', pd);
+        sessionStorage.setItem('selectedUserCouponId',  selectedUserCouponId || '');
+        sessionStorage.setItem('selectedCouponName',    selectedCouponName || '');
+        sessionStorage.setItem('couponDiscount',        cd || 0);
         var t = localStorage.getItem('token') || sessionStorage.getItem('token');
         location.href = '/orders?token=' + (t || '');
     }

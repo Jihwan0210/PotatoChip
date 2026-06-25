@@ -8,6 +8,8 @@
      Mission  — 연두 진하게 #7BBF45 (다크 카드)
      Footer   — 다크브라운  #3A2808 (푸터만)
 ════════════════════════ */
+@import url('responsive.css');
+
 :root {
   --dark:   #3A2808;
 
@@ -481,5 +483,112 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
   border: 1px solid #F5C8A8;
   margin-left: 4px;
   display: inline-block;
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px (태블릿·모바일)
+   style.css 클래스 오버라이드는 반드시 이 파일 끝에
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── NAV ── */
+  nav { padding: 0 5%; }
+  .nav-links { display: none; }
+  .nav-r { gap: 8px; }
+  .btn-nav#btn-nav-login { padding: 8px 16px; font-size: .82rem; }
+
+  /* ── HERO ── */
+  .hero { grid-template-columns: 1fr; height: auto; min-height: unset; }
+  .hl { padding: 36px 6% 28px; }
+  .hr { height: 220px; padding: 0 6%; gap: 16px; }
+  .hp-fl { display: none; }
+  .h-title { font-size: clamp(1.55rem, 5.5vw, 2.2rem); }
+  .h-sub { font-size: .84rem; }
+  .btn-hero { padding: 12px 28px; font-size: .88rem; }
+  .h-bot { flex-wrap: wrap; gap: 12px; }
+
+  /* ── ABOUT ── */
+  .about-sec { padding: 56px 6%; }
+  .about-grid { grid-template-columns: 1fr; gap: 28px; }
+  .ar-desc { grid-template-columns: 1fr; gap: 10px; }
+  .acards { grid-template-columns: 1fr 1fr; height: auto; min-height: 260px; }
+  .ac2 { grid-row: auto; grid-column: auto; }
+
+  /* ── SERVICES ── */
+  .svc-sec { padding: 56px 6%; }
+  .svc-grid { grid-template-columns: 1fr; }
+  .svc-photo { height: 180px; font-size: 4rem; }
+  .sec-hdr { flex-wrap: wrap; gap: 10px; }
+
+  /* ── PRODUCTS (홈) ── */
+  .prod-sec { padding: 56px 6%; }
+  .pc { flex: 0 0 175px; }
+
+  /* ── MISSION ── */
+  .miss-wrap { padding: 56px 6%; }
+  .miss-card { grid-template-columns: 1fr; }
+  .ml { padding: 32px 24px; }
+  .mr { grid-template-columns: 1fr 1fr; padding: 16px; gap: 8px; }
+  .ms { padding: 16px 14px; }
+
+  /* ── FOOTER ── */
+  footer { padding: 48px 6% 24px; }
+  .ft-g { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .ft-bot { flex-direction: column; gap: 6px; text-align: center; }
+
+  /* ── LOGIN / 회원가입 ── */
+  .login-bg { padding: 28px 16px; }
+  .login-box { padding: 28px 20px; border-radius: 16px; }
+  .name-row { grid-template-columns: 1fr; }
+  .soc-btns { grid-template-columns: 1fr; }
+
+  /* ── CART ── */
+  .cart-layout { grid-template-columns: 1fr; }
+  .cart-sum { position: static; }
+
+  /* ── MARKET 그리드 ── */
+  .pgrid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
+  .mkt-bar { padding: 0 4%; gap: 6px; }
+}
+
+@media (max-width: 480px) {
+
+  /* ── NAV ── */
+  nav { padding: 0 4%; }
+  .logo { font-size: 1.2rem; }
+  .n-ico { font-size: 1rem; }
+
+  /* ── HERO ── */
+  .hl { padding: 28px 4% 22px; }
+  .hr { height: 180px; }
+  .h-title { font-size: clamp(1.4rem, 7vw, 1.9rem); }
+
+  /* ── SECTIONS ── */
+  .about-sec, .svc-sec, .prod-sec { padding: 44px 4%; }
+  .miss-wrap { padding: 44px 4%; }
+  footer { padding: 40px 4% 20px; }
+
+  /* ── ABOUT 카드 ── */
+  .acards { grid-template-columns: 1fr; min-height: auto; }
+  .ac2 { min-height: 180px; }
+
+  /* ── MISSION ── */
+  .mr { grid-template-columns: 1fr; }
+
+  /* ── FOOTER ── */
+  .ft-g { grid-template-columns: 1fr; gap: 24px; }
+
+  /* ── MARKET ── */
+  .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .pc2-thumb { height: 100px; font-size: 2.5rem; }
+  .pc2-body { padding: 8px 9px 10px; }
+  .pc2-nm { font-size: .76rem; }
+
+  /* ── CART ── */
+  .cart-item { gap: 10px; }
+  .ct-thumb { width: 52px; height: 52px; font-size: 1.6rem; }
+
+  /* ── LOGIN ── */
+  .login-box { padding: 22px 16px; }
 }
 

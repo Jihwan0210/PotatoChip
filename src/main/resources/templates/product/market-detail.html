@@ -22,7 +22,7 @@
         </span>
     </div>
 
-    <div style="padding:28px 5%;display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1100px;margin:0 auto">
+    <div class="detail-grid" style="padding:28px 5%;display:grid;grid-template-columns:1fr 380px;gap:32px;max-width:1100px;margin:0 auto">
         <!-- LEFT: 이미지 + 탭 -->
         <div>
             <!-- 상품 이미지 -->
@@ -193,7 +193,7 @@
         </div>
 
         <!-- RIGHT: 구매 패널 -->
-        <div style="position:sticky;top:80px;align-self:flex-start">
+        <div class="detail-panel" style="position:sticky;top:80px;align-self:flex-start">
             <div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:22px;margin-bottom:12px">
                 <div style="font-size:.72rem;color:var(--green);margin-bottom:4px;font-weight:500" th:text="${product.origin}">원산지</div>
                 <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:13px;line-height:1.4">
@@ -297,6 +297,50 @@
                         th:onclick="|location.href='@{/market/edit/{id}(id=${product.id})}'|">
                     ✏️ 상품 수정
                 </button>
+                <!-- 판매자: 쿠폰 관리 영역 (JS로 동적 표시) -->
+                <div id="sellerCouponSection" style="display:none;margin-top:8px">
+                    <!-- 쿠폰 없을 때 -->
+                    <button id="addCouponBtn" onclick="openCouponPopup()"
+                            style="display:flex;width:100%;padding:10px;border:1.5px solid #b47a00;border-radius:10px;background:#fff4d8;font-size:.8rem;font-weight:700;color:#b47a00;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:5px;box-sizing:border-box">
+                        🎟️ 쿠폰 추가하기
+                    </button>
+                    <!-- 쿠폰 있을 때 -->
+                    <div id="sellerCouponInfo" style="display:none;background:#fff4d8;border:1.5px solid #f5d87a;border-radius:10px;padding:12px 13px">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                            <div>
+                                <div style="font-size:.78rem;font-weight:700;color:#b47a00;margin-bottom:3px">🎟️ 현재 등록된 쿠폰</div>
+                                <div id="cpInfoName" style="font-size:.84rem;font-weight:600;color:var(--dark)"></div>
+                            </div>
+                            <span id="cpInfoStatus" style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px"></span>
+                        </div>
+                        <div id="cpInfoDiscount" style="font-size:.8rem;color:#9a6500;margin-bottom:2px"></div>
+                        <div id="cpInfoEnd" style="font-size:.72rem;color:var(--muted);margin-bottom:10px"></div>
+                        <div id="cpInfoUsage" style="font-size:.72rem;color:var(--muted);margin-bottom:10px"></div>
+                        <div style="display:flex;gap:6px">
+                            <button onclick="openCouponPopup()"
+                                    style="flex:1;padding:7px;background:#b47a00;color:#fff;border:none;border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit">
+                                수정
+                            </button>
+                            <button id="cpDeleteBtn" onclick="deleteProductCoupon()"
+                                    style="flex:1;padding:7px;background:#fff;color:#b23b3b;border:1.5px solid #f5c8a8;border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit">
+                                삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 구매자: 쿠폰 다운로드 배너 -->
+                <div id="couponBanner" style="display:none;margin-top:10px;padding:12px 14px;background:#fff4d8;border:1.5px solid #f5d87a;border-radius:10px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                        <div>
+                            <div style="font-size:.8rem;font-weight:700;color:#b47a00">🎟️ 쿠폰 사용 가능합니다!</div>
+                            <div id="couponBannerDesc" style="font-size:.72rem;color:#9a6500;margin-top:2px"></div>
+                        </div>
+                        <button id="couponDownloadBtn" onclick="downloadProductCoupon()"
+                                style="background:#b47a00;color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">
+                            다운로드
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- 주문 안내 -->
@@ -355,6 +399,57 @@
 </div>
 <!-- AI담당 추가: 리뷰 상세보기 모달 끝 -->
 
+<!-- 판매자 쿠폰 추가 팝업 -->
+<div id="couponPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10001;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:380px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.2)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark)">🎟️ 쿠폰 추가하기</div>
+            <button onclick="closeCouponPopup()" style="border:none;background:none;font-size:1.2rem;cursor:pointer;color:var(--muted)">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+                <label style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">쿠폰 이름</label>
+                <input id="cpName" type="text" placeholder="예: 이 상품 10% 할인"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"/>
+            </div>
+            <div>
+                <label style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">할인 유형</label>
+                <select id="cpType" onchange="onCpTypeChange()"
+                        style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none">
+                    <option value="PERCENTAGE">정률 할인 (%)</option>
+                    <option value="FIXED_AMOUNT">정액 할인 (원)</option>
+                    <option value="FREE_SHIPPING">무료 배송</option>
+                </select>
+            </div>
+            <div id="cpValueGroup">
+                <label id="cpValueLabel" style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">할인율 (%)</label>
+                <input id="cpValue" type="number" min="1" placeholder="예: 10"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"/>
+            </div>
+            <div id="cpMaxGroup">
+                <label style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">최대 할인 한도 (원, 선택)</label>
+                <input id="cpMax" type="number" min="0" placeholder="예: 5000 (없으면 비워두세요)"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"/>
+            </div>
+            <div>
+                <label style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">종료일</label>
+                <input id="cpEnd" type="datetime-local"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"/>
+            </div>
+            <div>
+                <label style="font-size:.76rem;font-weight:600;color:var(--mid);display:block;margin-bottom:4px">최소 주문 금액 (원, 선택)</label>
+                <input id="cpMin" type="number" min="0" placeholder="없으면 비워두세요"
+                       style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"/>
+            </div>
+        </div>
+        <div id="cpMsg" style="font-size:.76rem;margin-top:10px;display:none"></div>
+        <button onclick="submitCoupon()"
+                style="width:100%;margin-top:16px;background:#b47a00;color:#fff;border:none;border-radius:10px;padding:13px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit">
+            쿠폰 등록하기
+        </button>
+    </div>
+</div>
+
 <!-- 채팅 모달 (구매자 → 판매자) -->
 <div id="chatModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:10000;align-items:center;justify-content:center;padding:20px">
     <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;height:560px;display:flex;flex-direction:column;box-shadow:0 12px 44px rgba(0,0,0,.22);overflow:hidden">
@@ -396,6 +491,183 @@
 <script th:inline="javascript">
     const productId = [[${product.id}]];
     const sellerEmail = document.getElementById('deleteProductBtn').dataset.sellerEmail;
+
+    // ── 쿠폰 기능 ────────────────────────────────────────────────────────────
+    const _cpToken = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const _cpRole  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
+    const _cpEmail = localStorage.getItem('email') || sessionStorage.getItem('email') || '';
+
+    var _currentSellerCouponId = null;
+
+    // 판매자 본인이면 쿠폰 섹션 표시 + 현재 쿠폰 조회
+    if (_cpRole === 'SELLER' && _cpEmail === sellerEmail) {
+        document.getElementById('sellerCouponSection').style.display = 'block';
+        loadSellerCoupon();
+    }
+
+    async function loadSellerCoupon() {
+        const res = await fetch('/api/coupons/product/' + productId + '/mine', {
+            headers: { 'Authorization': 'Bearer ' + _cpToken }
+        });
+        if (res.status === 204) {
+            // 등록된 쿠폰 없음
+            document.getElementById('addCouponBtn').style.display = 'flex';
+            document.getElementById('sellerCouponInfo').style.display = 'none';
+            _currentSellerCouponId = null;
+            return;
+        }
+        const c = await res.json();
+        _currentSellerCouponId = c.id;
+
+        const now = new Date();
+        const end = c.endDate ? new Date(c.endDate) : null;
+        const expired = end && end < now;
+        const active = c.isActive && !expired;
+
+        // 상태 뱃지
+        const statusEl = document.getElementById('cpInfoStatus');
+        statusEl.textContent = !c.isActive ? '비활성' : expired ? '만료됨' : '진행중';
+        statusEl.style.background = active ? '#e6f9ed' : '#fee';
+        statusEl.style.color = active ? '#1c7a3d' : '#b23b3b';
+
+        // 할인 텍스트
+        let disc = '';
+        if (c.discountType === 'PERCENTAGE') {
+            disc = c.discountValue + '% 할인';
+            if (c.maxDiscountAmount) disc += ' (최대 ' + Number(c.maxDiscountAmount).toLocaleString() + '원)';
+        } else if (c.discountType === 'FIXED_AMOUNT') {
+            disc = Number(c.discountValue).toLocaleString() + '원 할인';
+        } else {
+            disc = '무료 배송';
+        }
+        if (c.minOrderAmount) disc += ' · 최소 ' + Number(c.minOrderAmount).toLocaleString() + '원 이상';
+
+        document.getElementById('cpInfoName').textContent = c.name;
+        document.getElementById('cpInfoDiscount').textContent = disc;
+        document.getElementById('cpInfoEnd').textContent = end ? '종료: ' + end.toLocaleDateString('ko-KR') : '';
+        document.getElementById('cpInfoUsage').textContent = '다운로드 수: ' + (c.currentUsage || 0) + '회';
+
+        document.getElementById('addCouponBtn').style.display = 'none';
+        document.getElementById('sellerCouponInfo').style.display = 'block';
+    }
+
+    async function deleteProductCoupon() {
+        if (!_currentSellerCouponId) return;
+        if (!confirm('이 쿠폰을 삭제하시겠습니까?')) return;
+        const res = await fetch('/api/coupons/' + _currentSellerCouponId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + _cpToken }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert('쿠폰이 삭제되었습니다.');
+            loadSellerCoupon();
+        } else {
+            alert(data.error || '삭제 실패');
+        }
+    }
+
+    // 구매자면 상품 쿠폰 조회해서 배너 표시
+    var _productCouponId = null;
+    if (_cpRole !== 'SELLER') {
+        fetch('/api/coupons/product/' + productId)
+            .then(r => r.status === 204 ? null : r.json())
+            .then(data => {
+                if (!data) return;
+                _productCouponId = data.couponId;
+                const banner = document.getElementById('couponBanner');
+                const desc   = document.getElementById('couponBannerDesc');
+                if (!banner || !desc) return;
+                const disc = data.discountType === 'PERCENTAGE'
+                    ? data.discountValue + '% 할인'
+                    : data.discountType === 'FIXED_AMOUNT'
+                        ? Number(data.discountValue).toLocaleString() + '원 할인'
+                        : '무료 배송';
+                const until = data.endDate ? ' · ' + data.endDate.substring(0,10) + ' 까지' : '';
+                desc.textContent = disc + until;
+                banner.style.display = 'block';
+            });
+    }
+
+    async function downloadProductCoupon() {
+        if (!_cpToken) { alert('로그인이 필요합니다.'); return; }
+        if (!_productCouponId) return;
+        const res = await fetch('/api/coupons/download/' + _productCouponId, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + _cpToken }
+        });
+        const data = await res.json();
+        if (res.ok) {
+            alert('✅ ' + data.message);
+            document.getElementById('couponDownloadBtn').textContent = '다운로드 완료';
+            document.getElementById('couponDownloadBtn').disabled = true;
+            document.getElementById('couponDownloadBtn').style.background = '#aaa';
+        } else {
+            alert(data.error || '다운로드 실패');
+        }
+    }
+
+    function openCouponPopup()  { document.getElementById('couponPopup').style.display = 'flex'; }
+    function closeCouponPopup() { document.getElementById('couponPopup').style.display = 'none'; }
+
+    function onCpTypeChange() {
+        const type = document.getElementById('cpType').value;
+        const vg = document.getElementById('cpValueGroup');
+        const mg = document.getElementById('cpMaxGroup');
+        const lbl = document.getElementById('cpValueLabel');
+        if (type === 'FREE_SHIPPING') {
+            vg.style.opacity = '0.3'; vg.style.pointerEvents = 'none';
+            mg.style.opacity = '0.3'; mg.style.pointerEvents = 'none';
+        } else {
+            vg.style.opacity = '1'; vg.style.pointerEvents = 'auto';
+            lbl.textContent = type === 'PERCENTAGE' ? '할인율 (%)' : '할인 금액 (원)';
+            if (type === 'PERCENTAGE') {
+                mg.style.opacity = '1'; mg.style.pointerEvents = 'auto';
+            } else {
+                mg.style.opacity = '0.3'; mg.style.pointerEvents = 'none';
+            }
+        }
+    }
+
+    async function submitCoupon() {
+        const name = document.getElementById('cpName').value.trim();
+        const type = document.getElementById('cpType').value;
+        const value = document.getElementById('cpValue').value;
+        const max  = document.getElementById('cpMax').value;
+        const end  = document.getElementById('cpEnd').value;
+        const min  = document.getElementById('cpMin').value;
+        const msgEl = document.getElementById('cpMsg');
+
+        if (!name || !end) { showCpMsg('error', '이름과 종료일은 필수입니다.'); return; }
+        if (type !== 'FREE_SHIPPING' && !value) { showCpMsg('error', '할인 값을 입력해주세요.'); return; }
+
+        const body = {
+            name, discountType: type,
+            discountValue: value ? parseFloat(value) : null,
+            maxDiscountAmount: max ? parseFloat(max) : null,
+            minOrderAmount: min ? parseFloat(min) : null,
+            endDate: end + ':00'
+        };
+        const res = await fetch('/api/coupons/product/' + productId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _cpToken },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showCpMsg('success', '✅ ' + data.message);
+            setTimeout(() => { closeCouponPopup(); loadSellerCoupon(); }, 1200);
+        } else {
+            showCpMsg('error', '❌ ' + (data.error || '등록 실패'));
+        }
+    }
+
+    function showCpMsg(type, msg) {
+        const el = document.getElementById('cpMsg');
+        el.textContent = msg;
+        el.style.color = type === 'success' ? 'var(--green)' : '#b23b3b';
+        el.style.display = 'block';
+    }
 
     var currentProductId = productId;
     var currentUserId = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;

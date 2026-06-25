@@ -43,12 +43,136 @@
         <a th:href="@{/login}" class="btn-nav" id="btn-nav-login">로그인</a>
     </div>
 
+    <!-- 모바일 햄버거 버튼 -->
+    <button class="nav-mobile-btn" id="nav-mobile-btn" onclick="toggleMobileNav()" aria-label="메뉴">☰</button>
+
+    <!-- 모바일 풀스크린 메뉴 -->
+    <div class="nav-mobile-overlay" id="nav-mobile-overlay">
+        <a th:href="@{/}" onclick="closeMobileNav()">홈</a>
+        <a th:href="@{/market}" onclick="closeMobileNav()">마켓</a>
+        <a th:href="@{/ranking}" onclick="closeMobileNav()">판매랭킹</a>
+        <a th:href="@{/board}" onclick="closeMobileNav()">게시판</a>
+        <a th:href="@{/faq}" onclick="closeMobileNav()">FAQ</a>
+        <div class="nav-mobile-auth" id="nav-mobile-auth-area"></div>
+    </div>
+
     <script src="/js/app.js"></script>
     <script>
-        (function () {
-            var token     = localStorage.getItem('token')     || sessionStorage.getItem('token');
-            var role      = (localStorage.getItem('role')     || sessionStorage.getItem('role')  || '').toUpperCase();
-            var name      = localStorage.getItem('name')      || sessionStorage.getItem('name')  || '사용자';
+        var navEventBound = false;
+
+        function getNavCookieValue(name) {
+            var cookies = document.cookie ? document.cookie.split('; ') : [];
+
+            for (var i = 0; i < cookies.length; i++) {
+                var parts = cookies[i].split('=');
+                var key = decodeURIComponent(parts.shift());
+
+                if (key === name) {
+                    return decodeURIComponent(parts.join('='));
+                }
+            }
+
+            return null;
+        }
+
+        function isNavTokenExpired(token) {
+            var payload = parseNavJwtPayload(token);
+            if (!payload || !payload.exp) return false;
+            return Date.now() >= Number(payload.exp) * 1000;
+        }
+
+        function getNavToken() {
+            var token = localStorage.getItem('token')
+                || sessionStorage.getItem('token')
+                || getNavCookieValue('jwt');
+
+            if (token && isNavTokenExpired(token)) {
+                clearNavAuthState();
+                return null;
+            }
+
+            return token;
+        }
+
+        function parseNavJwtPayload(token) {
+            if (!token || token.split('.').length < 2) {
+                return {};
+            }
+
+            try {
+                var base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+                var json = decodeURIComponent(
+                    atob(base64)
+                        .split('')
+                        .map(function(char) {
+                            return '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2);
+                        })
+                        .join('')
+                );
+
+                return JSON.parse(json);
+            } catch (e) {
+                try {
+                    return JSON.parse(atob(token.split('.')[1]));
+                } catch (ignore) {
+                    return {};
+                }
+            }
+        }
+
+        function normalizeNavRole(role) {
+            var value = String(role || '').toUpperCase();
+
+            if (value.indexOf('ROLE_') === 0) {
+                value = value.substring(5);
+            }
+
+            return value;
+        }
+
+        function getNavPayload() {
+            return parseNavJwtPayload(getNavToken());
+        }
+
+        function getNavRole() {
+            var payload = getNavPayload();
+            return normalizeNavRole(
+                localStorage.getItem('role')
+                || sessionStorage.getItem('role')
+                || payload.role
+                || payload.auth
+                || payload.authority
+                || ''
+            );
+        }
+
+        function getNavUserName() {
+            var payload = getNavPayload();
+
+            return localStorage.getItem('name')
+                || sessionStorage.getItem('name')
+                || payload.name
+                || payload.nickname
+                || payload.username
+                || payload.sub
+                || payload.email
+                || '사용자';
+        }
+
+        function getNavUserId() {
+            var payload = getNavPayload();
+
+            return localStorage.getItem('currentUserId')
+                || sessionStorage.getItem('currentUserId')
+                || payload.userId
+                || payload.id
+                || null;
+        }
+
+        function refreshNavUserUI() {
+            var token     = getNavToken();
+            var role      = getNavRole();
+            var name      = getNavUserName();
 
             var loginBtn  = document.getElementById('btn-nav-login');
             var userWrap  = document.getElementById('nav-user-wrap');
@@ -63,87 +187,115 @@
                 return;
             }
 
-            // 로그인 상태: 이름 드롭다운 표시
             if (loginBtn) loginBtn.style.display = 'none';
             if (userWrap) userWrap.style.display = 'flex';
-            if (userName) userName.textContent   = name;
+            if (userName) userName.textContent = name;
 
             if (role === 'SELLER') {
-                if (ndCart)    ndCart.style.display     = 'none';
-                if (ndRoleIco) ndRoleIco.textContent    = '🌾';
-                if (ndRoleLbl) ndRoleLbl.textContent    = '농가 대시보드';
+                if (ndCart) ndCart.style.display = 'none';
+                if (ndRoleIco) ndRoleIco.textContent = '🌾';
+                if (ndRoleLbl) ndRoleLbl.textContent = '농가 대시보드';
                 return;
             }
 
             if (role === 'ADMIN') {
-                if (ndCart)    ndCart.style.display     = 'none';
-                if (ndRoleIco) ndRoleIco.textContent    = '🛠️';
-                if (ndRoleLbl) ndRoleLbl.textContent    = '관리자 대시보드';
+                if (ndCart) ndCart.style.display = 'none';
+                if (ndRoleIco) ndRoleIco.textContent = '🛠️';
+                if (ndRoleLbl) ndRoleLbl.textContent = '관리자 대시보드';
                 return;
             }
 
-            // BUYER: 드롭다운에 장바구니
-            if (ndCart)  ndCart.style.display  = 'flex';
+            if (ndCart) ndCart.style.display = 'flex';
             if (ndRoleIco) ndRoleIco.textContent = '👤';
             if (ndRoleLbl) ndRoleLbl.textContent = '마이페이지';
-        })();
-
-        function toggleUserDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('nav-dropdown').classList.toggle('open');
         }
 
-        document.addEventListener('click', function () {
-            var dd = document.getElementById('nav-dropdown');
-            if (dd) dd.classList.remove('open');
-        });
+        function toggleUserDropdown(e) {
+            if (e) e.stopPropagation();
 
-        function getNavUserId() {
-            return localStorage.getItem('currentUserId') || sessionStorage.getItem('currentUserId');
+            var dropdown = document.getElementById('nav-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('open');
+            }
         }
 
         function goRolePage() {
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            var role  = (localStorage.getItem('role') || sessionStorage.getItem('role') || '').toUpperCase();
-            if (!token)            { location.href = '/login'; return; }
-            if (role === 'ADMIN')  { location.href = '/admin/dashboard'; return; }
-            if (role === 'SELLER') { location.href = '/farmer'; return; }
+            var token = getNavToken();
+            var role  = getNavRole();
+
+            if (!token) {
+                location.href = '/login';
+                return;
+            }
+
+            if (role === 'ADMIN') {
+                location.href = '/admin/dashboard';
+                return;
+            }
+
+            if (role === 'SELLER') {
+                location.href = '/farmer';
+                return;
+            }
+
             location.href = '/mypage';
         }
 
-        function handleNavLogout() {
-            if (typeof doLogout === 'function') { doLogout(); return; }
-            ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function (k) {
+        function clearNavAuthState() {
+            ['token', 'email', 'role', 'name', 'currentUserId'].forEach(function(k) {
                 localStorage.removeItem(k);
                 sessionStorage.removeItem(k);
             });
-            location.href = '/login';
+
+            // 프로젝트에서 jwt 쿠키를 같이 쓰는 경우가 있어서 로그아웃 시 화면 상태가 남지 않도록 쿠키도 만료 처리합니다.
+            document.cookie = 'jwt=; Max-Age=0; path=/';
+            document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+
+        function handleNavLogout() {
+            clearNavAuthState();
+            refreshNavUserUI();
+
+            try {
+                if (typeof doLogout === 'function') {
+                    doLogout();
+                }
+            } catch (e) {}
+
+            setTimeout(function() {
+                location.href = '/login';
+            }, 80);
         }
 
         function updateCartBadge() {
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            var role = localStorage.getItem('role') || sessionStorage.getItem('role') || '';
-
+            var token = getNavToken();
+            var role = getNavRole();
             var badge = document.getElementById('cartBadge');
 
             if (!badge) return;
 
-            if (!token || role === 'SELLER') {
+            if (!token || role === 'SELLER' || role === 'ADMIN') {
                 badge.style.display = 'none';
                 return;
             }
 
-
             fetch('/cart/data', {
-                headers: { 'Authorization': 'Bearer ' + token }
+                headers: { 'Authorization': 'Bearer ' + token },
+                credentials: 'same-origin'
             })
                 .then(function(res) {
-                    if (!res.ok) { badge.style.display = 'none'; return null; }
+                    if (!res.ok) {
+                        badge.style.display = 'none';
+                        return null;
+                    }
+
                     return res.json();
                 })
                 .then(function(data) {
                     if (!data) return;
+
                     var count = data.items ? data.items.length : 0;
+
                     if (count > 0) {
                         badge.textContent = count;
                         badge.style.display = 'flex';
@@ -151,33 +303,27 @@
                         badge.style.display = 'none';
                     }
                 })
-                .catch(function() { badge.style.display = 'none'; });
-        }
-
-        updateCartBadge();
-
-        function getNavToken() {
-            return localStorage.getItem('token') || sessionStorage.getItem('token');
+                .catch(function() {
+                    badge.style.display = 'none';
+                });
         }
 
         async function loadNotificationCount() {
-            const token = getNavToken();
-            const badge = document.getElementById('notificationBadge');
+            var token = getNavToken();
+            var badge = document.getElementById('notificationBadge');
 
             if (!token || !badge) return;
 
             try {
-                const userId = getNavUserId();
-                if (!userId) return;
-
-                const response = await fetch('/api/notifications/unread-count?userId=' + encodeURIComponent(userId), {
-                    headers: { 'Authorization': 'Bearer ' + token }
+                var response = await fetch('/api/notifications/unread-count', {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    credentials: 'same-origin'
                 });
 
                 if (!response.ok) return;
 
-                const data = await response.json();
-                const count = data.count || 0;
+                var data = await response.json();
+                var count = data.count || 0;
 
                 if (count > 0) {
                     badge.textContent = count > 99 ? '99+' : count;
@@ -189,7 +335,7 @@
         }
 
         async function toggleNotificationDropdown() {
-            const dropdown = document.getElementById('notificationDropdown');
+            var dropdown = document.getElementById('notificationDropdown');
 
             if (!dropdown) return;
 
@@ -203,8 +349,8 @@
         }
 
         async function loadNotifications() {
-            const token = getNavToken();
-            const list = document.getElementById('notificationList');
+            var token = getNavToken();
+            var list = document.getElementById('notificationList');
 
             if (!list) return;
 
@@ -214,14 +360,12 @@
             }
 
             try {
-                const userId = getNavUserId();
-                if (!userId) return;
-
-                const response = await fetch('/api/notifications?userId=' + encodeURIComponent(userId), {
-                    headers: { 'Authorization': 'Bearer ' + token }
+                var response = await fetch('/api/notifications', {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    credentials: 'same-origin'
                 });
 
-                const data = await response.json();
+                var data = await response.json();
 
                 if (!response.ok || !Array.isArray(data)) {
                     list.innerHTML = '<div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오지 못했습니다.</div>';
@@ -234,11 +378,13 @@
                 }
 
                 list.innerHTML = data.map(function(item) {
+                    var targetUrl = escapeNotificationAttr(item.targetUrl || '');
+
                     return ''
                         + '<div style="position:relative;padding:13px 15px;border-bottom:1px solid var(--sand);background:' + (item.isRead ? '#fff' : 'var(--gp)') + '">'
                         + '  <button onclick="deleteNotification(' + item.id + ', event)" '
                         + '          style="position:absolute;top:8px;right:10px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">✕</button>'
-                        + '  <div onclick="readNotification(' + item.id + ', \'' + escapeNotificationAttr(item.targetUrl || '') + '\')" style="cursor:pointer">'
+                        + '  <div onclick="readNotification(' + item.id + ', \'' + targetUrl + '\')" style="cursor:pointer;padding-right:18px">'
                         + '      <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">' + escapeNotificationHtml(item.title) + '</div>'
                         + '      <div style="font-size:.74rem;color:var(--mid);line-height:1.5">' + escapeNotificationHtml(item.message) + '</div>'
                         + '      <div style="font-size:.66rem;color:var(--muted);margin-top:5px">' + formatNotificationDate(item.createdAt) + '</div>'
@@ -251,15 +397,13 @@
         }
 
         async function readNotification(id, targetUrl) {
-            const token = getNavToken();
+            var token = getNavToken();
 
             if (token) {
-                const userId = getNavUserId();
-                if (!userId) return;
-
-                await fetch('/api/notifications/' + id + '/read?userId=' + encodeURIComponent(userId), {
+                await fetch('/api/notifications/' + id + '/read', {
                     method: 'PATCH',
-                    headers: { 'Authorization': 'Bearer ' + token }
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    credentials: 'same-origin'
                 });
             }
 
@@ -271,25 +415,20 @@
         }
 
         async function deleteNotification(id, event) {
-            event.stopPropagation();
+            if (event) event.stopPropagation();
 
-            const token = getNavToken();
-            const userId = getNavUserId();
+            var token = getNavToken();
 
-            if (!token || !userId) {
+            if (!token) {
                 return;
             }
 
             try {
-                const response = await fetch(
-                    '/api/notifications/' + id + '?userId=' + encodeURIComponent(userId),
-                    {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        }
-                    }
-                );
+                var response = await fetch('/api/notifications/' + id, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    credentials: 'same-origin'
+                });
 
                 if (!response.ok) {
                     alert('알림 삭제 실패');
@@ -298,7 +437,6 @@
 
                 await loadNotificationCount();
                 await loadNotifications();
-
             } catch (e) {
                 console.error(e);
             }
@@ -316,7 +454,9 @@
         function escapeNotificationAttr(value) {
             return String(value == null ? '' : value)
                 .replaceAll('\\', '\\\\')
-                .replaceAll("'", "\\'");
+                .replaceAll("'", "\\'")
+                .replaceAll('\n', ' ')
+                .replaceAll('\r', ' ');
         }
 
         function formatNotificationDate(value) {
@@ -324,9 +464,35 @@
             return String(value).replace('T', ' ').substring(0, 16);
         }
 
-        document.addEventListener('DOMContentLoaded', loadNotificationCount);
-        document.addEventListener('DOMContentLoaded', function() {
-            const bellIcon = document.getElementById('bellIcon');
+        function setupNavEvents() {
+            if (navEventBound) return;
+            navEventBound = true;
+
+            document.addEventListener('click', function(event) {
+                var userDropdown = document.getElementById('nav-dropdown');
+                var notificationDropdown = document.getElementById('notificationDropdown');
+                var bell = document.getElementById('bellIcon');
+                var mobileOverlay = document.getElementById('nav-mobile-overlay');
+                var mobileBtn = document.getElementById('nav-mobile-btn');
+
+                if (userDropdown) {
+                    userDropdown.classList.remove('open');
+                }
+
+                if (notificationDropdown && bell) {
+                    if (!notificationDropdown.contains(event.target) && !bell.contains(event.target)) {
+                        notificationDropdown.style.display = 'none';
+                    }
+                }
+
+                if (mobileOverlay && mobileBtn) {
+                    if (!mobileOverlay.contains(event.target) && !mobileBtn.contains(event.target)) {
+                        closeMobileNav();
+                    }
+                }
+            });
+
+            var bellIcon = document.getElementById('bellIcon');
 
             if (bellIcon) {
                 bellIcon.addEventListener('click', function(event) {
@@ -335,19 +501,60 @@
                     toggleNotificationDropdown();
                 });
             }
+        }
 
-            document.addEventListener('click', function(event) {
-                const dropdown = document.getElementById('notificationDropdown');
-                const bell = document.getElementById('bellIcon');
+        function toggleMobileNav() {
+            var overlay = document.getElementById('nav-mobile-overlay');
+            var btn = document.getElementById('nav-mobile-btn');
+            var isOpen = overlay.classList.toggle('open');
+            btn.textContent = isOpen ? '✕' : '☰';
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+            if (isOpen) refreshMobileAuth();
+        }
 
-                if (!dropdown || !bell) return;
+        function closeMobileNav() {
+            var overlay = document.getElementById('nav-mobile-overlay');
+            var btn = document.getElementById('nav-mobile-btn');
+            overlay.classList.remove('open');
+            btn.textContent = '☰';
+            document.body.style.overflow = '';
+        }
 
-                if (!dropdown.contains(event.target) && !bell.contains(event.target)) {
-                    dropdown.style.display = 'none';
-                }
-            });
-        });
+        function refreshMobileAuth() {
+            var area = document.getElementById('nav-mobile-auth-area');
+            if (!area) return;
+            var token = getNavToken();
+            var role = getNavRole();
+            var name = getNavUserName();
+            if (!token) {
+                area.innerHTML = '<a href="/login" onclick="closeMobileNav()" class="btn-nav" style="text-align:center;margin-top:8px">로그인</a>';
+                return;
+            }
+            var rolePage = role === 'SELLER' ? '/farmer' : role === 'ADMIN' ? '/admin/dashboard' : '/mypage';
+            var roleLabel = role === 'SELLER' ? '🌾 농가 대시보드' : role === 'ADMIN' ? '🛠️ 관리자 대시보드' : '👤 마이페이지';
+            var cartHtml = (role !== 'SELLER' && role !== 'ADMIN')
+                ? '<a href="/cart" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">🛒 장바구니</a>'
+                : '';
+            area.innerHTML = '<div style="padding:14px 0;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--beige)">' + name + ' 님</div>'
+                + cartHtml
+                + '<a href="' + rolePage + '" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">' + roleLabel + '</a>'
+                + '<button onclick="handleNavLogout();closeMobileNav();" style="width:100%;margin-top:16px;padding:13px;background:#fff;color:#e74c3c;border:1.5px solid #e74c3c;border-radius:12px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit">🚪 로그아웃</button>';
+        }
 
+        function initNav() {
+            var mobileOverlay = document.getElementById('nav-mobile-overlay');
+            if (mobileOverlay) document.body.appendChild(mobileOverlay);
+            refreshNavUserUI();
+            setupNavEvents();
+            updateCartBadge();
+            loadNotificationCount();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNav);
+        } else {
+            initNav();
+        }
     </script>
 </nav>
 </body>
