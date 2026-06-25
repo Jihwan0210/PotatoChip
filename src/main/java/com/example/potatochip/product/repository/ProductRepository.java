@@ -45,7 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 인기순 검색 - ProductRankings의 WEEKLY salesCount 기준 내림차순
     @Query("SELECT p FROM Product p " +
-            "LEFT JOIN ProductRankings r ON r.product = p AND r.periodType = 'WEEKLY' " +
+            "LEFT JOIN ProductRankings r ON r.product = p AND r.periodType = 'WEEKLY' AND r.periodDate = :weekStart " +
             "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
             "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
             "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
@@ -59,6 +59,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                           @Param("searchType") String searchType,
                                           @Param("today") LocalDate today,
                                           @Param("expireLimit") LocalDate expireLimit,
+                                          @Param("weekStart") LocalDate weekStart,
                                           Pageable pageable);
 
     // 할인율순 검색 - 할인율 높은 순, 할인 없는 상품은 맨 뒤에 배치

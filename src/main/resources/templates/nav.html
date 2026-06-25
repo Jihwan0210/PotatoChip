@@ -43,6 +43,19 @@
         <a th:href="@{/login}" class="btn-nav" id="btn-nav-login">로그인</a>
     </div>
 
+    <!-- 모바일 햄버거 버튼 -->
+    <button class="nav-mobile-btn" id="nav-mobile-btn" onclick="toggleMobileNav()" aria-label="메뉴">☰</button>
+
+    <!-- 모바일 풀스크린 메뉴 -->
+    <div class="nav-mobile-overlay" id="nav-mobile-overlay">
+        <a th:href="@{/}" onclick="closeMobileNav()">홈</a>
+        <a th:href="@{/market}" onclick="closeMobileNav()">마켓</a>
+        <a th:href="@{/ranking}" onclick="closeMobileNav()">판매랭킹</a>
+        <a th:href="@{/board}" onclick="closeMobileNav()">게시판</a>
+        <a th:href="@{/faq}" onclick="closeMobileNav()">FAQ</a>
+        <div class="nav-mobile-auth" id="nav-mobile-auth-area"></div>
+    </div>
+
     <script src="/js/app.js"></script>
     <script>
         var navEventBound = false;
@@ -459,6 +472,8 @@
                 var userDropdown = document.getElementById('nav-dropdown');
                 var notificationDropdown = document.getElementById('notificationDropdown');
                 var bell = document.getElementById('bellIcon');
+                var mobileOverlay = document.getElementById('nav-mobile-overlay');
+                var mobileBtn = document.getElementById('nav-mobile-btn');
 
                 if (userDropdown) {
                     userDropdown.classList.remove('open');
@@ -467,6 +482,12 @@
                 if (notificationDropdown && bell) {
                     if (!notificationDropdown.contains(event.target) && !bell.contains(event.target)) {
                         notificationDropdown.style.display = 'none';
+                    }
+                }
+
+                if (mobileOverlay && mobileBtn) {
+                    if (!mobileOverlay.contains(event.target) && !mobileBtn.contains(event.target)) {
+                        closeMobileNav();
                     }
                 }
             });
@@ -482,7 +503,47 @@
             }
         }
 
+        function toggleMobileNav() {
+            var overlay = document.getElementById('nav-mobile-overlay');
+            var btn = document.getElementById('nav-mobile-btn');
+            var isOpen = overlay.classList.toggle('open');
+            btn.textContent = isOpen ? '✕' : '☰';
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+            if (isOpen) refreshMobileAuth();
+        }
+
+        function closeMobileNav() {
+            var overlay = document.getElementById('nav-mobile-overlay');
+            var btn = document.getElementById('nav-mobile-btn');
+            overlay.classList.remove('open');
+            btn.textContent = '☰';
+            document.body.style.overflow = '';
+        }
+
+        function refreshMobileAuth() {
+            var area = document.getElementById('nav-mobile-auth-area');
+            if (!area) return;
+            var token = getNavToken();
+            var role = getNavRole();
+            var name = getNavUserName();
+            if (!token) {
+                area.innerHTML = '<a href="/login" onclick="closeMobileNav()" class="btn-nav" style="text-align:center;margin-top:8px">로그인</a>';
+                return;
+            }
+            var rolePage = role === 'SELLER' ? '/farmer' : role === 'ADMIN' ? '/admin/dashboard' : '/mypage';
+            var roleLabel = role === 'SELLER' ? '🌾 농가 대시보드' : role === 'ADMIN' ? '🛠️ 관리자 대시보드' : '👤 마이페이지';
+            var cartHtml = (role !== 'SELLER' && role !== 'ADMIN')
+                ? '<a href="/cart" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">🛒 장바구니</a>'
+                : '';
+            area.innerHTML = '<div style="padding:14px 0;font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--beige)">' + name + ' 님</div>'
+                + cartHtml
+                + '<a href="' + rolePage + '" onclick="closeMobileNav()" style="padding:14px 0;font-size:1.05rem;font-weight:600;color:var(--dark);text-decoration:none;border-bottom:1px solid var(--beige);display:block">' + roleLabel + '</a>'
+                + '<button onclick="handleNavLogout();closeMobileNav();" style="width:100%;margin-top:16px;padding:13px;background:#fff;color:#e74c3c;border:1.5px solid #e74c3c;border-radius:12px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:inherit">🚪 로그아웃</button>';
+        }
+
         function initNav() {
+            var mobileOverlay = document.getElementById('nav-mobile-overlay');
+            if (mobileOverlay) document.body.appendChild(mobileOverlay);
             refreshNavUserUI();
             setupNavEvents();
             updateCartBadge();

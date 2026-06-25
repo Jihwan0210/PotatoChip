@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -143,9 +144,10 @@ public class ProductServiceImpl implements ProductService{
                     sellerEmail, category, keyword, searchType, today, expireLimit, sortedPageable
             );
         } else if ("popular".equals(sort)) {
-            // 인기순: WEEKLY salesCount 기준
+            // 인기순: WEEKLY salesCount 기준 (이번 주 월요일 날짜로 필터)
+            LocalDate weekStart = today.with(DayOfWeek.MONDAY);
             products = productRepository.searchProductsByPopular(
-                    category, keyword, searchType, today, expireLimit, pageable
+                    category, keyword, searchType, today, expireLimit, weekStart, pageable
             );
         } else if ("discount".equals(sort)) {
             // 할인율순: 할인율 높은 순, 할인 없는 상품 맨 뒤
