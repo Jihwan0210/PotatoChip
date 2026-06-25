@@ -473,6 +473,21 @@
         <div id="detailActions" class="board-detail-actions"></div>
     </div>
 </div>
+
+<div id="reportModal" class="board-modal">
+    <div class="board-modal-card" style="max-width:480px">
+        <div class="board-modal-head">
+            <h2 class="board-modal-title">게시글 신고하기</h2>
+            <button class="board-close-btn" type="button" onclick="closeReportModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="board-form-group">
+            <label for="reportReason">신고 사유</label>
+            <textarea id="reportReason" placeholder="신고 사유를 자세히 입력해주세요." style="min-height:150px"></textarea>
+        </div>
+        <button class="board-submit-btn" type="button" onclick="submitBoardReport()">신고 접수하기</button>
+    </div>
+</div>
+
 <div id="boardImageModal" class="board-image-modal">
     <button type="button" class="board-image-modal-close" onclick="closeBoardImageModal()">
         <i class="ti ti-x"></i>
@@ -580,7 +595,7 @@
 
     async function loadPosts() {
         try {
-            var res  = await fetch('/api/board');
+            var res  = await fetch('/api/board', { headers: buildAuthHeaders(), credentials: 'same-origin' });
             allPosts = await res.json();
             updateTabCounts();
             renderPosts();
@@ -749,6 +764,7 @@
                 + '    <div class="post-top">'
                 + '      <span class="post-category ' + getCatClass(p.category) + '">' + esc(getCatName(p.category)) + '</span>'
                 + '      <span class="post-title">' + esc(p.title) + '</span>'
+                +        (p.reportedByCurrentUser ? '<span style="font-size:10px;font-weight:700;color:#b47a00;background:#fff4d8;border-radius:100px;padding:2px 7px;white-space:nowrap">신고 완료</span>' : '')
                 +        (isNew ? '<span class="post-new"></span>' : '')
                 + '    </div>'
                 + '    <div class="post-bottom">'
@@ -867,34 +883,26 @@
         }
 
         document.getElementById('detailContent').innerHTML = imageHtml + '<div style="white-space:pre-line;">' + esc(post.content || '') + '</div>';
+
+        document.getElementById('detailActions').innerHTML = buildBoardDetailActions(post, post.likeCount || 0, false);
+
         fetch('/api/board/' + id + '/like/status', {
             headers: buildAuthHeaders(),
             credentials: 'same-origin'
         })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+                if (!res.ok) throw new Error('like status failed');
+                return res.json();
+            })
             .then(function (data) {
-                var actions = '';
-                actions += '<button type="button" id="likeBtn" onclick="clickLike()" class="board-action-btn" style="border:1px solid #e2e8f0; background:#fff; color:#475569; margin-right:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:0 16px; height:36px; border-radius:18px; font-size:0.875rem; font-weight:600; transition:all 0.2s;">'
-                    + '  <i id="likeIcon" class="ti ti-heart" style="font-size:1.1rem; color:#cbd5e1;"></i>'
-                    + '  <span id="detailLikeCount">' + fmtNum(data.likeCount) + '</span>'
-                    + '</button>';
-
-                if (canEditPost(post)) {
-                    actions += '<button class="board-action-btn" onclick="openEditModal(' + post.id + ')" style="border:1px solid #ccc; background:#fff; color:#333; margin-right:8px; cursor:pointer; height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">수정</button>';
-                }
-                if (canDeletePost(post)) {
-                    actions += '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')" style="height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">삭제</button>';
-                }
-
-                document.getElementById('detailActions').innerHTML = actions;
+                document.getElementById('detailActions').innerHTML = buildBoardDetailActions(post, data.likeCount || 0, data.isLiked);
                 updateHeartUI(data.isLiked);
-
                 post.likeCount = data.likeCount;
                 if (typeof renderPosts === 'function') { renderPosts(); }
             })
             .catch(function(e){
                 console.error(e);
-                document.getElementById('detailActions').innerHTML = '<button type="button" id="likeBtn" class="board-action-btn"><i id="likeIcon" class="ti ti-heart"></i><span id="detailLikeCount">0</span></button>';
+                document.getElementById('detailActions').innerHTML = buildBoardDetailActions(post, post.likeCount || 0, false);
             });
 
         if (typeof loadComments === 'function') {
@@ -902,6 +910,91 @@
         }
 
         document.getElementById('detailModal').classList.add('open');
+    }
+
+
+
+    function buildBoardDetailActions(post, likeCount, isLiked) {
+        var actions = '';
+        var heartClass = isLiked ? 'ti ti-heart-filled' : 'ti ti-heart';
+        var heartColor = isLiked ? '#ef4444' : '#cbd5e1';
+
+        actions += '<button type="button" id="likeBtn" onclick="clickLike()" class="board-action-btn" style="border:1px solid #e2e8f0; background:#fff; color:#475569; margin-right:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:0 16px; height:36px; border-radius:18px; font-size:0.875rem; font-weight:600; transition:all 0.2s;">'
+            + '  <i id="likeIcon" class="' + heartClass + '" style="font-size:1.1rem; color:' + heartColor + ';"></i>'
+            + '  <span id="detailLikeCount">' + fmtNum(likeCount || 0) + '</span>'
+            + '</button>';
+
+        if (canEditPost(post)) {
+            actions += '<button class="board-action-btn" onclick="openEditModal(' + post.id + ')" style="border:1px solid #ccc; background:#fff; color:#333; margin-right:8px; cursor:pointer; height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">수정</button>';
+        }
+        if (canDeletePost(post)) {
+            actions += '<button class="board-action-btn danger" onclick="deletePost(' + post.id + ')" style="height:36px; padding:0 16px; border-radius:18px; font-size:0.875rem;">삭제</button>';
+        }
+
+        if (canReportPost(post)) {
+            if (post.reportedByCurrentUser) {
+                actions += '<button class="board-action-btn" disabled style="height:36px;padding:0 16px;border-radius:18px;font-size:0.875rem;opacity:.55;cursor:not-allowed">이미 신고한 글</button>';
+            } else {
+                actions += '<button class="board-action-btn danger" onclick="openReportModal(' + post.id + ')" style="height:36px;padding:0 16px;border-radius:18px;font-size:0.875rem">신고</button>';
+            }
+        }
+
+        return actions;
+    }
+
+    var currentReportBoardId = null;
+
+    function canReportPost(post) {
+        if (!post) return false;
+        if (!getBoardAuthToken()) return false;
+        if (isCurrentUserAdmin()) return false;
+        if (isOwnPost(post)) return false;
+        return true;
+    }
+
+    function openReportModal(boardId) {
+        var post = allPosts.find(function(p) { return Number(p.id) === Number(boardId); });
+        if (!post) { showToast('게시글 정보를 찾을 수 없습니다.'); return; }
+        if (post.reportedByCurrentUser) { showToast('이미 신고한 글입니다.'); return; }
+        currentReportBoardId = boardId;
+        var reason = document.getElementById('reportReason');
+        if (reason) reason.value = '';
+        document.getElementById('reportModal').classList.add('open');
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModal').classList.remove('open');
+        currentReportBoardId = null;
+    }
+
+    async function submitBoardReport() {
+        if (!currentReportBoardId) return;
+        var token = getBoardAuthToken();
+        if (!token) { showToast('로그인 후 신고할 수 있습니다.'); return; }
+        var reason = document.getElementById('reportReason').value.trim();
+        if (!reason) { showToast('신고 사유를 입력해주세요.'); return; }
+
+        try {
+            var response = await fetch('/api/board/' + currentReportBoardId + '/reports', {
+                method: 'POST',
+                headers: buildAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'same-origin',
+                body: JSON.stringify({ reason: reason })
+            });
+            var data = await response.json().catch(function(){ return {}; });
+            if (!response.ok) {
+                showToast(data.message || '신고 접수에 실패했습니다.');
+                return;
+            }
+            var post = allPosts.find(function(p) { return Number(p.id) === Number(currentReportBoardId); });
+            if (post) post.reportedByCurrentUser = true;
+            closeReportModal();
+            showToast('신고가 접수되었습니다.');
+            renderPosts();
+            if (post) openDetail(post.id);
+        } catch (error) {
+            showToast('서버 연결에 실패했습니다.');
+        }
     }
 
     function closeDetailModal() {

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ProductRankingsService {
     List<ProductRankings> getWeeklyRanking();
     List<ProductRankings> getDailyRanking();
+    void refreshRankings();
 }

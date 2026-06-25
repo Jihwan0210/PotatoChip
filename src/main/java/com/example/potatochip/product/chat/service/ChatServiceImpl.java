@@ -2,6 +2,7 @@ package com.example.potatochip.product.chat.service;
 
 import com.example.potatochip.auth.entity.User;
 import com.example.potatochip.auth.repository.UserRepository;
+import com.example.potatochip.notification.service.NotificationService;
 import com.example.potatochip.product.chat.dto.ChatMessageDTO;
 import com.example.potatochip.product.chat.dto.ChatRoomDTO;
 import com.example.potatochip.product.chat.entity.ChatMessage;
@@ -26,6 +27,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -70,13 +72,22 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public ChatMessageDTO sendMessage(Long roomId, Long senderId, String senderName, String content) {
         ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow();
+
         ChatMessage message = new ChatMessage();
         message.setChatRoom(room);
         message.setSenderId(senderId);
         message.setSenderName(senderName);
         message.setContent(content);
         message.setIsRead(false);
-        return toMessageDTO(chatMessageRepository.save(message));
+
+        ChatMessage savedMessage = chatMessageRepository.save(message);
+
+        Long receiverId = senderId.equals(room.getBuyerId()) ? room.getSellerId() : room.getBuyerId();
+        if (receiverId != null && !receiverId.equals(senderId)) {
+            notificationService.createChatMessageNotification(receiverId, room.getId(), room.getProductId(), senderName);
+        }
+
+        return toMessageDTO(savedMessage);
     }
 
     @Override
@@ -89,33 +100,8 @@ public class ChatServiceImpl implements ChatService {
     public int getUnreadCount(Long userId) {
         return chatRoomRepository.findByBuyerIdOrSellerId(userId, userId)
                 .stream()
-                .mapToInt(room -> chatMessageRepository
-                        .countByChatRoomIdAndIsReadFalseAndSenderIdNot(room.getId(), userId))
+                .mapToInt(room -> chatMessageRepository.countByChatRoomIdAndIsReadFalseAndSenderIdNot(room.getId(), userId))
                 .sum();
-    }
-
-    private ChatRoomDTO toRoomDTO(ChatRoom room, Long myId) {
-        User buyer  = userRepository.findById(room.getBuyerId()).orElse(null);
-        User seller = userRepository.findById(room.getSellerId()).orElse(null);
-
-        ChatMessage lastMsg = chatMessageRepository
-                .findTopByChatRoomIdOrderBySentAtDesc(room.getId())
-                .orElse(null);
-
-        int unread = chatMessageRepository
-                .countByChatRoomIdAndIsReadFalseAndSenderIdNot(room.getId(), myId);
-
-        return ChatRoomDTO.builder()
-                .id(room.getId())
-                .buyerId(room.getBuyerId())
-                .buyerName(buyer  != null ? buyer.getName()  : "알 수 없음")
-                .sellerId(room.getSellerId())
-                .sellerName(seller != null ? seller.getName() : "알 수 없음")
-                .productId(room.getProductId())
-                .lastMessage(lastMsg != null ? lastMsg.getContent() : "")
-                .lastMessageAt(lastMsg != null ? lastMsg.getSentAt().toString() : "")
-                .unreadCount(unread)
-                .build();
     }
 
     @Override
@@ -126,6 +112,25 @@ public class ChatServiceImpl implements ChatService {
             throw new RuntimeException("본인이 보낸 메시지만 삭제할 수 있습니다.");
         }
         chatMessageRepository.delete(msg);
+    }
+
+    private ChatRoomDTO toRoomDTO(ChatRoom room, Long myId) {
+        User buyer = userRepository.findById(room.getBuyerId()).orElse(null);
+        User seller = userRepository.findById(room.getSellerId()).orElse(null);
+        ChatMessage lastMsg = chatMessageRepository.findTopByChatRoomIdOrderBySentAtDesc(room.getId()).orElse(null);
+        int unread = chatMessageRepository.countByChatRoomIdAndIsReadFalseAndSenderIdNot(room.getId(), myId);
+
+        return ChatRoomDTO.builder()
+                .id(room.getId())
+                .buyerId(room.getBuyerId())
+                .buyerName(buyer != null ? buyer.getName() : "알 수 없음")
+                .sellerId(room.getSellerId())
+                .sellerName(seller != null ? seller.getName() : "알 수 없음")
+                .productId(room.getProductId())
+                .lastMessage(lastMsg != null ? lastMsg.getContent() : "")
+                .lastMessageAt(lastMsg != null ? lastMsg.getSentAt().toString() : "")
+                .unreadCount(unread)
+                .build();
     }
 
     private ChatMessageDTO toMessageDTO(ChatMessage msg) {
