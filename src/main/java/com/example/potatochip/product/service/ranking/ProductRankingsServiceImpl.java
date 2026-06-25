@@ -10,6 +10,7 @@ import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.product.repository.ProductRankingsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
@@ -41,7 +42,7 @@ public class ProductRankingsServiceImpl implements ProductRankingsService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void refreshRankings() {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(DayOfWeek.MONDAY);
