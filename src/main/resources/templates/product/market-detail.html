@@ -74,10 +74,6 @@
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:9px">📝 상품 설명</div>
                     <div style="font-size:.8rem;color:var(--mid);line-height:1.8" th:text="${product.description != null ? product.description : '상품 설명이 없습니다.'}">상품 설명이 없습니다.</div>
                 </div>
-                <div style="border:1.5px solid var(--gl);background:var(--gp);border-radius:12px;padding:16px 18px">
-                    <div style="font-size:.8rem;font-weight:500;color:var(--green);margin-bottom:7px">✅ 원산지 정보</div>
-                    <div style="font-size:.8rem;color:var(--mid);line-height:1.75" th:text="${product.origin}">원산지 정보</div>
-                </div>
                 <div style="border:1.5px solid var(--sand);border-radius:12px;padding:18px;margin-top:16px">
                     <div style="font-size:.84rem;font-weight:500;color:var(--dark);margin-bottom:12px">🖼️ 상세 이미지</div>
                     <div style="display:flex;flex-direction:column;gap:12px">

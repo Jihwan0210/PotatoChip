@@ -41,6 +41,7 @@
     background: #fff;
     border-bottom: 1.5px solid var(--sand);
     padding: 28px 5% 0;
+    margin-top: 64px;
 }
 .mkt-header-label {
     font-size: .65rem;
@@ -55,6 +56,20 @@
     font-weight: 700;
     color: var(--dark);
     margin-bottom: 14px;
+}
+
+/* ── 검색 셀렉트 ── */
+.mkt-search-select {
+    border: 1.5px solid var(--sand);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: .78rem;
+    color: var(--mid);
+    background: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
 }
 
 /* ── 검색바 ── */
@@ -110,7 +125,7 @@
 /* ── 카테고리 탭 ── */
 .mkt-tabs {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     margin-bottom: -1.5px;
 }
 .mkt-tab {
@@ -465,4 +480,81 @@
 }
 
 /* ── 찜 버튼 ── */
+
+/* ── 정렬 그룹 (새 클래스) ── */
+.mkt-sort-group {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid var(--sand);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.mkt-sort-btn {
+    font-size: .74rem;
+    cursor: pointer;
+    padding: 7px 12px;
+    border-right: 1px solid var(--sand);
+    color: var(--muted);
+    background: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+.mkt-sort-btn:last-child { border-right: none; }
+.mkt-sort-btn:first-child { border-radius: 6px 0 0 6px; }
+.mkt-sort-btn:last-child  { border-radius: 0 6px 6px 0; }
+
+/* ════════════════════════════════════════
+   모바일 반응형 — 768px
+════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 헤더 */
+  .mkt-header { padding: 18px 4% 0; }
+  .mkt-header-title { font-size: 1.4rem; margin-bottom: 10px; }
+
+  /* 검색바: 셀렉트 전체 너비 → 아래 줄로 이동 */
+  .mkt-search-wrap { flex-wrap: wrap; max-width: 100%; }
+  .mkt-search-select { width: 100%; }
+  .mkt-search-inner { flex: 1; }
+
+  /* 카테고리 탭 글자 */
+  .mkt-tab { font-size: .75rem; padding: 11px 0; }
+
+  /* 상품 목록 헤더: 카운트 + 정렬 세로 정렬 */
+  .mkt-list-header { flex-direction: column; align-items: stretch; }
+  .mkt-sort-group  { width: 100%; }
+  .mkt-sort-btn    { flex: 1; text-align: center; padding: 8px 4px; }
+
+  /* 인기상품 팝업: 화면 안으로 고정 */
+  #recPopup {
+    right: 12px !important;
+    bottom: 72px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: 68vh !important;
+    resize: none !important;
+  }
+
+  /* AI 추천 그리드: 4열 → 2열 */
+  #aiRecommendationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* AI 탭 패딩 */
+  #mkt-content-1 { padding: 20px 4% !important; }
+}
+
+@media (max-width: 480px) {
+  .mkt-header { padding: 14px 4% 0; }
+  .mkt-header-title { font-size: 1.2rem; }
+  .mkt-tab { font-size: .72rem; }
+  .mkt-sort-btn { font-size: .7rem; }
+
+  /* AI 그리드 1열로 */
+  #aiRecommendationGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
 

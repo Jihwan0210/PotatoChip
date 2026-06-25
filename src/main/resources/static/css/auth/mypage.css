@@ -147,3 +147,112 @@
     box-shadow: 0 2px 14px rgba(231,76,60,.06);
     padding: 30px 34px;
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 페이지 배경: 상하 패딩 축소, 좌우 패딩 제거 (카드가 직접 담당) */
+  #page-mypage { padding: 64px 0 60px; }
+
+  /* 2열 레이아웃 → 1열 */
+  .mp-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-width: 100%;
+  }
+
+  /* 사이드바: 세로 카드 → 상단 sticky 가로 바 */
+  .mp-sidebar {
+    position: sticky;
+    top: 64px;
+    z-index: 200;
+    border-radius: 0;
+    box-shadow: 0 2px 10px rgba(42,30,6,.09);
+  }
+
+  /* 유저 박스: 가운데 정렬 → 좌측 가로 컴팩트 */
+  .mp-user-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--beige2);
+  }
+  .mp-avatar {
+    width: 44px; height: 44px;
+    font-size: 1.3rem;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .mp-sidebar-name { font-size: .96rem; }
+  .mp-sidebar-email { font-size: .76rem; margin-top: 1px; }
+
+  /* 탭 목록: 세로 → 가로 스크롤 */
+  .mp-nav {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 4px;
+    border-top: none;
+  }
+  .mp-nav::-webkit-scrollbar { display: none; }
+
+  .mp-tab {
+    flex-shrink: 0;
+    padding: 0 14px;
+    height: 44px;
+    font-size: .84rem;
+    gap: 6px;
+    border-left: none;
+    border-bottom: 2.5px solid transparent;
+    white-space: nowrap;
+  }
+  .mp-tab:hover { background: none; }
+  .mp-tab.on {
+    background: none;
+    border-left-color: transparent;
+    border-bottom-color: var(--green);
+    color: var(--dark);
+  }
+
+  /* 콘텐츠 영역: 좌우 패딩 추가 */
+  .mp-layout > div:last-child { padding: 16px 4% 0; }
+
+  /* 카드 패딩 축소 */
+  .mp-card { padding: 20px 18px; border-radius: 12px; margin-bottom: 14px; }
+  .danger-card { padding: 20px 18px; border-radius: 12px; }
+
+  /* 버튼 줄바꿈 허용 */
+  .mp-btn-row { flex-wrap: wrap; }
+
+  /* 찜 목록 그리드: 2열 */
+  .wl-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .wl-thumb { height: 120px; font-size: 2.8rem; }
+  .wl-body { padding: 10px 12px; }
+
+  /* 주소 검색 행 */
+  #mp-address-search-row { flex-wrap: wrap; }
+  #mp-postcode { width: 100% !important; }
+}
+
+@media (max-width: 480px) {
+
+  /* 탭 글자 더 작게 */
+  .mp-tab { font-size: .78rem; padding: 0 10px; }
+
+  /* 카드 패딩 더 축소 */
+  .mp-card { padding: 16px 14px; }
+  .danger-card { padding: 16px 14px; }
+
+  /* 찜 목록 1열 */
+  .wl-grid { grid-template-columns: 1fr; }
+
+  /* 버튼 세로 쌓기 */
+  .mp-btn-row { flex-direction: column; }
+  .mp-btn { flex: none; }
+}
