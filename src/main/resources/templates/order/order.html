@@ -78,6 +78,10 @@
     <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)">결제하기 💳</div>
 </div>
 
+<!-- 주문 오류 알림 -->
+<div th:if="${orderError}" th:text="${orderError}"
+     style="background:#fff0f0;color:#c0392b;border:1.5px solid #f5c0c0;border-radius:10px;padding:14px 20px;margin:20px 5% 0;font-size:.92rem;font-weight:500"></div>
+
 <!-- 비로그인 안내 -->
 <div id="loginGuide" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
     <div style="font-size:3rem;margin-bottom:12px">🔒</div>
