@@ -492,10 +492,19 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 @media (max-width: 768px) {
 
   /* ── NAV ── */
-  nav { padding: 0 5%; }
+  nav { padding: 0 4%; }
   .nav-links { display: none; }
-  .nav-r { gap: 8px; }
-  .btn-nav#btn-nav-login { padding: 8px 16px; font-size: .82rem; }
+  /* 로고가 공간 채워서 오른쪽 아이콘들이 끝에 붙도록 */
+  .logo { flex: 1; }
+  .nav-r { gap: 4px; }
+  /* 이름 버튼·로그인 버튼은 사이드 패널에서 처리 */
+  .nav-user-wrap { display: none !important; }
+  #btn-nav-login  { display: none !important; }
+  /* 벨 아이콘 터치 영역 확보 */
+  #bellIcon { padding: 8px; border-radius: 10px; margin-right: 2px; display: inline-flex; align-items: center; justify-content: center; }
+  #bellIcon:hover { background: var(--beige2); }
+  /* 알림 드롭다운: 화면 너비에 맞게 */
+  #notificationDropdown { right: 12px !important; top: 60px !important; width: calc(100vw - 24px) !important; max-width: 360px !important; }
 
   /* ── HERO ── */
   .hero { grid-template-columns: 1fr; height: auto; min-height: unset; }
@@ -548,14 +557,17 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 
   /* ── MARKET 그리드 ── */
   .pgrid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
-  .mkt-bar { padding: 0 4%; gap: 6px; }
+  /* 필터 칩: 줄바꿈 허용, 패딩 조정 */
+  .mkt-bar { padding: 6px 4% 8px; gap: 6px; flex-wrap: wrap; }
+  .mf { font-size: .7rem; padding: 5px 11px; }
 }
 
 @media (max-width: 480px) {
 
   /* ── NAV ── */
   nav { padding: 0 4%; }
-  .logo { font-size: 1.2rem; }
+  .logo { font-size: 1.18rem; }
+  .logo img { height: 28px; }
   .n-ico { font-size: 1rem; }
 
   /* ── HERO ── */
@@ -590,5 +602,9 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 
   /* ── LOGIN ── */
   .login-box { padding: 22px 16px; }
+
+  /* ── MARKET 필터 칩 ── */
+  .mkt-bar { padding: 5px 4% 7px; gap: 5px; }
+  .mf { font-size: .68rem; padding: 4px 9px; }
 }
 
