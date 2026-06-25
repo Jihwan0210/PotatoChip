@@ -102,3 +102,79 @@
 .ft-settle-primary        .ft-settle-sub { color: rgba(255,255,255,.6); }
 .ft-settle-white          .ft-settle-sub { color: var(--muted); }
 .ft-settle-white.complete .ft-settle-sub { color: var(--green); font-weight: 500; }
+
+/* ══════════════════════════════
+   768px 이하 (태블릿 · 모바일)
+══════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* Header */
+  .ft-header { padding: 18px 4% 0; }
+  .ft-header-title { font-size: 1.45rem; }
+
+  /* 탭 바: 스크롤 가능하게 */
+  .ft-tab-bar { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  .ft-tab-bar::-webkit-scrollbar { display: none; }
+  .ft-tab { padding: 0 18px; height: 46px; font-size: .86rem; white-space: nowrap; flex-shrink: 0; }
+
+  /* Main */
+  .ft-main { padding: 20px 4%; }
+
+  /* KPI 카드: 4열 → 2열 */
+  .ft-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+  .ft-kpi-card { padding: 18px 16px; }
+  .ft-kpi-value { font-size: 1.6rem; }
+
+  /* 액션 바 */
+  .ft-action-bar { flex-wrap: wrap; gap: 10px; }
+
+  /* 주문 테이블: 6열 → 3열 (상품명·결제액·상태, 나머지 숨김) */
+  .ft-order-grid {
+    grid-template-columns: 1fr 80px 72px !important;
+  }
+  .ft-order-grid .ft-cell-id,
+  .ft-order-grid .ft-cell-c,
+  .ft-order-grid .ft-cell-date { display: none; }
+  .ft-table-head.ft-order-grid > div:nth-child(1),
+  .ft-table-head.ft-order-grid > div:nth-child(3),
+  .ft-table-head.ft-order-grid > div:nth-child(6) { display: none; }
+
+  /* 재고 테이블: 5열 → 3열 (상품명·재고·관리, 유통기한·상태 숨김) */
+  .ft-inv-grid {
+    grid-template-columns: 1fr 70px 72px !important;
+  }
+  .ft-inv-grid .ft-stock-total,
+  .ft-inv-grid .ft-badge { display: none; }
+  .ft-table-head.ft-inv-grid > div:nth-child(3),
+  .ft-table-head.ft-inv-grid > div:nth-child(4) { display: none; }
+
+  /* 차트: 2열 → 1열 */
+  .ft-chart-grid { grid-template-columns: 1fr; }
+
+  /* 정산 카드: 3열 → 1열 */
+  .ft-settle-cards-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  /* 정산 테이블: 4열 → 3열 (정산월 숨김) */
+  .ft-settle-grid {
+    grid-template-columns: 1fr 90px 80px !important;
+  }
+  .ft-settle-grid .ft-cell-month { display: none; }
+  .ft-table-head.ft-settle-grid > div:nth-child(1) { display: none; }
+
+  /* 테이블 공통 패딩 축소 */
+  .ft-table-head,
+  .ft-table-row { padding: 12px 14px; }
+}
+
+/* ══════════════════════════════
+   480px 이하 (소형 모바일)
+══════════════════════════════ */
+@media (max-width: 480px) {
+  .ft-header { padding: 16px 4% 0; }
+  .ft-main { padding: 16px 4%; }
+  .ft-kpi-grid { gap: 8px; }
+  .ft-kpi-card { padding: 14px 12px; }
+  .ft-kpi-value { font-size: 1.4rem; }
+  .ft-tab { padding: 0 14px; font-size: .8rem; }
+  .ft-settle-val { font-size: 1.5rem; }
+}

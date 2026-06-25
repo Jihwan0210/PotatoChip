@@ -1,0 +1,106 @@
+/* ══════════════════════════════════════════
+   responsive.css
+   역할: nav 햄버거 메뉴 + 페이지별 신규 클래스
+   style.css 클래스 오버라이드는 style.css 끝에
+══════════════════════════════════════════ */
+
+/* ── 햄버거 버튼 (기본 숨김) ── */
+.nav-mobile-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.55rem;
+  cursor: pointer;
+  color: var(--dark);
+  padding: 4px 8px;
+  border-radius: 8px;
+  line-height: 1;
+  transition: background .2s;
+}
+.nav-mobile-btn:hover { background: var(--beige); }
+
+/* ── 모바일 풀스크린 메뉴 (기본 숨김) ── */
+.nav-mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0; bottom: 0;
+  background: rgba(255,254,251,.98);
+  backdrop-filter: blur(14px);
+  z-index: 298;
+  padding: 20px 6%;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.nav-mobile-overlay.open { display: flex; }
+
+.nav-mobile-overlay a {
+  display: block;
+  padding: 16px 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--dark);
+  text-decoration: none;
+  border-bottom: 1px solid var(--beige);
+  transition: color .2s, padding-left .2s;
+}
+.nav-mobile-overlay a:hover { color: var(--green); padding-left: 6px; }
+
+.nav-mobile-auth {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── 햄버거 버튼 모바일에서 표시 ── */
+@media (max-width: 768px) {
+  .nav-mobile-btn { display: flex; align-items: center; }
+}
+
+/* ════════════════════════════════════════
+   RANKING 페이지 전용 클래스
+════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* TOP 3 포디움: 세로 정렬 */
+  .rank-podium {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    margin-top: 12px !important;
+  }
+  .rank-podium-card {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .rank-podium-first {
+    margin-bottom: 0 !important;
+    order: -1;
+  }
+
+  /* 4위 이하 테이블: 가격 열 숨기고 3열로 */
+  .rank-table-row {
+    grid-template-columns: 44px 1fr 64px !important;
+  }
+  .rank-col-price { display: none !important; }
+}
+
+/* ════════════════════════════════════════
+   MARKET DETAIL 페이지 전용 클래스
+════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 메인 2열 → 1열 */
+  .detail-grid {
+    grid-template-columns: 1fr !important;
+    padding: 16px 4% !important;
+    gap: 20px !important;
+  }
+  .detail-panel { position: static !important; }
+
+  /* 상품 이미지 높이 축소 */
+  .detail-grid > div:first-child > div:first-child {
+    height: 260px !important;
+  }
+}
