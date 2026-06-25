@@ -496,35 +496,7 @@
 </div>
 <div id="boardToast" class="board-toast"></div>
 
-<footer>
-    <div class="ft-g">
-        <div>
-            <div class="ft-logo">못난이 농작물</div>
-            <p class="ft-desc">버려질 뻔한 농산물을 한 상으로 담다.<br/>신선한 못난이 농산물을 합리적인 가격으로 연결합니다.</p>
-        </div>
-        <div class="ft-col">
-            <h5>서비스</h5>
-            <a th:href="@{/market}" href="/market">마켓</a>
-            <a th:href="@{/ranking}" href="/ranking">판매랭킹</a>
-            <a th:href="@{/review}" href="/review">리뷰</a>
-        </div>
-        <div class="ft-col">
-            <h5>고객지원</h5>
-            <a th:href="@{/board}" href="/board">게시판</a>
-            <a th:href="@{/faq}" href="/faq">FAQ</a>
-            <a th:href="@{/mypage}" href="/mypage">마이페이지</a>
-        </div>
-        <div class="ft-col">
-            <h5>농가</h5>
-            <a th:href="@{/farmer}" href="/farmer">농가 대시보드</a>
-            <a th:href="@{/market}" href="/market">상품 등록 안내</a>
-        </div>
-    </div>
-    <div class="ft-bot">
-        <span>© PotatoChip. Ugly Farm Produce Market.</span>
-        <span>Board</span>
-    </div>
-</footer>
+<div th:replace="~{footer :: footer}"></div>
 
 <script th:src="@{/js/app.js}" src="/js/app.js"></script>
 <script>
