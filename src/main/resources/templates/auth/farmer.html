@@ -60,6 +60,12 @@
             <div class="ft-action-bar">
                 <div class="ft-action-label">최근 주문 목록</div>
                 <div class="ft-btn-group">
+                    <button id="registerBtn"
+                            style="font-size:.74rem;cursor:pointer;padding:5px 11px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
+                            th:onclick="|location.href='@{/market/create}'|">
+                        + 상품등록
+                    </button>
+
                     <button class="ft-btn-excel" onclick="exportOrders()">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         엑셀 다운로드
