@@ -1,23 +1,23 @@
 package com.example.potatochip.review.controller;
 
+import com.example.potatochip.auth.entity.User;
+import com.example.potatochip.auth.repository.UserRepository;
+import com.example.potatochip.product.file.FileService;
 import com.example.potatochip.review.dto.ReviewDTO;
 import com.example.potatochip.review.dto.ReviewHelpfulDTO;
 import com.example.potatochip.review.dto.ReviewStatsDTO;
 import com.example.potatochip.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import com.example.potatochip.auth.entity.User;
-import com.example.potatochip.auth.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import com.example.potatochip.product.file.FileService;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,9 +30,13 @@ public class ReviewController {
     @GetMapping("/api/reviews")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProductId(
             @RequestParam Long productId,
-            @RequestParam(required = false) Long userId
+            @RequestParam(required = false) Long userId,
+            Authentication authentication
     ) {
-        List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId, userId);
+        Long loginUserId = resolveLoginUserIdOrNull(authentication);
+        Long currentUserId = loginUserId != null ? loginUserId : userId;
+
+        List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId, currentUserId);
         return ResponseEntity.ok(reviews);
     }
 
@@ -93,11 +97,16 @@ public class ReviewController {
     @PostMapping("/api/reviews/{reviewId}/helpful")
     public ResponseEntity<?> addHelpful(
             @PathVariable Long reviewId,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
         try {
-            ReviewHelpfulDTO response = reviewService.addHelpful(reviewId, userId);
+            Long loginUserId = getLoginUserId(authentication);
+            ReviewHelpfulDTO response = reviewService.addHelpful(reviewId, loginUserId);
             return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of("message", e.getMessage())
+            );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     Map.of("message", e.getMessage())
@@ -130,6 +139,14 @@ public class ReviewController {
             return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(Map.of("message", "리뷰 이미지 업로드에 실패했습니다."));
+        }
+    }
+
+    private Long resolveLoginUserIdOrNull(Authentication authentication) {
+        try {
+            return getLoginUserId(authentication);
+        } catch (SecurityException e) {
+            return null;
         }
     }
 
