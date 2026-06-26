@@ -190,12 +190,16 @@
 
         <!-- RIGHT: 구매 패널 -->
         <div class="detail-panel" style="position:sticky;top:80px;align-self:flex-start">
-            <div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:22px;margin-bottom:12px">
-                <div style="font-size:.72rem;color:var(--green);margin-bottom:4px;font-weight:500" th:text="${product.origin}">원산지</div>
-                <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:13px;line-height:1.4">
-                    <span th:text="${product.name}">상품명</span><br/>
-                    <span style="font-size:.8rem;font-weight:400;color:var(--muted)">(못난이)</span>
-                </div>
+            <div style="font-family:Gaegu,cursive;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:6px;line-height:1.4">
+                <span th:text="${product.name}">상품명</span><br/>
+                <span style="font-size:.8rem;font-weight:400;color:var(--muted)">(못난이)</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:13px;font-size:.78rem;color:var(--mid)">
+                <span>📦 재고</span>
+                <strong style="color:var(--green);font-weight:700"
+                        th:text="${product.stockQuantity != null ? product.stockQuantity + '개' : '-'}">100개</strong>
+            </div>
 
                 <!-- 가격 -->
                 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
@@ -227,7 +231,17 @@
                     <div style="display:flex;align-items:center;gap:12px">
                         <div style="display:inline-flex;align-items:center;border:1.5px solid var(--sand);border-radius:9px;overflow:hidden">
                             <button onclick="changeDetailQty(-1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">−</button>
-                            <span id="detailQty" style="width:32px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:700;color:var(--dark);border-left:1px solid var(--sand);border-right:1px solid var(--sand)">1</span>
+
+                            <input id="detailQty"
+                                   type="number"
+                                   value="1"
+                                   min="1"
+                                   th:max="${product.stockQuantity != null ? product.stockQuantity : 9999}"
+                                   th:data-stock="${product.stockQuantity != null ? product.stockQuantity : 9999}"
+                                   oninput="syncDetailQty()"
+                                   onchange="syncDetailQty()"
+                                   style="width:46px;height:30px;text-align:center;font-size:.84rem;font-weight:700;color:var(--dark);border:none;border-left:1px solid var(--sand);border-right:1px solid var(--sand);outline:none;font-family:inherit"/>
+
                             <button onclick="changeDetailQty(1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">+</button>
                         </div>
                         <span style="font-size:.78rem;color:var(--mid)">×
@@ -666,6 +680,7 @@
     }
 
     var currentProductId = productId;
+    var detailQtyVal = 1;
     var currentUserId = localStorage.getItem('currentUserId') ? Number(localStorage.getItem('currentUserId')) : null;
     var reviewFilter = 'all';
     var onlyPhotoReview = false;
