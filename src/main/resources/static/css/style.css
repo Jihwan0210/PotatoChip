@@ -8,6 +8,8 @@
      Mission  — 연두 진하게 #7BBF45 (다크 카드)
      Footer   — 다크브라운  #3A2808 (푸터만)
 ════════════════════════ */
+@import url('responsive.css');
+
 :root {
   --dark:   #3A2808;
 
@@ -63,6 +65,33 @@ nav.sh{box-shadow:0 3px 22px var(--sh)}
 .n-ico{font-size:1.1rem;cursor:pointer;color:var(--mid)}
 .btn-nav{background:var(--amber);color:#fff;border:none;border-radius:50px;padding:10px 24px;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
 .btn-nav:hover{background:var(--dark);transform:translateY(-1px)}
+
+/* ── NAV USER DROPDOWN ── */
+.nav-user-wrap { position: relative; display: flex; align-items: center; }
+.nav-user-btn { display: flex; align-items: center; gap: 5px; }
+.nav-arrow { font-size: .65rem; transition: transform .2s; }
+.nav-user-wrap.open .nav-arrow,
+#nav-dropdown.open ~ * .nav-arrow { transform: rotate(180deg); }
+#nav-user-btn.active .nav-arrow { transform: rotate(180deg); }
+
+.nav-dropdown {
+    display: none;
+    position: absolute; top: calc(100% + 10px); right: 0;
+    background: #fff; border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(42,30,6,.14);
+    border: 1px solid var(--beige); min-width: 160px;
+    z-index: 400; overflow: hidden;
+    animation: fadeDown .18s ease;
+}
+.nav-dropdown.open { display: block; }
+.nd-item {
+    padding: 11px 16px; font-size: .83rem; color: var(--mid);
+    cursor: pointer; transition: background .15s;
+    display: flex; align-items: center; gap: 8px;
+}
+.nd-item:hover { background: var(--beige2); color: var(--dark); }
+.nd-logout:hover { color: #e74c3c; background: #fff5f5; }
+.nd-divider { height: 1px; background: var(--beige); margin: 0; }
 
 /* ── HERO ── */
 .hero{margin-top:64px;height:calc(100vh - 64px);min-height:580px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
@@ -218,7 +247,11 @@ nav.sh{box-shadow:0 3px 22px var(--sh)}
 
 /* ── FOOTER  딥 세이지 그린 ── */
 footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
-.ft-g{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,.1)}
+.ft-g{
+  display:grid;
+  grid-template-columns:3fr 1fr 1fr;
+  gap:48px;
+}
 .ft-logo{font-family:'Gaegu',cursive;font-size:1.4rem;color:#fff}
 .ft-desc{font-size:.82rem;line-height:1.85;margin-top:12px}
 .ft-col h5{font-family:'Gaegu',cursive;color:#fff;font-size:.92rem;margin-bottom:14px}
@@ -370,6 +403,27 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 .ben-badge{display:flex;align-items:center;gap:6px;background:var(--gp,#E8F6D4);border-radius:9px;padding:9px 11px;margin-top:10px;font-size:.73rem;color:var(--green);font-weight:500}
 
 /* ── MARKET ── */
+.plk {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .92rem;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 1px 5px rgba(0,0,0,.2);
+  border: 1px solid rgba(0,0,0,.06);
+  transition: transform .15s;
+}
+.plk:hover {
+  transform: scale(1.1);
+}
 .mkt-bar{background:#fff;border-bottom:1.5px solid var(--sand);padding:0 5%;display:flex;align-items:center;gap:8px;height:auto;min-height:50px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
 .mkt-bar::-webkit-scrollbar{display:none}
 .mf{padding:5px 13px;border-radius:100px;border:1.5px solid var(--sand);font-size:.74rem;color:var(--mid);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
@@ -382,10 +436,9 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 .pc2-thumb.ap{background:linear-gradient(145deg,#FEF2E8,#F5C4A0)}
 .pc2-thumb.mt{background:linear-gradient(145deg,#E8FAF7,#A8E4D8)}
 .pc2-thumb.lv{background:linear-gradient(145deg,#F2EEFB,#C8BAF0)}
-.pbdg{position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:3px}
+.pbdg{position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:3px;z-index:2}
 .pbdg-t{font-size:.6rem;font-weight:500;padding:2px 6px;border-radius:4px;display:inline-block}
 .pbdg-new{background:var(--green);color:#fff}.pbdg-exp{background:#D05018;color:#fff}
-.plk{position:absolute;top:7px;right:7px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.88);display:flex;align-items:center;justify-content:center;font-size:.78rem;cursor:pointer}
 .pc2-body{padding:10px 11px 12px}
 .pc2-farm{font-size:.62rem;color:var(--muted);margin-bottom:2px}
 .pc2-nm{font-size:.8rem;font-weight:500;color:var(--dark);margin-bottom:5px;line-height:1.3}
@@ -424,3 +477,134 @@ footer{background:#3D5A3E;color:rgba(255,255,255,.55);padding:60px 8% 30px}
 .rv2-cert{font-size:.65rem;color:var(--green);font-weight:500}
 .rv2-prod {  border: none;  cursor: pointer;  display: inline-flex;  align-items: center;  gap: 5px;  background: var(--gp);  border-radius: 7px;  padding: 3px 9px;  font-size: .65rem;  color: var(--green);font-weight: 700;margin-bottom: 9px;font-family: inherit;}
 .rv2-prod:hover {background: var(--green);color: #fff;}
+.pbdg-soon {
+  background: #FFF5EF;
+  color: #D05018;
+  border: 1px solid #F5C8A8;
+  margin-left: 4px;
+  display: inline-block;
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — 768px (태블릿·모바일)
+   style.css 클래스 오버라이드는 반드시 이 파일 끝에
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── NAV ── */
+  nav { padding: 0 4%; }
+  .nav-links { display: none; }
+  /* 로고가 공간 채워서 오른쪽 아이콘들이 끝에 붙도록 */
+  .logo { flex: 1; }
+  .nav-r { gap: 4px; }
+  /* 이름 버튼·로그인 버튼은 사이드 패널에서 처리 */
+  .nav-user-wrap { display: none !important; }
+  #btn-nav-login  { display: none !important; }
+  /* 벨 아이콘 터치 영역 확보 */
+  #bellIcon { padding: 8px; border-radius: 10px; margin-right: 2px; display: inline-flex; align-items: center; justify-content: center; }
+  #bellIcon:hover { background: var(--beige2); }
+  /* 알림 드롭다운: 화면 너비에 맞게 */
+  #notificationDropdown { right: 12px !important; top: 60px !important; width: calc(100vw - 24px) !important; max-width: 360px !important; }
+
+  /* ── HERO ── */
+  .hero { grid-template-columns: 1fr; height: auto; min-height: unset; }
+  .hl { padding: 36px 6% 28px; }
+  .hr { height: 220px; padding: 0 6%; gap: 16px; }
+  .hp-fl { display: none; }
+  .h-title { font-size: clamp(1.55rem, 5.5vw, 2.2rem); }
+  .h-sub { font-size: .84rem; }
+  .btn-hero { padding: 12px 28px; font-size: .88rem; }
+  .h-bot { flex-wrap: wrap; gap: 12px; }
+
+  /* ── ABOUT ── */
+  .about-sec { padding: 56px 6%; }
+  .about-grid { grid-template-columns: 1fr; gap: 28px; }
+  .ar-desc { grid-template-columns: 1fr; gap: 10px; }
+  .acards { grid-template-columns: 1fr 1fr; height: auto; min-height: 260px; }
+  .ac2 { grid-row: auto; grid-column: auto; }
+
+  /* ── SERVICES ── */
+  .svc-sec { padding: 56px 6%; }
+  .svc-grid { grid-template-columns: 1fr; }
+  .svc-photo { height: 180px; font-size: 4rem; }
+  .sec-hdr { flex-wrap: wrap; gap: 10px; }
+
+  /* ── PRODUCTS (홈) ── */
+  .prod-sec { padding: 56px 6%; }
+  .pc { flex: 0 0 175px; }
+
+  /* ── MISSION ── */
+  .miss-wrap { padding: 56px 6%; }
+  .miss-card { grid-template-columns: 1fr; }
+  .ml { padding: 32px 24px; }
+  .mr { grid-template-columns: 1fr 1fr; padding: 16px; gap: 8px; }
+  .ms { padding: 16px 14px; }
+
+  /* ── FOOTER ── */
+  footer { padding: 48px 6% 24px; }
+  .ft-g { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .ft-bot { flex-direction: column; gap: 6px; text-align: center; }
+
+  /* ── LOGIN / 회원가입 ── */
+  .login-bg { padding: 28px 16px; }
+  .login-box { padding: 28px 20px; border-radius: 16px; }
+  .name-row { grid-template-columns: 1fr; }
+  .soc-btns { grid-template-columns: 1fr; }
+
+  /* ── CART ── */
+  .cart-layout { grid-template-columns: 1fr; }
+  .cart-sum { position: static; }
+
+  /* ── MARKET 그리드 ── */
+  .pgrid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
+  /* 필터 칩: 줄바꿈 허용, 패딩 조정 */
+  .mkt-bar { padding: 6px 4% 8px; gap: 6px; flex-wrap: wrap; }
+  .mf { font-size: .7rem; padding: 5px 11px; }
+}
+
+@media (max-width: 480px) {
+
+  /* ── NAV ── */
+  nav { padding: 0 4%; }
+  .logo { font-size: 1.18rem; }
+  .logo img { height: 28px; }
+  .n-ico { font-size: 1rem; }
+
+  /* ── HERO ── */
+  .hl { padding: 28px 4% 22px; }
+  .hr { height: 180px; }
+  .h-title { font-size: clamp(1.4rem, 7vw, 1.9rem); }
+
+  /* ── SECTIONS ── */
+  .about-sec, .svc-sec, .prod-sec { padding: 44px 4%; }
+  .miss-wrap { padding: 44px 4%; }
+  footer { padding: 40px 4% 20px; }
+
+  /* ── ABOUT 카드 ── */
+  .acards { grid-template-columns: 1fr; min-height: auto; }
+  .ac2 { min-height: 180px; }
+
+  /* ── MISSION ── */
+  .mr { grid-template-columns: 1fr; }
+
+  /* ── FOOTER ── */
+  .ft-g { grid-template-columns: 1fr; gap: 24px; }
+
+  /* ── MARKET ── */
+  .pgrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .pc2-thumb { height: 100px; font-size: 2.5rem; }
+  .pc2-body { padding: 8px 9px 10px; }
+  .pc2-nm { font-size: .76rem; }
+
+  /* ── CART ── */
+  .cart-item { gap: 10px; }
+  .ct-thumb { width: 52px; height: 52px; font-size: 1.6rem; }
+
+  /* ── LOGIN ── */
+  .login-box { padding: 22px 16px; }
+
+  /* ── MARKET 필터 칩 ── */
+  .mkt-bar { padding: 5px 4% 7px; gap: 5px; }
+  .mf { font-size: .68rem; padding: 4px 9px; }
+}
+#notificationBadge:empty {display: none !important;}

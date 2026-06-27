@@ -52,6 +52,14 @@ public class ReviewServiceImpl implements ReviewService {
 
         Product product = findProduct(reviewDTO.getProductId());
 
+        if (reviewDTO.getOrderItemId() != null &&
+                reviewRepository.existsByOrderItemIdAndUserIdAndIsActiveTrue(
+                        reviewDTO.getOrderItemId(),
+                        reviewDTO.getUserId()
+                )) {
+            throw new IllegalArgumentException("이미 리뷰를 작성한 주문 상품입니다.");
+        }
+
         Review review = Review.builder()
                 .product(product)
                 .userId(reviewDTO.getUserId())
@@ -60,13 +68,14 @@ public class ReviewServiceImpl implements ReviewService {
                 .content(reviewDTO.getContent())
                 .imageUrl(normalizeImageUrl(reviewDTO.getImageUrl()))
                 .repurchaseIntent(Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent()))
+                .isAnonymous(Boolean.TRUE.equals(reviewDTO.getIsAnonymous()))
                 .build();
 
         Review savedReview = reviewRepository.save(review);
 
         refreshAiSummarySafely(savedReview.getProductId());
 
-        return ReviewDTO.fromEntity(savedReview);
+        return ReviewDTO.fromEntity(savedReview, 0L, false);
     }
 
     @Override
@@ -86,7 +95,8 @@ public class ReviewServiceImpl implements ReviewService {
                 reviewDTO.getRating(),
                 reviewDTO.getContent(),
                 normalizeImageUrl(reviewDTO.getImageUrl()),
-                Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent())
+                Boolean.TRUE.equals(reviewDTO.getRepurchaseIntent()),
+                Boolean.TRUE.equals(reviewDTO.getIsAnonymous())
         );
 
         refreshAiSummarySafely(review.getProductId());
@@ -210,7 +220,26 @@ public class ReviewServiceImpl implements ReviewService {
         if (imageUrl == null || imageUrl.isBlank()) {
             return null;
         }
-
         return imageUrl.trim();
+    }
+
+    @Override
+    public List<ReviewDTO> getMyReviews(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("사용자 ID가 필요합니다.");
+        }
+
+        return reviewRepository.findByUserIdAndIsActiveTrueOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(review -> {
+                    Long helpfulCount = reviewHelpfulRepository.countByReviewId(review.getReviewId());
+                    Boolean helpfulByCurrentUser = reviewHelpfulRepository.existsByReviewIdAndUserId(
+                            review.getReviewId(),
+                            userId
+                    );
+
+                    return ReviewDTO.fromEntity(review, helpfulCount, helpfulByCurrentUser);
+                })
+                .toList();
     }
 }
