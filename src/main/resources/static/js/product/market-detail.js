@@ -137,16 +137,19 @@ function deleteProduct(id) {
 }
 
 function addToCartDetail(btn) {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const token = getReviewAuthToken();
     if (!token) {
         if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
         return;
     }
+
     var pid = btn.getAttribute('data-id');
+    var quantity = getDetailQty();
+
     fetch('/cart/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ productId: parseInt(pid), quantity: detailQtyVal })
+        body: JSON.stringify({ productId: parseInt(pid), quantity: quantity })
     })
         .then(res => {
             if (res.status === 401) {
@@ -162,15 +165,18 @@ function addToCartDetail(btn) {
 }
 
 function buyNow(pid) {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+    const token = getReviewAuthToken();
     if (!token) {
         if (confirm('로그인이 필요해요 🌿\n로그인 페이지로 이동할까요?')) location.href = '/login';
         return;
     }
+
+    var quantity = getDetailQty();
+
     fetch('/cart/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ productId: parseInt(pid), quantity: detailQtyVal })
+        body: JSON.stringify({ productId: parseInt(pid), quantity: quantity })
     })
         .then(res => {
             if (res.status === 401) {
@@ -311,13 +317,29 @@ async function loadReviewStats(productId) {
 async function loadReviewList(productId) {
     var list = document.getElementById('reviewList');
     if (!list) return;
+
     list.innerHTML = '<div class="review-empty">리뷰를 불러오는 중입니다.</div>';
+
     try {
+        var token = getReviewAuthToken();
         var url = '/api/reviews?productId=' + productId;
-        if (currentUserId) url += '&userId=' + currentUserId;
-        var response = await fetch(url);
+
+        if (currentUserId) {
+            url += '&userId=' + currentUserId;
+        }
+
+        var options = {};
+        if (token) {
+            options.headers = { 'Authorization': 'Bearer ' + token };
+        }
+
+        var response = await fetch(url, options);
         cachedReviews = await response.json();
-        if (!Array.isArray(cachedReviews)) cachedReviews = [];
+
+        if (!Array.isArray(cachedReviews)) {
+            cachedReviews = [];
+        }
+
         renderReviewList();
     } catch (error) {
         list.innerHTML = '<div class="review-empty">리뷰 목록을 불러오지 못했습니다.</div>';
@@ -542,22 +564,35 @@ async function deleteReview(reviewId) {
 }
 
 async function toggleReviewHelpful(reviewId) {
-    if (!currentUserId) {
+    var token = getReviewAuthToken();
+
+    if (!token) {
         showReviewToast('로그인 후 도움돼요를 누를 수 있어요.');
         setTimeout(function() { location.href = '/login'; }, 900);
         return;
     }
+
     try {
-        var response = await fetch('/api/reviews/' + reviewId + '/helpful?userId=' + currentUserId, { method: 'POST' });
+        var response = await fetch('/api/reviews/' + reviewId + '/helpful', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+
         var data = await response.json();
-        if (!response.ok) { showReviewToast(data.message || '도움돼요 처리에 실패했습니다.'); return; }
+
+        if (!response.ok) {
+            showReviewToast(data.message || '도움돼요 처리에 실패했습니다.');
+            return;
+        }
+
         cachedReviews = cachedReviews.map(function(review) {
-            if (review.reviewId === reviewId) {
+            if (Number(review.reviewId) === Number(reviewId)) {
                 review.helpfulCount = data.helpfulCount;
                 review.helpfulByCurrentUser = data.helpfulByCurrentUser;
             }
             return review;
         });
+
         renderReviewList();
         showReviewToast('도움돼요가 반영됐어요 🌿');
     } catch (error) {
@@ -862,4 +897,78 @@ function openNaverSearch() {
             window.open('https://map.naver.com/p/search/' + encodeURIComponent(address), '_blank');
         })
         .catch(function() { showToast('판매처 정보를 불러오지 못했어요 ㅠㅠ'); });
+}
+function getReviewAuthToken() {
+    return localStorage.getItem('token') || sessionStorage.getItem('token');
+}
+
+function getDetailStock() {
+    var qtyInput = document.getElementById('detailQty');
+    if (!qtyInput) {
+        return 9999;
+    }
+
+    var stock = Number(qtyInput.dataset.stock || qtyInput.max || 9999);
+
+    if (!Number.isFinite(stock) || stock < 1) {
+        return 9999;
+    }
+
+    return stock;
+}
+
+function getDetailQty() {
+    var qtyInput = document.getElementById('detailQty');
+
+    if (!qtyInput) {
+        return 1;
+    }
+
+    var stock = getDetailStock();
+    var qty = Number(qtyInput.value || 1);
+
+    if (!Number.isFinite(qty) || qty < 1) {
+        qty = 1;
+    }
+
+    if (qty > stock) {
+        qty = stock;
+    }
+
+    qty = Math.floor(qty);
+    qtyInput.value = qty;
+
+    return qty;
+}
+
+function syncDetailQty() {
+    detailQtyVal = getDetailQty();
+    updateDetailTotalPrice();
+}
+
+function changeDetailQty(delta) {
+    var qtyInput = document.getElementById('detailQty');
+
+    if (!qtyInput) {
+        return;
+    }
+
+    var currentQty = getDetailQty();
+    qtyInput.value = currentQty + Number(delta || 0);
+
+    syncDetailQty();
+}
+
+function updateDetailTotalPrice() {
+    var totalEl = document.getElementById('detailTotalPrice');
+
+    if (!totalEl) {
+        return;
+    }
+
+    var unitPrice = Number(totalEl.dataset.unit || 0);
+    var quantity = getDetailQty();
+    var totalPrice = unitPrice * quantity;
+
+    totalEl.textContent = totalPrice.toLocaleString('ko-KR') + '원';
 }

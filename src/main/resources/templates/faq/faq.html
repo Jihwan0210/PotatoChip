@@ -73,7 +73,270 @@
     .fab-btn{width:62px;height:62px}
     @media(max-width:720px){.faq-head{padding:28px 6% 22px}.faq-q{padding:16px}.faq-q-left{flex-direction:column;gap:8px}.faq-a{padding:0 16px 18px}.faq-help-card{align-items:flex-start}.faq-inquiry-actions{width:100%}.faq-inquiry-btn{flex:1}}
     @media(max-width:520px){.fab{right:18px;bottom:120px}.chat-window{right:16px;bottom:190px;height:430px}}
-  </style>
+
+/* ===== RESPONSIVE FIX: paste-safe override ===== */
+.faq-page,
+.faq-page * {
+    box-sizing: border-box;
+}
+
+.faq-search-box input,
+.chat-input-row input {
+    min-width: 0;
+}
+
+.faq-modal {
+    overflow-y: auto;
+}
+
+.faq-modal-card {
+    box-sizing: border-box;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.faq-tags {
+    -webkit-overflow-scrolling: touch;
+}
+
+.faq-question,
+.faq-a-inner,
+.chat-msg {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+    .faq-page {
+        padding-top: 58px;
+    }
+
+    .faq-head {
+        padding: 26px 5% 21px;
+        align-items: flex-start;
+    }
+
+    .faq-head > div {
+        width: 100%;
+    }
+
+    .faq-title {
+        font-size: 1.9rem;
+    }
+
+    .faq-desc {
+        font-size: .8rem;
+    }
+
+    #faqAdminAddBtn {
+        width: 100%;
+    }
+
+    .faq-wrap {
+        padding: 24px 4% 70px;
+    }
+
+    .faq-search-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .faq-search-title {
+        font-size: 1.08rem;
+    }
+
+    .faq-search-box {
+        padding: 11px 13px;
+    }
+
+    .faq-tags {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+
+    .faq-tags::-webkit-scrollbar {
+        display: none;
+    }
+
+    .faq-tag {
+        flex: 0 0 auto;
+    }
+
+    .faq-q {
+        align-items: flex-start;
+        padding: 16px;
+    }
+
+    .faq-q-left {
+        flex: 1;
+        min-width: 0;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .faq-a {
+        padding: 0 16px 18px;
+    }
+
+    .faq-help-card {
+        display: block;
+        padding: 18px;
+    }
+
+    .faq-inquiry-actions {
+        width: 100%;
+        margin-top: 14px;
+    }
+
+    .faq-inquiry-btn {
+        flex: 1 1 140px;
+        text-align: center;
+    }
+
+    .faq-admin-actions {
+        flex-wrap: wrap;
+        padding: 0 16px 16px;
+    }
+
+    .faq-admin-actions .faq-inquiry-btn {
+        flex: 1 1 auto;
+    }
+
+    .faq-modal {
+        align-items: flex-start;
+        padding: 12px;
+    }
+
+    .faq-modal-card {
+        width: 100%;
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        padding: 20px 16px;
+        border-radius: 18px;
+    }
+
+    .faq-modal-title {
+        font-size: 1.25rem;
+    }
+
+    .faq-form-group input,
+    .faq-form-group select,
+    .faq-form-group textarea {
+        font-size: .84rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .faq-title {
+        font-size: 1.72rem;
+    }
+
+    .faq-search-sub {
+        font-size: .72rem;
+    }
+
+    .faq-question {
+        font-size: .84rem;
+    }
+
+    .faq-cat-badge {
+        width: fit-content;
+    }
+
+    .faq-inquiry-actions {
+        flex-direction: column;
+    }
+
+    .faq-inquiry-btn {
+        width: 100%;
+    }
+
+    .fab {
+        right: 18px;
+        bottom: 22px;
+    }
+
+    .fab-bubble {
+        display: none;
+    }
+
+    .fab-btn {
+        width: 56px;
+        height: 56px;
+    }
+
+    .chat-window {
+        left: 12px;
+        right: 12px;
+        bottom: 88px;
+        width: auto;
+        max-width: none;
+        height: min(70vh, 470px);
+        border-radius: 18px;
+    }
+
+    .chat-head {
+        padding: 14px 15px;
+    }
+
+    .chat-body {
+        padding: 14px;
+    }
+
+    .chat-msg {
+        max-width: 92%;
+        font-size: .76rem;
+    }
+
+    .chat-quick {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+
+    .chat-quick::-webkit-scrollbar {
+        display: none;
+    }
+
+    .chat-quick button {
+        flex: 0 0 auto;
+    }
+
+    .chat-input-row {
+        padding: 10px;
+    }
+
+    .chat-input-row button {
+        padding: 0 13px;
+    }
+}
+
+@media (max-width: 380px) {
+    .faq-head {
+        padding-left: 4%;
+        padding-right: 4%;
+    }
+
+    .faq-wrap {
+        padding-left: 3.5%;
+        padding-right: 3.5%;
+    }
+
+    .faq-search-card,
+    .faq-help-card,
+    .faq-q {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .chat-window {
+        left: 8px;
+        right: 8px;
+    }
+}
+</style>
 </head>
 <body>
 <div th:replace="~{nav :: nav}"></div>
