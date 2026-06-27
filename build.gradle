@@ -56,8 +56,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
 
-    // -상품담당 - AWS S3 - 배포 시 주석 해제
-    // implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    // AWS S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 
 }
