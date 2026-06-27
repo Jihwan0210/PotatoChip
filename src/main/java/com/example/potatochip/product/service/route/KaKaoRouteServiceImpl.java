@@ -63,8 +63,6 @@ public class KaKaoRouteServiceImpl implements KaKaoRouteService {
 
         ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
 
-        System.out.println("카카오 응답: " + response.getBody()); // 디버그용, 확인 후 지워도 돼요
-
         List<Map<String, Object>> documents = (List<Map<String, Object>>) response.getBody().get("documents");
         if (documents == null || documents.isEmpty()) {
             throw new IllegalStateException("주소를 좌표로 변환하지 못했어요.");

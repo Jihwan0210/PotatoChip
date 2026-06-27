@@ -7,7 +7,6 @@ import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.entity.Wishlist;
 import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.product.repository.WishRepository;
-import com.example.potatochip.product.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

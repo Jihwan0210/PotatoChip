@@ -97,6 +97,11 @@
                      alt="상품 이미지"
                      style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit"/>
                 <span th:unless="${product.thumbnailUrl != null and !product.thumbnailUrl.isEmpty()}">🥔</span>
+                <!-- 품절 오버레이 -->
+                <div th:if="${product.stockQuantity != null and product.stockQuantity <= 0}"
+                     style="position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;border-radius:inherit;z-index:3">
+                    <span style="color:#fff;font-weight:700;font-size:.9rem;background:rgba(0,0,0,0.55);padding:4px 14px;border-radius:20px;letter-spacing:.05em">품절</span>
+                </div>
             </div>
             <div class="pc2-body">
                 <div class="pc2-farm" th:text="${product.origin}"></div>
@@ -117,7 +122,11 @@
                           th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'"></span>
                 </div>
                 <div class="pc2-meta">
-                    <span>📦 재고 <span th:text="${product.stockQuantity}"></span></span>
+                    <span th:if="${product.stockQuantity != null and product.stockQuantity <= 0}"
+                          style="color:#e53935;font-weight:700">품절</span>
+                    <span th:unless="${product.stockQuantity != null and product.stockQuantity <= 0}">
+                        📦 재고 <span th:text="${product.stockQuantity}"></span>
+                    </span>
                     <span th:if="${product.isPickupAvailable}">· 픽업 가능</span>
                 </div>
                 <!-- 상세보기 버튼 -->
