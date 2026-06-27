@@ -62,6 +62,42 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                           @Param("weekStart") LocalDate weekStart,
                                           Pageable pageable);
 
+    // 가격순 검색 - 할인가 기준(없으면 원가) 낮은 순
+    @Query("SELECT p FROM Product p " +
+            "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
+            "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
+            "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
+            "AND (:keyword = '' OR (" +
+            "(p.name LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'name')) OR " +
+            "(p.origin LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'farm')) OR " +
+            "(p.address LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'region'))))"+
+            "ORDER BY COALESCE(p.discountPrice, p.price) ASC")
+    Page<Product> searchProductsByPrice(@Param("category") String category,
+                                        @Param("keyword") String keyword,
+                                        @Param("searchType") String searchType,
+                                        @Param("today") LocalDate today,
+                                        @Param("expireLimit") LocalDate expireLimit,
+                                        Pageable pageable);
+
+    // 가격순 검색 (판매자 필터) - 할인가 기준(없으면 원가) 낮은 순
+    @Query("SELECT p FROM Product p " +
+            "WHERE p.seller.email = :sellerEmail " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
+            "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
+            "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
+            "AND (:keyword = '' OR (" +
+            "(p.name LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'name')) OR " +
+            "(p.origin LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'farm')) OR " +
+            "(p.address LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'region'))))"+
+            "ORDER BY COALESCE(p.discountPrice, p.price) ASC")
+    Page<Product> searchProductsBySellerEmailAndPrice(@Param("sellerEmail") String sellerEmail,
+                                                      @Param("category") String category,
+                                                      @Param("keyword") String keyword,
+                                                      @Param("searchType") String searchType,
+                                                      @Param("today") LocalDate today,
+                                                      @Param("expireLimit") LocalDate expireLimit,
+                                                      Pageable pageable);
+
     // 할인율순 검색 - 할인율 높은 순, 할인 없는 상품은 맨 뒤에 배치
     @Query("SELECT p FROM Product p " +
             "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
