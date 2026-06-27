@@ -1,9 +1,12 @@
 package com.example.potatochip.auth.entity;
 
+import com.example.potatochip.product.entity.Wishlist;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -19,43 +22,53 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String email; // 로그인 이메일 (고유값)
 
     @Column(nullable = false)
-    private String password;
+    private String password; // BCrypt 암호화된 비밀번호
 
     @Column(nullable = false)
-    private String name;
+    private String name; // 사용자 실명
 
-    private String address;
+    private String address; // 배송 주소 (선택)
 
-    private String phone;
+    private String phone; // 연락처 (선택)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // 역할 (BUYER / SELLER)
 
     @Column(nullable = false)
-    private String role;
+    private Boolean pushAgree; // 푸시 알림 수신 동의
 
     @Column(nullable = false)
-    private Boolean pushAgree;
+    private Boolean emailAgree; // 이메일 수신 동의
 
     @Column(nullable = false)
-    private Boolean emailAgree;
+    private Boolean isActive; // 계정 활성화 여부
+
+    @Column(name = "points", nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer points = 0;
+
+    private LocalDateTime deletedAt; // 탈퇴 일시
+
+    private String withdrawalReason; // 탈퇴 사유
+
+    private Long deletedBy; // 삭제 처리한 관리자 ID
+
+    private String nickname; // 닉네임 (커뮤니티 표시용)
 
     @Column(nullable = false)
-    private Boolean isActive;
-
-    private LocalDateTime deletedAt;
-
-    private String withdrawalReason;
-
-    private Long deletedBy;
-
-    private String nickname;
+    private LocalDateTime createdAt; // 가입 일시
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt; // 최종 수정 일시
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Wishlist> wishlists = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<com.example.potatochip.auth.entity.ResetPw> resetPws = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

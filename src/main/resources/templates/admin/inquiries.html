@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>문의 관리 | 못난이 농작물</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" href="/css/style.css" rel="stylesheet"/>
+    <style>
+        .admin-inq-page{min-height:100vh;padding-top:64px;background:linear-gradient(160deg,var(--beige2) 0%,var(--beige3) 48%,var(--gp) 100%)}
+        .admin-inq-head{background:var(--white);border-bottom:1.5px solid var(--beige);padding:34px 6% 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+        .admin-inq-kicker{font-size:.68rem;color:var(--green);letter-spacing:1px;font-weight:700;margin-bottom:8px}
+        .admin-inq-title{font-family:'Gaegu',cursive;font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;color:var(--dark)}
+        .admin-inq-desc{color:var(--light);font-size:.84rem;line-height:1.7;margin-top:8px;max-width:620px}
+        .admin-inq-wrap{max-width:1040px;margin:0 auto;padding:34px 6% 80px}
+        .admin-inq-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+        .admin-inq-filter{display:flex;gap:7px;flex-wrap:wrap}
+        .admin-inq-filter button{border:1.5px solid var(--beige);background:#fff;color:var(--mid);border-radius:100px;padding:8px 13px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer}
+        .admin-inq-filter button.on{background:var(--green);border-color:var(--green);color:#fff}
+        .admin-inq-select{height:38px;border:1.5px solid var(--beige);background:#fff;color:var(--mid);border-radius:100px;padding:0 12px;font-family:inherit;font-size:.75rem;font-weight:700;outline:none;cursor:pointer}
+        .admin-inq-select:focus{border-color:var(--green)}
+        .admin-inq-refresh{border:none;background:var(--amber);color:#fff;border-radius:100px;padding:9px 15px;font-family:'Gaegu',cursive;font-size:1rem;font-weight:700;cursor:pointer}
+        .admin-inq-list{display:flex;flex-direction:column;gap:12px}
+        .admin-inq-empty{background:#fff;border:1.5px solid var(--beige);border-radius:16px;padding:26px;color:var(--muted);font-size:.84rem;text-align:center}
+        .admin-inq-card{background:#fff;border:1.5px solid var(--beige);border-radius:18px;padding:20px;box-shadow:0 8px 26px rgba(90,74,58,.07)}
+        .admin-inq-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+        .admin-inq-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+        .admin-inq-badge{display:inline-flex;align-items:center;border-radius:100px;padding:4px 9px;font-size:.65rem;font-weight:700}
+        .admin-inq-badge.category{background:var(--gp);color:var(--green)}
+        .admin-inq-badge.pending{background:#FFF4D8;color:#B47A00}
+        .admin-inq-badge.answered{background:#E9F8E2;color:var(--green)}
+        .admin-inq-id{background:var(--beige3);color:var(--muted);border-radius:100px;padding:4px 9px;font-size:.64rem;font-weight:700}
+        .admin-inq-title2{font-size:1rem;color:var(--dark);font-weight:700;margin-bottom:6px}
+        .admin-inq-meta{font-size:.7rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+        .admin-inq-content{font-size:.82rem;color:var(--light);line-height:1.7;margin-top:12px;max-height:46px;overflow:hidden}
+        .admin-inq-answer{margin-top:13px;background:var(--beige3);border-radius:14px;padding:13px;font-size:.8rem;color:var(--mid);line-height:1.7}
+        .admin-inq-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+        .admin-inq-btn{border:none;border-radius:100px;padding:8px 13px;font-size:.73rem;font-weight:700;font-family:inherit;cursor:pointer}
+        .admin-inq-btn.detail{background:var(--amber);color:#fff}
+        .admin-inq-btn.answer{background:var(--green);color:#fff}
+        .admin-inq-btn.disabled{background:#eee;color:#999;cursor:default}
+        .admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:9999;align-items:center;justify-content:center;padding:20px}
+        .admin-modal-card{background:#fff;border-radius:20px;padding:25px;width:100%;max-width:560px;box-shadow:0 12px 44px rgba(0,0,0,.2)}
+        .admin-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .admin-modal-title{font-family:'Gaegu',cursive;font-size:1.45rem;font-weight:700;color:var(--dark)}
+        .admin-modal-close{border:none;background:transparent;font-size:1.2rem;cursor:pointer;color:var(--muted)}
+        .admin-modal-info{background:var(--beige3);border-radius:14px;padding:14px;margin-bottom:13px;color:var(--mid);font-size:.8rem;line-height:1.7}
+        .admin-modal-info strong{color:var(--dark)}
+        .admin-answer-area{width:100%;min-height:130px;resize:none;border:1.5px solid var(--beige);border-radius:13px;background:var(--beige3);outline:none;padding:13px;font-family:inherit;color:var(--dark)}
+        .admin-answer-area:focus{border-color:var(--green);background:#fff}
+        .admin-modal-actions{display:flex;gap:9px;margin-top:14px}
+        .admin-modal-btn{border:none;border-radius:13px;padding:12px 16px;font-family:'Gaegu',cursive;font-size:1rem;font-weight:700;cursor:pointer}
+        .admin-modal-btn.cancel{background:var(--beige);color:var(--mid)}
+        .admin-modal-btn.submit{background:var(--green);color:#fff;flex:1}
+
+        .admin-inq-card{cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+        .admin-inq-card:hover{transform:translateY(-1px);border-color:rgba(123,191,69,.45);box-shadow:0 10px 30px rgba(90,74,58,.1)}
+        .admin-inq-time-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:.69rem;color:var(--muted)}
+        .admin-inq-time-chip{background:var(--beige3);border-radius:100px;padding:4px 9px}
+        .admin-detail-modal-card{max-width:720px}
+        .admin-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+        .admin-detail-info{background:var(--beige3);border:1px solid var(--beige);border-radius:13px;padding:10px 12px}
+        .admin-detail-label{font-size:.66rem;color:var(--muted);font-weight:700;margin-bottom:4px}
+        .admin-detail-value{font-size:.78rem;color:var(--dark);font-weight:700;line-height:1.45}
+        .admin-detail-section{border:1.5px solid var(--beige);border-radius:16px;padding:14px;margin-top:12px;background:#fff}
+        .admin-detail-section.answer{background:var(--beige3)}
+        .admin-detail-section-title{font-size:.82rem;font-weight:800;color:var(--dark);margin-bottom:8px}
+        .admin-detail-text{font-size:.84rem;color:var(--mid);line-height:1.85;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+        .admin-detail-image{text-align:center;margin-top:10px}
+        .admin-detail-image img{max-width:100%;max-height:280px;object-fit:contain;border-radius:12px;border:1.5px solid var(--beige);cursor:zoom-in;background:#fff}
+        @media(max-width:720px){.admin-inq-top{flex-direction:column}.admin-modal-actions{flex-direction:column}.admin-detail-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div th:replace="~{nav :: nav}"></div>
+
+<main class="admin-inq-page">
+    <section class="admin-inq-head">
+        <div>
+            <div class="admin-inq-kicker">Admin Inquiry</div>
+            <h1 class="admin-inq-title">문의 관리 🛠️</h1>
+            <p class="admin-inq-desc">사용자가 남긴 1:1 문의를 확인하고 답변을 등록할 수 있어요.</p>
+        </div>
+        <button class="admin-inq-refresh" type="button" onclick="loadAdminInquiries()">새로고침</button>
+    </section>
+
+    <section class="admin-inq-wrap">
+        <div class="admin-inq-toolbar">
+            <div class="admin-inq-filter">
+                <select id="adminInquiryStatusSelect" class="admin-inq-select" onchange="setAdminInquiryFilters()">
+                    <option value="all">상태 전체</option>
+                    <option value="pending">답변 대기</option>
+                    <option value="answered">답변 완료</option>
+                </select>
+                <select id="adminInquiryRoleSelect" class="admin-inq-select" onchange="setAdminInquiryFilters()">
+                    <option value="all">구분 전체</option>
+                    <option value="BUYER">구매자</option>
+                    <option value="SELLER">판매자</option>
+                </select>
+                <select id="adminInquiryCategorySelect" class="admin-inq-select" onchange="setAdminInquiryFilters()">
+                    <option value="all">카테고리 전체</option>
+                    <option value="delivery">배송 문의</option>
+                    <option value="refund">환불/교환 문의</option>
+                    <option value="product">상품 문의</option>
+                    <option value="order">주문/결제 문의</option>
+                    <option value="etc">기타 문의</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="adminInquiryList" class="admin-inq-list">
+            <div class="admin-inq-empty">문의 내역을 불러오는 중입니다.</div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{footer :: footer}"></div>
+
+<div id="answerModal" class="admin-modal">
+    <div class="admin-modal-card">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">문의 답변 등록</h2>
+            <button type="button" class="admin-modal-close" onclick="closeAnswerModal()">✕</button>
+        </div>
+        <input type="hidden" id="answerInquiryId"/>
+        <div id="answerInquiryInfo" class="admin-modal-info"></div>
+        <textarea id="answerContent" class="admin-answer-area" placeholder="관리자 답변을 입력해주세요."></textarea>
+        <div class="admin-modal-actions">
+            <button type="button" class="admin-modal-btn cancel" onclick="closeAnswerModal()">취소</button>
+            <button type="button" class="admin-modal-btn submit" onclick="submitAnswer()">답변 등록하기</button>
+        </div>
+    </div>
+</div>
+
+<div id="inquiryDetailModal" class="admin-modal" onclick="closeInquiryDetailModal()">
+    <div class="admin-modal-card admin-detail-modal-card" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title" id="inquiryDetailTitle">문의 상세보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeInquiryDetailModal()">✕</button>
+        </div>
+        <div id="inquiryDetailBadges" class="admin-inq-badges"></div>
+        <div id="inquiryDetailInfo" class="admin-detail-grid"></div>
+        <div class="admin-detail-section">
+            <div class="admin-detail-section-title">문의 내용</div>
+            <div id="inquiryDetailContent" class="admin-detail-text"></div>
+            <div id="inquiryDetailImage" class="admin-detail-image"></div>
+        </div>
+        <div class="admin-detail-section answer">
+            <div class="admin-detail-section-title">관리자 답변</div>
+            <div id="inquiryDetailAnswer" class="admin-detail-text"></div>
+        </div>
+        <div id="inquiryDetailActions" class="admin-modal-actions"></div>
+    </div>
+</div>
+
+<div id="inquiryImageModal" class="admin-modal" onclick="closeInquiryImageModal()">
+    <div class="admin-modal-card" style="max-width:900px;text-align:center" onclick="event.stopPropagation()">
+        <div class="admin-modal-head">
+            <h2 class="admin-modal-title">첨부 이미지 보기</h2>
+            <button type="button" class="admin-modal-close" onclick="closeInquiryImageModal()">✕</button>
+        </div>
+        <img id="inquiryImageModalImg" src="" alt="문의 첨부 이미지" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:14px">
+    </div>
+</div>
+
+
+<script>
+    var adminId=1;
+    var adminInquiryStatusFilter='all';
+    var adminInquiryRoleFilter='all';
+    var adminInquiryCategoryFilter='all';
+    var cachedAdminInquiries=[];
+    var initialInquiryId=null;
+    var initialInquiryHandled=false;
+
+
+    function getAdminInquiryCookieValue(name){
+        var cookies=document.cookie?document.cookie.split('; '):[];
+        for(var i=0;i<cookies.length;i++){
+            var parts=cookies[i].split('=');
+            var key=decodeURIComponent(parts.shift());
+            if(key===name){return decodeURIComponent(parts.join('='));}
+        }
+        return null;
+    }
+
+    function getAdminInquiryAuthToken(){
+        return localStorage.getItem('token')
+            || sessionStorage.getItem('token')
+            || getAdminInquiryCookieValue('jwt');
+    }
+
+    function getAdminInquiryAuthHeaders(extraHeaders){
+        var headers=extraHeaders||{};
+        var token=getAdminInquiryAuthToken();
+        if(token){headers.Authorization='Bearer '+token;}
+        return headers;
+    }
+
+    document.addEventListener('DOMContentLoaded',function(){
+        var params=new URLSearchParams(location.search);
+        initialInquiryId=params.get('inquiryId')||params.get('id');
+        loadAdminInquiries();
+        setupAdminInquiryModalEvents();
+    });
+
+    async function loadAdminInquiries(){
+        var list=document.getElementById('adminInquiryList');
+        list.innerHTML='<div class="admin-inq-empty">문의 내역을 불러오는 중입니다.</div>';
+
+        try{
+            var url='/api/admin/inquiries';
+
+            var response=await fetch(url,{
+                headers:getAdminInquiryAuthHeaders(),
+                credentials:'same-origin'
+            });
+            var data=await response.json();
+
+            if(!response.ok){
+                list.innerHTML='<div class="admin-inq-empty">'+escapeHtml(data.message||'문의 내역을 불러오지 못했습니다.')+'</div>';
+                return;
+            }
+
+            cachedAdminInquiries=Array.isArray(data)?sortInquiryList(data):[];
+            renderAdminInquiries();
+            openInitialInquiryAnswerIfNeeded();
+        }catch(error){
+            list.innerHTML='<div class="admin-inq-empty">서버 연결에 실패했습니다.</div>';
+        }
+    }
+
+    function renderAdminInquiries(){
+        var list=document.getElementById('adminInquiryList');
+        var data=cachedAdminInquiries.filter(function(item){
+            var status=String(item.status||'').toLowerCase();
+            var role=String(item.userRole||'').toUpperCase();
+            var category=String(item.category||'').toLowerCase();
+
+            if(adminInquiryStatusFilter!=='all' && status!==adminInquiryStatusFilter) return false;
+            if(adminInquiryRoleFilter!=='all' && role!==adminInquiryRoleFilter) return false;
+            if(adminInquiryCategoryFilter!=='all' && category!==adminInquiryCategoryFilter) return false;
+            return true;
+        });
+
+        if(data.length===0){
+            list.innerHTML='<div class="admin-inq-empty">등록된 문의가 없습니다.</div>';
+            return;
+        }
+
+        list.innerHTML=data.map(function(item){
+            var statusClass=item.status==='answered'?'answered':'pending';
+            var userLabel=getInquiryUserLabel(item);
+
+            var imageHtml=item.imageUrl
+                ? '<div style="margin-top:12px;background:#fff;border:1.5px solid var(--beige);border-radius:14px;padding:10px;text-align:center">'
+                + '<img src="' + escapeHtml(item.imageUrl) + '" alt="문의 첨부 이미지" style="max-width:100%;max-height:220px;object-fit:contain;border-radius:10px;cursor:zoom-in" onclick="event.stopPropagation();openInquiryImageModal(\'' + escapeJsString(item.imageUrl) + '\')" onerror="this.parentElement.style.display=\'none\'">'
+                + '</div>'
+                : '';
+
+            var answerButton=item.status==='answered'
+                ? '<button type="button" class="admin-inq-btn disabled" onclick="event.stopPropagation()">답변 완료</button>'
+                : '<button type="button" class="admin-inq-btn answer" onclick="event.stopPropagation();openAnswerModal('+item.id+')">답변하기</button>';
+
+            return '<div id="admin-inq-card-'+item.id+'" class="admin-inq-card" onclick="openInquiryDetailModal('+item.id+')">'
+                +'<div class="admin-inq-top">'
+                +'<div>'
+                +'<div class="admin-inq-badges">'
+                +'<span class="admin-inq-badge category">'+escapeHtml(getInquiryCategoryText(item))+'</span>'
+                +'<span class="admin-inq-badge '+statusClass+'">'+escapeHtml(item.statusText||'답변 대기')+'</span>'
+                +'<span class="admin-inq-id">문의 ID '+escapeHtml(item.id)+'</span>'
+                +'</div>'
+                +'<div class="admin-inq-title2">'+escapeHtml(item.title)+'</div>'
+                +'<div class="admin-inq-meta">'
+                +'<span>작성자 ID '+escapeHtml(userLabel)+'</span>'
+                +'<span>'+escapeHtml(formatAdminInquiryTarget(item))+'</span>'
+                +'</div>'
+                +'<div class="admin-inq-time-row">'
+                +'<span class="admin-inq-time-chip">작성일 '+escapeHtml(formatAdminDateTime(item.createdAt))+'</span>'
+                +'<span class="admin-inq-time-chip">답변일 '+escapeHtml(getInquiryAnsweredDate(item))+'</span>'
+                +'</div>'
+                +'</div>'
+                +'</div>'
+                +'<div class="admin-inq-content">'+escapeHtml(item.content)+'</div>'
+                +imageHtml
+                +'<div class="admin-inq-actions">'
+                +answerButton
+                +'</div>'
+                +'</div>';
+        }).join('');
+    }
+
+    function openInitialInquiryAnswerIfNeeded(){
+        if(!initialInquiryId||initialInquiryHandled){
+            return;
+        }
+
+        var targetId=Number(initialInquiryId);
+        var item=cachedAdminInquiries.find(function(inquiry){
+            return Number(inquiry.id)===targetId;
+        });
+
+        if(!item){
+            return;
+        }
+
+        initialInquiryHandled=true;
+
+        var card=document.getElementById('admin-inq-card-'+targetId);
+        if(card){
+            card.scrollIntoView({behavior:'smooth',block:'center'});
+        }
+
+        if(String(item.status||'').toLowerCase()==='answered'){
+            setTimeout(function(){
+                openInquiryDetailModal(targetId);
+            },150);
+            return;
+        }
+
+        setTimeout(function(){
+            openAnswerModal(targetId);
+        },150);
+    }
+
+    function setAdminInquiryFilters(){
+        var statusSelect=document.getElementById('adminInquiryStatusSelect');
+        var roleSelect=document.getElementById('adminInquiryRoleSelect');
+        var categorySelect=document.getElementById('adminInquiryCategorySelect');
+
+        adminInquiryStatusFilter=statusSelect?statusSelect.value:'all';
+        adminInquiryRoleFilter=roleSelect?roleSelect.value:'all';
+        adminInquiryCategoryFilter=categorySelect?categorySelect.value:'all';
+        renderAdminInquiries();
+    }
+
+    function openInquiryDetailModal(inquiryId){
+        var item=findInquiry(inquiryId);
+
+        if(!item){
+            showAdminToast('문의 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        var statusClass=item.status==='answered'?'answered':'pending';
+        var isAnswered=String(item.status||'').toLowerCase()==='answered';
+
+        document.getElementById('inquiryDetailTitle').textContent=item.title||'문의 상세보기';
+        document.getElementById('inquiryDetailBadges').innerHTML=
+            '<span class="admin-inq-badge category">'+escapeHtml(getInquiryCategoryText(item))+'</span>'
+            +'<span class="admin-inq-badge '+statusClass+'">'+escapeHtml(item.statusText||'답변 대기')+'</span>';
+
+        document.getElementById('inquiryDetailInfo').innerHTML=
+            detailInfoItem('문의 ID',item.id)
+            +detailInfoItem('작성자 ID',getInquiryUserLabel(item))
+            +detailInfoItem('카테고리',getInquiryCategoryText(item))
+            +detailInfoItem('주문 ID / 상품 ID',formatAdminInquiryTarget(item))
+            +detailInfoItem('작성일',formatAdminDateTime(item.createdAt))
+            +detailInfoItem('답변일',getInquiryAnsweredDate(item));
+
+        document.getElementById('inquiryDetailContent').textContent=item.content||'-';
+        document.getElementById('inquiryDetailAnswer').textContent=item.answer||'아직 답변이 등록되지 않았습니다.';
+        document.getElementById('inquiryDetailImage').innerHTML=item.imageUrl
+            ? '<img src="'+escapeHtml(item.imageUrl)+'" alt="문의 첨부 이미지" onclick="openInquiryImageModal(\''+escapeJsString(item.imageUrl)+'\')" onerror="this.parentElement.style.display=\'none\'">'
+            : '';
+
+        document.getElementById('inquiryDetailActions').innerHTML=isAnswered
+            ? '<button type="button" class="admin-modal-btn cancel" onclick="closeInquiryDetailModal()">닫기</button>'
+            : '<button type="button" class="admin-modal-btn submit" onclick="closeInquiryDetailModal();openAnswerModal('+item.id+')">답변하기</button><button type="button" class="admin-modal-btn cancel" onclick="closeInquiryDetailModal()">닫기</button>';
+
+        document.getElementById('inquiryDetailModal').style.display='flex';
+    }
+
+    function closeInquiryDetailModal(){
+        document.getElementById('inquiryDetailModal').style.display='none';
+    }
+
+    function detailInfoItem(label,value){
+        return '<div class="admin-detail-info">'
+            +'<div class="admin-detail-label">'+escapeHtml(label)+'</div>'
+            +'<div class="admin-detail-value">'+escapeHtml(value||'-')+'</div>'
+            +'</div>';
+    }
+
+    function openAnswerModal(inquiryId){
+        var item=findInquiry(inquiryId);
+
+        if(!item){
+            showAdminToast('문의 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        document.getElementById('answerInquiryId').value=item.id;
+        document.getElementById('answerContent').value=item.answer||'';
+
+        var modalImageHtml = item.imageUrl
+            ? '<br><br><strong>첨부 이미지</strong><br>'
+            + '<img src="' + escapeHtml(item.imageUrl) + '" alt="문의 첨부 이미지" '
+            + 'onclick="openInquiryImageModal(\'' + escapeJsString(item.imageUrl) + '\')" '
+            + 'style="max-width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-top:8px;cursor:pointer;border:1.5px solid var(--beige)" '
+            + 'onerror="this.style.display=\'none\'">'
+            : '';
+
+        document.getElementById('answerInquiryInfo').innerHTML =
+            '<strong>문의 ID</strong> ' + escapeHtml(item.id)
+            + '<br><strong>작성자 ID</strong> ' + escapeHtml(getInquiryUserLabel(item))
+            + '<br><strong>카테고리</strong> ' + escapeHtml(getInquiryCategoryText(item))
+            + '<br><strong>주문 ID / 상품 ID</strong> ' + escapeHtml(formatAdminInquiryTarget(item))
+            + '<br><strong>작성시간</strong> ' + escapeHtml(formatAdminDateTime(item.createdAt))
+            + '<br><strong>답변시간</strong> ' + escapeHtml(getInquiryAnsweredDate(item))
+            + '<br><br><strong>문의 제목</strong><br>' + escapeHtml(item.title)
+            + '<br><br><strong>문의 내용</strong><br>' + escapeHtml(item.content)
+            + modalImageHtml;
+
+        document.getElementById('answerModal').style.display='flex';
+    }
+
+    function closeAnswerModal(){
+        document.getElementById('answerModal').style.display='none';
+    }
+
+    async function submitAnswer(){
+        var inquiryId=document.getElementById('answerInquiryId').value;
+        var answer=document.getElementById('answerContent').value.trim();
+
+        if(!answer){
+            showAdminToast('답변 내용을 입력해주세요.');
+            return;
+        }
+
+        var body={
+            adminId:adminId,
+            answer:answer
+        };
+
+        try{
+            var response=await fetch('/api/admin/inquiries/'+inquiryId+'/answer',{
+                method:'POST',
+                headers:getAdminInquiryAuthHeaders({'Content-Type':'application/json'}),
+                credentials:'same-origin',
+                body:JSON.stringify(body)
+            });
+
+            var data=await response.json();
+
+            if(!response.ok){
+                showAdminToast(data.message||'답변 등록에 실패했습니다.');
+                return;
+            }
+
+            closeAnswerModal();
+            showAdminToast('답변이 등록되었습니다.');
+            await loadAdminInquiries();
+        }catch(error){
+            showAdminToast('서버 연결에 실패했습니다.');
+        }
+    }
+
+    function findInquiry(inquiryId){
+        return cachedAdminInquiries.find(function(inquiry){
+            return Number(inquiry.id)===Number(inquiryId);
+        });
+    }
+
+    function sortInquiryList(list){
+        return list.slice().sort(function(a,b){
+            var aPending=String(a.status||'').toLowerCase()==='pending'?0:1;
+            var bPending=String(b.status||'').toLowerCase()==='pending'?0:1;
+
+            if(aPending!==bPending){
+                return aPending-bPending;
+            }
+
+            return getTimeValue(b.createdAt)-getTimeValue(a.createdAt);
+        });
+    }
+
+    function getInquiryRoleText(role){
+        var value=String(role||'').toUpperCase();
+        if(value==='BUYER')return '구매자';
+        if(value==='SELLER')return '판매자';
+        if(value==='ADMIN')return '관리자';
+        return value||'-';
+    }
+
+    function getInquiryUserLabel(item){
+        return String(item.userId||'-')+' ('+getInquiryRoleText(item.userRole||item.userRoleText)+')';
+    }
+
+
+    function formatAdminInquiryTarget(item){
+        var orderId=item&&item.orderId;
+        var productId=item&&item.productId;
+
+        if(productId&&orderId){
+            return '주문 ID '+orderId+' / 상품 ID '+productId;
+        }
+
+        if(productId){
+            return '상품 ID '+productId;
+        }
+
+        if(orderId){
+            return '주문 ID '+orderId;
+        }
+
+        return '-';
+    }
+
+    function getInquiryCategoryText(item){
+        var categoryText=item.categoryText;
+        if(categoryText)return categoryText;
+        switch(String(item.category||'').toLowerCase()){
+            case 'delivery':return '배송 문의';
+            case 'refund':return '환불/교환 문의';
+            case 'product':return '상품 문의';
+            case 'order':return '주문/결제 문의';
+            case 'etc':return '기타 문의';
+            default:return item.category||'기타 문의';
+        }
+    }
+
+    function getInquiryTargetLabel(item){
+        var role=String(item.userRole||item.userRoleText||'').toUpperCase();
+
+        if(role.indexOf('SELLER')>=0||role.indexOf('판매자')>=0){
+            return '상품 ID';
+        }
+
+        if(role.indexOf('BUYER')>=0||role.indexOf('구매자')>=0){
+            return '주문 ID';
+        }
+
+        if(item.productId){
+            return '상품 ID';
+        }
+
+        return '주문 ID';
+    }
+
+    function getInquiryTargetValue(item){
+        return getInquiryTargetLabel(item)==='상품 ID'
+            ? (item.productId||'-')
+            : (item.orderId||'-');
+    }
+
+    function getInquiryAnsweredDate(item){
+        return String(item.status||'').toLowerCase()==='answered'
+            ? formatAdminDateTime(item.answeredAt)
+            : '-';
+    }
+
+    function formatAdminDateTime(value){
+        if(!value)return'-';
+        var text=String(value).replace('T',' ');
+        return text.length>=16?text.substring(0,16):text;
+    }
+
+    function getTimeValue(value){
+        if(!value)return 0;
+        var time=new Date(value).getTime();
+        return isNaN(time)?0:time;
+    }
+
+    function escapeHtml(value){
+        if(value===null||value===undefined)return'';
+        return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+    }
+
+    function showAdminToast(message){
+        if(typeof showToast==='function'){showToast(message);return}
+        alert(message);
+    }
+
+    function openInquiryImageModal(imageUrl){
+        var modal=document.getElementById('inquiryImageModal');
+        var image=document.getElementById('inquiryImageModalImg');
+
+        if(!modal||!image){
+            return;
+        }
+
+        image.src=imageUrl;
+        modal.style.display='flex';
+    }
+
+    function closeInquiryImageModal(){
+        var modal=document.getElementById('inquiryImageModal');
+        var image=document.getElementById('inquiryImageModalImg');
+
+        if(image){
+            image.src='';
+        }
+
+        if(modal){
+            modal.style.display='none';
+        }
+    }
+
+    function setupAdminInquiryModalEvents(){
+        document.addEventListener('keydown',function(event){
+            if(event.key==='Escape'){
+                closeInquiryImageModal();
+                closeInquiryDetailModal();
+                closeAnswerModal();
+            }
+        });
+    }
+
+    function escapeJsString(value){
+        if(value===null||value===undefined){
+            return '';
+        }
+
+        return String(value)
+            .replaceAll('\\','\\\\')
+            .replaceAll("'","\\'")
+            .replaceAll('\n',' ')
+            .replaceAll('\r',' ');
+    }
+</script>
+</body>
+</html>

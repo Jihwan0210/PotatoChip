@@ -43,6 +43,9 @@ public class Review {
     @Column(name = "repurchase_intent", nullable = false)
     private Boolean repurchaseIntent;
 
+    @Column(name = "is_anonymous", nullable = false)
+    private Boolean isAnonymous;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
@@ -52,6 +55,9 @@ public class Review {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean isHidden;
+
     @Builder
     public Review(
             Product product,
@@ -60,7 +66,8 @@ public class Review {
             Integer rating,
             String content,
             String imageUrl,
-            Boolean repurchaseIntent
+            Boolean repurchaseIntent,
+            Boolean isAnonymous
     ) {
         this.product = product;
         this.userId = userId;
@@ -68,10 +75,12 @@ public class Review {
         this.rating = rating;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.repurchaseIntent = repurchaseIntent;
+        this.repurchaseIntent = Boolean.TRUE.equals(repurchaseIntent);
+        this.isAnonymous = Boolean.TRUE.equals(isAnonymous);
         this.isActive = true;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.isHidden = false;
     }
 
     public Long getProductId() {
@@ -82,16 +91,61 @@ public class Review {
         return this.userId.equals(userId);
     }
 
-    public void updateReview(Integer rating, String content, String imageUrl, Boolean repurchaseIntent) {
+    public void updateReview(
+            Integer rating,
+            String content,
+            String imageUrl,
+            Boolean repurchaseIntent,
+            Boolean isAnonymous
+    ) {
         this.rating = rating;
         this.content = content;
         this.imageUrl = imageUrl;
-        this.repurchaseIntent = repurchaseIntent;
+        this.repurchaseIntent = Boolean.TRUE.equals(repurchaseIntent);
+        this.isAnonymous = Boolean.TRUE.equals(isAnonymous);
         this.updatedAt = LocalDateTime.now();
     }
 
     public void deactivate() {
         this.isActive = false;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.repurchaseIntent == null) {
+            this.repurchaseIntent = false;
+        }
+
+        if (this.isAnonymous == null) {
+            this.isAnonymous = false;
+        }
+
+        if (this.isActive == null) {
+            this.isActive = true;
+        }
+
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        if (this.isHidden == null) {
+            this.isHidden = false;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void hide() {
+        this.isHidden = Boolean.TRUE;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void show() {
+        this.isHidden = false;
         this.updatedAt = LocalDateTime.now();
     }
 }

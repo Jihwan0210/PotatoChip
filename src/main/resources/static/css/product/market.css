@@ -1,0 +1,560 @@
+/* ═══════════════════════════════
+   market.css  —  못난이 농작물 마켓 전용
+   (style.css 공통 + 인라인 스타일 통합)
+═══════════════════════════════ */
+
+/* ── 알림 팝업 ── */
+#notifPopup {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 320px;
+    background: #fff;
+    border: 1.5px solid var(--sand);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(42,30,6,.14);
+    z-index: 999;
+    overflow: hidden;
+    display: none;
+    animation: fadeDown .18s ease;
+}
+.notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--sand);
+}
+.notif-header-title {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+.notif-read-all {
+    font-size: .72rem;
+    color: var(--green);
+    cursor: pointer;
+}
+
+/* ── 마켓 헤더 ── */
+.mkt-header {
+    background: #fff;
+    border-bottom: 1.5px solid var(--sand);
+    padding: 28px 5% 0;
+    margin-top: 64px;
+}
+.mkt-header-label {
+    font-size: .65rem;
+    color: var(--green);
+    letter-spacing: 1px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+.mkt-header-title {
+    font-family: Gaegu, cursive;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 14px;
+}
+
+/* ── 검색 셀렉트 ── */
+.mkt-search-select {
+    border: 1.5px solid var(--sand);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: .78rem;
+    color: var(--mid);
+    background: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    flex-shrink: 0;
+}
+
+/* ── 검색바 ── */
+.mkt-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 600px;
+    margin-bottom: 14px;
+}
+.mkt-search-inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--beige2);
+    border: 1.5px solid var(--sand);
+    border-radius: 10px;
+    padding: 9px 14px;
+}
+.mkt-search-icon {
+    font-size: .85rem;
+    color: var(--muted);
+}
+#mktSearch {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: .82rem;
+    color: var(--dark);
+    background: transparent;
+    font-family: inherit;
+}
+#mktSearchClear {
+    font-size: .85rem;
+    color: var(--muted);
+    cursor: pointer;
+    display: none;
+}
+.mkt-search-btn {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+/* ── 카테고리 탭 ── */
+.mkt-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: -1.5px;
+}
+.mkt-tab {
+    padding: 12px 0;
+    text-align: center;
+    font-size: .8rem;
+    cursor: pointer;
+}
+.mkt-tab.active {
+    border-bottom: 2px solid var(--green);
+    font-weight: 500;
+    color: var(--dark);
+}
+.mkt-tab:not(.active) {
+    color: var(--muted);
+}
+.mkt-tab-rec {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* ── 맞춤추천 팝업 ── */
+#recPopup {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    width: 300px;
+    background: #fff;
+    border: 1.5px solid var(--sand);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(42,30,6,.16);
+    z-index: 9990;
+    overflow: hidden;
+}
+.rec-popup-header {
+    background: linear-gradient(135deg, var(--green), #5A9A30);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.rec-popup-title {
+    font-size: .78rem;
+    font-weight: 700;
+    color: #fff;
+    font-family: Gaegu, cursive;
+}
+.rec-popup-sub {
+    font-size: .65rem;
+    color: rgba(255,255,255,.7);
+    margin-top: 2px;
+}
+.rec-popup-close {
+    cursor: pointer;
+    color: rgba(255,255,255,.8);
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.rec-popup-body {
+    padding: 12px 14px;
+}
+.rec-section-label {
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--amber);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.rec-item {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--sand);
+    cursor: pointer;
+    align-items: center;
+}
+.rec-item:last-of-type {
+    border-bottom: none;
+}
+.rec-item-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.rec-item-thumb.gn { background: linear-gradient(145deg, var(--gp), var(--gl)); }
+.rec-item-thumb.ap { background: linear-gradient(145deg, #FEF2E8, #F5C4A0); }
+.rec-item-info {
+    flex: 1;
+    min-width: 0;
+}
+.rec-item-tag {
+    font-size: .65rem;
+    color: var(--green);
+    font-weight: 500;
+    margin-bottom: 1px;
+}
+.rec-item-name {
+    font-size: .76rem;
+    font-weight: 500;
+    color: var(--dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rec-item-farm {
+    font-size: .65rem;
+    color: var(--muted);
+}
+.rec-item-price-wrap {
+    text-align: right;
+    flex-shrink: 0;
+}
+.rec-item-price {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--amber);
+}
+.rec-item-og {
+    font-size: .62rem;
+    color: var(--muted);
+    text-decoration: line-through;
+}
+.rec-popup-footer {
+    padding: 0 14px 12px;
+}
+.rec-popup-footer button {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 9px;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ── 상품 목록 헤더 (정렬/카운트) ── */
+.mkt-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pgrid-count {
+    font-size: .76rem;
+    color: var(--muted);
+}
+.sort-group {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid var(--sand);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.sort-btn {
+    font-size: .74rem;
+    cursor: pointer;
+    padding: 5px 11px;
+    border-right: 1px solid var(--sand);
+    color: var(--muted);
+}
+.sort-btn:last-child { border-right: none; }
+.sort-btn.active {
+    font-weight: 700;
+    color: var(--green);
+    background: var(--gp);
+}
+.sort-btn:first-child { border-radius: 6px 0 0 6px; }
+.sort-btn:last-child  { border-radius: 0 6px 6px 0; }
+
+/* ── 상품등록 버튼 ── */
+.btn-product-add {
+    font-size: .74rem;
+    cursor: pointer;
+    padding: 5px 11px;
+    margin-left: 8px;
+    border: 1px solid var(--green);
+    background: var(--green);
+    color: #fff;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+/* ── 상품 그리드 컨테이너 ── */
+#mkt-content-0 {
+    padding: 22px 5%;
+}
+
+/* ── 이번주 랭킹 탭 ── */
+#mkt-content-1 {
+    display: none;
+    padding: 28px 5%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.rank-title {
+    font-family: Gaegu, cursive;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 18px;
+}
+.rank-table {
+    background: #fff;
+    border: 1.5px solid var(--sand);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.rank-table-head {
+    display: grid;
+    grid-template-columns: 52px 1fr 100px 100px 90px;
+    align-items: center;
+    padding: 11px 18px;
+    background: var(--beige2);
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 1px solid var(--sand);
+}
+.rank-table-head .col-center { text-align: center; }
+.rank-table-head .col-right  { text-align: right; }
+.rank-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 100px 100px 90px;
+    align-items: center;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--sand);
+    cursor: pointer;
+    transition: background .15s;
+}
+.rank-row:last-child { border-bottom: none; }
+.rank-row:hover { background: var(--beige2); }
+.rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.rank-badge.gold   { background: var(--amber); }
+.rank-badge.silver { background: #B0B8C1; }
+.rank-badge.bronze { background: #C89B6E; }
+.rank-badge.etc    { text-align: center; font-size: .84rem; font-weight: 700; color: var(--muted); background: none; }
+.rank-product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rank-product-emoji { font-size: 1.5rem; }
+.rank-product-name {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+.rank-product-farm {
+    font-size: .7rem;
+    color: var(--muted);
+}
+.rank-count {
+    text-align: center;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--green);
+}
+.rank-price {
+    text-align: right;
+    font-size: .84rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+.rank-cart { text-align: center; }
+.rank-cart button {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: .74rem;
+    cursor: pointer;
+}
+
+/* ── AI 추천 탭 ── */
+#mkt-content-2 {
+    display: none;
+    padding: 28px 5%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.ai-rec-banner {
+    background: linear-gradient(135deg, var(--gp), #f0fce8);
+    border: 1.5px solid var(--gl);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.ai-rec-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.ai-rec-title {
+    font-family: Gaegu, cursive;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 3px;
+}
+.ai-rec-sub {
+    font-size: .78rem;
+    color: var(--mid);
+}
+.ai-rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+/* ── 페이지네이션 ── */
+.mpg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 32px;
+    padding-bottom: 32px;
+}
+
+/* ── 찜 버튼 ── */
+
+/* ── 정렬 그룹 (새 클래스) ── */
+.mkt-sort-group {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid var(--sand);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.mkt-sort-btn {
+    font-size: .74rem;
+    cursor: pointer;
+    padding: 7px 12px;
+    border-right: 1px solid var(--sand);
+    color: var(--muted);
+    background: transparent;
+    user-select: none;
+    white-space: nowrap;
+}
+.mkt-sort-btn:last-child { border-right: none; }
+.mkt-sort-btn:first-child { border-radius: 6px 0 0 6px; }
+.mkt-sort-btn:last-child  { border-radius: 0 6px 6px 0; }
+
+/* ════════════════════════════════════════
+   모바일 반응형 — 768px
+════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* 헤더 */
+  .mkt-header { padding: 18px 4% 0; }
+  .mkt-header-title { font-size: 1.4rem; margin-bottom: 10px; }
+
+  /* 검색바: 셀렉트 전체 너비 → 아래 줄로 이동 */
+  .mkt-search-wrap { flex-wrap: wrap; max-width: 100%; }
+  .mkt-search-select { width: 100%; }
+  .mkt-search-inner { flex: 1; }
+
+  /* 카테고리 탭 글자 */
+  .mkt-tab { font-size: .75rem; padding: 11px 0; }
+
+  /* 상품 목록 헤더: 카운트 + 정렬 세로 정렬 */
+  .mkt-list-header { flex-direction: column; align-items: stretch; }
+  .mkt-sort-group  { width: 100%; }
+  .mkt-sort-btn    { flex: 1; text-align: center; padding: 8px 4px; }
+
+  /* 인기상품 팝업: 화면 안으로 고정 */
+  #recPopup {
+    right: 12px !important;
+    bottom: 72px !important;
+    left: 12px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    max-height: 68vh !important;
+    resize: none !important;
+  }
+
+  /* AI 추천 그리드: 4열 → 2열 */
+  #aiRecommendationGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* AI 탭 패딩 */
+  #mkt-content-1 { padding: 20px 4% !important; }
+}
+
+@media (max-width: 480px) {
+  .mkt-header { padding: 14px 4% 0; }
+  .mkt-header-title { font-size: 1.2rem; }
+  .mkt-tab { font-size: .72rem; }
+  .mkt-sort-btn { font-size: .7rem; }
+
+  /* AI 그리드 1열로 */
+  #aiRecommendationGrid {
+    grid-template-columns: 1fr !important;
+  }
+}
+

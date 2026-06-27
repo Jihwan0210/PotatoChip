@@ -1,523 +1,719 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>상품 등록</title>
-
-    <link rel="stylesheet" href="/css/style.css">
-
+    <title>상품 등록 | 못난이 농작물</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
     <style>
-        .create-wrap{
-            min-height:100vh;
-            background:var(--beige2);
-            padding:110px 7% 80px;
+        html { font-size: 20px; }
+        body { font-size: 1rem; line-height: 1.6; }
+
+        /* ── 페이지 래퍼 ── */
+        .cr-page { padding-top: 64px; min-height: 100vh; background: var(--beige2); }
+
+        /* ── 상단 히어로 ── */
+        .cr-hero {
+            background: var(--dark);
+            padding: 50px 7% 48px;
+            position: relative;
+            overflow: hidden;
+        }
+        .cr-hero-ring1 {
+            position: absolute; top: -60px; right: 6%;
+            width: 220px; height: 220px;
+            border: 40px solid rgba(255,255,255,.04);
+            border-radius: 50%;
+        }
+        .cr-hero-ring2 {
+            position: absolute; bottom: -80px; right: 22%;
+            width: 160px; height: 160px;
+            border: 30px solid rgba(123,191,69,.08);
+            border-radius: 50%;
+        }
+        .cr-hero-deco {
+            position: absolute; right: 8%; top: 50%;
+            transform: translateY(-50%);
+            font-size: 7.5rem; opacity: .08;
+            pointer-events: none; user-select: none;
+        }
+        .cr-hero-inner { position: relative; z-index: 1; max-width: 560px; }
+        .cr-hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(123,191,69,.18);
+            border: 1px solid rgba(123,191,69,.35);
+            color: var(--gm);
+            padding: 5px 14px; border-radius: 999px;
+            font-size: .72rem; font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .cr-hero-title {
+            font-family: 'Gaegu', cursive;
+            font-size: clamp(2rem, 4vw, 2.9rem);
+            font-weight: 700; color: #fff;
+            line-height: 1.18; margin-bottom: 12px;
+        }
+        .cr-hero-sub { font-size: .88rem; color: rgba(255,255,255,.6); line-height: 1.7; }
+
+        /* ── 본문 그리드 ── */
+        .cr-content { padding: 32px 7% 80px; }
+        .cr-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+            align-items: start;
         }
 
-        .create-top{
-            margin-bottom:30px;
+        /* ── 스텝 카드 ── */
+        .cr-step {
+            background: #fff;
+            border-radius: 20px;
+            border: 1.5px solid var(--beige);
+            box-shadow: 0 4px 22px rgba(42,30,6,.05);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        .cr-step-hd {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px 24px;
+            background: var(--beige3);
+            border-bottom: 1.5px solid var(--beige);
+        }
+        .cr-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--green); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .84rem; font-weight: 700; flex-shrink: 0;
+        }
+        .cr-step-ttl { font-weight: 700; font-size: .92rem; color: var(--dark); }
+        .cr-step-bd { padding: 22px 24px; }
+
+        /* ── 폼 요소 ── */
+        .fg { margin-bottom: 16px; }
+        .fg:last-child { margin-bottom: 0; }
+        .fg > label {
+            display: block; margin-bottom: 7px;
+            font-size: .76rem; font-weight: 700; color: var(--mid);
+        }
+        .fi, .fs, .fta {
+            width: 100%; padding: 12px 14px;
+            border: 1.5px solid var(--beige);
+            border-radius: 11px; background: #fff;
+            font-family: inherit; font-size: .84rem;
+            color: var(--dark); outline: none;
+            transition: border-color .2s;
+        }
+        .fi:focus, .fs:focus, .fta:focus { border-color: var(--green); }
+        .fta { resize: none; min-height: 130px; }
+        .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .hint { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+        /* ── 이미지 업로드 ── */
+        .img-upload {
+            border: 2px dashed var(--gl);
+            border-radius: 16px;
+            background: var(--gp);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; cursor: pointer;
+            transition: border-color .2s, background .2s;
+            padding: 28px 20px; gap: 6px;
+        }
+        .img-upload:hover { border-color: var(--green); background: #edfad8; }
+        .img-upload-sm { padding: 16px 20px; }
+        .img-upload-icon { font-size: 2.8rem; }
+        .img-upload-ttl { font-size: .88rem; font-weight: 700; color: var(--dark); }
+        .img-upload-sub { font-size: .7rem; color: var(--muted); }
+
+        /* ── AI 토글 ── */
+        .ai-box {
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(100deg,#f0fdf4,#e8f6d4);
+            border: 1.5px solid #bbf7d0; border-radius: 12px;
+            padding: 11px 15px; margin-bottom: 14px;
+        }
+        .ai-lbl { font-size: .82rem; font-weight: 600; color: #15803d; }
+
+        /* ── 픽업 박스 ── */
+        .pickup-box {
+            background: var(--gp); border: 1.5px solid var(--gl);
+            border-radius: 14px; padding: 16px 18px; margin-top: 4px;
+        }
+        .pickup-box .fg { margin-bottom: 14px; }
+        .pickup-box .fg:last-child { margin-bottom: 0; }
+
+        /* ── 버튼 ── */
+        .btn-row { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+        .btn-back {
+            border: none; background: var(--beige); color: var(--mid);
+            border-radius: 12px; padding: 13px 22px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            font-size: .86rem; transition: background .2s;
+        }
+        .btn-back:hover { background: #ede7da; }
+        .btn-reg {
+            border: none; background: var(--green); color: #fff;
+            border-radius: 12px; padding: 13px 28px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            font-size: .86rem; letter-spacing: .02em;
+            box-shadow: 0 6px 20px rgba(123,191,69,.3);
+            transition: background .2s, transform .1s;
+        }
+        .btn-reg:hover { background: #5ea52a; }
+        .btn-reg:active { transform: scale(.97); }
+        .btn-addr {
+            border: 1.5px solid var(--green); background: #fff; color: var(--green);
+            border-radius: 10px; padding: 12px 16px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            font-size: .82rem; white-space: nowrap; transition: background .2s;
+        }
+        .btn-addr:hover { background: var(--gp); }
+
+        /* ── 미리보기 패널 ── */
+        .cr-preview-wrap {
+            position: sticky; top: 82px;
+        }
+        .cr-preview-lbl {
+            font-size: .72rem; font-weight: 700; color: var(--muted);
+            letter-spacing: .06em; text-transform: uppercase;
+            margin-bottom: 10px; padding-left: 4px;
+        }
+        .cr-preview-card {
+            background: #fff; border-radius: 20px;
+            border: 1.5px solid var(--beige);
+            box-shadow: 0 4px 22px rgba(42,30,6,.07);
+            overflow: hidden;
+        }
+        .pv-img {
+            height: 220px;
+            background: linear-gradient(145deg, var(--gp), var(--gl));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 5rem; position: relative;
+        }
+        .pv-live-tag {
+            position: absolute; top: 12px; right: 12px;
+            background: var(--green); color: #fff;
+            font-size: .62rem; font-weight: 700;
+            padding: 3px 9px; border-radius: 6px;
+        }
+        .pv-body { padding: 20px; }
+        .pv-origin { font-size: .7rem; color: var(--muted); margin-bottom: 5px; }
+        .pv-name {
+            font-family: 'Gaegu', cursive;
+            font-size: 1.3rem; font-weight: 700;
+            color: var(--dark); margin-bottom: 10px; line-height: 1.3;
+        }
+        .pv-price { display: flex; align-items: baseline; gap: 7px; margin-bottom: 10px; }
+        .pv-rate { color: #D05018; font-size: .88rem; font-weight: 700; }
+        .pv-main { font-size: 1.45rem; font-weight: 700; color: var(--dark); }
+        .pv-desc {
+            font-size: .8rem; color: var(--mid); line-height: 1.7;
+            margin-bottom: 16px; display: -webkit-box;
+            -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .pv-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        .pv-chip {
+            background: var(--gp); color: var(--green);
+            padding: 5px 10px; border-radius: 999px;
+            font-size: .67rem; font-weight: 700;
         }
 
-        .create-badge{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            background:var(--gp);
-            color:var(--green);
-            padding:6px 14px;
-            border-radius:999px;
-            font-size:.74rem;
-            font-weight:700;
-            margin-bottom:14px;
+        /* ── 상세 이미지 그리드 ── */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+            gap: 8px; margin-top: 10px;
         }
 
-        .create-title{
-            font-family:'Gaegu',cursive;
-            font-size:2.5rem;
-            color:var(--dark);
-            font-weight:700;
-            margin-bottom:10px;
+        /* ── 반응형 ── */
+        @media (max-width: 900px) {
+            .cr-grid { grid-template-columns: 1fr; }
+            .cr-preview-wrap { position: static; margin-top: 8px; }
         }
-
-        .create-sub{
-            font-size:.9rem;
-            color:var(--mid);
-            line-height:1.7;
-        }
-
-        .create-grid{
-            display:grid;
-            grid-template-columns:1.1fr .9fr;
-            gap:24px;
-            align-items:start;
-        }
-
-        .create-card{
-            background:#fff;
-            border:1.5px solid var(--beige);
-            border-radius:24px;
-            padding:28px;
-            box-shadow:0 8px 30px rgba(42,30,6,.05);
-        }
-
-        .form-group{
-            margin-bottom:18px;
-        }
-
-        .form-group label{
-            display:block;
-            margin-bottom:7px;
-            font-size:.78rem;
-            font-weight:700;
-            color:var(--mid);
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea{
-            width:100%;
-            padding:13px 15px;
-            border:1.5px solid var(--beige);
-            border-radius:12px;
-            background:#fff;
-            font-family:inherit;
-            font-size:.84rem;
-            color:var(--dark);
-            outline:none;
-            transition:.2s;
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus{
-            border-color:var(--green);
-        }
-
-        .form-textarea{
-            resize:none;
-            min-height:140px;
-        }
-
-        .form-row{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:14px;
-        }
-
-        .thumb-upload{
-            height:240px;
-            border:2px dashed var(--gl);
-            border-radius:20px;
-            background:var(--gp);
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-            cursor:pointer;
-            transition:.2s;
-        }
-
-        .thumb-upload:hover{
-            border-color:var(--green);
-            background:#f5fbe9;
-        }
-
-        .thumb-icon{
-            font-size:3.5rem;
-            margin-bottom:10px;
-        }
-
-        .thumb-title{
-            font-size:.9rem;
-            font-weight:700;
-            color:var(--dark);
-        }
-
-        .thumb-sub{
-            margin-top:5px;
-            font-size:.72rem;
-            color:var(--muted);
-        }
-
-        .submit-row{
-            display:flex;
-            justify-content:flex-end;
-            gap:10px;
-            margin-top:12px;
-        }
-
-        .btn-cancel{
-            border:none;
-            background:var(--beige);
-            color:var(--mid);
-            border-radius:12px;
-            padding:13px 22px;
-            font-weight:700;
-            cursor:pointer;
-        }
-
-        .btn-submit2{
-            border:none;
-            background:var(--green);
-            color:#fff;
-            border-radius:12px;
-            padding:13px 28px;
-            font-weight:700;
-            cursor:pointer;
-            box-shadow:0 6px 18px rgba(123,191,69,.25);
-            transition:.2s;
-        }
-
-        .btn-submit2:hover{
-            background:#5d9f2e;
-        }
-
-        .preview-card{
-            overflow:hidden;
-            padding:0;
-        }
-
-        .preview-top{
-            height:250px;
-            background:linear-gradient(145deg,var(--gp),var(--gl));
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:5rem;
-            position:relative;
-        }
-
-        .preview-badge{
-            position:absolute;
-            top:14px;
-            left:14px;
-            background:var(--green);
-            color:#fff;
-            font-size:.68rem;
-            padding:4px 10px;
-            border-radius:8px;
-            font-weight:700;
-        }
-
-        .preview-body{
-            padding:22px;
-        }
-
-        .preview-origin{
-            font-size:.7rem;
-            color:var(--muted);
-            margin-bottom:5px;
-        }
-
-        .preview-name{
-            font-size:1.1rem;
-            font-weight:700;
-            color:var(--dark);
-            margin-bottom:12px;
-        }
-
-        .preview-price{
-            display:flex;
-            align-items:baseline;
-            gap:7px;
-            margin-bottom:10px;
-        }
-
-        .preview-discount{
-            color:#D05018;
-            font-size:.88rem;
-            font-weight:700;
-        }
-
-        .preview-main{
-            font-size:1.45rem;
-            font-weight:700;
-            color:var(--dark);
-        }
-
-        .preview-desc{
-            font-size:.82rem;
-            color:var(--mid);
-            line-height:1.7;
-            margin-bottom:18px;
-        }
-
-        .preview-meta{
-            display:flex;
-            flex-wrap:wrap;
-            gap:8px;
-        }
-
-        .preview-chip{
-            background:var(--gp);
-            color:var(--green);
-            padding:5px 10px;
-            border-radius:999px;
-            font-size:.68rem;
-            font-weight:700;
-        }
-
-        @media(max-width:960px){
-
-            .create-grid{
-                grid-template-columns:1fr;
-            }
-
+        @media (max-width: 540px) {
+            .frow { grid-template-columns: 1fr; }
+            .cr-content { padding: 24px 5% 60px; }
+            .cr-hero { padding: 40px 5% 38px; }
         }
     </style>
 </head>
-
 <body>
 
-<div class="create-wrap">
+<div th:replace="nav :: nav"></div>
 
-    <div class="create-top">
+<div class="cr-page">
 
-        <div class="create-badge">
-            🌾 판매자 전용
+    <!-- ── 히어로 배너 ── -->
+    <div class="cr-hero">
+        <div class="cr-hero-ring1"></div>
+        <div class="cr-hero-ring2"></div>
+        <div class="cr-hero-deco">🌾</div>
+        <div class="cr-hero-inner">
+            <div class="cr-hero-badge">🌾 판매자 전용</div>
+            <h1 class="cr-hero-title">못난이 농산물<br>상품 등록</h1>
+            <p class="cr-hero-sub">신선한 농산물을 등록하고 소비자들에게 직접 판매해보세요.</p>
         </div>
-
-        <div class="create-title">
-            못난이 농산물 상품 등록
-        </div>
-
-        <div class="create-sub">
-            신선한 농산물을 등록하고 소비자들에게 직접 판매해보세요.
-        </div>
-
     </div>
 
-    <div class="create-grid">
+    <!-- ── 본문 ── -->
+    <div class="cr-content">
+        <div class="cr-grid">
 
-        <!-- 왼쪽 등록 폼 -->
-        <div class="create-card">
+            <!-- ══ 왼쪽: 등록 폼 ══ -->
+            <form th:action="@{/market/create}" method="post" enctype="multipart/form-data"
+                  novalidate onsubmit="return validateForm(event)">
 
-            <form th:action="@{/market/create}"
-                  method="post"
-                  enctype="multipart/form-data">
-
-                <div class="form-group">
-                    <label>상품명</label>
-
-                    <input type="text"
-                           name="name"
-                           class="form-input"
-                           placeholder="예: 못난이 감자 3kg"
-                           required>
+                <!-- ① 기본 정보 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">1</div>
+                        <div class="cr-step-ttl">기본 정보</div>
+                    </div>
+                    <div class="cr-step-bd">
+                        <div class="fg">
+                            <label>상품명</label>
+                            <input type="text" name="name" class="fi"
+                                   placeholder="예: 못난이 감자 3kg" required
+                                   oninput="document.querySelector('.pv-name').textContent = this.value || '못난이 감자 3kg'">
+                        </div>
+                        <div class="fg">
+                            <label>카테고리</label>
+                            <select name="category" class="fs" required onchange="updateChips()">
+                                <option value="">카테고리 선택</option>
+                                <option value="채소">채소</option>
+                                <option value="과일">과일</option>
+                                <option value="곡류">곡류</option>
+                                <option value="버섯">버섯</option>
+                                <option value="뿌리채소">뿌리채소</option>
+                            </select>
+                        </div>
+                        <div class="fg">
+                            <label>상품 설명</label>
+                            <textarea name="description" class="fta"
+                                      placeholder="상품 특징, 배송 정보, 보관법 등을 입력해주세요."
+                                      oninput="document.querySelector('.pv-desc').textContent = this.value || '크기는 조금 달라도 맛과 신선함은 그대로인 친환경 못난이 감자 상품입니다.'"></textarea>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>카테고리</label>
-
-                    <select name="category"
-                            class="form-select"
-                            required>
-
-                        <option value="">카테고리 선택</option>
-                        <option value="채소">채소</option>
-                        <option value="과일">과일</option>
-                        <option value="곡류">곡류</option>
-                        <option value="버섯">버섯</option>
-
-                    </select>
+                <!-- ② 가격 정보 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">2</div>
+                        <div class="cr-step-ttl">가격 정보</div>
+                    </div>
+                    <div class="cr-step-bd">
+                        <div class="frow">
+                            <div class="fg">
+                                <label>판매 가격 (원)</label>
+                                <input type="number" name="price" class="fi"
+                                       placeholder="12000"
+                                       oninput="updateDiscountPreview()" required>
+                            </div>
+                            <div class="fg">
+                                <label>할인율 (%)</label>
+                                <input type="number" id="discountRateInput" class="fi"
+                                       min="0" max="99" placeholder="예: 20"
+                                       oninput="this.value=Math.min(Math.max(this.value,0),99); updateDiscountPreview()">
+                                <input type="hidden" name="discountPrice" id="discountPriceHidden">
+                                <div class="hint">최대 99%까지 적용됩니다</div>
+                            </div>
+                        </div>
+                        <div class="frow" style="margin-top:4px">
+                            <div class="fg">
+                                <label>할인 시작일</label>
+                                <input type="date" name="discountStartAt" class="fi">
+                            </div>
+                            <div class="fg">
+                                <label>할인 종료일</label>
+                                <input type="date" name="discountEndAt" class="fi">
+                            </div>
+                        </div>
+                        <div class="hint">💡 할인율 입력 시 기간을 함께 설정해주세요.</div>
+                    </div>
                 </div>
 
-                <div class="form-row">
-
-                    <div class="form-group">
-                        <label>판매 가격</label>
-
-                        <input type="number"
-                               name="price"
-                               class="form-input"
-                               placeholder="12000"
-                               required>
+                <!-- ③ 상품 세부 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">3</div>
+                        <div class="cr-step-ttl">상품 세부</div>
                     </div>
-
-                    <div class="form-group">
-                        <label>할인 가격</label>
-
-                        <input type="number"
-                               name="discountPrice"
-                               class="form-input"
-                               placeholder="8900">
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-
-                    <div class="form-group">
-                        <label>원산지</label>
-
-                        <input type="text"
-                               name="origin"
-                               class="form-input"
-                               placeholder="예: 강원 홍천"
-                               required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>재고 수량</label>
-
-                        <input type="number"
-                               name="stockQuantity"
-                               class="form-input"
-                               placeholder="100"
-                               required>
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-
-                    <div class="form-group">
-                        <label>유통기한</label>
-
-                        <input type="date"
-                               name="expiryDate"
-                               class="form-input"
-                               required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>픽업 가능 여부</label>
-
-                        <select name="isPickupAvailable"
-                                class="form-select">
-
-                            <option value="true">가능</option>
-                            <option value="false">불가능</option>
-
-                        </select>
-                    </div>
-
-                </div>
-
-                <div class="form-group">
-
-                    <label>상품 설명</label>
-
-                    <textarea name="description"
-                              class="form-textarea"
-                              placeholder="상품 특징, 배송 정보 등을 입력해주세요."></textarea>
-
-                </div>
-
-                <div class="form-group">
-
-                    <label>대표 이미지</label>
-
-                    <label class="thumb-upload">
-
-                        <div class="thumb-icon">
-                            📦
+                    <div class="cr-step-bd">
+                        <div class="frow">
+                            <div class="fg">
+                                <label>원산지</label>
+                                <input type="text" name="origin" class="fi"
+                                       placeholder="예: 강원 홍천" required
+                                       oninput="document.querySelector('.pv-origin').textContent = this.value || '강원 홍천 · 감자 농가'">
+                            </div>
+                            <div class="fg">
+                                <label>재고 수량 (개)</label>
+                                <input type="number" name="stockQuantity" class="fi"
+                                       placeholder="100" required oninput="updateChips()">
+                            </div>
+                        </div>
+                        <div class="frow">
+                            <div class="fg">
+                                <label>유통기한</label>
+                                <input type="date" name="expiryDate" class="fi" required>
+                            </div>
+                            <div class="fg">
+                                <label>픽업 가능 여부</label>
+                                <select name="isPickupAvailable" class="fs"
+                                        id="pickupSelect" onchange="updateChips(); togglePickup()">
+                                    <option value="true">가능</option>
+                                    <option value="false">불가능</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="thumb-title">
-                            이미지 업로드
+                        <!-- 픽업 상세 -->
+                        <div id="pickupDetail" style="display:none;" class="pickup-box">
+                            <div class="fg">
+                                <label>픽업 주소</label>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="text" id="pickupAddressInput" name="address"
+                                           class="fi" placeholder="주소 검색 버튼을 눌러주세요" readonly>
+                                    <button type="button" class="btn-addr" onclick="searchAddress()">주소 검색</button>
+                                </div>
+                            </div>
+                            <!-- 주소 입력 전 플레이스홀더 -->
+                            <div id="mapPlaceholder"
+                                 style="width:100%;height:220px;border-radius:12px;margin-bottom:12px;
+                                        background:var(--beige3);border:2px dashed var(--beige);
+                                        display:flex;flex-direction:column;align-items:center;
+                                        justify-content:center;gap:10px;text-align:center;">
+                                <div style="font-size:3rem;opacity:.6">🗺️</div>
+                                <div style="font-size:.88rem;font-weight:700;color:var(--mid)">주소를 입력해주세요</div>
+                                <div style="font-size:.74rem;color:var(--muted)">위 주소 검색 버튼을 눌러주세요</div>
+                            </div>
+                            <!-- 주소 입력 후 실제 지도 -->
+                            <div id="kakaoMap" style="width:100%;height:220px;border-radius:12px;margin-bottom:12px;display:none;"></div>
+                            <input type="hidden" id="latitudeInput" name="latitude">
+                            <input type="hidden" id="longitudeInput" name="longitude">
+                            <div class="fg">
+                                <label>운영 시간</label>
+                                <input type="text" name="operatingHours" class="fi"
+                                       placeholder="예: 평일 09:00 ~ 18:00">
+                            </div>
                         </div>
-
-                        <div class="thumb-sub">
-                            JPG, PNG 파일 업로드 가능
-                        </div>
-
-                        <input type="file"
-                               name="thumbnailFile"
-                               accept="image/*"
-                               hidden>
-
-                    </label>
-
+                    </div>
                 </div>
 
-                <div class="submit-row">
+                <!-- ④ 이미지 등록 -->
+                <div class="cr-step">
+                    <div class="cr-step-hd">
+                        <div class="cr-num">4</div>
+                        <div class="cr-step-ttl">이미지 등록</div>
+                    </div>
+                    <div class="cr-step-bd">
 
-                    <button type="button"
-                            class="btn-cancel"
-                            onclick="history.back()">
+                        <!-- AI 토글 -->
+                        <div class="ai-box">
+                            <span class="ai-lbl">🤖 AI 사진 분석으로 상품명 · 설명 자동완성</span>
+                            <label style="position:relative;width:42px;height:24px;cursor:pointer;display:inline-block;flex-shrink:0">
+                                <input type="checkbox" id="aiToggle" checked style="opacity:0;width:0;height:0;">
+                                <span id="toggleSlider" style="position:absolute;inset:0;background:#4caf50;border-radius:99px;transition:.2s;">
+                                    <span id="toggleThumb" style="position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;display:block;transform:translateX(18px);"></span>
+                                </span>
+                            </label>
+                        </div>
 
-                        취소
+                        <!-- 대표 이미지 -->
+                        <div class="fg">
+                            <label>대표 이미지</label>
+                            <label class="img-upload" for="thumbFile">
+                                <div class="img-upload-icon">📦</div>
+                                <div class="img-upload-ttl">대표 이미지 업로드</div>
+                                <div class="img-upload-sub">JPG, PNG 업로드 가능</div>
+                                <input type="file" id="thumbFile" name="thumbnailFile" accept="image/*" hidden>
+                            </label>
+                            <div id="aiAnalyzeHint" style="font-size:.75rem;color:var(--green);margin-top:6px"></div>
+                        </div>
 
-                    </button>
+                        <!-- 상세 이미지 -->
+                        <div class="fg">
+                            <label>상세 이미지</label>
+                            <label class="img-upload img-upload-sm" for="detailImageInput">
+                                <div style="font-size:1.8rem">🖼️</div>
+                                <div class="img-upload-ttl">상세 이미지 추가</div>
+                                <div class="img-upload-sub">여러 장 업로드 가능</div>
+                            </label>
+                            <input type="file" name="imageFiles" id="detailImageInput" accept="image/*" multiple hidden>
+                            <div class="detail-grid" id="detailPreviewGrid"></div>
+                        </div>
+                    </div>
+                </div>
 
-                    <button type="submit"
-                            class="btn-submit2">
-
-                        상품 등록하기
-
-                    </button>
-
+                <!-- ── 버튼 ── -->
+                <div class="btn-row">
+                    <input type="hidden" name="sellerEmail" id="sellerEmailInput"/>
+                    <script>
+                        document.getElementById('sellerEmailInput').value =
+                            sessionStorage.getItem('email') || localStorage.getItem('email');
+                    </script>
+                    <button type="button" class="btn-back" onclick="history.back()">취소</button>
+                    <button type="submit" class="btn-reg">🌿 상품 등록하기</button>
                 </div>
 
             </form>
 
-        </div>
-
-        <!-- 오른쪽 미리보기 -->
-        <div class="create-card preview-card">
-
-            <div class="preview-top">
-
-                🥔
-
-                <div class="preview-badge">
-                    미리보기
-                </div>
-
-            </div>
-
-            <div class="preview-body">
-
-                <div class="preview-origin">
-                    강원 홍천 · 감자 농가
-                </div>
-
-                <div class="preview-name">
-                    못난이 감자 3kg
-                </div>
-
-                <div class="preview-price">
-
-                    <div class="preview-discount">
-                        -30%
+            <!-- ══ 오른쪽: 미리보기 ══ -->
+            <div class="cr-preview-wrap">
+                <div class="cr-preview-lbl">실시간 미리보기</div>
+                <div class="cr-preview-card">
+                    <div class="pv-img">
+                        <img id="thumbPreview" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:0"/>
+                        🥔
+                        <div class="pv-live-tag">미리보기</div>
                     </div>
-
-                    <div class="preview-main">
-                        7,000원
+                    <div class="pv-body">
+                        <div class="pv-origin">강원 홍천 · 감자 농가</div>
+                        <div class="pv-name">못난이 감자 3kg</div>
+                        <div class="pv-price">
+                            <div class="pv-rate"></div>
+                            <div class="pv-main">가격 미입력</div>
+                        </div>
+                        <div class="pv-desc">크기는 조금 달라도 맛과 신선함은 그대로인 친환경 못난이 감자 상품입니다.</div>
+                        <div class="pv-chips" id="pvChips">
+                            <div class="pv-chip">🥬 채소</div>
+                            <div class="pv-chip">📦 재고 100개</div>
+                            <div class="pv-chip">🚚 픽업 가능</div>
+                        </div>
                     </div>
-
                 </div>
-
-                <div class="preview-desc">
-                    크기는 조금 달라도 맛과 신선함은 그대로인
-                    친환경 못난이 감자 상품입니다.
-                </div>
-
-                <div class="preview-meta">
-
-                    <div class="preview-chip">
-                        🥔 채소
-                    </div>
-
-                    <div class="preview-chip">
-                        📦 재고 100개
-                    </div>
-
-                    <div class="preview-chip">
-                        🚚 픽업 가능
-                    </div>
-
-                </div>
-
             </div>
 
         </div>
-
     </div>
-
 </div>
 
+<script>
+    // 오늘 이전 날짜 입력 방지
+    var _today = new Date().toISOString().split('T')[0];
+    document.querySelector('[name=expiryDate]').min      = _today;
+    document.querySelector('[name=discountStartAt]').min = _today;
+    document.querySelector('[name=discountEndAt]').min   = _today;
+
+    // 할인 미리보기
+    function updateDiscountPreview() {
+        var price = Number(document.querySelector('[name=price]').value);
+        var rate  = Number(document.getElementById('discountRateInput').value);
+        var hasDiscount = rate > 0 && rate <= 99;
+
+        var startAt = document.querySelector('[name=discountStartAt]');
+        var endAt   = document.querySelector('[name=discountEndAt]');
+        startAt.disabled = !hasDiscount;
+        endAt.disabled   = !hasDiscount;
+        startAt.style.opacity = hasDiscount ? '1' : '0.4';
+        endAt.style.opacity   = hasDiscount ? '1' : '0.4';
+        if (!hasDiscount) { startAt.value = ''; endAt.value = ''; }
+
+        if (!price) return;
+        var pvMain = document.querySelector('.pv-main');
+        var pvRate = document.querySelector('.pv-rate');
+        var hidden = document.getElementById('discountPriceHidden');
+        if (hasDiscount) {
+            var discounted = Math.round(price * (1 - rate / 100));
+            pvRate.textContent = '-' + rate + '%';
+            pvMain.textContent = discounted.toLocaleString() + '원';
+            hidden.value = discounted;
+        } else {
+            pvRate.textContent = '';
+            pvMain.textContent = price.toLocaleString() + '원';
+            hidden.value = '';
+        }
+    }
+    updateDiscountPreview();
+
+    // 미리보기 칩 업데이트
+    var catEmoji = { '채소':'🥬','과일':'🍎','곡류':'🌾','버섯':'🍄' };
+    function updateChips() {
+        var cat    = document.querySelector('[name=category]').value;
+        var stock  = document.querySelector('[name=stockQuantity]').value;
+        var pickup = document.getElementById('pickupSelect').value === 'true';
+        document.getElementById('pvChips').innerHTML =
+            '<div class="pv-chip">' + (catEmoji[cat] || '🥔') + ' ' + (cat || '채소') + '</div>' +
+            '<div class="pv-chip">📦 재고 ' + (stock || 100) + '개</div>' +
+            (pickup ? '<div class="pv-chip">🚚 픽업 가능</div>' :
+                      '<div class="pv-chip" style="color:var(--muted)">픽업 불가</div>');
+    }
+
+    // AI 토글
+    var aiToggle = document.getElementById('aiToggle');
+    var slider   = document.getElementById('toggleSlider');
+    var thumb    = document.getElementById('toggleThumb');
+
+    aiToggle.addEventListener('change', function () {
+        if (this.checked) {
+            slider.style.background = '#4caf50';
+            thumb.style.transform   = 'translateX(18px)';
+            document.getElementById('aiAnalyzeHint').textContent = '';
+        } else {
+            slider.style.background = '#ccc';
+            thumb.style.transform   = 'translateX(0)';
+            document.getElementById('aiAnalyzeHint').textContent = '🔕 AI 자동완성이 꺼져 있어요. 직접 입력해주세요.';
+        }
+    });
+
+    // 대표 이미지 미리보기 + AI 분석
+    document.getElementById('thumbFile').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            var img = document.getElementById('thumbPreview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+            var pvImg = document.querySelector('.pv-img');
+            pvImg.childNodes.forEach(function (n) { if (n.nodeType === 3) n.textContent = ''; });
+        };
+        reader.readAsDataURL(file);
+        if (aiToggle.checked) analyzeProductImage(file);
+    });
+
+    function analyzeProductImage(file) {
+        var nameInput = document.querySelector('input[name="name"]');
+        var descInput = document.querySelector('textarea[name="description"]');
+        var hint = document.getElementById('aiAnalyzeHint');
+        hint.textContent = '🤖 AI가 사진 보고 분석 중이에요...';
+        var formData = new FormData();
+        formData.append('image', file);
+        fetch('/market/api/analyze-image', { method: 'POST', body: formData })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.name)        { nameInput.value = d.name; nameInput.dispatchEvent(new Event('input')); }
+                if (d.description) { descInput.value = d.description; descInput.dispatchEvent(new Event('input')); }
+                hint.textContent = '✅ AI가 채워준 거예요, 꼭 확인하고 수정해주세요!';
+            })
+            .catch(function () { hint.textContent = '⚠️ 분석 실패했어요, 직접 입력해주세요.'; });
+    }
+
+    // 상세 이미지 프리뷰
+    var detailFiles = [];
+
+    document.getElementById('detailImageInput').addEventListener('change', function (e) {
+        Array.from(e.target.files).forEach(function (file) {
+            var idx = detailFiles.length;
+            detailFiles.push(file);
+            var reader = new FileReader();
+            reader.onload = function (ev) {
+                var grid = document.getElementById('detailPreviewGrid');
+                var div  = document.createElement('div');
+                div.dataset.index = idx;
+                div.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1.5px solid var(--beige);';
+                div.innerHTML =
+                    '<img src="' + ev.target.result + '" style="width:100%;height:100%;object-fit:cover;">' +
+                    '<button type="button" onclick="removeDetail(this,' + idx + ')"' +
+                    ' style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);' +
+                    'color:#fff;border:none;border-radius:50%;width:20px;height:20px;' +
+                    'font-size:.7rem;cursor:pointer;">✕</button>';
+                grid.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+        var dt = new DataTransfer();
+        detailFiles.filter(function (f) { return f !== null; })
+                   .forEach(function (f) { dt.items.add(f); });
+        this.files = dt.files;
+    });
+
+    function removeDetail(btn, idx) {
+        detailFiles[idx] = null;
+        btn.closest('[data-index]').remove();
+        var dt = new DataTransfer();
+        detailFiles.filter(function (f) { return f !== null; })
+                   .forEach(function (f) { dt.items.add(f); });
+        document.getElementById('detailImageInput').files = dt.files;
+    }
+
+    // 픽업 섹션 show/hide
+    function togglePickup() {
+        var show = document.getElementById('pickupSelect').value === 'true';
+        document.getElementById('pickupDetail').style.display = show ? 'block' : 'none';
+    }
+    togglePickup();
+
+    // 주소 검색 + 지도
+    function searchAddress() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                document.getElementById('pickupAddressInput').value = data.roadAddress;
+                var geocoder = new kakao.maps.services.Geocoder();
+                geocoder.addressSearch(data.roadAddress, function (result, status) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        var lat = result[0].y;
+                        var lng = result[0].x;
+                        document.getElementById('latitudeInput').value  = lat;
+                        document.getElementById('longitudeInput').value = lng;
+                        // 플레이스홀더 숨기고 지도 표시
+                        document.getElementById('mapPlaceholder').style.display = 'none';
+                        var container = document.getElementById('kakaoMap');
+                        container.style.display = 'block';
+                        var map = new kakao.maps.Map(container, {
+                            center: new kakao.maps.LatLng(lat, lng),
+                            level: 3
+                        });
+                        new kakao.maps.Marker({
+                            map: map,
+                            position: new kakao.maps.LatLng(lat, lng)
+                        });
+                    }
+                });
+            }
+        }).open();
+    }
+
+    function validateForm(e) {
+        var checks = [
+            { el: document.querySelector('[name=name]'),          msg: '상품명을 입력해주세요.' },
+            { el: document.querySelector('[name=category]'),      msg: '카테고리를 선택해주세요.', empty: function(el){ return !el.value; } },
+            { el: document.querySelector('[name=price]'),         msg: '판매 가격을 입력해주세요.' },
+            { el: document.querySelector('[name=origin]'),        msg: '원산지를 입력해주세요.' },
+            { el: document.querySelector('[name=stockQuantity]'), msg: '재고 수량을 입력해주세요.' },
+            { el: document.querySelector('[name=expiryDate]'),    msg: '유통기한을 입력해주세요.' }
+        ];
+
+        for (var i = 0; i < checks.length; i++) {
+            var c = checks[i];
+            var isEmpty = c.empty ? c.empty(c.el) : !c.el.value.trim();
+            if (isEmpty) {
+                e.preventDefault();
+                c.el.focus();
+                c.el.style.border = '1.5px solid #e53935';
+                alert(c.msg);
+                return false;
+            }
+            c.el.style.border = '';
+        }
+
+        var stock = parseInt(document.querySelector('[name=stockQuantity]').value, 10);
+        if (isNaN(stock) || stock < 1) {
+            e.preventDefault();
+            var si = document.querySelector('[name=stockQuantity]');
+            si.focus();
+            si.style.border = '1.5px solid #e53935';
+            alert('재고는 1개 이상이어야 합니다.');
+            return false;
+        }
+
+        var pickup = document.querySelector('[name=isPickupAvailable]').value;
+        if (pickup === 'true') {
+            var addr = document.querySelector('[name=address]');
+            if (!addr || !addr.value.trim()) {
+                e.preventDefault();
+                alert('픽업 주소를 입력해주세요.');
+                return false;
+            }
+        }
+
+        return true;
+    }
+</script>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=050995b6d6375c46a4dee1a7b3e53aa4&libraries=services"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </body>
 </html>

@@ -1,14 +1,21 @@
 package com.example.potatochip.review.controller;
 
+import com.example.potatochip.auth.entity.User;
+import com.example.potatochip.auth.repository.UserRepository;
+import com.example.potatochip.product.file.FileService;
 import com.example.potatochip.review.dto.ReviewDTO;
 import com.example.potatochip.review.dto.ReviewHelpfulDTO;
 import com.example.potatochip.review.dto.ReviewStatsDTO;
 import com.example.potatochip.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,18 +24,19 @@ import java.util.Map;
 public class ReviewController {
 
     private final ReviewService reviewService;
-
-    @GetMapping("/review")
-    public String reviewPage() {
-        return "review";
-    }
+    private final UserRepository userRepository;
+    private final FileService fileService;
 
     @GetMapping("/api/reviews")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProductId(
             @RequestParam Long productId,
-            @RequestParam(required = false) Long userId
+            @RequestParam(required = false) Long userId,
+            Authentication authentication
     ) {
-        List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId, userId);
+        Long loginUserId = resolveLoginUserIdOrNull(authentication);
+        Long currentUserId = loginUserId != null ? loginUserId : userId;
+
+        List<ReviewDTO> reviews = reviewService.getReviewsByProductId(productId, currentUserId);
         return ResponseEntity.ok(reviews);
     }
 
@@ -89,15 +97,73 @@ public class ReviewController {
     @PostMapping("/api/reviews/{reviewId}/helpful")
     public ResponseEntity<?> addHelpful(
             @PathVariable Long reviewId,
-            @RequestParam Long userId
+            Authentication authentication
     ) {
         try {
-            ReviewHelpfulDTO response = reviewService.addHelpful(reviewId, userId);
+            Long loginUserId = getLoginUserId(authentication);
+            ReviewHelpfulDTO response = reviewService.addHelpful(reviewId, loginUserId);
             return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of("message", e.getMessage())
+            );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
                     Map.of("message", e.getMessage())
             );
         }
+    }
+
+    @GetMapping("/api/reviews/my")
+    public ResponseEntity<?> getMyReviews(Authentication authentication) {
+        try {
+            Long loginUserId = getLoginUserId(authentication);
+            List<ReviewDTO> reviews = reviewService.getMyReviews(loginUserId);
+            return ResponseEntity.ok(reviews);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    Map.of("message", e.getMessage())
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", e.getMessage())
+            );
+        }
+    }
+
+    @PostMapping("/api/reviews/upload-image")
+    @ResponseBody
+    public ResponseEntity<?> uploadReviewImage(@RequestParam("image") MultipartFile image) {
+        try {
+            String imageUrl = fileService.upload(image);
+            return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "리뷰 이미지 업로드에 실패했습니다."));
+        }
+    }
+
+    private Long resolveLoginUserIdOrNull(Authentication authentication) {
+        try {
+            return getLoginUserId(authentication);
+        } catch (SecurityException e) {
+            return null;
+        }
+    }
+
+    private Long getLoginUserId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+
+        String email = String.valueOf(authentication.getPrincipal());
+
+        if (email == null || email.isBlank() || "anonymousUser".equals(email)) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new SecurityException("로그인 사용자를 찾을 수 없습니다."));
+
+        return user.getId();
     }
 }

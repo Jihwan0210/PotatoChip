@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>못난이 농작물 - 농가 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <link th:href="@{/css/auth/farmer.css}" rel="stylesheet"/>
+</head>
+<body>
+
+<div th:replace="nav :: nav"></div>
+
+<div class="page active" id="page-farmer">
+    <div class="ft-header">
+        <div class="ft-header-label">🌾 농가 관리</div>
+        <div class="ft-header-title" th:text="${sellerName} + ' 대시보드'">농가 대시보드</div>
+        <div class="ft-tab-bar">
+            <div id="ftab-0" class="ft-tab on" onclick="switchFarmerTab(0)">주문 현황</div>
+            <div id="ftab-1" class="ft-tab"    onclick="switchFarmerTab(1)">재고 관리</div>
+            <div id="ftab-2" class="ft-tab"    onclick="switchFarmerTab(2)">판매 분석</div>
+            <div id="ftab-3" class="ft-tab"    onclick="switchFarmerTab(3)">정산 내역</div>
+        </div>
+    </div>
+
+    <div class="ft-main">
+
+        <!-- ── 탭 0: 주문 현황 ── -->
+        <div id="fcontent-0">
+            <div class="ft-kpi-grid">
+                <div class="ft-kpi-card">
+                    <div class="ft-kpi-icon">🛒</div>
+                    <div class="ft-kpi-value" th:text="${summary.todayOrderCount} + '건'">-</div>
+                    <div class="ft-kpi-label">오늘 신규 주문</div>
+                    <div class="ft-kpi-trend-neutral" th:text="'상품 ' + ${summary.productCount} + '종 판매 중'">-</div>
+                </div>
+                <div class="ft-kpi-card">
+                    <div class="ft-kpi-icon">🏆</div>
+                    <div class="ft-kpi-value" th:text="${summary.totalOrderCount} + '건'">-</div>
+                    <div class="ft-kpi-label">누적 판매 건수</div>
+                    <div class="ft-kpi-trend-neutral">총 누적 주문</div>
+                </div>
+                <div class="ft-kpi-card">
+                    <div class="ft-kpi-icon">💰</div>
+                    <div class="ft-kpi-value"
+                         th:text="${#numbers.formatDecimal(summary.monthlyRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-kpi-label">이번 달 매출</div>
+                    <div class="ft-kpi-trend-neutral">이번 달 매출</div>
+                </div>
+                <div class="ft-kpi-card">
+                    <div class="ft-kpi-icon">⭐</div>
+                    <div class="ft-kpi-value" th:text="${summary.avgRating} + '★'">-</div>
+                    <div class="ft-kpi-label">평균 평점</div>
+                    <div class="ft-kpi-trend-neutral" th:text="'리뷰 ' + ${summary.reviewCount} + '건'">-</div>
+                </div>
+            </div>
+
+            <div class="ft-action-bar">
+                <div class="ft-action-label">최근 주문 목록</div>
+                <div class="ft-btn-group">
+                    <button id="registerBtn"
+                            style="font-size:.74rem;cursor:pointer;padding:5px 11px;border:1px solid var(--green);background:var(--green);color:#fff;border-radius:6px;font-weight:700"
+                            th:onclick="|location.href='@{/market/create}'|">
+                        + 상품등록
+                    </button>
+
+                    <button class="ft-btn-excel" onclick="exportOrders()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        엑셀 다운로드
+                    </button>
+                </div>
+            </div>
+            <div class="ft-table">
+                <div class="ft-table-head ft-order-grid">
+                    <div>주문번호</div>
+                    <div>상품명</div>
+                    <div style="text-align:center">수량</div>
+                    <div style="text-align:right">결제액</div>
+                    <div style="text-align:center">상태</div>
+                    <div style="text-align:center">주문일</div>
+                </div>
+                <div th:if="${#lists.isEmpty(orders)}"
+                     class="ft-table-row"
+                     style="grid-template-columns:1fr;text-align:center;color:var(--muted)">
+                    주문이 없습니다.
+                </div>
+                <div th:each="order : ${orders}" class="ft-table-row ft-order-grid">
+                    <div class="ft-cell-id" th:text="${order.orderNumber}">-</div>
+                    <div class="ft-cell-name">
+                        <th:block th:if="${not #lists.isEmpty(order.items)}">
+                            <span th:text="${order.items[0].productName}">-</span>
+                            <span th:if="${#lists.size(order.items) > 1}"
+                                  th:text="' 외 ' + (${#lists.size(order.items) - 1}) + '건'"></span>
+                        </th:block>
+                        <span th:if="${#lists.isEmpty(order.items)}">-</span>
+                    </div>
+                    <div class="ft-cell-c"
+                         th:text="${not #lists.isEmpty(order.items) ? order.items[0].quantity : '-'}">-</div>
+                    <div class="ft-cell-r"
+                         th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-cell-badge">
+                        <select th:attr="data-order-id=${order.id}, data-status=${order.status}"
+                                style="border:none;cursor:pointer;font-size:.68rem;font-weight:700;padding:2px 6px;border-radius:10px"
+                                onchange="updateOrderStatus(this)">
+                            <option value="PAYMENT_COMPLETE" th:selected="${order.status == 'PAYMENT_COMPLETE'}">결제 완료</option>
+                            <option value="PREPARING"        th:selected="${order.status == 'PREPARING'}">상품 준비 중</option>
+                            <option value="SHIPPING"         th:selected="${order.status == 'SHIPPING'}">배송 중</option>
+                            <option value="DELIVERED"        th:selected="${order.status == 'DELIVERED'}">배송 완료</option>
+                            <option value="CANCELLED"        th:selected="${order.status == 'CANCELLED'}">취소</option>
+                            <option value="REFUNDED"         th:selected="${order.status == 'REFUNDED'}">환불</option>
+                        </select>
+                    </div>
+                    <div class="ft-cell-date"
+                         th:text="${order.createdAt != null ?
+                             #strings.replace(#strings.substring(order.createdAt, 5, 10), '-', '.') : '-'}">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── 탭 1: 재고 관리 ── -->
+        <div id="fcontent-1" style="display:none">
+            <div class="ft-section-title">재고 관리 📦</div>
+            <div class="ft-table">
+                <div class="ft-table-head ft-inv-grid">
+                    <div>상품명</div>
+                    <div style="text-align:center">현재 재고</div>
+                    <div style="text-align:center">유통기한</div>
+                    <div style="text-align:center">상태</div>
+                    <div style="text-align:center">관리</div>
+                </div>
+                <div th:if="${#lists.isEmpty(products)}"
+                     class="ft-table-row"
+                     style="grid-template-columns:1fr;text-align:center;color:var(--muted)">
+                    등록된 상품이 없습니다.
+                </div>
+                <div th:each="product : ${products}" class="ft-table-row ft-inv-grid">
+                    <div class="ft-inv-cell">
+                        <div class="ft-inv-thumb" th:if="${product.thumbnailUrl != null and !#strings.isEmpty(product.thumbnailUrl)}">
+                            <img th:src="${product.thumbnailUrl}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"/>
+                        </div>
+                        <div class="ft-inv-thumb ft-inv-thumb-gn" th:unless="${product.thumbnailUrl != null and !#strings.isEmpty(product.thumbnailUrl)}">🥬</div>
+                        <div class="ft-cell-name" th:text="${product.name}">-</div>
+                    </div>
+                    <div th:class="${product.stockQuantity == 0 ? 'ft-stock-out' :
+                                    (product.stockQuantity < 10 ? 'ft-stock-low' : 'ft-stock-ok')}"
+                         th:text="${product.stockQuantity} + '개'">-</div>
+                    <div class="ft-stock-total" th:text="${product.expiryDate ?: '-'}">-</div>
+                    <div class="ft-cell-badge">
+                        <span th:class="${'ft-badge ' + (product.stockQuantity == 0 ? 'ft-badge-danger' : (product.stockQuantity < 10 ? 'ft-badge-warning' : 'ft-badge-success'))}"
+                              th:text="${product.stockQuantity == 0 ? '품절' : (product.stockQuantity < 10 ? '재고 부족' : '판매 중')}">-</span>
+                    </div>
+                    <div class="ft-cell-badge">
+                        <button class="ft-btn-edit"
+                                th:attr="data-product-id=${product.id},
+                                         data-product-name=${product.name},
+                                         data-stock=${product.stockQuantity}"
+                                onclick="editStockFromBtn(this)">수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── 탭 2: 판매 분석 ── -->
+        <div id="fcontent-2" style="display:none">
+            <div class="ft-section-title">판매 분석 📊</div>
+            <div class="ft-chart-grid">
+                <div class="ft-chart-card">
+                    <div class="ft-chart-title">월별 매출 추이 (최근 6개월)</div>
+                    <canvas id="monthlyChart" height="120"></canvas>
+                    <div class="ft-chart-foot"
+                         th:text="${salesAnalysis.hasSales ? '최고 매출 · ' + salesAnalysis.peakMonthLabel : '아직 매출 데이터가 없어요'}">-</div>
+                </div>
+                <div class="ft-chart-card">
+                    <div class="ft-chart-title">요일별 주문 패턴</div>
+                    <canvas id="weekdayChart" height="120"></canvas>
+                    <div class="ft-chart-foot"
+                         th:text="${salesAnalysis.hasSales ? salesAnalysis.peakDay + '요일에 주문이 가장 많아요' : '아직 주문 데이터가 없어요'}">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── 탭 3: 정산 내역 ── -->
+        <div id="fcontent-3" style="display:none">
+            <div class="ft-section-title">정산 내역 💳</div>
+            <div class="ft-settle-cards-grid">
+                <div class="ft-settle-primary">
+                    <div class="ft-settle-lbl">이번 달 정산 예정</div>
+                    <div class="ft-settle-val"
+                         th:text="${#numbers.formatDecimal(settlement.thisMonthRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-settle-sub">월말 지급 예정</div>
+                </div>
+                <div class="ft-settle-white complete">
+                    <div class="ft-settle-lbl">지난 달 정산 완료</div>
+                    <div class="ft-settle-val"
+                         th:text="${#numbers.formatDecimal(settlement.lastMonthRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-settle-sub">지급 완료 ✓</div>
+                </div>
+                <div class="ft-settle-white">
+                    <div class="ft-settle-lbl">누적 정산 총액</div>
+                    <div class="ft-settle-val"
+                         th:text="${#numbers.formatDecimal(settlement.totalRevenue, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-settle-sub">가입일부터 현재까지</div>
+                </div>
+            </div>
+            <div class="ft-table">
+                <div class="ft-table-head ft-settle-grid">
+                    <div>정산 월</div>
+                    <div>정산 항목</div>
+                    <div style="text-align:right">금액</div>
+                    <div style="text-align:center">상태</div>
+                </div>
+                <div th:if="${#lists.isEmpty(settlement.settlements)}"
+                     class="ft-table-row"
+                     style="grid-template-columns:1fr;text-align:center;color:var(--muted)">
+                    정산 내역이 없습니다.
+                </div>
+                <div class="ft-table-row ft-settle-grid" th:each="s : ${settlement.settlements}">
+                    <div class="ft-cell-month" th:text="${s.month}">-</div>
+                    <div class="ft-cell-name"
+                         th:text="${s.isCurrent ? '판매대금 (이번 달)' : '판매대금 (' + s.month + ')'}">-</div>
+                    <div class="ft-cell-r"
+                         th:text="${#numbers.formatDecimal(s.amount, 0, 'COMMA', 0, 'POINT') + '원'}">-</div>
+                    <div class="ft-cell-badge">
+                        <span th:class="${s.isCurrent ? 'ft-badge ft-badge-warning' : 'ft-badge ft-badge-success'}"
+                              th:text="${s.status}">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div th:replace="footer :: footer"></div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/auth/farmer.js}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script th:inline="javascript">
+    var monthlyStats = /*[[${salesAnalysis.monthlyStats}]]*/ [];
+    var weekdayStats = /*[[${salesAnalysis.weekdayStats}]]*/ [];
+
+    var monthLabels = monthlyStats.map(function(m){ return m.label; });
+    var monthData   = monthlyStats.map(function(m){ return m.revenue; });
+    var weekLabels  = weekdayStats.map(function(w){ return w.day; });
+    var weekData    = weekdayStats.map(function(w){ return w.count; });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: '매출',
+                    data: monthData,
+                    backgroundColor: monthlyStats.map(function(m){
+                        return m.isCurrent ? '#A0522D' : '#D4A96A';
+                    }),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { ticks: { callback: function(v){ return v.toLocaleString() + '원'; } } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('weekdayChart'), {
+            type: 'bar',
+            data: {
+                labels: weekLabels,
+                datasets: [{
+                    label: '주문수',
+                    data: weekData,
+                    backgroundColor: weekdayStats.map(function(w){
+                        return w.isToday ? '#A0522D' : '#D4A96A';
+                    }),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { ticks: { stepSize: 1 } } }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
