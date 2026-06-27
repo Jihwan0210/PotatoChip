@@ -29,7 +29,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 카테고리 + 키워드(검색타입별) 필터 검색 (기본)
     @Query("SELECT p FROM Product p " +
-            "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
+            "WHERE p.stockQuantity > 0 " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
             "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
             "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
             "AND (:keyword = '' OR (" +
@@ -46,7 +47,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 인기순 검색 - ProductRankings의 WEEKLY salesCount 기준 내림차순
     @Query("SELECT p FROM Product p " +
             "LEFT JOIN ProductRankings r ON r.product = p AND r.periodType = 'WEEKLY' AND r.periodDate = :weekStart " +
-            "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
+            "WHERE p.stockQuantity > 0 " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
             "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
             "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
             "AND (:keyword = '' OR (" +
@@ -64,7 +66,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 가격순 검색 - 할인가 기준(없으면 원가) 낮은 순
     @Query("SELECT p FROM Product p " +
-            "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
+            "WHERE p.stockQuantity > 0 " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
             "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
             "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
             "AND (:keyword = '' OR (" +
@@ -100,7 +103,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 할인율순 검색 - 할인율 높은 순, 할인 없는 상품은 맨 뒤에 배치
     @Query("SELECT p FROM Product p " +
-            "WHERE (:category = '' OR :category = '전체' OR p.category = :category " +
+            "WHERE p.stockQuantity > 0 " +
+            "AND (:category = '' OR :category = '전체' OR p.category = :category " +
             "OR (:category = '기한임박' AND p.discountEndAt IS NOT NULL " +
             "AND p.discountEndAt >= :today AND p.discountEndAt < :expireLimit)) " +
             "AND (:keyword = '' OR (" +
