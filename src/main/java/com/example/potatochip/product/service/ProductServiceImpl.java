@@ -134,15 +134,20 @@ public class ProductServiceImpl implements ProductService{
 
         if (sellerEmail != null) {
             // 내 상품 필터: 정렬은 price/newest/기본만 지원 (popular/discount 제외)
-            Sort sorting = switch (sort) {
-                case "price"  -> Sort.by("price").ascending();
-                case "newest" -> Sort.by("createdAt").descending();
-                default       -> Sort.by("id").descending();
-            };
-            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
-            products = productRepository.searchProductsBySellerEmail(
-                    sellerEmail, category, keyword, searchType, today, expireLimit, sortedPageable
-            );
+            if ("price".equals(sort)) {
+                products = productRepository.searchProductsBySellerEmailAndPrice(
+                        sellerEmail, category, keyword, searchType, today, expireLimit, pageable
+                );
+            } else {
+                Sort sorting = switch (sort) {
+                    case "newest" -> Sort.by("createdAt").descending();
+                    default       -> Sort.by("id").descending();
+                };
+                Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorting);
+                products = productRepository.searchProductsBySellerEmail(
+                        sellerEmail, category, keyword, searchType, today, expireLimit, sortedPageable
+                );
+            }
         } else if ("popular".equals(sort)) {
             // 인기순: WEEKLY salesCount 기준 (이번 주 월요일 날짜로 필터)
             LocalDate weekStart = today.with(DayOfWeek.MONDAY);
@@ -154,10 +159,14 @@ public class ProductServiceImpl implements ProductService{
             products = productRepository.searchProductsByDiscount(
                     category, keyword, searchType, today, expireLimit, pageable
             );
+        } else if ("price".equals(sort)) {
+            // 가격순: 할인가 기준(없으면 원가) 낮은 순
+            products = productRepository.searchProductsByPrice(
+                    category, keyword, searchType, today, expireLimit, pageable
+            );
         } else {
-            // 가격순 / 최신순 / 기본(id 내림차순)
+            // 최신순 / 기본(id 내림차순)
             Sort sorting = switch (sort) {
-                case "price"  -> Sort.by("price").ascending();
                 case "newest" -> Sort.by("createdAt").descending();
                 default       -> Sort.by("id").descending();
             };

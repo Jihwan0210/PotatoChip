@@ -261,7 +261,8 @@
         <div class="cr-grid">
 
             <!-- ══ 왼쪽: 등록 폼 ══ -->
-            <form th:action="@{/market/create}" method="post" enctype="multipart/form-data">
+            <form th:action="@{/market/create}" method="post" enctype="multipart/form-data"
+                  novalidate onsubmit="return validateForm(event)">
 
                 <!-- ① 기본 정보 -->
                 <div class="cr-step">
@@ -663,6 +664,52 @@
                 });
             }
         }).open();
+    }
+
+    function validateForm(e) {
+        var checks = [
+            { el: document.querySelector('[name=name]'),          msg: '상품명을 입력해주세요.' },
+            { el: document.querySelector('[name=category]'),      msg: '카테고리를 선택해주세요.', empty: function(el){ return !el.value; } },
+            { el: document.querySelector('[name=price]'),         msg: '판매 가격을 입력해주세요.' },
+            { el: document.querySelector('[name=origin]'),        msg: '원산지를 입력해주세요.' },
+            { el: document.querySelector('[name=stockQuantity]'), msg: '재고 수량을 입력해주세요.' },
+            { el: document.querySelector('[name=expiryDate]'),    msg: '유통기한을 입력해주세요.' }
+        ];
+
+        for (var i = 0; i < checks.length; i++) {
+            var c = checks[i];
+            var isEmpty = c.empty ? c.empty(c.el) : !c.el.value.trim();
+            if (isEmpty) {
+                e.preventDefault();
+                c.el.focus();
+                c.el.style.border = '1.5px solid #e53935';
+                alert(c.msg);
+                return false;
+            }
+            c.el.style.border = '';
+        }
+
+        var stock = parseInt(document.querySelector('[name=stockQuantity]').value, 10);
+        if (isNaN(stock) || stock < 1) {
+            e.preventDefault();
+            var si = document.querySelector('[name=stockQuantity]');
+            si.focus();
+            si.style.border = '1.5px solid #e53935';
+            alert('재고는 1개 이상이어야 합니다.');
+            return false;
+        }
+
+        var pickup = document.querySelector('[name=isPickupAvailable]').value;
+        if (pickup === 'true') {
+            var addr = document.querySelector('[name=address]');
+            if (!addr || !addr.value.trim()) {
+                e.preventDefault();
+                alert('픽업 주소를 입력해주세요.');
+                return false;
+            }
+        }
+
+        return true;
     }
 </script>
 
