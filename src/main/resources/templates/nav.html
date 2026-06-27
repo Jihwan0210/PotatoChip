@@ -16,7 +16,7 @@
     <div class="nav-r">
         <!-- 알림 -->
         <div style="position:relative">
-        <span class="n-ico" id="bellIcon" style="cursor:pointer;position:relative">🔔<span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px">0</span></span><div id="notificationDropdown" style="display:none;position:fixed;right:70px;top:64px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 10px 30px rgba(42,30,6,.14);z-index:99999;overflow:hidden"><div style="padding:13px 15px;border-bottom:1px solid var(--sand);font-size:.86rem;font-weight:700;color:var(--dark)">알림</div><div id="notificationList" style="max-height:360px;overflow:auto"><div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오는 중...</div></div></div></div>
+        <span class="n-ico" id="bellIcon" style="cursor:pointer;position:relative">🔔<span id="notificationBadge" style="display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:50%;background:#E84040;color:#fff;font-size:.55rem;font-weight:700;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px"></span></span><div id="notificationDropdown" style="display:none;position:fixed;right:70px;top:64px;width:320px;background:#fff;border:1.5px solid var(--sand);border-radius:14px;box-shadow:0 10px 30px rgba(42,30,6,.14);z-index:99999;overflow:hidden"><div style="padding:13px 15px;border-bottom:1px solid var(--sand);font-size:.86rem;font-weight:700;color:var(--dark)">알림</div><div id="notificationList" style="max-height:360px;overflow:auto"><div style="padding:18px;text-align:center;font-size:.78rem;color:var(--muted)">알림을 불러오는 중...</div></div></div></div>
         <!-- 로그인 후: 이름 버튼 + 드롭다운 -->
         <div class="nav-user-wrap" id="nav-user-wrap" style="display:none">
             <button type="button" class="btn-nav nav-user-btn" id="nav-user-btn" onclick="toggleUserDropdown(event)">
@@ -321,11 +321,30 @@
                 });
         }
 
+        function hideNotificationBadge() {
+            var badge = document.getElementById('notificationBadge');
+
+            if (!badge) {
+                return;
+            }
+
+            badge.textContent = '';
+            badge.style.display = 'none';
+        }
+
         async function loadNotificationCount() {
             var token = getNavToken();
             var badge = document.getElementById('notificationBadge');
 
-            if (!token || !badge) return;
+            if (!badge) {
+                return;
+            }
+
+            hideNotificationBadge();
+
+            if (!token) {
+                return;
+            }
 
             try {
                 var response = await fetch('/api/notifications/unread-count', {
@@ -333,18 +352,23 @@
                     credentials: 'same-origin'
                 });
 
-                if (!response.ok) return;
+                if (!response.ok) {
+                    hideNotificationBadge();
+                    return;
+                }
 
                 var data = await response.json();
-                var count = data.count || 0;
+                var count = Number(data.count || 0);
 
                 if (count > 0) {
-                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.textContent = count > 99 ? '99+' : String(count);
                     badge.style.display = 'flex';
                 } else {
-                    badge.style.display = 'none';
+                    hideNotificationBadge();
                 }
-            } catch (e) {}
+            } catch (e) {
+                hideNotificationBadge();
+            }
         }
 
         async function toggleNotificationDropdown() {
