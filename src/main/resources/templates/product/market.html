@@ -33,36 +33,15 @@
         </div>
         <button onclick="doMktSearch()" class="mkt-search-btn">검색</button>
     </div>
-    <!-- 카테고리 탭 (3개) -->
     <div class="mkt-tabs">
-        <div id="mkt-tab-0" onclick="switchMktTab(0)" style="padding:12px 0;text-align:center;border-bottom:2px solid var(--green);font-size:.8rem;font-weight:500;color:var(--dark);cursor:pointer">전체 상품</div>
+        <div id="mkt-tab-0" onclick="openAllProductsTab()" style="padding:12px 0;text-align:center;border-bottom:2px solid var(--green);font-size:.8rem;font-weight:500;color:var(--dark);cursor:pointer">전체 상품</div>
         <div id="mkt-tab-1" onclick="switchMktTab(1)" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer">AI 추천</div>
-        <div id="mkt-tab-2" onclick="openRecPopup()" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">✨ 인기 상품 추천</div>
-    </div>
-</div>
-
-<!-- 인기상품추천 팝업 -->
-<div id="recPopup" style="display:none;position:fixed;bottom:100px;right:100px;width:420px;height:460px;min-width:320px;min-height:300px;max-width:90vw;max-height:82vh;background:#fff;border:1.5px solid var(--sand);border-radius:16px;box-shadow:0 12px 40px rgba(42,30,6,.16);z-index:9990;overflow:hidden;resize:both">
-    <div id="recPopupHeader" style="background:linear-gradient(135deg,var(--green),#5A9A30);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none">
-        <div>
-            <div style="font-size:1rem;font-weight:700;color:#fff;font-family:Gaegu,cursive">🔥 인기상품 추천</div>
-            <div style="font-size:.76rem;color:rgba(255,255,255,.86);margin-top:3px;font-weight:600">주문수 · 찜수 · 리뷰수 · 평점 · 최신등록순 기반</div>
-        </div>
-        <span class="rec-popup-close" onclick="closeRecPopup()" style="cursor:pointer;color:rgba(255,255,255,.85);font-size:1.2rem;line-height:1">✕</span>
-    </div>
-    <div style="padding:14px 16px;max-height:calc(100% - 112px);overflow:auto">
-        <div style="font-size:.86rem;font-weight:700;color:var(--amber);margin-bottom:12px;display:flex;align-items:center;gap:6px">🔥 지금 인기 있는 상품</div>
-        <div id="popularRecommendationList" style="min-height:80px">
-            <div style="font-size:.74rem;color:var(--muted);padding:12px 0;text-align:center">인기상품을 불러오는 중...</div>
-        </div>
-    </div>
-    <div style="padding:0 14px 12px">
-        <button onclick="location.href='/market';closeRecPopup();" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">전체 추천 상품 보기 →</button>
+        <div id="mkt-tab-2" onclick="switchMktTab(2)" style="padding:12px 0;text-align:center;font-size:.8rem;color:var(--muted);cursor:pointer">🔥 인기상품 추천</div>
     </div>
 </div>
 
 <!-- 필터 -->
-<div class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
+<div id="mktCategoryBar" class="mkt-bar" style="display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none">
     <div class="mf" th:classappend="${category == '' or category == '전체'} ? ' on'" onclick="mktF(this)">전체</div>
     <div class="mf" th:classappend="${category == '채소'} ? ' on'" onclick="mktF(this)">채소 🥦</div>
     <div class="mf" th:classappend="${category == '과일'} ? ' on'" onclick="mktF(this)">과일 🍎</div>
@@ -73,7 +52,7 @@
 </div>
 
 <!-- ======= 탭 0: 전체 상품 ======= -->
-<div id="mkt-content-0" style="padding:22px 5%">
+<div id="mkt-content-0" style="display:block;padding:22px 5%">
     <div class="mkt-list-header">
         <span class="pgrid-count">총 <strong style="color:var(--dark)" th:text="${totalElements}"></strong>개 상품</span>
         <!-- 정렬 버튼 -->
@@ -186,6 +165,20 @@
     </div>
     <div id="aiRecommendationGrid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
         <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">AI 추천 상품을 불러오는 중...</div>
+    </div>
+</div>
+
+
+<div id="mkt-content-2" style="display:none;padding:28px 5%;max-width:1240px;margin:0 auto">
+    <div style="background:linear-gradient(135deg,#fff8ed,#fffaf4);border:1.5px solid var(--sand);border-radius:16px;padding:20px 24px;margin-bottom:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">🔥</div>
+        <div>
+            <div style="font-family:Gaegu,cursive;font-size:1rem;font-weight:700;color:var(--amber);margin-bottom:3px">인기상품 추천</div>
+            <div style="font-size:.78rem;color:var(--mid)">주문수, 찜수, 리뷰수, 평점, 최신등록순을 기준으로 인기 상품을 보여드려요</div>
+        </div>
+    </div>
+    <div id="popularRecommendationList" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
+        <div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.82rem;padding:26px 0">인기상품을 불러오는 중...</div>
     </div>
 </div>
 
