@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Getter
     private static class PendingOrder {
         private final Long userId;
-        private final String partnerOrderId;  // ready 때 생성한 값 그대로 보관
+        private final String partnerOrderId;
         private final String shippingAddress;
         private final String deliveryType;
         private final List<Long> selectedProductIds;
@@ -120,7 +120,7 @@ public class PaymentServiceImpl implements PaymentService {
         Map<String, Object> body = new HashMap<>();
         body.put("cid", cid);
         body.put("tid", tid);
-        body.put("partner_order_id", pending.getPartnerOrderId()); // ready 때와 동일한 값
+        body.put("partner_order_id", pending.getPartnerOrderId());
         body.put("partner_user_id", String.valueOf(userId));
         body.put("pg_token", pgToken);
 
