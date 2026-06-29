@@ -2,6 +2,7 @@ package com.example.potatochip.review.repository;
 
 import com.example.potatochip.review.entity.ReviewHelpful;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -37,4 +38,8 @@ public interface ReviewHelpfulRepository extends JpaRepository<ReviewHelpful, Lo
             @Param("reviewId") Long reviewId,
             @Param("userId") Long userId
     );
+
+    @Modifying
+    @Query("DELETE FROM ReviewHelpful rh WHERE rh.review.reviewId IN (SELECT r.reviewId FROM Review r WHERE r.product.id = :productId)")
+    void deleteByProductId(@Param("productId") Long productId);
 }
