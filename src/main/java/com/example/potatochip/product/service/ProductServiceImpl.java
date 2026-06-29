@@ -21,9 +21,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.example.potatochip.ai.repository.AiReviewSummaryRepository;
+import com.example.potatochip.ai.repository.ProductRecommendationRepository;
 import com.example.potatochip.notification.service.NotificationService;
 import com.example.potatochip.product.entity.Wishlist;
+import com.example.potatochip.product.repository.ProductRankingsRepository;
 import com.example.potatochip.product.repository.WishRepository;
+import com.example.potatochip.review.repository.ReviewHelpfulRepository;
+import com.example.potatochip.review.repository.ReviewRepository;
 
 import java.math.BigDecimal;
 
@@ -37,6 +42,11 @@ public class ProductServiceImpl implements ProductService{
     private final UserRepository userRepository;
     private final WishRepository wishRepository;
     private final NotificationService notificationService;
+    private final ReviewHelpfulRepository reviewHelpfulRepository;
+    private final ReviewRepository reviewRepository;
+    private final AiReviewSummaryRepository aiReviewSummaryRepository;
+    private final ProductRecommendationRepository productRecommendationRepository;
+    private final ProductRankingsRepository productRankingsRepository;
 
 
 
@@ -117,7 +127,13 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteProduct(Long id) {
+        reviewHelpfulRepository.deleteByProductId(id);
+        reviewRepository.deleteByProductId(id);
+        aiReviewSummaryRepository.deleteByProductId(id);
+        productRecommendationRepository.deleteByProductId(id);
+        productRankingsRepository.deleteByProductId(id);
         productRepository.deleteById(id);
     }
 

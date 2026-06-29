@@ -2,6 +2,7 @@ package com.example.potatochip.review.repository;
 
 import com.example.potatochip.review.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -84,4 +85,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         having count(r.reviewId) >= :minReviewCount
         """)
     List<Long> findProductIdsHavingReviewCountAtLeast(@Param("minReviewCount") long minReviewCount);
+
+    @Modifying
+    @Query("DELETE FROM Review r WHERE r.product.id = :productId")
+    void deleteByProductId(@Param("productId") Long productId);
 }

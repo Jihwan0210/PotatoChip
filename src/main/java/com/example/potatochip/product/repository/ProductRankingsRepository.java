@@ -24,4 +24,8 @@ public interface ProductRankingsRepository extends JpaRepository<ProductRankings
     @Query("DELETE FROM ProductRankings p WHERE p.periodType = :periodType AND p.periodDate = :periodDate")
     void deleteByPeriodTypeAndPeriodDate(@Param("periodType") PeriodType periodType,
                                          @Param("periodDate") LocalDate periodDate);
+
+    @Modifying
+    @Query("DELETE FROM ProductRankings pr WHERE pr.product.id = :productId")
+    void deleteByProductId(@Param("productId") Long productId);
 }

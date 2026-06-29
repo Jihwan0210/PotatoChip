@@ -2,6 +2,7 @@ package com.example.potatochip.ai.repository;
 
 import com.example.potatochip.ai.entity.AiReviewSummary;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,4 +32,8 @@ public interface AiReviewSummaryRepository extends JpaRepository<AiReviewSummary
               and a.isActive = true
             """)
     boolean existsByProductIdAndIsActiveTrue(@Param("productId") Long productId);
+
+    @Modifying
+    @Query("DELETE FROM AiReviewSummary a WHERE a.product.id = :productId")
+    void deleteByProductId(@Param("productId") Long productId);
 }
