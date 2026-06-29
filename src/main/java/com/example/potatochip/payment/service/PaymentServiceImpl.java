@@ -42,15 +42,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Getter
     private static class PendingOrder {
         private final Long userId;
+        private final String partnerOrderId;
         private final String shippingAddress;
         private final String deliveryType;
         private final List<Long> selectedProductIds;
         private final BigDecimal shippingFee;
         private final int totalAmount;
 
-        PendingOrder(Long userId, String shippingAddress, String deliveryType,
+        PendingOrder(Long userId, String partnerOrderId, String shippingAddress, String deliveryType,
                      List<Long> selectedProductIds, BigDecimal shippingFee, int totalAmount) {
             this.userId = userId;
+            this.partnerOrderId = partnerOrderId;
             this.shippingAddress = shippingAddress;
             this.deliveryType = deliveryType;
             this.selectedProductIds = selectedProductIds;
@@ -75,7 +77,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         Map<String, Object> body = new HashMap<>();
         body.put("cid", cid);
-        body.put("partner_order_id", "pending_" + userId + "_" + System.currentTimeMillis());
+        String partnerOrderId = "order_" + userId + "_" + System.currentTimeMillis();
+        body.put("partner_order_id", partnerOrderId);
         body.put("partner_user_id", String.valueOf(userId));
         body.put("item_name", itemName);
         body.put("quantity", 1);
@@ -93,7 +96,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 주문 정보를 tid와 함께 임시 보관 (주문 생성은 approve 때)
         pendingStore.put(ready.getTid(), new PendingOrder(
-                userId, shippingAddress, deliveryType,
+                userId, partnerOrderId, shippingAddress, deliveryType,
                 selectedProductIds, shippingFee, totalAmount
         ));
         userTidStore.put(userId, ready.getTid());
@@ -117,7 +120,7 @@ public class PaymentServiceImpl implements PaymentService {
         Map<String, Object> body = new HashMap<>();
         body.put("cid", cid);
         body.put("tid", tid);
-        body.put("partner_order_id", "pending_" + userId);
+        body.put("partner_order_id", pending.getPartnerOrderId());
         body.put("partner_user_id", String.valueOf(userId));
         body.put("pg_token", pgToken);
 
