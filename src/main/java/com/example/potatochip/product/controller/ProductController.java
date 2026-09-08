@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -102,8 +103,10 @@ public class ProductController {
     public String createProduct(ProductDTO productDTO,
                                 @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                                 @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
-                                @RequestParam("sellerEmail") String sellerEmail) throws IOException {
+                                Authentication authentication) throws IOException {
 
+        // 판매자는 로그인한 유저로 고정 (클라이언트가 보낸 값 신뢰하지 않음)
+        String sellerEmail = requireLogin(authentication);
         Product product = productService.createProduct(productDTO, thumbnailFile, sellerEmail);
 
         if (imageFiles != null && !imageFiles.isEmpty()) {
@@ -116,13 +119,19 @@ public class ProductController {
 
     @DeleteMapping("/market/{id}")
     @ResponseBody
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id, Authentication authentication) {
+        if (!isOwner(id, authentication)) {
+            return ResponseEntity.status(403).build();
+        }
         productService.deleteProduct(id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/market/edit/{id}")
-    public String marketEdit(@PathVariable Long id, Model model) {
+    public String marketEdit(@PathVariable Long id, Model model, Authentication authentication) {
+        if (!isOwner(id, authentication)) {
+            return "redirect:/market/detail?id=" + id;
+        }
         ProductDTO product = productService.getProductById(id);
         model.addAttribute("product", product);
 
@@ -146,7 +155,11 @@ public class ProductController {
                               ProductDTO productDTO,
                               @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
                               @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFiles,
-                              @RequestParam(value = "deleteImageIds", required = false) List<Long> deleteImageIds) throws IOException {
+                              @RequestParam(value = "deleteImageIds", required = false) List<Long> deleteImageIds,
+                              Authentication authentication) throws IOException {
+        if (!isOwner(id, authentication)) {
+            return "redirect:/market/detail?id=" + id;
+        }
         productDTO.setId(id);
         if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
             String url = fileService.upload(thumbnailFile);
@@ -191,6 +204,23 @@ public class ProductController {
     @ResponseBody
     public AnalyzeImageResult analyzeImage(@RequestParam("image") MultipartFile image) throws IOException {
         return productImageAnalysisService.analyze(image);
+    }
+
+    // 로그인한 유저의 이메일 반환, 미로그인 시 예외
+    private String requireLogin(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+        return authentication.getName();
+    }
+
+    // 해당 상품의 판매자가 현재 로그인한 유저인지 확인
+    private boolean isOwner(Long productId, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        ProductDTO product = productService.getProductById(productId);
+        return product != null && authentication.getName().equals(product.getSellerEmail());
     }
 
 }
