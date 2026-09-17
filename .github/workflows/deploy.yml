@@ -33,7 +33,7 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
             docker rm -f potatochip || true
             docker run -d --name potatochip --restart unless-stopped \
-              -p 80:8080 \
+              -p 127.0.0.1:8080:8080 \
               -v /home/ubuntu/config:/app/config \
               -v /home/ubuntu/uploads:/app/uploads \
               ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
