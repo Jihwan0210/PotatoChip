@@ -15,7 +15,7 @@ import com.example.potatochip.product.coupons.service.CouponService;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
 import com.example.potatochip.product.service.ranking.ProductRankingsService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -109,23 +109,15 @@ public class OrderServiceImpl implements OrderService {
                 .status(OrderStatus.PAYMENT_COMPLETE)
                 .build();
 
-        // 7. 재고 확인 (주문 전 선제 검증)
-        for (CartItem cartItem : targetItems) {
-            Product product = productRepository.findById(cartItem.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다: " + cartItem.getProductId()));
-            if (product.getStockQuantity() < cartItem.getQuantity()) {
-                throw new IllegalStateException(
-                        "'" + product.getName() + "' 재고가 부족합니다. (남은 재고: " + product.getStockQuantity() + ")");
-            }
-        }
-
-        // 8. OrderItem 생성 + 재고 차감
+        // 7. OrderItem 생성 + 원자적 재고 차감 (조건부 UPDATE로 오버셀 방지)
         targetItems.forEach(cartItem -> {
+            int updated = productRepository.decreaseStock(cartItem.getProductId(), cartItem.getQuantity());
+            if (updated == 0) {
+                throw new IllegalStateException("재고가 부족하거나 존재하지 않는 상품입니다: " + cartItem.getProductId());
+            }
+
             Product product = productRepository.findById(cartItem.getProductId()).orElseThrow();
             Long sellerId = product.getSeller() != null ? product.getSeller().getId() : 1L;
-
-            product.setStockQuantity(product.getStockQuantity() - cartItem.getQuantity());
-            productRepository.save(product);
 
             OrderItem orderItem = OrderItem.builder()
                     .productId(cartItem.getProductId())
