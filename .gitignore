@@ -39,4 +39,7 @@ out/
 ### 민감 설정 파일 ###
 src/main/resources/application.properties
 
+### 업로드 이미지 (호스트 볼륨에 저장, git 추적 안 함) ###
+uploads/
+
 

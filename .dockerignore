@@ -1,0 +1,9 @@
+.git
+.github
+.gradle
+build
+uploads
+*.md
+.idea
+.vscode
+src/main/resources/application.properties

@@ -1,0 +1,40 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. 이미지 빌드 + Docker Hub push (빌드는 러너에서 = EC2 메모리 안전)
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
+
+      # 2. EC2에 ssh → pull → 재실행 (설정·업로드는 호스트 볼륨 유지)
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
+            docker rm -f potatochip || true
+            docker run -d --name potatochip --restart unless-stopped \
+              -p 80:8080 \
+              -v /home/ubuntu/config:/app/config \
+              -v /home/ubuntu/uploads:/app/uploads \
+              ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
+            docker image prune -f
