@@ -154,4 +154,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                       @Param("productId") Long productId,
                                       Pageable pageable);
 
+    // 원자적 재고 차감 (조건부 UPDATE) - 재고가 충분할 때만 차감, 반환값 0이면 재고 부족
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true)
+    @Query("UPDATE Product p SET p.stockQuantity = p.stockQuantity - :qty " +
+           "WHERE p.id = :id AND p.stockQuantity >= :qty")
+    int decreaseStock(@Param("id") Long id, @Param("qty") int qty);
+
 }
