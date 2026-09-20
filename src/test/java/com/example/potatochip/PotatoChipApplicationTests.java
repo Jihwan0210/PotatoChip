@@ -1,4 +1,4 @@
-package example;
+package com.example.potatochip;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
