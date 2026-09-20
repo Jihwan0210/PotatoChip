@@ -23,18 +23,20 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
 
-      # 2. EC2에 ssh → pull → 재실행 (설정·업로드는 호스트 볼륨 유지)
+      # 2. EC2에 ssh → pull → 재실행 (설정은 .env 주입, 업로드는 호스트 볼륨 유지)
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # .env 없으면 기존 컨테이너 살려둔 채 중단 (docker rm 후 run 실패 = 서비스 다운 방지)
+            test -f /home/ubuntu/.env || { echo "ERROR: /home/ubuntu/.env 없음"; exit 1; }
             docker pull ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
             docker rm -f potatochip || true
             docker run -d --name potatochip --restart unless-stopped \
               -p 127.0.0.1:8080:8080 \
-              -v /home/ubuntu/config:/app/config \
+              --env-file /home/ubuntu/.env \
               -v /home/ubuntu/uploads:/app/uploads \
               ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
             docker image prune -f
