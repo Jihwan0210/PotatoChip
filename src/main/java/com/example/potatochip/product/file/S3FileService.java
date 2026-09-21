@@ -21,9 +21,12 @@ public class S3FileService implements FileService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    // LocalFileService 와 동일하게 products/ 아래에 모은다 (버킷 루트가 지저분해지는 것 방지)
+    private static final String KEY_PREFIX = "products/";
+
     @Override
     public String upload(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = KEY_PREFIX + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
