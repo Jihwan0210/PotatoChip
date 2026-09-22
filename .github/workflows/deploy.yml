@@ -67,3 +67,19 @@ jobs:
               -v /home/ubuntu/uploads:/app/uploads \
               ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
             docker image prune -f
+
+            # docker run -d 는 컨테이너만 띄우고 반환한다. 앱이 실제로 기동했는지는
+            # 확인하지 않으므로, 여기서 응답을 볼 때까지 기다린다.
+            # 이 검증이 없으면 앱이 크래시 루프여도 배포가 초록불로 끝난다.
+            echo "기동 대기..."
+            for i in $(seq 1 30); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:8080/ || true)
+              case "$code" in
+                2*|3*) echo "기동 확인 (HTTP $code, ${i}0초)"; exit 0 ;;
+              esac
+              sleep 10
+            done
+
+            echo "::error::앱이 300초 안에 기동하지 못했습니다"
+            docker logs --tail 50 potatochip
+            exit 1
