@@ -4,6 +4,7 @@ import com.example.potatochip.auth.util.JwtUtil;
 import com.example.potatochip.board.dto.BoardResponse;
 import com.example.potatochip.board.entity.Board;
 import com.example.potatochip.board.service.BoardService;
+import com.example.potatochip.product.file.FileService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final JwtUtil jwtUtil;
+    private final FileService fileService;
 
     @GetMapping("/board")
     public String boardPage() {
@@ -61,15 +63,9 @@ public class BoardController {
     ) {
         if (image != null && !image.isEmpty()) {
             try {
-                String uploadDir = "C:/minsung/uploads/";
-                java.io.File folder = new java.io.File(uploadDir);
-                if (!folder.exists()) folder.mkdirs();
-                String savedFileName = java.util.UUID.randomUUID() + "_" + image.getOriginalFilename();
-                java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
-                image.transferTo(destinationFile);
-                board.setImageUrl("/uploads/" + savedFileName);
+                board.setImageUrl(fileService.upload(image));
             } catch (java.io.IOException e) {
-                e.printStackTrace();
+                throw new IllegalStateException("이미지 업로드에 실패했습니다.", e);
             }
         }
 
@@ -102,15 +98,9 @@ public class BoardController {
     ) {
         if (image != null && !image.isEmpty()) {
             try {
-                String uploadDir = "C:/minsung/uploads/";
-                java.io.File folder = new java.io.File(uploadDir);
-                if (!folder.exists()) folder.mkdirs();
-                String savedFileName = java.util.UUID.randomUUID() + "_" + image.getOriginalFilename();
-                java.io.File destinationFile = new java.io.File(uploadDir + savedFileName);
-                image.transferTo(destinationFile);
-                updatedBoard.setImageUrl("/uploads/" + savedFileName);
+                updatedBoard.setImageUrl(fileService.upload(image));
             } catch (java.io.IOException e) {
-                e.printStackTrace();
+                throw new IllegalStateException("이미지 업로드에 실패했습니다.", e);
             }
         }
 
