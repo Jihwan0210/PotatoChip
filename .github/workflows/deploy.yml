@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # CI: 테스트 게이트. 실패하면 deploy 가 아예 돌지 않는다.
   test:
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +23,6 @@ jobs:
 
       - run: ./gradlew test --no-daemon
 
-      # 실패 원인을 액션 화면에서 바로 보려면 리포트가 필요하다
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -68,9 +66,7 @@ jobs:
               ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
             docker image prune -f
 
-            # docker run -d 는 컨테이너만 띄우고 반환한다. 앱이 실제로 기동했는지는
-            # 확인하지 않으므로, 여기서 응답을 볼 때까지 기다린다.
-            # 이 검증이 없으면 앱이 크래시 루프여도 배포가 초록불로 끝난다.
+            # docker run -d 는 컨테이너만 띄우고 반환하므로 앱 기동 여부를 직접 확인한다
             echo "기동 대기..."
             for i in $(seq 1 30); do
               code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:8080/ || true)

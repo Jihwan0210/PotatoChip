@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -64,22 +65,42 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("선택된 상품이 없습니다.");
         }
 
-        // 4. 총 금액 계산
+        // 4. 결제 시점 현재가 조회
+        //    담을 때의 priceSnapshot이 아니라 결제 시점의 서버 현재가로 금액을 계산한다.
+        //    - 마감임박 할인 등 가격 하락을 결제에 반영
+        //    - 클라이언트가 보낸 금액(totalAmount)을 신뢰하지 않고 서버가 재계산
+        //    priceSnapshot은 장바구니에서 "담을 때 가격" 표시/비교용으로만 유지한다.
+        Map<Long, BigDecimal> currentPriceByProduct = new HashMap<>();
+        Map<Long, Long> sellerIdByProduct = new HashMap<>();
+        for (CartItem item : targetItems) {
+            Product product = productRepository.findById(item.getProductId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다: " + item.getProductId()));
+            BigDecimal currentPrice = product.getDiscountPrice() != null
+                    ? product.getDiscountPrice()
+                    : product.getPrice();
+            currentPriceByProduct.put(product.getId(), currentPrice);
+            sellerIdByProduct.put(product.getId(),
+                    product.getSeller() != null ? product.getSeller().getId() : 1L);
+        }
+
+        // 총 금액 = 현재가 × 수량 (서버 계산)
         BigDecimal totalAmount = targetItems.stream()
-                .map(item -> item.getPriceSnapshot().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .map(item -> currentPriceByProduct.get(item.getProductId())
+                        .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal shippingFee = requestDTO.getShippingFee() != null
                 ? requestDTO.getShippingFee()
                 : BigDecimal.ZERO;
 
-        // 5. 쿠폰 할인 적용
+        // 5. 쿠폰 할인 적용 (현재가 기준)
         BigDecimal couponDiscount = BigDecimal.ZERO;
         if (requestDTO.getUserCouponId() != null) {
             Map<Long, BigDecimal> amountByProduct = targetItems.stream()
                     .collect(Collectors.toMap(
                             CartItem::getProductId,
-                            item -> item.getPriceSnapshot().multiply(BigDecimal.valueOf(item.getQuantity()))
+                            item -> currentPriceByProduct.get(item.getProductId())
+                                    .multiply(BigDecimal.valueOf(item.getQuantity()))
                     ));
 
             List<Long> orderedProductIds = new ArrayList<>(amountByProduct.keySet());
@@ -116,14 +137,11 @@ public class OrderServiceImpl implements OrderService {
                 throw new IllegalStateException("재고가 부족하거나 존재하지 않는 상품입니다: " + cartItem.getProductId());
             }
 
-            Product product = productRepository.findById(cartItem.getProductId()).orElseThrow();
-            Long sellerId = product.getSeller() != null ? product.getSeller().getId() : 1L;
-
             OrderItem orderItem = OrderItem.builder()
                     .productId(cartItem.getProductId())
-                    .sellerId(sellerId)
+                    .sellerId(sellerIdByProduct.get(cartItem.getProductId()))
                     .quantity(cartItem.getQuantity())
-                    .price(cartItem.getPriceSnapshot())
+                    .price(currentPriceByProduct.get(cartItem.getProductId()))
                     .shippingFee(BigDecimal.ZERO)
                     .status(OrderStatus.PAYMENT_COMPLETE)
                     .build();
