@@ -4,7 +4,6 @@ import com.example.potatochip.cart.entity.Cart;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -46,5 +45,4 @@ public class CartItem {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-    private BigDecimal priceSnapshot;
 }

@@ -40,7 +40,7 @@ public class CartServiceImpl implements CartService {
                             .buyerId(buyerId)
                             .productId(item.getProductId())
                             .quantity(item.getQuantity())
-                            .price(item.getPriceSnapshot())
+                            .price(product != null ? product.currentPrice() : BigDecimal.ZERO)
                             .productName(product != null ? product.getName() : "상품 없음")
                             .thumbnailUrl(product != null ? product.getThumbnailUrl() : "")
                             .origin(product != null ? product.getOrigin() : "")
@@ -68,18 +68,13 @@ public class CartServiceImpl implements CartService {
                 .ifPresentOrElse(existingItem ->
                                 existingItem.setQuantity(existingItem.getQuantity() + requestDTO.getQuantity()),
                         () -> {
-                            Product product = productRepository.findById(requestDTO.getProductId())
-                                    .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-
-                            // BigDecimal이라 그냥 바로 사용
-                            BigDecimal price = product.getDiscountPrice() != null
-                                    ? product.getDiscountPrice()
-                                    : product.getPrice();
+                            if (!productRepository.existsById(requestDTO.getProductId())) {
+                                throw new IllegalArgumentException("상품이 존재하지 않습니다.");
+                            }
 
                             CartItem newItem = CartItem.builder()
                                     .productId(requestDTO.getProductId())
                                     .quantity(requestDTO.getQuantity())
-                                    .priceSnapshot(price)
                                     .build();
                             cart.addItem(newItem);
                         }

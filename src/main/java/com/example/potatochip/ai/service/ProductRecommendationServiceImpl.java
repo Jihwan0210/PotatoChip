@@ -321,9 +321,7 @@ public class ProductRecommendationServiceImpl implements ProductRecommendationSe
         try {
             String categoriesText = String.join(", ", purchasedCategories);
 
-            String priceText = product.getDiscountPrice() != null
-                    ? product.getDiscountPrice().toPlainString()
-                    : product.getPrice().toPlainString();
+            String priceText = product.currentPrice().toPlainString();
 
             String prompt = """
                     사용자의 구매 카테고리와 추천 상품 정보를 보고 추천 이유를 작성해.

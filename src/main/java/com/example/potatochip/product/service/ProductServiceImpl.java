@@ -99,12 +99,12 @@ public class ProductServiceImpl implements ProductService{
         Optional<Product> result = productRepository.findById(productDTO.getId());
         Product product = result.orElseThrow();
 
-        BigDecimal oldPrice = product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+        BigDecimal oldPrice = product.currentPrice();
 
         product.changeEntity(productDTO);
         productRepository.save(product);
 
-        BigDecimal newPrice = product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+        BigDecimal newPrice = product.currentPrice();
 
         if (oldPrice != null && newPrice != null && oldPrice.compareTo(newPrice) != 0) {
             List<Wishlist> wishlists = wishRepository.findByProductId(product.getId());

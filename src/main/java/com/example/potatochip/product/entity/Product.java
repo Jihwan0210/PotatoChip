@@ -8,6 +8,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,6 +108,15 @@ public class Product {
                 this.longitude = productDTO.getLongitude();
                 this.operatingHours = productDTO.getOperatingHours();
                 this.updatedAt = LocalDateTime.now();
+        }
+
+        // 할인 기간 안이면 할인가, 아니면 정가
+        public BigDecimal currentPrice() {
+                LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+                boolean onDiscount = discountPrice != null
+                        && (discountStartAt == null || !today.isBefore(discountStartAt))
+                        && (discountEndAt == null || !today.isAfter(discountEndAt));
+                return onDiscount ? discountPrice : price;
         }
 
         @PrePersist
