@@ -47,11 +47,11 @@
                 <div style="font-size:.67rem;color:var(--muted);margin-bottom:10px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.4rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.66rem;color:var(--muted);margin-bottom:8px">이번 주 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.68rem;color:var(--muted);text-decoration:line-through"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.68rem;color:var(--muted);text-decoration:line-through"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:12px;background:var(--dark);color:#fff;border:none;border-radius:10px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">상세보기</button>
@@ -82,11 +82,11 @@
                 <div style="font-size:.68rem;color:var(--muted);margin-bottom:12px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px">이번 주 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.7rem;color:var(--muted);text-decoration:line-through"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.7rem;color:var(--muted);text-decoration:line-through"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:14px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(123,191,69,.35)">상세보기</button>
@@ -117,11 +117,11 @@
                 <div style="font-size:.67rem;color:var(--muted);margin-bottom:10px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.4rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.66rem;color:var(--muted);margin-bottom:8px">이번 주 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.68rem;color:var(--muted);text-decoration:line-through"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.68rem;color:var(--muted);text-decoration:line-through"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:12px;background:var(--dark);color:#fff;border:none;border-radius:10px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">상세보기</button>
@@ -166,7 +166,7 @@
                     </div>
                 </div>
                 <div class="rank-col-price" style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
-                     th:text="${item.product.discountPrice != null ? #numbers.formatInteger(item.product.discountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
+                     th:text="${item.product.activeDiscountPrice != null ? #numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
                 <div style="text-align:right;font-size:.9rem;font-weight:700;color:var(--green)"
                      th:text="${item.salesCount} + '건'"></div>
             </div>
@@ -201,9 +201,9 @@
                 <div style="font-size:.67rem;color:var(--muted);margin-bottom:10px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.4rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.66rem;color:var(--muted);margin-bottom:8px">오늘 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:12px;background:var(--dark);color:#fff;border:none;border-radius:10px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">상세보기</button>
@@ -232,9 +232,9 @@
                 <div style="font-size:.68rem;color:var(--muted);margin-bottom:12px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px">오늘 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:1rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:14px;background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(123,191,69,.35)">상세보기</button>
@@ -263,9 +263,9 @@
                 <div style="font-size:.67rem;color:var(--muted);margin-bottom:10px" th:text="${item.product.origin}"></div>
                 <div style="font-family:Gaegu,cursive;font-size:1.4rem;font-weight:700;color:var(--green)" th:text="${item.salesCount} + '건'"></div>
                 <div style="font-size:.66rem;color:var(--muted);margin-bottom:8px">오늘 판매</div>
-                <div th:if="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
-                     th:text="${#numbers.formatInteger(item.product.discountPrice,3,'COMMA')} + '원'"></div>
-                <div th:unless="${item.product.discountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                <div th:if="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
+                     th:text="${#numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')} + '원'"></div>
+                <div th:unless="${item.product.activeDiscountPrice != null}" style="font-size:.9rem;font-weight:700;color:var(--dark)"
                      th:text="${#numbers.formatInteger(item.product.price,3,'COMMA')} + '원'"></div>
                 <button th:onclick="|location.href='@{/market/detail(id=${item.product.id})}'|"
                         style="width:100%;margin-top:12px;background:var(--dark);color:#fff;border:none;border-radius:10px;padding:9px;font-size:.82rem;font-weight:600;cursor:pointer">상세보기</button>
@@ -307,7 +307,7 @@
                     </div>
                 </div>
                 <div class="rank-col-price" style="text-align:right;font-size:.84rem;font-weight:700;color:var(--dark)"
-                     th:text="${item.product.discountPrice != null ? #numbers.formatInteger(item.product.discountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
+                     th:text="${item.product.activeDiscountPrice != null ? #numbers.formatInteger(item.product.activeDiscountPrice,3,'COMMA')+'원' : #numbers.formatInteger(item.product.price,3,'COMMA')+'원'}"></div>
                 <div style="text-align:right;font-size:.9rem;font-weight:700;color:var(--green)"
                      th:text="${item.salesCount} + '건'"></div>
             </div>

@@ -139,7 +139,7 @@ public class MyPageController {
                     item.put("name",         p.getName());
                     item.put("category",     p.getCategory());
                     item.put("price",        p.getPrice());
-                    item.put("discountPrice",p.getDiscountPrice());
+                    item.put("discountPrice",p.getActiveDiscountPrice());
                     item.put("thumbnailUrl", p.getThumbnailUrl());
                     return item;
                 })

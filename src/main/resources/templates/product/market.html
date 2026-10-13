@@ -81,8 +81,8 @@
         <div class="pc2"
              th:each="product : ${products}"
              th:data-category="${product.category}"
-             th:data-price="${product.discountPrice != null ? product.discountPrice : product.price}"
-             th:data-discount="${product.discountPrice != null ? (product.price - product.discountPrice) * 100 / product.price : 0}"
+             th:data-price="${product.activeDiscountPrice != null ? product.activeDiscountPrice : product.price}"
+             th:data-discount="${product.activeDiscountPrice != null ? (product.price - product.activeDiscountPrice) * 100 / product.price : 0}"
              th:data-id="${product.id}"
              th:onclick="|location.href='@{/market/detail(id=${product.id})}'|"
              style="cursor:pointer">
@@ -108,17 +108,17 @@
                 <div class="pc2-nm" th:text="${product.name}"></div>
                 <div class="pc2-pr">
                     <span class="pc2-disc"
-                          th:if="${product.discountPrice != null}"
-                          th:with="rate=${(product.price - product.discountPrice) * 100 / product.price}"
+                          th:if="${product.activeDiscountPrice != null}"
+                          th:with="rate=${(product.price - product.activeDiscountPrice) * 100 / product.price}"
                           th:text="'-' + ${#numbers.formatInteger(rate, 1, 'DEFAULT')} + '%'"></span>
                     <span class="pc2-price"
-                          th:if="${product.discountPrice != null}"
-                          th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'"></span>
+                          th:if="${product.activeDiscountPrice != null}"
+                          th:text="${#numbers.formatInteger(product.activeDiscountPrice, 3, 'COMMA')} + '원'"></span>
                     <span class="pc2-price"
-                          th:unless="${product.discountPrice != null}"
+                          th:unless="${product.activeDiscountPrice != null}"
                           th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'"></span>
                     <span class="pc2-og"
-                          th:if="${product.discountPrice != null}"
+                          th:if="${product.activeDiscountPrice != null}"
                           th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'"></span>
                 </div>
                 <div class="pc2-meta">

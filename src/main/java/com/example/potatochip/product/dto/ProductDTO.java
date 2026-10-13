@@ -67,4 +67,9 @@ public class ProductDTO {
         return createdAt != null && createdAt.isAfter(LocalDateTime.now().minusDays(5));
     }
 
+    // 지금 적용 중인 할인가 (할인 기간 밖이면 null)
+    public BigDecimal getActiveDiscountPrice() {
+        return Product.isDiscountActive(discountPrice, discountStartAt, discountEndAt) ? discountPrice : null;
+    }
+
 }

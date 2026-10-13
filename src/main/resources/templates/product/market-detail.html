@@ -203,18 +203,18 @@
 
                 <!-- 가격 -->
                 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
-                    <span th:if="${product.discountPrice != null}"
+                    <span th:if="${product.activeDiscountPrice != null}"
                           style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
-                          th:text="${#numbers.formatInteger(product.discountPrice, 3, 'COMMA')} + '원'">12,900원</span>
-                    <span th:unless="${product.discountPrice != null}"
+                          th:text="${#numbers.formatInteger(product.activeDiscountPrice, 3, 'COMMA')} + '원'">12,900원</span>
+                    <span th:unless="${product.activeDiscountPrice != null}"
                           style="font-family:Gaegu,cursive;font-size:1.7rem;font-weight:700;color:var(--dark)"
                           th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">12,900원</span>
-                    <span th:if="${product.discountPrice != null}"
+                    <span th:if="${product.activeDiscountPrice != null}"
                           style="font-size:.82rem;color:var(--muted);text-decoration:line-through"
                           th:text="${#numbers.formatInteger(product.price, 3, 'COMMA')} + '원'">19,800원</span>
-                    <span th:if="${product.discountPrice != null}"
+                    <span th:if="${product.activeDiscountPrice != null}"
                           style="font-size:.82rem;font-weight:700;color:var(--amber)"
-                          th:text="'-' + ${#numbers.formatInteger((1 - product.discountPrice / product.price) * 100, 1, 'NONE')} + '%'">-35%</span>
+                          th:text="'-' + ${#numbers.formatInteger((1 - product.activeDiscountPrice / product.price) * 100, 1, 'NONE')} + '%'">-35%</span>
                 </div>
 
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px">
@@ -245,7 +245,7 @@
                             <button onclick="changeDetailQty(1)" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff;border:none;font-size:.9rem;color:var(--mid);cursor:pointer;font-family:inherit">+</button>
                         </div>
                         <span style="font-size:.78rem;color:var(--mid)">×
-                            <span th:text="${product.discountPrice != null ? #numbers.formatInteger(product.discountPrice, 3, 'COMMA') + '원' : #numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">12,900원</span>
+                            <span th:text="${product.activeDiscountPrice != null ? #numbers.formatInteger(product.activeDiscountPrice, 3, 'COMMA') + '원' : #numbers.formatInteger(product.price, 3, 'COMMA') + '원'}">12,900원</span>
                         </span>
                     </div>
                 </div>
@@ -254,8 +254,8 @@
                     <div style="display:flex;justify-content:space-between;align-items:center">
                         <span style="font-size:.82rem;color:var(--mid)">총 상품 금액</span>
                         <strong id="detailTotalPrice"
-                                th:data-unit="${product.discountPrice != null ? product.discountPrice : product.price}"
-                                th:text="${#numbers.formatInteger(product.discountPrice != null ? product.discountPrice : product.price, 3, 'COMMA')} + '원'"
+                                th:data-unit="${product.activeDiscountPrice != null ? product.activeDiscountPrice : product.price}"
+                                th:text="${#numbers.formatInteger(product.activeDiscountPrice != null ? product.activeDiscountPrice : product.price, 3, 'COMMA')} + '원'"
                                 style="font-size:1.1rem;color:var(--dark)">12,900원</strong>
                     </div>
                 </div>

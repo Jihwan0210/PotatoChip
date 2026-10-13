@@ -27,7 +27,7 @@ public class RelatedProductRecommendationDTO {
                 product.getOrigin(),
                 product.getThumbnailUrl(),
                 product.getPrice(),
-                product.getDiscountPrice(),
+                product.getActiveDiscountPrice(),
                 reason
         );
     }
