@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -143,7 +144,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public Page<ProductDTO> getProducts(String category, String keyword, String searchType, String sort, String sellerEmail, Pageable pageable) {
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate expireLimit = today.plusDays(4); // 기한임박 기준: 오늘 + 4일
 
         Page<Product> products;

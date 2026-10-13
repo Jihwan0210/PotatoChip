@@ -110,13 +110,22 @@ public class Product {
                 this.updatedAt = LocalDateTime.now();
         }
 
+        public static boolean isDiscountActive(BigDecimal discountPrice, LocalDate start, LocalDate end) {
+                LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+                return discountPrice != null
+                        && (start == null || !today.isBefore(start))
+                        && (end == null || !today.isAfter(end));
+        }
+
+        // 지금 적용 중인 할인가 (할인 기간 밖이면 null)
+        public BigDecimal getActiveDiscountPrice() {
+                return isDiscountActive(discountPrice, discountStartAt, discountEndAt) ? discountPrice : null;
+        }
+
         // 할인 기간 안이면 할인가, 아니면 정가
         public BigDecimal currentPrice() {
-                LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-                boolean onDiscount = discountPrice != null
-                        && (discountStartAt == null || !today.isBefore(discountStartAt))
-                        && (discountEndAt == null || !today.isAfter(discountEndAt));
-                return onDiscount ? discountPrice : price;
+                BigDecimal active = getActiveDiscountPrice();
+                return active != null ? active : price;
         }
 
         @PrePersist

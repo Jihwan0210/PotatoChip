@@ -192,7 +192,7 @@ public class ProductController {
                         r.getProduct().getName(),
                         r.getProduct().getOrigin(),
                         r.getProduct().getPrice(),
-                        r.getProduct().getDiscountPrice(),
+                        r.getProduct().getActiveDiscountPrice(),
                         r.getProduct().getThumbnailUrl()))
                 .collect(Collectors.toList());
     }

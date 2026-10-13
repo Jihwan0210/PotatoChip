@@ -43,6 +43,12 @@ class ProductCurrentPriceTest {
     }
 
     @Test
+    void 할인_기간_밖이면_적용_할인가는_없음() {
+        assertThat(product(TODAY.minusDays(3), TODAY.minusDays(1)).getActiveDiscountPrice()).isNull();
+        assertThat(product(TODAY.minusDays(1), TODAY.plusDays(1)).getActiveDiscountPrice()).isEqualByComparingTo("3000");
+    }
+
+    @Test
     void 할인가가_없으면_정가() {
         Product p = product(null, null);
         p.setDiscountPrice(null);

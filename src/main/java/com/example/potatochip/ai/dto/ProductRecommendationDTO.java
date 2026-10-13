@@ -48,7 +48,7 @@ public class ProductRecommendationDTO {
                 recommendation.getExpiresAt(),
                 recommendation.getGeneratedAt(),
                 recommendation.getProduct().getPrice(),
-                recommendation.getProduct().getDiscountPrice(),
+                recommendation.getProduct().getActiveDiscountPrice(),
                 recommendation.getProduct().getStockQuantity()
         );
     }

@@ -74,7 +74,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(p.name LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'name')) OR " +
             "(p.origin LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'farm')) OR " +
             "(p.address LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'region'))))"+
-            "ORDER BY COALESCE(p.discountPrice, p.price) ASC")
+            "ORDER BY CASE WHEN p.discountPrice IS NOT NULL " +
+            "AND (p.discountStartAt IS NULL OR p.discountStartAt <= :today) " +
+            "AND (p.discountEndAt IS NULL OR p.discountEndAt >= :today) " +
+            "THEN p.discountPrice ELSE p.price END ASC")
     Page<Product> searchProductsByPrice(@Param("category") String category,
                                         @Param("keyword") String keyword,
                                         @Param("searchType") String searchType,
@@ -92,7 +95,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(p.name LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'name')) OR " +
             "(p.origin LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'farm')) OR " +
             "(p.address LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'region'))))"+
-            "ORDER BY COALESCE(p.discountPrice, p.price) ASC")
+            "ORDER BY CASE WHEN p.discountPrice IS NOT NULL " +
+            "AND (p.discountStartAt IS NULL OR p.discountStartAt <= :today) " +
+            "AND (p.discountEndAt IS NULL OR p.discountEndAt >= :today) " +
+            "THEN p.discountPrice ELSE p.price END ASC")
     Page<Product> searchProductsBySellerEmailAndPrice(@Param("sellerEmail") String sellerEmail,
                                                       @Param("category") String category,
                                                       @Param("keyword") String keyword,
@@ -111,8 +117,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(p.name LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'name')) OR " +
             "(p.origin LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'farm')) OR " +
             "(p.address LIKE %:keyword% AND (:searchType = 'all' OR :searchType = 'region'))))"+
-            "ORDER BY CASE WHEN p.discountPrice IS NULL THEN 0 " +
-            "ELSE (p.price - p.discountPrice) * 1.0 / p.price END DESC")
+            "ORDER BY CASE WHEN p.discountPrice IS NOT NULL " +
+            "AND (p.discountStartAt IS NULL OR p.discountStartAt <= :today) " +
+            "AND (p.discountEndAt IS NULL OR p.discountEndAt >= :today) " +
+            "THEN (p.price - p.discountPrice) * 1.0 / p.price ELSE 0 END DESC")
     Page<Product> searchProductsByDiscount(@Param("category") String category,
                                            @Param("keyword") String keyword,
                                            @Param("searchType") String searchType,
