@@ -65,25 +65,18 @@ public class OrderServiceImpl implements OrderService {
             throw new IllegalArgumentException("선택된 상품이 없습니다.");
         }
 
-        // 4. 결제 시점 현재가 조회
-        //    담을 때의 priceSnapshot이 아니라 결제 시점의 서버 현재가로 금액을 계산한다.
-        //    - 마감임박 할인 등 가격 하락을 결제에 반영
-        //    - 클라이언트가 보낸 금액(totalAmount)을 신뢰하지 않고 서버가 재계산
-        //    priceSnapshot은 장바구니에서 "담을 때 가격" 표시/비교용으로만 유지한다.
+        // 4. 주문 시점 현재가 조회 (할인 기간 반영)
         Map<Long, BigDecimal> currentPriceByProduct = new HashMap<>();
         Map<Long, Long> sellerIdByProduct = new HashMap<>();
         for (CartItem item : targetItems) {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품입니다: " + item.getProductId()));
-            BigDecimal currentPrice = product.getDiscountPrice() != null
-                    ? product.getDiscountPrice()
-                    : product.getPrice();
-            currentPriceByProduct.put(product.getId(), currentPrice);
+            currentPriceByProduct.put(product.getId(), product.currentPrice());
             sellerIdByProduct.put(product.getId(),
                     product.getSeller() != null ? product.getSeller().getId() : 1L);
         }
 
-        // 총 금액 = 현재가 × 수량 (서버 계산)
+        // 총 금액 = 현재가 × 수량
         BigDecimal totalAmount = targetItems.stream()
                 .map(item -> currentPriceByProduct.get(item.getProductId())
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
