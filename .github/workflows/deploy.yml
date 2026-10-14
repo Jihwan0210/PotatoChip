@@ -48,34 +48,21 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
 
-      # 2. EC2에 ssh → pull → 재실행 (설정은 .env 주입, 업로드는 호스트 볼륨 유지)
+      # 2. 배포 스크립트를 EC2로 복사
+      - uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: scripts/deploy.sh
+          target: /home/ubuntu
+          strip_components: 1
+
+      # 3. 새 이미지 배포. 응답이 없으면 직전 이미지로 되돌린다 (scripts/deploy.sh)
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            # .env 없으면 기존 컨테이너 살려둔 채 중단 (docker rm 후 run 실패 = 서비스 다운 방지)
-            test -f /home/ubuntu/.env || { echo "ERROR: /home/ubuntu/.env 없음"; exit 1; }
-            docker pull ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
-            docker rm -f potatochip || true
-            docker run -d --name potatochip --restart unless-stopped \
-              -p 127.0.0.1:8080:8080 \
-              --env-file /home/ubuntu/.env \
-              -v /home/ubuntu/uploads:/app/uploads \
-              ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
-            docker image prune -f
-
-            # docker run -d 는 컨테이너만 띄우고 반환하므로 앱 기동 여부를 직접 확인한다
-            echo "기동 대기..."
-            for i in $(seq 1 30); do
-              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:8080/ || true)
-              case "$code" in
-                2*|3*) echo "기동 확인 (HTTP $code, ${i}0초)"; exit 0 ;;
-              esac
-              sleep 10
-            done
-
-            echo "::error::앱이 300초 안에 기동하지 못했습니다"
-            docker logs --tail 50 potatochip
-            exit 1
+          command_timeout: 15m
+          script: bash /home/ubuntu/deploy.sh ${{ secrets.DOCKERHUB_USER }}/potatochip:latest
