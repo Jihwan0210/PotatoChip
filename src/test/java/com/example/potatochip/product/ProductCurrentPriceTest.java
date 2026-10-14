@@ -49,6 +49,16 @@ class ProductCurrentPriceTest {
     }
 
     @Test
+    void 할인_상태() {
+        assertThat(product(TODAY.plusDays(1), TODAY.plusDays(3)).getDiscountStatus()).isEqualTo("할인 예정");
+        assertThat(product(TODAY.minusDays(1), TODAY.plusDays(1)).getDiscountStatus()).isEqualTo("할인 중");
+        assertThat(product(TODAY.minusDays(3), TODAY.minusDays(1)).getDiscountStatus()).isEqualTo("할인 종료");
+        Product noDiscount = product(null, null);
+        noDiscount.setDiscountPrice(null);
+        assertThat(noDiscount.getDiscountStatus()).isNull();
+    }
+
+    @Test
     void 할인가가_없으면_정가() {
         Product p = product(null, null);
         p.setDiscountPrice(null);
