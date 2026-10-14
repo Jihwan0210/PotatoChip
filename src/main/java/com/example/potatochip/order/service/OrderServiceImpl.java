@@ -14,7 +14,6 @@ import com.example.potatochip.order.repository.OrderRepository;
 import com.example.potatochip.product.coupons.service.CouponService;
 import com.example.potatochip.product.entity.Product;
 import com.example.potatochip.product.repository.ProductRepository;
-import com.example.potatochip.product.service.ranking.ProductRankingsService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CouponService couponService;
-    private final ProductRankingsService productRankingsService;
 
     @Override
     @Transactional
@@ -179,9 +177,6 @@ public class OrderServiceImpl implements OrderService {
         } else {
             cartRepository.delete(cart);
         }
-
-        // 12. 판매 랭킹 갱신
-        productRankingsService.refreshRankings();
 
         return savedOrder.getId();
     }
