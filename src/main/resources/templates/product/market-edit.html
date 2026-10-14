@@ -109,6 +109,8 @@
                             </div>
                         </div>
                         <div class="hint">💡 할인율이 1% 이상일 때만 기간을 설정할 수 있습니다.</div>
+                        <div class="hint" th:if="${product.discountStatus != null}"
+                             th:text="'현재 상태: ' + ${product.discountStatus}">현재 상태</div>
                     </div>
                 </div>
 

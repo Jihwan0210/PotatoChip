@@ -21,6 +21,10 @@ public class AdminProductDTO {
     private String category;
     private BigDecimal price;
     private BigDecimal discountPrice;
+    private LocalDate discountStartAt;
+    private LocalDate discountEndAt;
+    private String discountStatus;
+    private BigDecimal currentPrice;
     private Integer stockQuantity;
     private String origin;
     private LocalDate expiryDate;
@@ -37,6 +41,10 @@ public class AdminProductDTO {
                 .category(product.getCategory())
                 .price(product.getPrice())
                 .discountPrice(product.getDiscountPrice())
+                .discountStartAt(product.getDiscountStartAt())
+                .discountEndAt(product.getDiscountEndAt())
+                .discountStatus(product.getDiscountStatus())
+                .currentPrice(product.currentPrice())
                 .stockQuantity(product.getStockQuantity())
                 .origin(product.getOrigin())
                 .expiryDate(product.getExpiryDate())

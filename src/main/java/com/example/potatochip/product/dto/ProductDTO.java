@@ -72,4 +72,8 @@ public class ProductDTO {
         return Product.isDiscountActive(discountPrice, discountStartAt, discountEndAt) ? discountPrice : null;
     }
 
+    public String getDiscountStatus() {
+        return Product.discountStatus(discountPrice, discountStartAt, discountEndAt);
+    }
+
 }

@@ -783,13 +783,13 @@
             +'<th class="sort-th" onclick="sortAdminTable(\'products\',\'createdAt\')">등록일 '+sortIcon('products','createdAt')+'</th>'
             +'</tr></thead><tbody>'
             +pagedData.map(function(item){
-                item.displayPrice=item.discountPrice||item.price;
+                item.displayPrice=item.currentPrice;
                 return '<tr class="admin-click-row" onclick="openAdminProductModal('+item.id+')">'
                     +'<td>'+escapeHtml(item.id)+'</td>'
                     +'<td><span class="cell-main">'+escapeHtml(item.name)+'</span><span class="cell-sub">'+escapeHtml(item.origin||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.sellerName||'-')+'<br><span class="cell-sub">ID '+escapeHtml(item.sellerId||'-')+'</span></td>'
                     +'<td>'+escapeHtml(item.category)+'</td>'
-                    +'<td>'+formatMoney(item.discountPrice||item.price)+'</td>'
+                    +'<td>'+formatMoney(item.currentPrice)+(item.discountStatus?'<br><span class="cell-sub">'+escapeHtml(item.discountStatus)+'</span>':'')+'</td>'
                     +'<td>'+escapeHtml(item.stockQuantity)+'</td>'
                     +'<td><span class="status-chip">'+escapeHtml(item.statusText)+'</span></td>'
                     +'<td>'+formatDate(item.createdAt)+'</td>'
@@ -1184,7 +1184,7 @@
 
     function getSortValue(item,key){
         if(key==='displayPrice'){
-            return Number(item.discountPrice||item.price||0);
+            return Number(item.currentPrice||0);
         }
 
         var value=item[key];
@@ -1476,8 +1476,11 @@ function getSearchFields(type, defaultFields){
             +modalInfoCard('판매자 ID',product.sellerId||'-')
             +modalInfoCard('카테고리',product.category||'-')
             +modalInfoCard('상태',product.statusText||'-')
-            +modalInfoCard('가격',formatMoney(product.price))
+            +modalInfoCard('정가',formatMoney(product.price))
+            +modalInfoCard('현재 판매가',formatMoney(product.currentPrice))
             +modalInfoCard('할인가',product.discountPrice?formatMoney(product.discountPrice):'-')
+            +modalInfoCard('할인 기간',product.discountPrice?((product.discountStartAt||'')+' ~ '+(product.discountEndAt||'')):'-')
+            +modalInfoCard('할인 상태',product.discountStatus||'-')
             +modalInfoCard('재고',product.stockQuantity==null?'-':String(product.stockQuantity)+'개')
             +modalInfoCard('원산지',product.origin||'-')
             +modalInfoCard('픽업 가능',product.pickupAvailable?'가능':'불가')
