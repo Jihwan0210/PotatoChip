@@ -2,6 +2,7 @@ package com.example.potatochip.product.coupons.repository;
 
 import com.example.potatochip.product.coupons.entity.UserCoupon;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,4 +18,10 @@ public interface UserCouponRepository extends JpaRepository<UserCoupon, Long> {
            "AND c.isActive = true AND c.startDate <= :now AND c.endDate >= :now")
     List<UserCoupon> findAvailableCoupons(@Param("userId") Long userId,
                                           @Param("now") LocalDateTime now);
+
+    // 아직 안 쓴 쿠폰일 때만 사용 처리한다. 이미 썼으면 0을 반환
+    @Modifying
+    @Query("UPDATE UserCoupon uc SET uc.isUsed = true, uc.usedAt = :now " +
+           "WHERE uc.id = :id AND uc.isUsed = false")
+    int markUsed(@Param("id") Long id, @Param("now") LocalDateTime now);
 }

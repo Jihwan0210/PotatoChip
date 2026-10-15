@@ -276,16 +276,11 @@ public class CouponServiceImpl implements CouponService {
     public void useCoupon(Long userCouponId) {
         UserCoupon uc = userCouponRepository.findById(userCouponId)
                 .orElseThrow(() -> new IllegalArgumentException("쿠폰을 찾을 수 없습니다."));
-        if (uc.getIsUsed()) {
+        // 조건부 UPDATE: 같은 쿠폰으로 동시에 주문해도 한 번만 사용된다
+        if (userCouponRepository.markUsed(userCouponId, LocalDateTime.now()) == 0) {
             throw new IllegalArgumentException("이미 사용된 쿠폰입니다.");
         }
-        uc.setIsUsed(true);
-        uc.setUsedAt(LocalDateTime.now());
-        userCouponRepository.save(uc);
-
-        Coupon coupon = uc.getCoupon();
-        coupon.setCurrentUsage(coupon.getCurrentUsage() + 1);
-        couponRepository.save(coupon);
+        couponRepository.increaseUsage(uc.getCoupon().getId());
     }
 
     @Override
