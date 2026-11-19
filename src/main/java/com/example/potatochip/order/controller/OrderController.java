@@ -10,6 +10,7 @@ import com.example.potatochip.order.entity.Order;
 import com.example.potatochip.order.repository.OrderRepository;
 import com.example.potatochip.order.service.OrderService;
 import com.example.potatochip.order.service.OrderServiceImpl;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,8 +47,13 @@ public class OrderController {
             token = header.substring(7);
         }
 
-        if (token == null) {
-            token = request.getParameter("token");
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
         }
 
         if (token == null || !jwtUtil.validateToken(token)) {
@@ -61,8 +67,7 @@ public class OrderController {
     }
 
     @GetMapping
-    public String showOrderPage(@RequestParam(required = false) String token,
-                                @RequestParam(required = false) String error,
+    public String showOrderPage(@RequestParam(required = false) String error,
                                 Model model,
                                 HttpServletRequest request) {
         Long buyerId;
@@ -86,7 +91,6 @@ public class OrderController {
 
     @PostMapping("/checkout")
     public String checkoutOrder(OrderRequestDTO requestDTO,
-                                @RequestParam(required = false) String token,
                                 HttpServletRequest request) {
         Long buyerId;
         try {
@@ -100,12 +104,10 @@ public class OrderController {
             newOrderId = orderService.OrderFromCart(buyerId, requestDTO);
         } catch (IllegalArgumentException | IllegalStateException e) {
             String msg = java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
-            String tokenParam = (token != null && !token.isEmpty()) ? "&token=" + token : "";
-            return "redirect:/orders?error=" + msg + tokenParam;
+            return "redirect:/orders?error=" + msg;
         }
 
-        String safeToken = (token != null && !token.isEmpty()) ? token : "";
-        return "redirect:/orders/complete/" + newOrderId + "?token=" + safeToken;
+        return "redirect:/orders/complete/" + newOrderId;
     }
 
     @GetMapping("/complete/{orderId}")

@@ -4,6 +4,7 @@ import com.example.potatochip.auth.repository.UserRepository;
 import com.example.potatochip.auth.util.JwtUtil;
 import com.example.potatochip.payment.dto.PaymentDTO;
 import com.example.potatochip.payment.service.PaymentService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,14 @@ public class PaymentController {
     private Long getLoginUserId(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) token = token.substring(7);
-        if (token == null) token = request.getParameter("token");
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
         if (token == null || !jwtUtil.validateToken(token)) throw new IllegalStateException("로그인 필요");
         return userRepository.findByEmail(jwtUtil.getEmail(token))
                 .orElseThrow(() -> new RuntimeException("유저 없음")).getId();
@@ -64,12 +72,10 @@ public class PaymentController {
     @GetMapping("/kakao/approve")
     public String kakaoApprove(@RequestParam String pg_token,
                                @RequestParam Long user_id,
-                               @RequestParam(required = false) String token,
                                HttpServletRequest request) {
         try {
             Long orderId = paymentService.kakaoApprove(pg_token, user_id);
-            return "redirect:/orders/complete/" + orderId
-                    + "?token=" + (token != null ? token : "");
+            return "redirect:/orders/complete/" + orderId;
         } catch (Exception e) {
             return "redirect:/cart?error=payment_failed";
         }

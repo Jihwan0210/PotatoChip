@@ -212,8 +212,7 @@
     // URL에서 orderId 파싱: /delivery/tracking/{orderId}
     var pathParts = location.pathname.split('/');
     var orderId   = pathParts[pathParts.length - 1];
-    var token     = new URLSearchParams(location.search).get('token')
-        || localStorage.getItem('token')
+    var token     = localStorage.getItem('token')
         || sessionStorage.getItem('token');
 
     var POLL_INTERVAL = 15000; // 15초마다 자동 갱신
@@ -239,11 +238,6 @@
             var res = await fetch('/delivery/' + orderId, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            // token이 URL 파라미터로만 있을 경우 재시도
-            if (res.status === 401) {
-                res = await fetch('/delivery/' + orderId + '?token=' + token);
-            }
 
             if (!res.ok) {
                 showError('배송 정보를 찾을 수 없어요. (주문번호: ' + orderId + ')');
