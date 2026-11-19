@@ -491,10 +491,6 @@
         appendHidden(form, 'pointUsed', orderPointUsed);
         appendHidden(form, 'finalTotal', Math.max(0, productTotal + orderShippingFee - orderPointUsed));
 
-        // POST 시 서버가 토큰으로 사용자를 식별할 수 있도록 포함
-        var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        appendHidden(form, 'token', token || '');
-
         var rawIds = sessionStorage.getItem('selectedProductIds');
         if (rawIds) {
             form.querySelectorAll('input[name="selectedProductIds"]').forEach(function(el) { el.remove(); });
@@ -535,8 +531,7 @@
                     itemName: itemName,
                     totalAmount: totalAmount,
                     selectedProductIds: selectedProductIds,
-                    shippingFee: orderShippingFee,
-                    token: token
+                    shippingFee: orderShippingFee
                 })
             });
 

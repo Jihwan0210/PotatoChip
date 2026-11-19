@@ -7,6 +7,7 @@ import com.example.potatochip.order.repository.OrderRepository;
 import com.example.potatochip.traking.dto.DeliveryTrackingDTO;
 import com.example.potatochip.traking.dto.DeliverydateDTO;
 import com.example.potatochip.traking.service.DeliveryTrackingService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,14 @@ public class DeliveryTrackingController {
         String token = null;
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) token = header.substring(7);
-        if (token == null) token = request.getParameter("token");
+        if (token == null && request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                    break;
+                }
+            }
+        }
         if (token == null || !jwtUtil.validateToken(token)) throw new IllegalStateException("로그인이 필요합니다.");
         String email = jwtUtil.getEmail(token);
         return userRepository.findByEmail(email)

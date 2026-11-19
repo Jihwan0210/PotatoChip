@@ -70,10 +70,8 @@ public class PaymentServiceImpl implements PaymentService {
         headers.set("Authorization", "SECRET_KEY " + adminKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // approve 콜백 URL에 userId와 token을 파라미터로 포함
-        String approvalUrl = approvalRedirect
-                + "?user_id=" + userId
-                + "&token=" + (token != null ? token : "");
+        // approve 콜백은 브라우저가 따라오므로 로그인 쿠키로 사용자를 식별한다
+        String approvalUrl = approvalRedirect + "?user_id=" + userId;
 
         Map<String, Object> body = new HashMap<>();
         body.put("cid", cid);

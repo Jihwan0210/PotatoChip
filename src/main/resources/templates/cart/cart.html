@@ -488,8 +488,7 @@
         sessionStorage.setItem('selectedUserCouponId',  selectedUserCouponId || '');
         sessionStorage.setItem('selectedCouponName',    selectedCouponName || '');
         sessionStorage.setItem('couponDiscount',        cd || 0);
-        var t = localStorage.getItem('token') || sessionStorage.getItem('token');
-        location.href = '/orders?token=' + (t || '');
+        location.href = '/orders';
     }
 
     function increaseQty(productId) {

@@ -184,8 +184,7 @@
     <script th:inline="javascript">
         function goTracking() {
             var orderId = /*[[${order.id}]]*/ 0;
-            var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            location.href = '/delivery/tracking/' + orderId + '?token=' + (token || '');
+            location.href = '/delivery/tracking/' + orderId;
         }
     </script>
 </div>

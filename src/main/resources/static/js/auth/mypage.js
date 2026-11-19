@@ -329,7 +329,7 @@ function loadMyOrders() {
                     + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">' + escapeMpHtml(dateStr) + ' · ' + escapeMpHtml(DELIVERY_LABELS[order.deliveryType] || order.deliveryType || '') + '</div>'
                     + '<div style="display:flex;justify-content:space-between;align-items:center">'
                     + '<span style="font-weight:700;color:#F39C12">' + Number(finalAmount).toLocaleString() + '원</span>'
-                    + '<a href="/orders/complete/' + order.id + '?token=' + token + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>'
+                    + '<a href="/orders/complete/' + order.id + '" style="font-size:.78rem;color:var(--green);text-decoration:underline">상세보기</a>'
                     + '</div>'
                     + '</div>'
                     + '</div>';
