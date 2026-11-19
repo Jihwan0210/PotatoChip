@@ -258,6 +258,13 @@ function doForgotPassword() {
 }
 
 /* ══ 로그인 ══ */
+// 로그인 화면의 체험용 계정 버튼: 이메일과 비밀번호를 채워 넣는다
+function fillDemo(email) {
+    document.getElementById('le').value = email;
+    document.getElementById('lp').value = 'password';
+    document.getElementById('lp').focus();
+}
+
 function doLogin() {
     const email    = document.getElementById('le').value;
     const password = document.getElementById('lp').value;
